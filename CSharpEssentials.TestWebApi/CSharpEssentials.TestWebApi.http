@@ -1,0 +1,6 @@
+@CSharpEssentials.TestWebApi_HostAddress = http://localhost:5008
+
+GET {{CSharpEssentials.TestWebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

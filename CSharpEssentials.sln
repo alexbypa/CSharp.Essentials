@@ -3,7 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HangFireHelper", "HangFireHelper\HangFireHelper.csproj", "{625F19AB-EAB9-4714-B98C-3D531E045683}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.HangFireHelper", "HangFireHelper\CSharpEssentials.HangFireHelper.csproj", "{625F19AB-EAB9-4714-B98C-3D531E045683}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.EncryptHelper", "CSharpEssentials.EncryptHelper\CSharpEssentials.EncryptHelper.csproj", "{D63C591B-19F7-42A9-ADA1-D7613BF6A457}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.SerializerHelper", "CSharpEssentials.SerializerHelper\CSharpEssentials.SerializerHelper.csproj", "{BE95F7D8-A28D-4659-986F-CBE986B49F26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.HttpHelper", "CSharpEssentials.HttpHelper\CSharpEssentials.HttpHelper.csproj", "{86EE237D-B819-42DA-B474-22B3388CA24A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{34E02FB5-03C3-4509-A13D-DEB34F0ADB32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.HttpContextHelper", "CSharpEssentials.HttpContextHelper\CSharpEssentials.HttpContextHelper.csproj", "{FD68C725-45A9-42C4-A4B7-C787EB086A64}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +25,26 @@ Global
 		{625F19AB-EAB9-4714-B98C-3D531E045683}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{625F19AB-EAB9-4714-B98C-3D531E045683}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{625F19AB-EAB9-4714-B98C-3D531E045683}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D63C591B-19F7-42A9-ADA1-D7613BF6A457}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D63C591B-19F7-42A9-ADA1-D7613BF6A457}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D63C591B-19F7-42A9-ADA1-D7613BF6A457}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D63C591B-19F7-42A9-ADA1-D7613BF6A457}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE95F7D8-A28D-4659-986F-CBE986B49F26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE95F7D8-A28D-4659-986F-CBE986B49F26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE95F7D8-A28D-4659-986F-CBE986B49F26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE95F7D8-A28D-4659-986F-CBE986B49F26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86EE237D-B819-42DA-B474-22B3388CA24A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86EE237D-B819-42DA-B474-22B3388CA24A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86EE237D-B819-42DA-B474-22B3388CA24A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86EE237D-B819-42DA-B474-22B3388CA24A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34E02FB5-03C3-4509-A13D-DEB34F0ADB32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34E02FB5-03C3-4509-A13D-DEB34F0ADB32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34E02FB5-03C3-4509-A13D-DEB34F0ADB32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34E02FB5-03C3-4509-A13D-DEB34F0ADB32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD68C725-45A9-42C4-A4B7-C787EB086A64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD68C725-45A9-42C4-A4B7-C787EB086A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD68C725-45A9-42C4-A4B7-C787EB086A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD68C725-45A9-42C4-A4B7-C787EB086A64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
