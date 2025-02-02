@@ -54,13 +54,9 @@ public class BackgroundJobHandler : HangFireDashboardTracert {
             JsonElement jsonRoot = jsonContent.Deserialize<JsonElement>((json) => Console.WriteLine("Risposta non conforme : ", json));
             int Validate = jsonRoot.GetInt(jsonPathToValidate, 500);
             if (statusCode == httpStatusCode && Validate == jsonValuetoValidate) {
-                //TODO:
-                //RaiseMessage(1, WriteOnDashBoardWhenIsSuccess(irequest), performcontext);
                 RaiseMessage(1, $"Condizione soddisfatta, job completato per comando {Action} con chiave {IdTransaction}, Risposta ottenuta con successo.", performcontext);
                 return true;
             } else {
-                //TODO:
-                //RaiseMessage(statusCode != HttpStatusCode.OK ? (byte)3 : (byte)2, WriteOnDashBoardWhenIsFailure(irequest, retryCount + 1, retryInterval.TotalSeconds, jsonContent), performcontext);
                 RaiseMessage(statusCode != HttpStatusCode.OK ? (byte)3 : (byte)2, $"Retry numero {retryCount + 1} fallito per comando {Action} con chiave {IdTransaction}. Ritento tra {retryInterval.TotalSeconds} seconds. Risposta ottenuta {jsonContent}", performcontext);
                 return false;  //FUTURE: dobbiamo aggiungere un sistema di mail ing per notificare quando dei job vanno in retry più di n volte
             }

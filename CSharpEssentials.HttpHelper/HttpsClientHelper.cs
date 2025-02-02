@@ -12,8 +12,9 @@ public class httpsClientHelper : IhttpsClientHelper {
     public object JsonData { get; set; }
     public FormUrlEncodedContent formUrlEncodedContent { get; set; }
     public httpsClientHelper(List<Func<HttpRequestMessage, HttpResponseMessage, Task>> actions) {
-        var handler = new HttpClientHandlerLogging(actions);
-        httpClient = new HttpClient(handler);
+        httpClient = new HttpClient(new HttpClientHandlerLogging(actions) {
+            InnerHandler = new HttpClientHandler()
+        });
     }
     public httpsClientHelper(IHttpClientFactory clientFactory, string clientName) {
         this.clientFactory = clientFactory;

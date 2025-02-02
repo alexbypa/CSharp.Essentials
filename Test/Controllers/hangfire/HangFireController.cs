@@ -1,8 +1,6 @@
 ﻿using CSharpEssentials.HangFireHelper;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Json;
 using System.Text.Json;
-using static System.Net.WebRequestMethods;
 
 namespace Test.Controllers.hangfire {
     [ApiController]
@@ -18,8 +16,8 @@ namespace Test.Controllers.hangfire {
             jobHandler.EnqueueWithRetry<HangFireHttpJobRequest>(new HangFireHttpJobRequest {
                 Body = JsonSerializer.Serialize(new { test = true }),
                 Method = HttpMethod.Post,
-                Url = "https://run.mocky.io/v3/5f80857e-8dc3-4d20-9e5e-a3c1c99e2757",
-                //Url = "https://run.mocky.io/v3/dd75bd88-98b6-4812-9027-d3e55d7b3441",
+                //Url = "https://run.mocky.io/v3/5f80857e-8dc3-4d20-9e5e-a3c1c99e2757",
+                Url = "https://run.mocky.io/v3/dd75bd88-98b6-4812-9027-d3e55d7b3441",
                 GameSessionID = Guid.NewGuid().ToString(),
                 ActionCommand = "ExternalCredit"
             },

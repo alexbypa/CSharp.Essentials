@@ -21,6 +21,7 @@ public static class HangFireExtension {
 
         services.AddHttpClient<HangFireHttpJobRequestHandler>();
 
+        try {
         services.AddHangfire(configuration =>
             configuration.UsePostgreSqlStorage(connectionstring, new PostgreSqlStorageOptions {
                 DistributedLockTimeout = TimeSpan.FromSeconds(30)
@@ -36,6 +37,9 @@ public static class HangFireExtension {
                 }
             })
         );
+        } catch (Exception ex) {
+            Console.WriteLine(ex.ToString());
+        }
         services.AddHangfireServer();
 
         services.AddTransient<IHangFireJobRequestHandler<HangFireHttpJobRequest>, HangFireHttpJobRequestHandler>();

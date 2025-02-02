@@ -8,8 +8,8 @@ public class HangFireHttpJobRequestHandler: IHangFireJobRequestHandler<HangFireH
     public HangFireHttpJobRequestHandler(HttpClient httpClient) {
         _httpClient = httpClient;
     }
-    public async Task<bool> ExecuteAsync(HangFireHttpJobRequest request, Func<HttpResponseMessage, bool> conditionForRetry) {
-        //TODO: configurare hangfIRE PER visualizzarlo in dashboard tramite Credenziali !
+    public async Task<bool> ExecuteAsync(HangFireHttpJobRequest request, Func<HttpResponseMessage, bool> conditionForRetry)  {
+        //TODO: configurare Hangfire PER visualizzarlo in dashboard tramite Credenziali !
         List<Func<HttpRequestMessage, HttpResponseMessage, Task>> actionsHttp = new List<Func<HttpRequestMessage, HttpResponseMessage, Task>>();
         Func<HttpRequestMessage, HttpResponseMessage, Task> traceRetry = (httpreq, httpres) => {
             JsonElement jsonRoot = httpres.Content.ReadAsStringAsync().GetAwaiter().GetResult().Deserialize<JsonElement>((json) =>
@@ -26,7 +26,7 @@ public class HangFireHttpJobRequestHandler: IHangFireJobRequestHandler<HangFireH
                 MustRetry = conditionForRetry(httpres) != true,
                 Status = jsonRoot.GetString("Status.ErrDesc", "Error"),
                 Url = httpreq.RequestUri.AbsoluteUri.ToString(),
-                BodyResponse = httpres.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+                BodyResponse = httpres.Content.ReadAsStringAsync().GetAwaiter().GetResult(),
             };
             //TODO:
             //loggerExtension.TraceAsync(irequest, Serilog.Events.LogEventLevel.Information, null, "INFO RETRY: {Url}, {Payload}, {AddOnQueueRetry}, {httpStatus} {BodyResponse}",

@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CSharpEssentials.EncryptHelper" Version="1.0.0" />
+    <PackageReference Include="CSharpEssentials.HttpHelper" Version="1.0.0" />
     <PackageReference Include="Hangfire" Version="1.8.17" />
     <PackageReference Include="Hangfire.Console" Version="1.4.3" />
     <PackageReference Include="Hangfire.PostgreSql" Version="1.20.10" />
@@ -16,9 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CSharpEssentials.EncryptHelper\CSharpEssentials.EncryptHelper.csproj" />
     <ProjectReference Include="..\CSharpEssentials.HttpContextHelper\CSharpEssentials.HttpContextHelper.csproj" />
-    <ProjectReference Include="..\CSharpEssentials.HttpHelper\CSharpEssentials.HttpHelper.csproj" />
     <ProjectReference Include="..\CSharpEssentials.SerializerHelper\CSharpEssentials.SerializerHelper.csproj" />
   </ItemGroup>
 
