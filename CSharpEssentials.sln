@@ -5,15 +5,15 @@ VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.HangFireHelper", "CSharpEssentials.HangFireHelper\CSharpEssentials.HangFireHelper.csproj", "{625F19AB-EAB9-4714-B98C-3D531E045683}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.EncryptHelper", "CSharpEssentials.EncryptHelper\CSharpEssentials.EncryptHelper.csproj", "{D63C591B-19F7-42A9-ADA1-D7613BF6A457}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.EncryptHelper", "CSharpEssentials.EncryptHelper\CSharpEssentials.EncryptHelper.csproj", "{D63C591B-19F7-42A9-ADA1-D7613BF6A457}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.SerializerHelper", "CSharpEssentials.SerializerHelper\CSharpEssentials.SerializerHelper.csproj", "{BE95F7D8-A28D-4659-986F-CBE986B49F26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.SerializerHelper", "CSharpEssentials.SerializerHelper\CSharpEssentials.SerializerHelper.csproj", "{BE95F7D8-A28D-4659-986F-CBE986B49F26}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.HttpHelper", "CSharpEssentials.HttpHelper\CSharpEssentials.HttpHelper.csproj", "{86EE237D-B819-42DA-B474-22B3388CA24A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.HttpHelper", "CSharpEssentials.HttpHelper\CSharpEssentials.HttpHelper.csproj", "{86EE237D-B819-42DA-B474-22B3388CA24A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{34E02FB5-03C3-4509-A13D-DEB34F0ADB32}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{34E02FB5-03C3-4509-A13D-DEB34F0ADB32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.HttpContextHelper", "CSharpEssentials.HttpContextHelper\CSharpEssentials.HttpContextHelper.csproj", "{FD68C725-45A9-42C4-A4B7-C787EB086A64}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.HttpContextHelper", "CSharpEssentials.HttpContextHelper\CSharpEssentials.HttpContextHelper.csproj", "{FD68C725-45A9-42C4-A4B7-C787EB086A64}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{FE6B8933-A077-4486-B300-2362849A47AD}"
 EndProject
@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 	ProjectSection(SolutionItems) = preProject
 		publish.yml = publish.yml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.RecaptchaHelper", "CSharpEssentials.RecaptchaHelper\CSharpEssentials.RecaptchaHelper.csproj", "{00510E4D-294C-4A16-9D47-EF216CB8A111}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +54,10 @@ Global
 		{FD68C725-45A9-42C4-A4B7-C787EB086A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD68C725-45A9-42C4-A4B7-C787EB086A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD68C725-45A9-42C4-A4B7-C787EB086A64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00510E4D-294C-4A16-9D47-EF216CB8A111}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00510E4D-294C-4A16-9D47-EF216CB8A111}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00510E4D-294C-4A16-9D47-EF216CB8A111}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00510E4D-294C-4A16-9D47-EF216CB8A111}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
