@@ -12,7 +12,7 @@ namespace Test.Controllers.logger {
         }
     }
     class Request : IRequest {
-        public string IdTransaction { get; }
-        public string Action { get; }
+        public string IdTransaction { get; set; }
+        public string Action { get; set; }
     }
 }
