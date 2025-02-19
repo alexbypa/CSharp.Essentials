@@ -7,9 +7,10 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Package per i log</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Packages per i logger
-Ultima versione 1.0.1</Description>
+    <Description>Packages per i logger Ultima versione 1.0.1</Description>
     <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1</AssemblyVersion>
+    <FileVersion>1.0.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
