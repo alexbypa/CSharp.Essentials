@@ -11,9 +11,8 @@ namespace Test.Controllers.logger {
             return Ok();
         }
     }
-
     class Request : IRequest {
-        public string Action { get; set; }
-        public string IdTransaction { get; set; }
+        public string IdTransaction { get; }
+        public string Action { get; }
     }
 }

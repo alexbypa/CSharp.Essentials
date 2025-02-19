@@ -10,9 +10,8 @@ using System.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
+
 namespace CSharpEssentials.LoggerHelper;
-
-
 public interface IRequest {
     public string IdTransaction { get; }
     public string Action { get; }
