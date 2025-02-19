@@ -7,7 +7,7 @@ namespace Test.Controllers.logger {
     public class LoggerController : Controller {
         [HttpGet(Name = "test")]
         public async Task<IActionResult> test() {
-            loggerExtension<Request>.TraceAsync(new Request{ Action = "Prova", IdTransaction = Guid.NewGuid().ToString() }, Serilog.Events.LogEventLevel.Information, null, "Avvio controller alle ore {time}", DateTime.Now);
+            loggerExtension<Request>.TraceAsync(new Request{ Action = "Prova", IdTransaction = "asdad" }, Serilog.Events.LogEventLevel.Information, null, "Avvio controller alle ore {time}", DateTime.Now);
             return Ok();
         }
     }
@@ -16,9 +16,4 @@ namespace Test.Controllers.logger {
         public string Action { get; set; }
         public string IdTransaction { get; set; }
     }
-    interface IRequest {
-        string Action { get; set; }
-        string IdTransaction { get; set; }
-    }
-
 }

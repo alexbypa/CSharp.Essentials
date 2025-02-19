@@ -12,6 +12,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 namespace CSharpEssentials.LoggerHelper;
 
+
+public interface IRequest {
+    public string IdTransaction { get; }
+    public string Action { get; }
+}
+
 public static class LoggerExtensionConfig {
     public static IServiceCollection addloggerConfiguration(this IServiceCollection services, IHostApplicationBuilder builder) {
         var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.LoggerHelper.json");
@@ -21,8 +27,7 @@ public static class LoggerExtensionConfig {
         return services;
     }
 }
-
-public class loggerExtension<IRequest> {
+public class loggerExtension<T> where T : IRequest {
     //TODO: Inserire tutte le opzioni di serilog del controller per ricordarsi facilmente di tutte le funzionalità esposte
     //TODO: Riprendere le altre tipologie di estensione Enrich etc etc json ....
     public static readonly ILogger log = null;
@@ -146,6 +151,9 @@ public class loggerExtension<IRequest> {
         if (request == null) {
             IdTransaction = Guid.NewGuid().ToString();
             ActionLog = "CallFromExternalBusiness";
+        } else {
+            IdTransaction = request.IdTransaction;
+            ActionLog = request.Action;
         }
 
         arguments.Add(IdTransaction);
