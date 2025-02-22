@@ -1,7 +1,5 @@
-using CSharpEssentials.HangFireHelper;
+using CSharpEssentials.HttpHelper;
 using CSharpEssentials.LoggerHelper;
-using Hangfire;
-using Test.Controllers.hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,9 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 #region hangFire
 // builder.Services.AddHangFire<Request>(builder);
 #endregion
-
 #region LoggerHelper
 builder.Services.addloggerConfiguration(builder);
+#endregion
+#region httpExtension
+builder.Services.AddHttpClients(builder.Configuration);
 #endregion
 
 builder.Services.AddControllers();

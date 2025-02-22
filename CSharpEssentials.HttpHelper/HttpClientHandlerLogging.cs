@@ -3,9 +3,9 @@
 namespace CSharpEssentials.HttpHelper;
 public class HttpClientHandlerLogging : DelegatingHandler {
     public List<Func<HttpRequestMessage, HttpResponseMessage, Task>> _RequestActions = new();
-    public HttpClientHandlerLogging(List<Func<HttpRequestMessage, HttpResponseMessage, Task>> RequestActions) {
-        _RequestActions = RequestActions;
-    }
+    //public HttpClientHandlerLogging(List<Func<HttpRequestMessage, HttpResponseMessage, Task>> RequestActions) {
+    //    _RequestActions = RequestActions;
+    //}
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
         string pageCalled = GetPageName(request);
         

@@ -4,14 +4,14 @@ using System.Text.Json;
 
 namespace Test.Controllers.hangfire {
     [ApiController]
-    [Route("controller")]
+    [Route("HangFireHelper")]
     public class HangFireController : Controller {
         private readonly BackgroundJobHandler jobHandler;
         public HangFireController(BackgroundJobHandler jobHandler) {
             this.jobHandler = jobHandler;
         }
-        [HttpPost(Name = "RetryWithHangfire")]
-        public async Task<IActionResult> RetryWithHangfire() {
+        [HttpPost(Name = "hangfiretest")]
+        public async Task<IActionResult> test() {
             //loggerExtension.TraceAsync(new Request { Action = ActionRequest.Check, IdTransaction = Guid.NewGuid().ToString() }, Serilog.Events.LogEventLevel.Information, null, "Avvio controller");
             jobHandler.EnqueueWithRetry<HangFireHttpJobRequest>(new HangFireHttpJobRequest {
                 Body = JsonSerializer.Serialize(new { test = true }),
