@@ -1,6 +1,24 @@
+# Imposta la variabile per l'indirizzo del server
 @Test_HostAddress = http://localhost:5133
 
-GET {{Test_HostAddress}}/weatherforecast/
+### 1) POST body
+POST {{Test_HostAddress}}/httpHelper/httptest
 Accept: application/json
+Content-Type: application/json
 
-###
+{
+  "url": "https://postman-echo.com/post",
+  "contentBody": "{\"nome\":\"Mario\"}",
+  "contentType": "application/json",
+  "httpMethod": "POST"
+}
+
+### 2) POST di un form
+POST {{Test_HostAddress}}/api/example
+Accept: application/json
+Content-Type: application/json
+
+{
+  "nome": "Mario",
+  "eta": 30
+}

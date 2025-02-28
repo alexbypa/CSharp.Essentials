@@ -12,8 +12,17 @@ public class httphelperController : Controller {
     public httphelperController(IOptions<List<httpClientOptions>> httpClientOptions) {
         this.httpClientOptions = httpClientOptions.Value;
     }
-    [HttpGet(Name = "httptest")]
-    public async Task<IActionResult> test(string url, string contentBody, string contentType, string httpmethod, int LengthIteration) {
+    [HttpPost("httptest")]
+    public async Task<IActionResult> httptest([FromBody] HttpTestRequest testRequest) {
+        string url = testRequest.Url;
+
+        object contentBody = null;
+        if (testRequest.UseJsonSample) {
+            contentBody = new { UserName = "Alex", Cell = "3452154524" };
+        }
+
+        string httpmethod = testRequest.HttpMethod;
+        string contentType = testRequest.ContentType;
         List<Func<HttpRequestMessage, HttpResponseMessage, Task>> actionsHttp = new List<Func<HttpRequestMessage, HttpResponseMessage, Task>>();
         //string url = "https://reqres.in/api/users/2";
         Func<HttpRequestMessage, HttpResponseMessage, Task> traceRetry = (httpreq, httpres) => {
@@ -21,8 +30,8 @@ public class httphelperController : Controller {
                 new MiaRichiesta { Action = "Test Http", IdTransaction = "Alex" },
                 Serilog.Events.LogEventLevel.Information,
                 null,
-                "INFO RETRY: {Url}, {httpStatus} {BodyResponse}",
-                url, httpres.StatusCode.ToString(), httpres.Content.ReadAsStringAsync()
+                "INFO RETRY: {Url}, {request} {httpStatus} {BodyResponse}",
+                url, httpreq, httpres.StatusCode.ToString(), httpres.Content.ReadAsStringAsync().GetAwaiter().GetResult()
                 );
             return Task.CompletedTask;
         };
@@ -49,9 +58,10 @@ public class httphelperController : Controller {
         httpsClientHelper
             .addTimeout(TimeSpan.FromSeconds(30))
             .addRetryCondition((httpRes) => httpRes.StatusCode != System.Net.HttpStatusCode.OK, 3, 2)
-            .addRateLimit(httpClientOptions.FirstOrDefault()?.RateLimitOptions);
-        for (int i = 0; i < 10; i++) {
-            //Task<HttpResponseMessage> responseMessage = httpsClientHelper.sendAsync(url);
+            .addRateLimitOnMoreRequests(httpClientOptions.FirstOrDefault()?.RateLimitOptions);
+
+        //Task<HttpResponseMessage> responseMessage = httpsClientHelper.sendAsync(url);
+        for (int i = 0; i < 5; i++) {
             Task<HttpResponseMessage> responseMessage = httpsClientHelper.SendAsync(
                 url,
                 httpmethod switch{
@@ -68,11 +78,18 @@ public class httphelperController : Controller {
             responses.Add(content);
         }
 
-        return Ok(Response);
+        return Ok(responses);
     }
     public class MiaRichiesta : IRequest {
         public string IdTransaction { get; set; }
 
         public string Action { get; set; }
+    }
+    public class HttpTestRequest {
+        public string Url { get; set; }
+        public bool UseJsonSample { get; set; }
+        public bool UseForm { get; set; }
+        public string ContentType { get; set; }
+        public string HttpMethod { get; set; }
     }
 }

@@ -59,11 +59,33 @@ public class httpsClientHelper : IhttpsClientHelper {
             await rateLimiter.AcquireAsync();
         }
         // 3) Esegui la chiamata con HttpClient
-        Task<HttpResponseMessage> response = _retryPolicy == null ? httpClient.SendAsync(request) : _retryPolicy.ExecuteAsync(() => httpClient.SendAsync(request));
+        Task<HttpResponseMessage> response = _retryPolicy == null ? httpClient.SendAsync(request) : _retryPolicy.ExecuteAsync(() => httpClient.SendAsync(CloneHttpRequestMessage(request)));
         //HttpResponseMessage response = await httpClient.SendAsync(request);
         
         return await response;
     }
+    private static HttpRequestMessage CloneHttpRequestMessage(HttpRequestMessage request) {
+        var clone = new HttpRequestMessage(request.Method, request.RequestUri);
+
+        // Copia gli header
+        foreach (var header in request.Headers) {
+            clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        }
+
+        // Clona il contenuto (se presente)
+        if (request.Content != null) {
+            var content = request.Content.ReadAsByteArrayAsync().Result; // Blocca solo in questa fase per la clonazione
+            clone.Content = new ByteArrayContent(content);
+
+            // Copia gli header del contenuto
+            foreach (var header in request.Content.Headers) {
+                clone.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            }
+        }
+
+        return clone;
+    }
+
 
     private async Task<HttpResponseMessage> sendAsync(string BaseUrl) {
         if (rateLimiter != null) {
@@ -97,7 +119,7 @@ public class httpsClientHelper : IhttpsClientHelper {
         httpClient.DefaultRequestHeaders.Add(KeyName, KeyValue);
         return this;
     }
-    public httpsClientHelper addRateLimit(httpClientRateLimitOptions rateLimitOptions) {
+    public httpsClientHelper addRateLimitOnMoreRequests(httpClientRateLimitOptions rateLimitOptions) {
         if (rateLimitOptions != null)
             rateLimiter = new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions {
                 AutoReplenishment = rateLimitOptions.AutoReplenishment,
