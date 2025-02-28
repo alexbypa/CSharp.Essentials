@@ -38,6 +38,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.SerializerHelper\CSharpEssentials.SerializerHelper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="CSharpEssentials.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

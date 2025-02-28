@@ -1,5 +1,6 @@
 # Imposta la variabile per l'indirizzo del server
 @Test_HostAddress = http://localhost:5133
+@Test_ExternalCall = https://webhook.site/985bc317-0c0e-4186-a2f7-19f19f13a0d8
 
 ### 1) POST body
 POST {{Test_HostAddress}}/httpHelper/httptest
@@ -7,18 +8,43 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "url": "https://postman-echo.com/post",
+  "url": "{{Test_ExternalCall}}",
   "contentBody": "{\"nome\":\"Mario\"}",
   "contentType": "application/json",
-  "httpMethod": "POST"
+  "HttpMethod": "POST",
+  "totIterations":1,
+  "httpStatusForRetry": 200,
+  "numberRetries":4,
+  "secondsDelayEspOnRetry": 2
 }
 
-### 2) POST di un form
-POST {{Test_HostAddress}}/api/example
+### 2) POST di un XML
+POST {{Test_HostAddress}}/httpHelper/httptest
 Accept: application/json
 Content-Type: application/json
 
 {
-  "nome": "Mario",
-  "eta": 30
+  "url": "{{Test_ExternalCall}}",
+  "contentBody": "<radice><figlio>ciccio</figlio></radice>",
+  "contentType": "application/xml",
+  "HttpMethod": "POST",
+  "totIterations":1,
+  "httpStatusForRetry": 200,
+  "numberRetries":4,
+  "secondsDelayEspOnRetry": 2
 }
+
+### 2) POST con risposta http 403
+POST {{Test_HostAddress}}/httpHelper/httptest
+Accept: application/json
+Content-Type: application/json
+
+{
+  "url": "{{Test_ExternalCall}}",
+  "contentBody": "<xmlSample><UserName>ciccio</UserName></xmlSample>",
+  "contentType": "application/xml",
+  "HttpMethod": "POST",
+  "totIterations":1
+}
+
+

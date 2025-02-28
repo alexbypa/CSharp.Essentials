@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text;
+using CSharpEssentials.SerializerHelper;
 
 namespace CSharpEssentials.HttpHelper;
 public interface IContentBuilder {
@@ -11,20 +12,20 @@ public class JsonContentBuilder : IContentBuilder {
         if (body == null)
             return null;
 
-        var json = JsonSerializer.Serialize(body);
-        return new StringContent(json, Encoding.UTF8, "application/json");
+        //var json = JsonSerializer.Serialize(body);
+        return new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
 }
 
-//public class XmlContentBuilder : IContentBuilder {
-//    public HttpContent BuildContent(object body) {
-//        if (body == null)
-//            return null;
+public class XmlContentBuilder : IContentBuilder {
+    public HttpContent BuildContent(object body) {
+        if (body == null)
+            return null;
 
-//        //var xml = XmlHelper.Serialize(body);//TODO: Implementare la classe XmlHelper
-//        return new StringContent(json, Encoding.UTF8, "application/xml");
-//    }
-//}
+        //var xml = xmlHelper.SerializeXml(body);
+        return new StringContent(body.ToString(), Encoding.UTF8, "application/xml");
+    }
+}
 
 public class FormUrlEncodedContentBuilder : IContentBuilder {
     public HttpContent BuildContent(object body) {

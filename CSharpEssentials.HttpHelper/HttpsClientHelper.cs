@@ -18,7 +18,7 @@ public class httpsClientHelper : IhttpsClientHelper {
     public FormUrlEncodedContent formUrlEncodedContent { get; set; }
     private AsyncRetryPolicy<HttpResponseMessage> _retryPolicy = null;
 
-    public httpsClientHelper(List<Func<HttpRequestMessage, HttpResponseMessage, Task>> actions) {
+    public httpsClientHelper(List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>> actions) {
         httpClient = new HttpClient(new HttpClientHandlerLogging() {
             _RequestActions = actions,
             InnerHandler = new HttpClientHandler()
@@ -35,10 +35,15 @@ public class httpsClientHelper : IhttpsClientHelper {
     public httpsClientHelper addRetryCondition(Func<HttpResponseMessage, bool> RetryCondition, int retryCount, double backoffFactor) {
         _retryPolicy = Policy
                     .Handle<HttpRequestException>()
-                    .OrResult<HttpResponseMessage>(RetryCondition) // Riprova solo per 5xx
-                    .WaitAndRetryAsync(retryCount, retryAttempt =>
-                        TimeSpan.FromSeconds(Math.Pow(backoffFactor, retryAttempt))
-                     );
+                    .OrResult<HttpResponseMessage>(RetryCondition)
+                    .WaitAndRetryAsync(retryCount,
+                        retryAttempt => TimeSpan.FromSeconds(Math.Pow(backoffFactor, retryAttempt)),
+                        onRetry: (outcome, timespan, attempt, context) => {
+                            context["RetryAttempt"] = attempt;
+                        }
+                     )
+
+                    ;
         return this;
     }
     public async Task<HttpResponseMessage> SendAsync(
@@ -54,14 +59,29 @@ public class httpsClientHelper : IhttpsClientHelper {
             .WithContentBuilder(contentBuilder)
             .Build();
 
-        // 2) Invochi il rate limiter se necessario
+        DateTime dtStartRequest = DateTime.Now;
+        TimeSpan timeSpanRateLimit = TimeSpan.Zero;
         if (rateLimiter != null) {
             await rateLimiter.AcquireAsync();
+            if (request.Headers.Contains("X-RateLimit-TimeSpanElapsed"))
+                request.Headers.Remove("X-RateLimit-TimeSpanElapsed");
+            request.Headers.Add("X-RateLimit-TimeSpanElapsed", (DateTime.Now - dtStartRequest).ToString());
         }
         // 3) Esegui la chiamata con HttpClient
-        Task<HttpResponseMessage> response = _retryPolicy == null ? httpClient.SendAsync(request) : _retryPolicy.ExecuteAsync(() => httpClient.SendAsync(CloneHttpRequestMessage(request)));
+        var context = new Context();
+        Task<HttpResponseMessage> response = _retryPolicy == null ? httpClient.SendAsync(request) : _retryPolicy.ExecuteAsync(
+            async ctx => {
+                var attempt = ctx.ContainsKey("RetryAttempt") ? (int)ctx["RetryAttempt"] : 0;
+
+                if (request.Headers.Contains("X-Retry-Attempt"))
+                    request.Headers.Remove("X-Retry-Attempt");
+
+                request.Headers.Add("X-Retry-Attempt", attempt.ToString());
+
+                return await httpClient.SendAsync(CloneHttpRequestMessage(request));
+            }, context);
         //HttpResponseMessage response = await httpClient.SendAsync(request);
-        
+
         return await response;
     }
     private static HttpRequestMessage CloneHttpRequestMessage(HttpRequestMessage request) {
@@ -82,11 +102,14 @@ public class httpsClientHelper : IhttpsClientHelper {
                 clone.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
             }
         }
-
         return clone;
     }
 
-
+    /// <summary>
+    /// deprecated
+    /// </summary>
+    /// <param name="BaseUrl"></param>
+    /// <returns></returns>
     private async Task<HttpResponseMessage> sendAsync(string BaseUrl) {
         if (rateLimiter != null) {
             RateLimitLease lease = await rateLimiter.AcquireAsync();
