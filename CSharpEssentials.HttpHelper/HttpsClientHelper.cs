@@ -6,6 +6,7 @@ using Polly.Retry;
 using System.Reflection;
 using System;
 using System.Reflection.Metadata;
+using System.Net.Http;
 
 namespace CSharpEssentials.HttpHelper;
 public class httpsClientHelper : IhttpsClientHelper {
@@ -40,7 +41,31 @@ public class httpsClientHelper : IhttpsClientHelper {
                      );
         return this;
     }
-    public async Task<HttpResponseMessage> sendAsync(string BaseUrl) {
+    public async Task<HttpResponseMessage> SendAsync(
+    string baseUrl,
+    HttpMethod httpMethod,
+    object body,
+    IContentBuilder contentBuilder) {
+        // 1) Crei la richiesta con il builder
+        var request = new HttpRequestBuilder()
+            .WithUrl(baseUrl)
+            .WithMethod(httpMethod)
+            .WithBody(body)
+            .WithContentBuilder(contentBuilder)
+            .Build();
+
+        // 2) Invochi il rate limiter se necessario
+        if (rateLimiter != null) {
+            await rateLimiter.AcquireAsync();
+        }
+        // 3) Esegui la chiamata con HttpClient
+        Task<HttpResponseMessage> response = _retryPolicy == null ? httpClient.SendAsync(request) : _retryPolicy.ExecuteAsync(() => httpClient.SendAsync(request));
+        //HttpResponseMessage response = await httpClient.SendAsync(request);
+        
+        return await response;
+    }
+
+    private async Task<HttpResponseMessage> sendAsync(string BaseUrl) {
         if (rateLimiter != null) {
             RateLimitLease lease = await rateLimiter.AcquireAsync();
         }
@@ -48,7 +73,7 @@ public class httpsClientHelper : IhttpsClientHelper {
 
         if (formUrlEncodedContent != null) {
             response = _retryPolicy == null ? httpClient.PostAsync(BaseUrl, formUrlEncodedContent) : _retryPolicy.ExecuteAsync(() => httpClient.PostAsync(BaseUrl, formUrlEncodedContent));
-            
+
         } else {
             if (JsonData != null && !(JsonData is string)) {
                 var settings = new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull };
@@ -82,6 +107,10 @@ public class httpsClientHelper : IhttpsClientHelper {
                 Window = rateLimitOptions.Window
             });
         return this;
+    }
+
+    public object addRateLimit(httpClientOptions httpClientOptions) {
+        throw new NotImplementedException();
     }
 }
 public interface IhttpsClientHelper { }

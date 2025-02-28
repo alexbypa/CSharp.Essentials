@@ -1,27 +1,35 @@
 ﻿using System.Text;
+using System.Threading.RateLimiting;
 
 namespace CSharpEssentials.HttpHelper;
 public class HttpClientHandlerLogging : DelegatingHandler {
     public List<Func<HttpRequestMessage, HttpResponseMessage, Task>> _RequestActions = new();
-    //public HttpClientHandlerLogging(List<Func<HttpRequestMessage, HttpResponseMessage, Task>> RequestActions) {
-    //    _RequestActions = RequestActions;
-    //}
+    public RateLimiter _rateLimiter;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
         string pageCalled = GetPageName(request);
-        
-        DateTime timeRequest = DateTime.Now;
-        StringBuilder requestLog = new StringBuilder();
-        DateTime dtStartRequest = DateTime.Now;
-        var now = DateTimeOffset.Now;
-        StringBuilder responseLog = new StringBuilder();
-        DateTime dtEndRequest = DateTime.Now;
-        requestLog.Append(request.ToString());
-        if (request.Content != null) {
-            requestLog.Append(await request.Content.ReadAsStringAsync());
+
+        bool IsAcquired = true;
+        if (_rateLimiter != null) {
+            using RateLimitLease lease = await _rateLimiter.AcquireAsync(permitCount: 1, cancellationToken);
+            IsAcquired = lease.IsAcquired;
         }
-        var response = await base.SendAsync(request, cancellationToken);
-        foreach (var action in _RequestActions) {
-            await action.Invoke(request, response);
+
+        HttpResponseMessage response = null;
+        if (IsAcquired) {
+            DateTime timeRequest = DateTime.Now;
+            StringBuilder requestLog = new StringBuilder();
+            DateTime dtStartRequest = DateTime.Now;
+            var now = DateTimeOffset.Now;
+            StringBuilder responseLog = new StringBuilder();
+            DateTime dtEndRequest = DateTime.Now;
+            requestLog.Append(request.ToString());
+            if (request.Content != null) {
+                requestLog.Append(await request.Content.ReadAsStringAsync());
+            }
+            response = await base.SendAsync(request, cancellationToken);
+            foreach (var action in _RequestActions) {
+                await action.Invoke(request, response);
+            }
         }
         return response;
     }

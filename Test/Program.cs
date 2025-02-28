@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.addloggerConfiguration(builder);
 #endregion
 #region httpExtension
+builder.Services.AddOptions();
 builder.Services.AddHttpClients(builder.Configuration);
 #endregion
 
