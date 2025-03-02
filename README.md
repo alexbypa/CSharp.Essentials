@@ -7,8 +7,10 @@ With this package, HTTP calls in your .NET applications become more robust, hand
 
 - **Resiliency:** Implements retry and fallback policies to manage transient errors.
 - **Rate Limiting:** Controls the frequency of HTTP requests to prevent overloads and adhere to API limits.
-- **Easy Integration:** Seamlessly integrates with ASP.NET Core applications, ideal for controllers and services.
-- **Tested & Validated:** Verified through real scenarios using a controller and `.http` files for request testing.
+- **Logging:** Leverages [CSharpEssentials.LoggerHelper](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) to trace requests using various Serilog sinks.
+- **Custom Delegates:** Utilizes a custom handler to attach multiple delegates during the HTTP call for additional processing and customization.
+- **Easy Integration:** Seamlessly integrates with ASP.NET Core applications.
+- **Tested & Validated:** Verified using both an ASP.NET Core controller and `.http` file examples.
 
 ## Installation
 
