@@ -153,7 +153,7 @@ public class httphelperController : Controller {
 ### Use cases
 ```http
 @Test_HostAddress = http://localhost:5133
-@Test_ExternalCall = https://webhook.site/985bc317-0c0e-4186-a2f7-19f19f13a0d8
+@Test_ExternalCall = https://webhook.site/<YOURGUID>
 
 ### 1) POST body json with ratelimit
 POST {{Test_HostAddress}}/httpHelper/httptest
