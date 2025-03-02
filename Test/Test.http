@@ -1,5 +1,5 @@
 @Test_HostAddress = http://localhost:5133
-@Test_ExternalCall = https://reqbin.com/echo/post/xml
+@Test_ExternalCall = https://webhook.site/YOUR-UNIQUE-ID
 
 ### 1) withNoBdoy: Call Simple Http Request
 GET {{Test_HostAddress}}/httpHelper/withNoBdoy?url={{Test_ExternalCall}}
@@ -17,7 +17,7 @@ Accept: html/text
 Content-Type: html/text
 
 ### 4) POST body XML 
-GET {{Test_HostAddress}}/httpHelper/withXmlBody?url={{Test_ExternalCall}}&content=<root><child>value</child></root>&contentType=application/xml
+GET {{Test_HostAddress}}/httpHelper/withXmlBody?url={{Test_ExternalCall}}&content=as
 Accept: application/json
 Content-Type: application/json
 
@@ -26,16 +26,15 @@ GET {{Test_HostAddress}}/httpHelper/withJsonBody?url={{Test_ExternalCall}}&conte
 Accept: application/json
 Content-Type: application/json
 
+
 ### 6) POST form x-www-form-urlencoded
-GET {{Test_HostAddress}}/httpHelper/withJsonBody?url={{Test_ExternalCall}}&content={"item":"value"}&contentType=application/json
+GET {{Test_HostAddress}}/httpHelper/withFormBody?url={{Test_ExternalCall}}&content={"Key1":"value1"}&contentType=application/json
 Accept: application/json
 Content-Type: application/json
 
 
-
-
-### 1) POST body json with ratelimit
-POST {{Test_HostAddress}}/httpHelper/httptest
+### 7) POST body json with ratelimit
+POST {{Test_HostAddress}}/httpHelper/testAll
 Accept: application/json
 Content-Type: application/json
 
@@ -44,26 +43,8 @@ Content-Type: application/json
   "contentBody": "{\"nome\":\"Mario\"}",
   "contentType": "application/json",
   "HttpMethod": "POST",
-  "totIterations":4,
-  "httpStatusForRetry": 500,
-  "numberRetries":4,
-  "secondsDelayEspOnRetry": 2
-}
-
-### 3) POST FORM x-www-form-urlencoded
-POST {{Test_HostAddress}}/httpHelper/httptest
-Accept: application/json
-Content-Type: application/json
-
-{
-  "url": "{{Test_ExternalCall}}",
-  "contentBody": "nome1=ciccio&nome2=frank",
-  "contentType": "application/x-www-form-urlencoded",
-  "HttpMethod": "POST",
   "totIterations":1,
-  "httpStatusForRetry": 500,
+  "httpStatusForRetry": 200,
   "numberRetries":4,
   "secondsDelayEspOnRetry": 2
 }
-
-

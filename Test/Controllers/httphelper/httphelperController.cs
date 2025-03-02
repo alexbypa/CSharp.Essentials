@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
 using System.Runtime.Serialization;
+using System.Xml.Linq;
 
 namespace Test.Controllers.httphelper;
 [ApiController]
@@ -122,6 +123,20 @@ public class httphelperController : Controller {
     /// <returns></returns>
     [HttpGet("withXmlBody")]
     public async Task<IActionResult> withXmlBody(string url, string content) {
+
+        //var client = new HttpClient();
+        //var request = new HttpRequestMessage(HttpMethod.Post, "https://reqbin.com/echo/post/xml");
+        //request.Headers.Add("Accept", "application/xml");
+        //request.Headers.Add("Content-Type", "application/xml");
+        //var contentbody = new StringContent("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Request>\r\n    <Login>login</Login>\r\n    <Password>password</Password>\r\n</Request>", null, "application/xml");
+        //request.Content = contentbody;
+        //var response = await client.SendAsync(request);
+        //return Ok(await response.Content.ReadAsStringAsync());
+
+
+        var body = new XDocument();
+        body.Add(new XElement("root", new XElement("child", "content")));
+
         List<object> responses = new List<object>();
         List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>> actionsHttp = new List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>>();
         Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> traceRetry = (httpreq, httpres, totRetry, timeSpanRateLimit) => {
@@ -141,7 +156,7 @@ public class httphelperController : Controller {
 
         var responseMessage = await httpsClientHelper
             .addTimeout(TimeSpan.FromSeconds(30))
-            .SendAsync(url, HttpMethod.Post, content, contentBuilder);
+            .SendAsync(url, HttpMethod.Post, body.ToString(), contentBuilder);
 
         return Ok(responses);
     }
@@ -183,7 +198,7 @@ public class httphelperController : Controller {
     /// <param name="testRequest"></param>
     /// <returns></returns>
     [HttpGet("withFormBody")]
-    public async Task<IActionResult> withFormBody(string url, string content) {
+    public async Task<IActionResult> withFormBody(string url) {
         List<object> responses = new List<object>();
         List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>> actionsHttp = new List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>>();
         Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> traceRetry = (httpreq, httpres, totRetry, timeSpanRateLimit) => {
@@ -199,7 +214,7 @@ public class httphelperController : Controller {
         };
         actionsHttp.Add(traceRetry);
         var httpsClientHelper = new httpsClientHelper(actionsHttp);
-        content = content.TrimStart('?');
+        string content = "key1=value1&key2=value2&key3=value3";
         var form = content.Split("&").Select(x => x.Split("=")).ToDictionary(x => x[0], x => x[1]);
         IContentBuilder contentBuilder = new FormUrlEncodedContentBuilder();
 
@@ -210,8 +225,8 @@ public class httphelperController : Controller {
         return Ok(responses);
     }
 
-    [HttpPost("httptest")]
-    public async Task<IActionResult> httptest([FromBody] HttpTestRequest testRequest) {
+    [HttpPost("testAll")]
+    public async Task<IActionResult> testAll([FromBody] HttpTestRequest testRequest) {
         string url = testRequest.Url;
         object contentBody = testRequest.contentBody;
         string httpmethod = testRequest.HttpMethod;
