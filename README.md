@@ -8,7 +8,7 @@ Below is a table listing all the current packages available in the CSharpEssenti
 
 | **Package Name**                         | **Description**                                                                              | **NuGet Link**                                                        |
 |------------------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
-| **[CSharpEssentials.HttpHelper] (#csharpessentialshttphelper)**          | Provides helper methods and extensions for simplified HTTP client operations.               | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HttpHelper)    |
+| [CSharpEssentials.HttpHelper] (#csharpessentialshttphelper)          | Provides helper methods and extensions for simplified HTTP client operations.               | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HttpHelper)    |
 | **CSharpEssentials.HangFireHelper** (#csharpessentialshangfirehelper)      | Contains utilities and extensions for integrating Hangfire background job processing.         | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HangFireHelper)|
 | **CSharpEssentials.LoggerHelper** (#csharpessentialsloggerhelper)       | Offers logging helpers to trace requests using various Serilog sinks and logging strategies. | [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)  |
 | **...**                                  | ... (more packages coming soon)                                                              | ...                                                                   |
