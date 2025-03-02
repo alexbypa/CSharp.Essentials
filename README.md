@@ -30,7 +30,7 @@ To install any of the packages, use the NuGet Package Manager or the .NET CLI. F
 ```bash
 dotnet add package CSharpEssentials.HttpHelper --version 1.2.2
 ```
-## [CSharpEssentials.HttpHelper](#csharpessentialshttphelper) 
+## CSharpEssentials.HttpHelper
 
 CSharpEssentials.HttpHelper is a NuGet package that extends HttpClient functionalities by integrating resiliency and rate limiting strategies. 
 With this package, HTTP calls in your .NET applications become more robust, handling transient errors and request limitations gracefully.
