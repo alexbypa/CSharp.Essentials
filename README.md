@@ -8,9 +8,9 @@ Below is a table listing all the current packages available in the CSharpEssenti
 
 | **Package Name**                         | **Description**                                                                              | **NuGet Link**                                                        |
 |------------------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
-| **CSharpEssentials.HttpHelper**          | Provides helper methods and extensions for simplified HTTP client operations.               | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HttpHelper)    |
-| **CSharpEssentials.HangFireHelper**      | Contains utilities and extensions for integrating Hangfire background job processing.         | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HangFireHelper)|
-| **CSharpEssentials.LoggerHelper**        | Offers logging helpers to trace requests using various Serilog sinks and logging strategies. | [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)  |
+| **CSharpEssentials.HttpHelper** (#csharpessentialshttphelper)          | Provides helper methods and extensions for simplified HTTP client operations.               | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HttpHelper)    |
+| **CSharpEssentials.HangFireHelper** (#csharpessentialshangfirehelper)      | Contains utilities and extensions for integrating Hangfire background job processing.         | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HangFireHelper)|
+| **CSharpEssentials.LoggerHelper** (#csharpessentialsloggerhelper)       | Offers logging helpers to trace requests using various Serilog sinks and logging strategies. | [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)  |
 | **...**                                  | ... (more packages coming soon)                                                              | ...                                                                   |
 
 ## Overview
@@ -30,7 +30,7 @@ To install any of the packages, use the NuGet Package Manager or the .NET CLI. F
 ```bash
 dotnet add package CSharpEssentials.HttpHelper --version 1.2.2
 ```
-## CSharpEssentials.HttpHelper
+## [CSharpEssentials.HttpHelper](#csharpessentialshttphelper) 
 
 CSharpEssentials.HttpHelper is a NuGet package that extends HttpClient functionalities by integrating resiliency and rate limiting strategies. 
 With this package, HTTP calls in your .NET applications become more robust, handling transient errors and request limitations gracefully.
