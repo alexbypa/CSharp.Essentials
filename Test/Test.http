@@ -34,7 +34,7 @@ Content-Type: application/json
   "secondsDelayEspOnRetry": 2
 }
 
-### 2) POST FORM x-www-form-urlencoded
+### 3) POST FORM x-www-form-urlencoded
 POST {{Test_HostAddress}}/httpHelper/httptest
 Accept: application/json
 Content-Type: application/json

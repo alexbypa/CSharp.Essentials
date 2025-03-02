@@ -1,3 +1,35 @@
+# CSharpEssentials Library
+
+CSharpEssentials is a collection of NuGet packages that provide a range of helpers and utilities for .NET development. This library includes various packages designed to simplify tasks such as HTTP operations, background job scheduling, logging, and more.
+
+## Package Index
+
+Below is a table listing all the current packages available in the CSharpEssentials library:
+
+| **Package Name**                         | **Description**                                                                              | **NuGet Link**                                                        |
+|------------------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
+| **CSharpEssentials.HttpHelper**          | Provides helper methods and extensions for simplified HTTP client operations.               | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HttpHelper)    |
+| **CSharpEssentials.HangFireHelper**      | Contains utilities and extensions for integrating Hangfire background job processing.         | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HangFireHelper)|
+| **CSharpEssentials.LoggerHelper**        | Offers logging helpers to trace requests using various Serilog sinks and logging strategies. | [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)  |
+| **...**                                  | ... (more packages coming soon)                                                              | ...                                                                   |
+
+## Overview
+
+The CSharpEssentials library is designed to be modular, offering dedicated packages for distinct aspects of .NET development:
+
+- **HttpHelper:** Simplifies HTTP client usage with additional resiliency features.
+- **HangFireHelper:** Streamlines the integration and management of background jobs using Hangfire.
+- **LoggerHelper:** Enhances logging capabilities by leveraging various logging sinks (e.g., Serilog).
+
+Each package is intended to be used independently or in combination, depending on your project's needs.
+
+## Getting Started
+
+To install any of the packages, use the NuGet Package Manager or the .NET CLI. For example, to install the HttpHelper package:
+
+```bash
+dotnet add package CSharpEssentials.HttpHelper --version 1.2.0
+
 # CSharpEssentials.HttpHelper
 
 CSharpEssentials.HttpHelper is a NuGet package that extends HttpClient functionalities by integrating resiliency and rate limiting strategies. 
