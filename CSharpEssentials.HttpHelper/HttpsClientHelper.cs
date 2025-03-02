@@ -51,7 +51,6 @@ public class httpsClientHelper : IhttpsClientHelper {
     HttpMethod httpMethod,
     object body,
     IContentBuilder contentBuilder) {
-        // 1) Crei la richiesta con il builder
         var request = new HttpRequestBuilder()
             .WithUrl(baseUrl)
             .WithMethod(httpMethod)
@@ -67,7 +66,6 @@ public class httpsClientHelper : IhttpsClientHelper {
                 request.Headers.Remove("X-RateLimit-TimeSpanElapsed");
             request.Headers.Add("X-RateLimit-TimeSpanElapsed", (DateTime.Now - dtStartRequest).ToString());
         }
-        // 3) Esegui la chiamata con HttpClient
         var context = new Context();
         Task<HttpResponseMessage> response = _retryPolicy == null ? httpClient.SendAsync(request) : _retryPolicy.ExecuteAsync(
             async ctx => {

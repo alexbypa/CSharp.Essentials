@@ -2,7 +2,7 @@
 @Test_HostAddress = http://localhost:5133
 @Test_ExternalCall = https://webhook.site/985bc317-0c0e-4186-a2f7-19f19f13a0d8
 
-### 1) POST body
+### 1) POST body json with ratelimit
 POST {{Test_HostAddress}}/httpHelper/httptest
 Accept: application/json
 Content-Type: application/json
@@ -12,13 +12,13 @@ Content-Type: application/json
   "contentBody": "{\"nome\":\"Mario\"}",
   "contentType": "application/json",
   "HttpMethod": "POST",
-  "totIterations":1,
-  "httpStatusForRetry": 200,
+  "totIterations":4,
+  "httpStatusForRetry": 500,
   "numberRetries":4,
   "secondsDelayEspOnRetry": 2
 }
 
-### 2) POST di un XML
+### 2) POST body XML with retry
 POST {{Test_HostAddress}}/httpHelper/httptest
 Accept: application/json
 Content-Type: application/json
@@ -34,17 +34,20 @@ Content-Type: application/json
   "secondsDelayEspOnRetry": 2
 }
 
-### 2) POST con risposta http 403
+### 2) POST FORM x-www-form-urlencoded
 POST {{Test_HostAddress}}/httpHelper/httptest
 Accept: application/json
 Content-Type: application/json
 
 {
   "url": "{{Test_ExternalCall}}",
-  "contentBody": "<xmlSample><UserName>ciccio</UserName></xmlSample>",
-  "contentType": "application/xml",
+  "contentBody": "nome1=ciccio&nome2=frank",
+  "contentType": "application/x-www-form-urlencoded",
   "HttpMethod": "POST",
-  "totIterations":1
+  "totIterations":1,
+  "httpStatusForRetry": 500,
+  "numberRetries":4,
+  "secondsDelayEspOnRetry": 2
 }
 
 

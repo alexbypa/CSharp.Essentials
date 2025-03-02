@@ -1,5 +1,6 @@
 ﻿using CSharpEssentials.HttpHelper;
 using CSharpEssentials.LoggerHelper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -37,7 +38,10 @@ public class httphelperController : Controller {
         };
         actionsHttp.Add(traceRetry);
         var httpsClientHelper = new httpsClientHelper(actionsHttp);
-
+        if (contentType.Equals("application/x-www-form-urlencoded", StringComparison.InvariantCultureIgnoreCase)) {
+            contentBody = contentBody.ToString().TrimStart('?');
+            contentBody = contentBody.ToString().Split("&").Select(x => x.Split("=")).ToDictionary(x => x[0], x => x[1]);
+        }
         // 2) Seleziona l’IContentBuilder in modo fluente
         IContentBuilder contentBuilder = (contentBody, contentType) switch {
             (null or "", _) => new NoBodyContentBuilder(),

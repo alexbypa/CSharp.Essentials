@@ -1,7 +1,4 @@
-﻿using System;
-using System.Net.Http;
-
-namespace CSharpEssentials.HttpHelper;
+﻿namespace CSharpEssentials.HttpHelper;
 public class HttpRequestBuilder {
     private string _url;
     private HttpMethod _method = HttpMethod.Get; // default
