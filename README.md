@@ -57,7 +57,7 @@ With this package, HTTP calls in your .NET applications become more robust, hand
 }
 ```
 ### 🌍 `HttpClientOptions`
-📌 **explanation**
+📌 **explanation** (The package uses the following rate limiting algorithm: Sliding window limiter)
 
 | Key | Type | Description |
 |--------|------|-------------|
@@ -68,7 +68,7 @@ With this package, HTTP calls in your .NET applications become more robust, hand
 | `RateLimitOptions.PermitLimit` | `int` | How many requests per window |
 | `RateLimitOptions.QueueLimit` | `int` | maximum number of requests that can be waiting in the queue |
 | `RateLimitOptions.Window` | `timestamp` | Time frame between one request and another |
-| `RateLimitOptions.Window` | `timestamp` | Number of segments per Window |
+| `RateLimitOptions.SegmentsPerWindow` | `int` | Number of segments per Window |
 
 
 ### Features
