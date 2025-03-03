@@ -123,17 +123,6 @@ public class httphelperController : Controller {
     /// <returns></returns>
     [HttpGet("withXmlBody")]
     public async Task<IActionResult> withXmlBody(string url, string content) {
-
-        //var client = new HttpClient();
-        //var request = new HttpRequestMessage(HttpMethod.Post, "https://reqbin.com/echo/post/xml");
-        //request.Headers.Add("Accept", "application/xml");
-        //request.Headers.Add("Content-Type", "application/xml");
-        //var contentbody = new StringContent("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Request>\r\n    <Login>login</Login>\r\n    <Password>password</Password>\r\n</Request>", null, "application/xml");
-        //request.Content = contentbody;
-        //var response = await client.SendAsync(request);
-        //return Ok(await response.Content.ReadAsStringAsync());
-
-
         var body = new XDocument();
         body.Add(new XElement("root", new XElement("child", "content")));
 

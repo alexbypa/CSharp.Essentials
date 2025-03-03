@@ -52,6 +52,9 @@ Install the package via the NuGet Package Manager:
 dotnet add package CSharpEssentials.HttpHelper --version 1.2.2
 ```
 
+### Configuration
+
+
 ### Create controller like below 
 
 ```csharp

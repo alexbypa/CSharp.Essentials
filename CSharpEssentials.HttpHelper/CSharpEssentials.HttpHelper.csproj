@@ -8,13 +8,13 @@
     <Authors>Alessandro Chiodo</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.HttpHelper</RepositoryUrl>
-    <AssemblyVersion>1.2.3</AssemblyVersion>
+    <AssemblyVersion>1.2.4</AssemblyVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
-    <FileVersion>1.2.3</FileVersion>
-    <Version>1.2.3</Version>
+    <FileVersion>1.2.4</FileVersion>
+    <Version>1.2.4</Version>
     <Description>package to help manage of httpHelper</Description>
     <Company>Alessandro Chiodo</Company>
     <PackageTags>HttpClient, Resiliency, RateLimiting, ASP.NET Core, HTTP, Retry, TransientFaultHandling, Logger, Serilog, Custom Handler, .http Test</PackageTags>
