@@ -35,6 +35,42 @@ dotnet add package CSharpEssentials.HttpHelper --version 1.2.2
 CSharpEssentials.HttpHelper is a NuGet package that extends HttpClient functionalities by integrating resiliency and rate limiting strategies. 
 With this package, HTTP calls in your .NET applications become more robust, handling transient errors and request limitations gracefully.
 
+### Configuration (appsettings.json)
+```js
+{
+  "HttpClientOptions": [
+    {
+      "name": "Test",
+      "certificate": {
+        "path": "YOUR_PATH",
+        "password": "YOUR_PASSWORD"
+      },
+      "RateLimitOptions": {
+        "AutoReplenishment": true,
+        "PermitLimit": 1, 
+        "QueueLimit": 1, 
+        "Window": "00:00:15",
+        "SegmentsPerWindow": 100
+      }
+    }
+  ]
+}
+```
+### 🌍 `HttpClientOptions`
+📌 **explanation**
+
+| Key | Type | Description |
+|--------|------|-------------|
+| `name` | `string` | Friendly name that encloses the settings to use with http to use a certificate for calls in https and configurations on the rate limit |
+| `certificate` | `string` | Settings to upload the certificate |
+| `certificate.path` | `string` | certificate path |
+| `certificate.password` | `string` | password path |
+| `RateLimitOptions.PermitLimit` | `int` | How many requests per window |
+| `RateLimitOptions.QueueLimit` | `int` | maximum number of requests that can be waiting in the queue |
+| `RateLimitOptions.Window` | `timestamp` | Time frame between one request and another |
+| `RateLimitOptions.Window` | `timestamp` | Number of segments per Window |
+
+
 ### Features
 
 - **Resiliency:** Implements retry and fallback policies to manage transient errors.
