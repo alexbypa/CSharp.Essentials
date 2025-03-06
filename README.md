@@ -88,8 +88,8 @@ Install the package via the NuGet Package Manager:
 dotnet add package CSharpEssentials.HttpHelper --version 1.2.4
 ```
 
-### Example API Controller Call
-#### Simple Get without body ###
+### API Examples
+#### Example 1: Simple Get without body
 ```csharp
 using Azure;
 using CSharpEssentials.HttpHelper;
@@ -143,23 +143,20 @@ public class httphelperController : Controller {
 }
 ```
 
-### Code Explanation
+#### Code Explanation
 
 1. **`[httpClientOptions]`**  
-   Carichiamo le configurazioni di appSettings
-
+  Let's load the appSettings configurations
 2. **`[actionsHttp]`**  
-   Defines the base route for the controller. The `[controller]` token is replaced with the actual class name (`Sample`), excluding the `Controller` suffix.
+  Defines the base route for the controller. The `[controller]` token is replaced with the actual class name (`Sample`), excluding the `Controller` suffix.
 
 3. **`[insertLog]`**  
-   Specifies that this method handles HTTP GET requests for the `hello` endpoint. The full URL becomes `api/Sample/hello`.
-
+  Specifies that this method handles HTTP GET requests for the `hello` endpoint. The full URL becomes `api/Sample/hello`.
 4. **`IContentBuilder`**  
-   Defines the action method that handles the request. Returning `IActionResult` allows flexibility in returning different HTTP response types.
-
+  Defines the action method that handles the request. Returning `IActionResult` allows flexibility in returning different HTTP response types.
 ---
 
-## Example HTTP Request
+#### Example HTTP Request
 
 ```http
 @Test_HostAddress = http://localhost:5133
@@ -167,6 +164,54 @@ public class httphelperController : Controller {
 
 ### 1) withNoBdoy: Call Simple Http Request
 GET {{Test_HostAddress}}/httpHelper/withNoBdoy?url={{Test_ExternalCall}}
+Accept: html/text
+Content-Type: html/text
+```
+
+#### Example 2: Simple with Retries
+```csharp
+    [HttpGet("withRetries")]
+    public async Task<IActionResult> withRetries(string url, int httpStausOnRetry, int totRetry, int secondsDelayEspOnRetry) {
+        List<object> responses = new List<object>();
+        List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>> actionsHttp = new List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>>();
+        Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> traceRetry = (httpreq, httpres, totRetry, timeSpanRateLimit) => {
+            loggerExtension<MyRequest>.TraceAsync(
+                new MyRequest { Action = "Test Http", IdTransaction = "Alex" },
+                Serilog.Events.LogEventLevel.Information,
+                null,
+                "HTTP LOG: {totRetry} {timeSpanRateLimit} {Url}, {request} {httpStatus} {BodyResponse}",
+                totRetry, timeSpanRateLimit, url, httpreq, httpres.StatusCode.ToString(), httpres.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+                );
+            responses.Add(new { content = httpres.Content.ReadAsStringAsync().GetAwaiter().GetResult(), httpStatus = httpres.StatusCode.ToString(), NumberRetry = totRetry, timeSpanRateLimit = timeSpanRateLimit });
+            return Task.CompletedTask;
+        };
+        actionsHttp.Add(traceRetry);
+        var httpsClientHelper = new httpsClientHelper(actionsHttp);
+        IContentBuilder contentBuilder = new NoBodyContentBuilder(); 
+
+        httpsClientHelper
+            .addTimeout(TimeSpan.FromSeconds(30))
+            .addRetryCondition((httpRes) => (int)httpRes.StatusCode == httpStausOnRetry, totRetry, secondsDelayEspOnRetry); // 2
+
+        var responseMessage = await httpsClientHelper
+            .SendAsync(url, HttpMethod.Get, null, contentBuilder
+        );
+
+        return Ok(responses);
+    }
+```
+
+#### Code Explanation
+
+2. **`[addRetryCondition]`**  
+  In this case we add the addRetryCondition method where we can choose when the retry should be performed, the number of retries (totRetry parameter), and the number of seconds in exponential mode (secondsDelayEspOnRetry parameter).
+In the example of the next call a retry is performed when the httpStatus response is 409 (of course we can always choose different rules), for a maximum of 4 retries and with a delay between each of respectively: 2 seconds, 4, 8 and 16
+---
+
+#### Example HTTP Request
+
+```http
+GET {{Test_HostAddress}}/httpHelper/withRetries?url={{Test_ExternalCall}}&httpStausOnRetry=429&totRetry=4&secondsDelayEspOnRetry=2
 Accept: html/text
 Content-Type: html/text
 ```
