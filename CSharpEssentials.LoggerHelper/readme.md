@@ -99,7 +99,8 @@ builder.Services.addloggerConfiguration(builder);
 // ... other services
 
 var app = builder.Build();
-
+//To add middleware for logging requests and responses
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
 // ... configure app
 
 app.Run();
