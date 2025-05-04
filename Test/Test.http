@@ -1,6 +1,50 @@
 @Test_HostAddress = http://localhost:5133
+@Test_ExternalCall = https://webhook.site/YOUR-UNIQUE-ID
 
-GET {{Test_HostAddress}}/weatherforecast/
+### 1) withNoBdoy: Call Simple Http Request
+GET {{Test_HostAddress}}/httpHelper/withNoBdoy?url={{Test_ExternalCall}}
+Accept: html/text
+Content-Type: html/text
+
+### 2) Call Simple Http Request with Rate Limit
+GET {{Test_HostAddress}}/httpHelper/withRateLimit?url={{Test_ExternalCall}}&totIterations=4
+Accept: html/text
+Content-Type: html/text
+
+### 3) Call Simple Http Request with retry
+GET {{Test_HostAddress}}/httpHelper/withRetries?url={{Test_ExternalCall}}&httpStausOnRetry=429&totRetry=4&secondsDelayEspOnRetry=2
+Accept: html/text
+Content-Type: html/text
+
+### 4) POST body XML 
+GET {{Test_HostAddress}}/httpHelper/withXmlBody?url={{Test_ExternalCall}}&content=as
 Accept: application/json
+Content-Type: application/json
 
-###
+### 5) POST body json
+GET {{Test_HostAddress}}/httpHelper/withJsonBody?url={{Test_ExternalCall}}&content={"item":"value"}&contentType=application/json
+Accept: application/json
+Content-Type: application/json
+
+
+### 6) POST form x-www-form-urlencoded
+GET {{Test_HostAddress}}/httpHelper/withFormBody?url={{Test_ExternalCall}}&content={"Key1":"value1"}&contentType=application/json
+Accept: application/json
+Content-Type: application/json
+
+
+### 7) POST body json with ratelimit
+POST {{Test_HostAddress}}/httpHelper/testAll
+Accept: application/json
+Content-Type: application/json
+
+{
+  "url": "{{Test_ExternalCall}}",
+  "contentBody": "{\"nome\":\"Mario\"}",
+  "contentType": "application/json",
+  "HttpMethod": "POST",
+  "totIterations":1,
+  "httpStatusForRetry": 200,
+  "numberRetries":4,
+  "secondsDelayEspOnRetry": 2
+}

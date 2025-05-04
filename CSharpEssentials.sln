@@ -22,7 +22,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		publish.yml = publish.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.RecaptchaHelper", "CSharpEssentials.RecaptchaHelper\CSharpEssentials.RecaptchaHelper.csproj", "{00510E4D-294C-4A16-9D47-EF216CB8A111}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.RecaptchaHelper", "CSharpEssentials.RecaptchaHelper\CSharpEssentials.RecaptchaHelper.csproj", "{00510E4D-294C-4A16-9D47-EF216CB8A111}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.LoggerHelper", "CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj", "{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +60,10 @@ Global
 		{00510E4D-294C-4A16-9D47-EF216CB8A111}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00510E4D-294C-4A16-9D47-EF216CB8A111}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00510E4D-294C-4A16-9D47-EF216CB8A111}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

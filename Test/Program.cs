@@ -1,11 +1,20 @@
-using CSharpEssentials.HangFireHelper;
-using Test.Controllers.hangfire;
+using CSharpEssentials.HttpHelper;
+using CSharpEssentials.LoggerHelper;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddHangFire<Request>(builder);
+#region hangFire
+// builder.Services.AddHangFire<Request>(builder);
+#endregion
+#region LoggerHelper
+builder.Services.addloggerConfiguration(builder);
+#endregion
+#region httpExtension
+builder.Services.AddOptions();
+builder.Services.AddHttpClients(builder.Configuration);
+#endregion
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -14,8 +23,9 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseCustomHangfireDashboard(builder.Configuration);
-
+#region hangFire
+// app.UseCustomHangfireDashboard(builder.Configuration);
+#endregion
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
