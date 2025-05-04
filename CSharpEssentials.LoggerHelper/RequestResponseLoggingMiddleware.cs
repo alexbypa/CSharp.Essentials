@@ -63,14 +63,6 @@ public class RequestResponseLoggingMiddleware {
             // Copia la risposta nel body originale
             responseBodyStream.Seek(0, SeekOrigin.Begin);
             await responseBodyStream.CopyToAsync(originalBodyStream);
-
-            // Log del completamento della richiesta
-            loggerExtension<RequestInfo>.TraceAsync(
-                requestInfo,
-                LogEventLevel.Information,
-                null,
-                "REQUEST COMPLETED"
-            );
         }
     }
 
