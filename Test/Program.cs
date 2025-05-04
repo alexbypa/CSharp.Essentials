@@ -1,5 +1,4 @@
 using CSharpEssentials.HangFireHelper;
-using Hangfire;
 using Test.Controllers.hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
