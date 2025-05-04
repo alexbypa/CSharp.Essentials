@@ -31,7 +31,9 @@ if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+#region loggerExtension
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
+#endregion
 app.UseAuthorization();
 
 app.MapControllers();
