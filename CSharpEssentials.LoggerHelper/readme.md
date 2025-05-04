@@ -26,6 +26,8 @@ dotnet add package CSharpEssentials.LoggerHelper
 
 ## Configuration
 
+The library requires an external configuration file named `appsettings.LoggerHelper.json` in your project root directory. The library will read its configuration exclusively from this file.
+
 Create an `appsettings.LoggerHelper.json` file in your project root with the following structure:
 
 ```json
@@ -52,6 +54,10 @@ Create an `appsettings.LoggerHelper.json` file in your project root with the fol
         {
           "Sink": "Telegram",
           "Level": ["Fatal"]
+        },
+        {
+          "Sink": "ElasticSearch",
+          "Level": []
         }
       ],
       "SerilogOption": {
@@ -84,6 +90,21 @@ Create an `appsettings.LoggerHelper.json` file in your project root with the fol
 }
 ```
 
+## Log Level Configuration
+
+The library uses the `SerilogCondition` array in the configuration to determine which log levels should be written to each sink:
+
+- Each sink has its own configuration entry with an array of log levels
+- If a level is present in the array, logs of that level will be written to the corresponding sink
+- If the `Level` array for a sink is empty (like `"Level": []`), **no logs** will be written to that sink regardless of their level
+- If a sink is not listed in the `SerilogCondition` array, it won't be used
+
+For example, in the configuration above:
+- The Console sink will receive Information, Warning, Error, and Fatal logs
+- The PostgreSQL and MSSqlServer sinks will only receive Error and Fatal logs
+- The Telegram sink will only receive Fatal logs
+- The ElasticSearch sink won't receive any logs (empty array)
+
 ## Setup in ASP.NET Core Application
 
 Register the logger in your `Program.cs`:
@@ -99,12 +120,16 @@ builder.Services.addloggerConfiguration(builder);
 // ... other services
 
 var app = builder.Build();
-//To add middleware for logging requests and responses
-app.UseMiddleware<RequestResponseLoggingMiddleware>();
+
 // ... configure app
+
+// Add this middleware to automatically log all requests and responses with Information level
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 app.Run();
 ```
+
+> **Note**: By adding `app.UseMiddleware<RequestResponseLoggingMiddleware>()` to your Program.cs, all HTTP requests and responses in your Web API will be automatically logged with Information level.
 
 ## Usage
 

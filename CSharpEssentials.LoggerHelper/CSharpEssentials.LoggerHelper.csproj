@@ -7,10 +7,11 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Package per i log</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>1.1.2 added Middleware</Description>
-    <Version>1.1.2</Version>
-    <AssemblyVersion>1.1.2</AssemblyVersion>
-    <FileVersion>1.1.2</FileVersion>
+    <Description>1.1.2 added Middleware
+1.1.3 Aggiornamento Middleware</Description>
+    <Version>1.1.3</Version>
+    <AssemblyVersion>1.1.3</AssemblyVersion>
+    <FileVersion>1.1.3</FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
