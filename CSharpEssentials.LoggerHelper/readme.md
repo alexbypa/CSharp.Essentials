@@ -1,3 +1,6 @@
+[![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
+[![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
+
 # CSharpEssentials.LoggerHelper
 
 A flexible and powerful logging library for .NET applications that simplifies the implementation of structured logging with multiple sink options.
