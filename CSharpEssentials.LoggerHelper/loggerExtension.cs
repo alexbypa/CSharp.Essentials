@@ -84,34 +84,34 @@ public class loggerExtension<T> where T : IRequest {
             }
             )
             .WriteTo.Conditional(evt => {
-                if (loggingConfig != null && loggingConfig.SerilogCondition.FirstOrDefault(level => level.Level != null && level.Sink.Equals("MSSqlServer") && level.Level.Contains(evt.Level.ToString())) != null)
+                if (loggingConfig != null && loggingConfig?.SerilogCondition?.FirstOrDefault(level => level.Level != null && level.Sink != null && level.Sink.Equals("MSSqlServer") && level.Level.Contains(evt.Level.ToString())) != null)
                     return true;
                 else
                     return false;
             },
-            wt => wt.MSSqlServer(loggingConfig.SerilogOption.MSSqlServer.connectionString,
+            wt => wt.MSSqlServer(loggingConfig?.SerilogOption?.MSSqlServer?.connectionString,
             new MSSqlServerSinkOptions {
                 TableName = loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.tableName,
                 SchemaName = loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.schemaName,
                 AutoCreateSqlTable = loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.autoCreateSqlTable ?? false,
                 BatchPostingLimit = loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.batchPostingLimit ?? 100,
-                BatchPeriod = string.IsNullOrEmpty(loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.period) ? TimeSpan.FromSeconds(10) : TimeSpan.Parse(loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.period),
+                BatchPeriod = string.IsNullOrEmpty(loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.period) ? TimeSpan.FromSeconds(10) : TimeSpan.Parse(loggingConfig.SerilogOption.MSSqlServer.sinkOptionsSection.period),
             }, columnOptions: GetColumnOptions()
             )
             .WriteTo.Conditional(evt => {
-                 return loggingConfig != null && loggingConfig.SerilogCondition.FirstOrDefault(item => item.Level != null && item.Sink.Equals("File") && item.Level.Contains(evt.Level.ToString())) != null;
+                 return loggingConfig != null && loggingConfig?.SerilogCondition?.FirstOrDefault(item => item.Level != null && item.Sink != null && item.Sink.Equals("File") && item.Level.Contains(evt.Level.ToString())) != null;
              }, wt => wt.File("logs/log.txt"))
             .WriteTo.Conditional(evt => {
-                if (loggingConfig != null && loggingConfig.SerilogCondition.FirstOrDefault(level => level.Level != null && level.Sink.Equals("ElasticSearch") && level.Level.Contains(evt.Level.ToString())) != null)
+                if (loggingConfig != null && loggingConfig?.SerilogCondition?.FirstOrDefault(level => level.Level != null && level.Sink != null && level.Sink.Equals("ElasticSearch") && level.Level.Contains(evt.Level.ToString())) != null)
                     return true;
                 else
                     return false;
             }, wt => wt.Elasticsearch())//TODO: da provare
             .WriteTo.Conditional(evt => {
-                return loggingConfig != null && loggingConfig.SerilogCondition.FirstOrDefault(item => item.Level != null && item.Sink.Equals("Email") && item.Level.Contains(evt.Level.ToString())) != null;
+                return loggingConfig != null && loggingConfig?.SerilogCondition?.FirstOrDefault(item => item.Level != null && item.Sink != null && item.Sink.Equals("Email") && item.Level.Contains(evt.Level.ToString())) != null;
             }, wt => wt.Email(new EmailSinkOptions { From = "alexbypa@gmail.com" })) //TODO:
             .WriteTo.Conditional(evt => {
-                if (loggingConfig != null && loggingConfig.SerilogCondition.FirstOrDefault(item => item.Level != null && item.Sink.Equals("Telegram") && item.Level.Contains(evt.Level.ToString())) != null)
+                if (loggingConfig != null && loggingConfig?.SerilogCondition?.FirstOrDefault(item => item.Level != null && item.Sink != null && item.Sink.Equals("Telegram") && item.Level.Contains(evt.Level.ToString())) != null)
                     return true;
                 else
                     return false;
