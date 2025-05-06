@@ -5,6 +5,10 @@ on:
     branches:
       - main # or main, or any other branch where you are releasing
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
