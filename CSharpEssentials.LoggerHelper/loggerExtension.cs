@@ -9,6 +9,7 @@ using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.PostgreSQL;
 using Serilog.Sinks.PostgreSQL.ColumnWriters;
 using System.Data;
+using System.Text.RegularExpressions;
 
 namespace CSharpEssentials.LoggerHelper;
 public interface IRequest {
@@ -67,35 +68,39 @@ public class loggerExtension<T> where T : IRequest {
                 if (loggingConfig.SerilogCondition.Any(level =>
                         level.Sink.Equals("PostgreSQL") &&
                         level.Level != null)) {
-                        wt.PostgreSQL(
-                            connectionString: loggingConfig.SerilogOption.PostgreSQL.connectionstring,
-                            tableName: "Logs",
-                            columnOptions: columnWriters,
-                            needAutoCreateTable: true,
-                            failureCallback: e => {
-                                string conn = configuration.GetConnectionString(loggingConfig.SerilogOption.PostgreSQL.connectionstring);
-                                Console.WriteLine($"CONN : {conn} Errore durante il logging su PostgreSQL: {e.Message}");
-                            }
-                        );
-                    }
+                    var cs = loggingConfig?.SerilogOption?.PostgreSQL?.connectionstring;
+                    wt.PostgreSQL(
+                        connectionString: cs,
+                        tableName: "Logs",
+                        columnOptions: columnWriters,
+                        needAutoCreateTable: true,
+                        failureCallback: e => {
+                            if (!string.IsNullOrWhiteSpace(cs))
+                                configuration.GetConnectionString(cs);
+                            Console.WriteLine($"CONN : {cs} Errore durante il logging su PostgreSQL: {e.Message}");
+                        }
+                    );
                 }
+            }
             )
             .WriteTo.Conditional(evt => {
                 if (loggingConfig != null && loggingConfig.SerilogCondition.FirstOrDefault(level => level.Level != null && level.Sink.Equals("MSSqlServer") && level.Level.Contains(evt.Level.ToString())) != null)
                     return true;
                 else
                     return false;
-                }, wt => wt.MSSqlServer(loggingConfig.SerilogOption.MSSqlServer.connectionString,
-                    new MSSqlServerSinkOptions {
-                    TableName = loggingConfig.SerilogOption.MSSqlServer.sinkOptionsSection.tableName,
-                    SchemaName = loggingConfig.SerilogOption.MSSqlServer.sinkOptionsSection.schemaName,
-                    AutoCreateSqlTable = loggingConfig.SerilogOption.MSSqlServer.sinkOptionsSection.autoCreateSqlTable,
-                    BatchPostingLimit = loggingConfig.SerilogOption.MSSqlServer.sinkOptionsSection.batchPostingLimit,
-                    BatchPeriod = TimeSpan.Parse(loggingConfig.SerilogOption.MSSqlServer.sinkOptionsSection.period)
-                }, columnOptions: GetColumnOptions()))
+            },
+            wt => wt.MSSqlServer(loggingConfig.SerilogOption.MSSqlServer.connectionString,
+            new MSSqlServerSinkOptions {
+                TableName = loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.tableName,
+                SchemaName = loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.schemaName,
+                AutoCreateSqlTable = loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.autoCreateSqlTable ?? false,
+                BatchPostingLimit = loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.batchPostingLimit ?? 100,
+                BatchPeriod = string.IsNullOrEmpty(loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.period) ? TimeSpan.FromSeconds(10) : TimeSpan.Parse(loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.period),
+            }, columnOptions: GetColumnOptions()
+            )
             .WriteTo.Conditional(evt => {
-                return loggingConfig != null && loggingConfig.SerilogCondition.FirstOrDefault(item => item.Level != null && item.Sink.Equals("File") && item.Level.Contains(evt.Level.ToString())) != null;
-            }, wt => wt.File("logs/log.txt"))
+                 return loggingConfig != null && loggingConfig.SerilogCondition.FirstOrDefault(item => item.Level != null && item.Sink.Equals("File") && item.Level.Contains(evt.Level.ToString())) != null;
+             }, wt => wt.File("logs/log.txt"))
             .WriteTo.Conditional(evt => {
                 if (loggingConfig != null && loggingConfig.SerilogCondition.FirstOrDefault(level => level.Level != null && level.Sink.Equals("ElasticSearch") && level.Level.Contains(evt.Level.ToString())) != null)
                     return true;
@@ -110,12 +115,16 @@ public class loggerExtension<T> where T : IRequest {
                     return true;
                 else
                     return false;
-            }, wt => wt.Telegram(loggingConfig.SerilogOption.TelegramOption.Api_Key, loggingConfig.SerilogOption.TelegramOption.chatId))
+            }, wt => {
+                var apiKey = loggingConfig?.SerilogOption?.TelegramOption?.Api_Key;
+                var chatId = loggingConfig?.SerilogOption?.TelegramOption?.chatId;
+                if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(chatId))
+                    wt.Telegram(apiKey, chatId);
+            }
+            )
             .WriteTo.Console(LogEventLevel.Information)
             .CreateLogger();
     }
-    public Dictionary<string, List<int>> loglevels { get; set; }
-
     /// <summary>
     /// method to write log
     /// </summary>
@@ -160,8 +169,15 @@ public class loggerExtension<T> where T : IRequest {
 
         Thread.Sleep(500);
 
-        if (message.Split("{").Length - 1 != arguments.Count) {
-            log.Error(new Exception("parametri non validi su loggerExtension"), message);
+        int totPlaceHolders = arguments.Count;
+        try {
+            var matches = Regex.Matches(message, @"(?<!\{)\{[a-zA-Z_][a-zA-Z0-9_]*\}(?!\})", RegexOptions.None, TimeSpan.FromMilliseconds(200));
+            totPlaceHolders = matches.Count;
+            if (totPlaceHolders != arguments.Count) {
+                log.Error(new Exception("parametri non validi su loggerExtension"), message);
+            }
+        } catch (Exception exRegEx) {
+            log.Error(new Exception("parametri non validi su loggerExtension: " + exRegEx.Message), message);
         }
 
         if (level == LogEventLevel.Debug)
