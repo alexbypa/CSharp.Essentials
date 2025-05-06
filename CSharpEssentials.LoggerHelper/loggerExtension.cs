@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using NpgsqlTypes;
 using Serilog;
 using Serilog.Events;
@@ -7,9 +9,6 @@ using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.PostgreSQL;
 using Serilog.Sinks.PostgreSQL.ColumnWriters;
 using System.Data;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
 
 namespace CSharpEssentials.LoggerHelper;
 public interface IRequest {

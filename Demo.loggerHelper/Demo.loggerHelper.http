@@ -1,0 +1,6 @@
+@Demo.loggerHelper_HostAddress = http://localhost:5077
+
+GET {{Demo.loggerHelper_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
