@@ -26,7 +26,7 @@ public static class LoggerExtensionConfig {
     }
 }
 public class loggerExtension<T> where T : IRequest {
-    //TODO: Inserire tutte le opzioni di serilog del controller per ricordarsi facilmente di tutte le funzionalità esposte
+    //TODO: Inserire tutte le opzioni di serilog del controller per ricordarsi facilmente di tutte le funzionalità esposte !!!!!
     //TODO: Riprendere le altre tipologie di estensione Enrich etc etc json ....
     public static readonly ILogger log = null;
     public static string postGreSQLConnectionString = "";
