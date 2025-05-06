@@ -58,7 +58,8 @@ public class loggerExtension<T> where T : IRequest {
         log = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
             .WriteTo.Conditional(evt => {
-                if (loggingConfig != null && loggingConfig.SerilogCondition.FirstOrDefault(level => level.Level != null && level.Sink.Equals("PostgreSQL") && level.Level.Contains(evt.Level.ToString())) != null)
+                if (loggingConfig != null && loggingConfig.SerilogCondition.FirstOrDefault(level => level.Level != null 
+                && level.Sink.Equals("PostgreSQL") && level.Level.Contains(evt.Level.ToString())) != null)
                     return true;
                 else
                     return false;
@@ -121,7 +122,7 @@ public class loggerExtension<T> where T : IRequest {
                 if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(chatId))
                     wt.Telegram(apiKey, chatId);
             }
-            )
+            ))
             .WriteTo.Console(LogEventLevel.Information)
             .CreateLogger();
     }
