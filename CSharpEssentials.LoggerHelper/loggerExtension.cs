@@ -29,7 +29,7 @@ public static class LoggerExtensionConfig {
 public class loggerExtension<T> where T : IRequest {
     //TODO: Inserire tutte le opzioni di serilog del controller per ricordarsi facilmente di tutte le funzionalità esposte !!!!!
     //TODO: Riprendere le altre tipologie di estensione Enrich etc etc json ....
-    public static readonly ILogger log = null;
+    public static readonly ILogger log;
     public static string postGreSQLConnectionString = "";
     static loggerExtension() {
         var configuration = new ConfigurationBuilder()
@@ -54,7 +54,6 @@ public class loggerExtension<T> where T : IRequest {
             { "Action", new SinglePropertyColumnWriter("Action", PropertyWriteMethod.ToString, NpgsqlDbType.Text) }
         };
 
-
         log = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
             .WriteTo.Conditional(evt => {
@@ -65,11 +64,11 @@ public class loggerExtension<T> where T : IRequest {
                     return false;
             },
             wt => {
-                // Aggiungi PostgreSQL solo se la condizione è vera
                 if (loggingConfig.SerilogCondition.Any(level =>
                         level.Sink.Equals("PostgreSQL") &&
                         level.Level != null)) {
                     var cs = loggingConfig?.SerilogOption?.PostgreSQL?.connectionstring;
+                    if (!string.IsNullOrEmpty(cs))
                     wt.PostgreSQL(
                         connectionString: cs,
                         tableName: "Logs",

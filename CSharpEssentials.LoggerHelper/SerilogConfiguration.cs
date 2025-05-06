@@ -1,11 +1,11 @@
 ﻿namespace CSharpEssentials.LoggerHelper;
 public class SerilogConfiguration {
-    public List<SerilogCondition> SerilogCondition { get; set; }
-    public SerilogOption SerilogOption { get; set; }
+    public List<SerilogCondition>? SerilogCondition { get; set; }
+    public SerilogOption? SerilogOption { get; set; }
 }
 public class SerilogCondition {
-    public string Sink { get; set; }
-    public List<string> Level { get; set; }
+    public string? Sink { get; set; }
+    public List<string>? Level { get; set; }
 }
 public class SerilogOption {
     public MSSqlServer? MSSqlServer { get; set; }
