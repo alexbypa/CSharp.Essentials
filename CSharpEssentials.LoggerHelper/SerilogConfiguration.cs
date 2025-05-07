@@ -13,9 +13,14 @@ public class SerilogOption {
     public TelegramOption? TelegramOption { get; set; }
     public SinkFileOptions? File { get; set; }
     public GeneralConfig? GeneralConfig { get; set; }
+    public ElasticSearch? ElasticSearch { get; set; }
 }
 public class PostgreSQL {
     public string? connectionstring { get; set; }
+}
+public class ElasticSearch {
+    public string? nodeUris { get; set; }
+    public string? indexFormat { get; set; }
 }
 public class GeneralConfig {
     public bool EnableSelfLogging { get; set; }

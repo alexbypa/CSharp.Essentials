@@ -36,11 +36,14 @@ public class loggerExtension<T> where T : IRequest {
         .AddJsonFile("appsettings.LoggerHelper.json")
         .Build();
 
+        var builder = new LoggerBuilder(configuration).AddDynamicSinks();
+        log = builder.Build();
+        
+        /*
         var loggingConfigurationSection = configuration.GetSection("Serilog:SerilogConfiguration");
         var loggingConfig = loggingConfigurationSection.Get<SerilogConfiguration>();
 
         //TODO: da ottimizzare va in lock
-        //Serilog.Debugging.SelfLog.Enable(msg => File.AppendAllText(Path.Combine(loggingConfig.SerilogOption.File.Path, "serilog-selflog.txt"), msg));
 
         //TODO: da parametrizzare
         var columnWriters = new Dictionary<string, ColumnWriterBase>{
@@ -102,11 +105,28 @@ public class loggerExtension<T> where T : IRequest {
                  return loggingConfig != null && loggingConfig?.SerilogCondition?.FirstOrDefault(item => item.Level != null && item.Sink != null && item.Sink.Equals("File") && item.Level.Contains(evt.Level.ToString())) != null;
              }, wt => wt.File("logs/log.txt"))
             .WriteTo.Conditional(evt => {
-                if (loggingConfig != null && loggingConfig?.SerilogCondition?.FirstOrDefault(level => level.Level != null && level.Sink != null && level.Sink.Equals("ElasticSearch") && level.Level.Contains(evt.Level.ToString())) != null)
-                    return true;
-                else
-                    return false;
-            }, wt => wt.Elasticsearch())//TODO: da provare
+                return loggingConfig != null &&
+                    loggingConfig.SerilogCondition != null &&
+                    loggingConfig.SerilogCondition.Any(level =>
+                        level.Level != null &&
+                        level.Sink != null &&
+                        level.Sink.Equals("ElasticSearch") &&
+                        level.Level.Contains(evt.Level.ToString()));
+            }, wt =>
+            {
+                var elasticUrl = loggingConfig?.SerilogOption?.ElasticSearch?.nodeUris ?? "http://localhost:9200";
+                try {
+                    using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(1) };
+                    var response = client.GetAsync(elasticUrl).Result;
+                    if (response.IsSuccessStatusCode) {
+                        wt.Elasticsearch(nodeUris: loggingConfig?.SerilogOption?.ElasticSearch?.nodeUris, indexFormat: loggingConfig?.SerilogOption?.ElasticSearch?.nodeUris); 
+                    } else {
+                        Serilog.Debugging.SelfLog.WriteLine($"[ElasticSearch] HTTP status non valido: {response.StatusCode}");
+                    }
+                } catch (Exception ex) {
+                    Serilog.Debugging.SelfLog.WriteLine($"[ElasticSearch] Non raggiungibile: {ex.Message}");
+                }
+            })
             .WriteTo.Conditional(evt => {
                 return loggingConfig != null && loggingConfig?.SerilogCondition?.FirstOrDefault(item => item.Level != null && item.Sink != null && item.Sink.Equals("Email") && item.Level.Contains(evt.Level.ToString())) != null;
             }, wt => wt.Email(new EmailSinkOptions { From = "alexbypa@gmail.com" })) //TODO:
@@ -124,6 +144,7 @@ public class loggerExtension<T> where T : IRequest {
             ))
             .WriteTo.Console(LogEventLevel.Information)
             .CreateLogger();
+        */
     }
     /// <summary>
     /// method to write log

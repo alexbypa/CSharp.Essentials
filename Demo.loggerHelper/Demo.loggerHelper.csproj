@@ -7,11 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="1.1.5" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
   </ItemGroup>
 
 </Project>
