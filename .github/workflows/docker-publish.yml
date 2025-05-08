@@ -25,7 +25,7 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./Dockerfile
+          context: ./CSharpEssentials.LoggerHelper
+          file: ./CSharpEssentials.LoggerHelper/Dockerfile
           push: true
           tags: alexbypa/loggerhelper:latest
