@@ -1,12 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NpgsqlTypes;
 using Serilog;
 using Serilog.Events;
-using Serilog.Sinks.Email;
 using Serilog.Sinks.MSSqlServer;
-using Serilog.Sinks.PostgreSQL;
 //using Serilog.Sinks.PostgreSQL.ColumnWriters;
 using System.Data;
 using System.Text.RegularExpressions;

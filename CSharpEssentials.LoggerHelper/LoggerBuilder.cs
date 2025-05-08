@@ -1,26 +1,23 @@
 ﻿using Microsoft.Extensions.Configuration;
+using NpgsqlTypes;
 using Serilog;
-using Serilog.Events;
 using Serilog.Sinks.Email;
 using Serilog.Sinks.MSSqlServer;
+using Serilog.Sinks.PostgreSQL;
+using Serilog.Sinks.PostgreSQL.ColumnWriters;
 using System.Data;
 using System.Diagnostics;
 using System.Net;
-using TelegramSink;
 
 namespace CSharpEssentials.LoggerHelper;
 public class LoggerBuilder {
     private readonly LoggerConfiguration _config;
     private readonly SerilogConfiguration _serilogConfig;
-    private readonly IConfiguration _configuration;
-
     public LoggerBuilder(IConfiguration configuration) {
-        _configuration = configuration;
         _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
         _config = new LoggerConfiguration().ReadFrom.Configuration(configuration);
-        Serilog.Debugging.SelfLog.Enable(msg => File.AppendAllText(Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt"), msg)); //TODO: da ottimizzare
+        Serilog.Debugging.SelfLog.Enable(msg => File.AppendAllText(Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt"), msg)); //TODO: inserire un opzione diversa e documentarlo su Readme.md
     }
-
     public LoggerBuilder AddDynamicSinks() {
         foreach (var condition in _serilogConfig.SerilogCondition ?? Enumerable.Empty<SerilogCondition>()) {
             Debug.Print(condition.Sink);
@@ -34,7 +31,7 @@ public class LoggerBuilder {
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
                         wt => wt.File(path));
                     break;
-                case "Telegram": //TODO: si deve stilizzare il messaggio
+                case "Telegram":
                     _config.WriteTo.Conditional(
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
                         wt => {
@@ -44,16 +41,30 @@ public class LoggerBuilder {
                                 new TelegramMarkdownFormatter()));
                         });
                     break;
-                //case "Telegram": //TODO: si deve stilizzare il messaggio
-                //    _config.WriteTo.Conditional(
-                //        evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                //        wt => {
-                //            var apiKey = _serilogConfig?.SerilogOption?.TelegramOption?.Api_Key;
-                //            var chatId = _serilogConfig?.SerilogOption?.TelegramOption?.chatId;
-                //            if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(chatId))
-                //                wt.TeleSink(telegramApiKey: apiKey,telegramChatId: chatId, formatProvider: new TelegramFormatter());
-                //        });
-                //    break;
+                case "PostgreSQL":
+                    _config.WriteTo.Conditional(
+                        evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
+                        wt => {
+                                wt.PostgreSQL(
+                                    connectionString: _serilogConfig?.SerilogOption?.PostgreSQL?.connectionstring,
+                                    tableName: "logs",
+                                    schemaName: "public",
+                                    columnOptions:  new Dictionary<string, ColumnWriterBase>
+                                    {
+                                        {"message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
+                                        {"message_template", new MessageTemplateColumnWriter(NpgsqlDbType.Text) },
+                                        {"level", new LevelColumnWriter(true, NpgsqlDbType.Varchar) },
+                                        {"raise_date", new TimestampColumnWriter(NpgsqlDbType.Timestamp) },
+                                        {"exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
+                                        {"properties", new LogEventSerializedColumnWriter(NpgsqlDbType.Jsonb) },
+                                        {"props_test", new PropertiesColumnWriter(NpgsqlDbType.Jsonb) },
+                                        {"machine_name", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "l") }
+                                    },
+                                    needAutoCreateTable: true
+                                );
+                        }
+                        );
+                    break;
                 case "MSSqlServer":
                     _config.WriteTo.Conditional(
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
@@ -98,7 +109,7 @@ public class LoggerBuilder {
                             To = new List<string> { "alexbypa@gmail.com" },
                             Credentials = new NetworkCredential("xxxxxxxxx@gmail.com", "------")
                         })
-                    );//TODO:Possiamo usare lo stesso meccanismo usato per il sink di Telegram !
+                    );
                     break;
             }
         }
@@ -123,8 +134,5 @@ public class LoggerBuilder {
         };
         return columnOptions;
     }
-
     public ILogger Build() => _config.WriteTo.Console().CreateLogger();
-
-
 }

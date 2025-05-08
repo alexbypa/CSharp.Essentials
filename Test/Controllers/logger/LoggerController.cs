@@ -9,7 +9,7 @@ namespace Test.Controllers.logger {
         public async Task<IActionResult> test() {
             //TODO: non devo usare chiavi segrete o connessioni a DB
             //TODO: Aggiungere e spiegare l' uso di Serilog.Debugging.SelfLog
-            //Scrivere sul readme la rimoozione 🔧 WriteTo ( per non scrivere su sinks non configurati )  
+            //Scrivere sul readme la rimozione 🔧 WriteTo ( per non scrivere su sinks non configurati )  
 
 
             loggerExtension<Request>.TraceAsync(new Request{ Action = "Prova", IdTransaction = "asdad" }, Serilog.Events.LogEventLevel.Information, null, "Avvio controller alle ore {time} ApplicationName: {ApplicationName}", DateTime.Now, "HubGame");

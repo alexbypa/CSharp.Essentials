@@ -22,6 +22,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+app.UseStaticFiles(); // << deve essere PRIMA di app.UseRouting()
 
 #region hangFire
 // app.UseCustomHangfireDashboard(builder.Configuration);

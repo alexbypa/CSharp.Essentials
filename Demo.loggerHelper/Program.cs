@@ -12,6 +12,7 @@ builder.Services.AddLogging(logging => {
 });
 
 var app = builder.Build();
+app.UseStaticFiles(); // << deve essere PRIMA di app.UseRouting()
 
 // Middleware per loggare tutte le richieste HTTP
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
