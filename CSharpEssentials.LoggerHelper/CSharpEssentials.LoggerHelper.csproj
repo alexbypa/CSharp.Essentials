@@ -16,7 +16,7 @@
     <AssemblyVersion>1.1.6</AssemblyVersion>
     <FileVersion>1.1.6</FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <PackageIcon>CSharpEssentials.png</PackageIcon>
+    <PackageIcon>img/CSharpEssentials.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
     <PackageTags>serilog;logging;logger;middleware;aspnetcore;asp.net-core;log-helper;</PackageTags>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
