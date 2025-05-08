@@ -40,8 +40,8 @@
     <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.Email" Version="4.0.0" />
     <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="8.1.0" />
-    <PackageReference Include="Serilog.Sinks.Postgresql.Alternative" Version="4.1.3" />
-    <PackageReference Include="Serilog.Sinks.Telegram.Alternative" Version="1.4.3" />
+    <PackageReference Include="Serilog.Sinks.PostgreSQL" Version="2.3.0" />
+    <PackageReference Include="Serilog.Sinks.Telegram" Version="0.2.1" />
   </ItemGroup>
 
   <ItemGroup>

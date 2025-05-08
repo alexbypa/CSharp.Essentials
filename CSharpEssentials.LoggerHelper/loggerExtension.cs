@@ -7,7 +7,7 @@ using Serilog.Events;
 using Serilog.Sinks.Email;
 using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.PostgreSQL;
-using Serilog.Sinks.PostgreSQL.ColumnWriters;
+//using Serilog.Sinks.PostgreSQL.ColumnWriters;
 using System.Data;
 using System.Text.RegularExpressions;
 
@@ -187,8 +187,6 @@ public class loggerExtension<T> where T : IRequest {
         arguments.Add(IdTransaction);
         arguments.Add(Environment.MachineName);
         arguments.Add(ActionLog);
-
-        Thread.Sleep(500);
 
         int totPlaceHolders = arguments.Count;
         try {

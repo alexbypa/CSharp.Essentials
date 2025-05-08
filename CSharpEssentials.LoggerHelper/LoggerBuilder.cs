@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Serilog;
+using Serilog.Events;
 using Serilog.Sinks.Email;
 using Serilog.Sinks.MSSqlServer;
 using System.Data;
 using System.Diagnostics;
 using System.Net;
+using TelegramSink;
 
 namespace CSharpEssentials.LoggerHelper;
 public class LoggerBuilder {
@@ -32,16 +34,26 @@ public class LoggerBuilder {
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
                         wt => wt.File(path));
                     break;
-                case "Telegram": //TODO: non arrivano i messaggi 
+                case "Telegram": //TODO: si deve stilizzare il messaggio
                     _config.WriteTo.Conditional(
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
                         wt => {
-                            var apiKey = _serilogConfig?.SerilogOption?.TelegramOption?.Api_Key;
-                            var chatId = _serilogConfig?.SerilogOption?.TelegramOption?.chatId;
-                            if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(chatId))
-                                wt.Telegram(apiKey, chatId);
+                            wt.Sink(new CustomTelegramSink(
+                                _serilogConfig?.SerilogOption?.TelegramOption?.Api_Key,
+                                _serilogConfig?.SerilogOption?.TelegramOption?.chatId,
+                                new TelegramMarkdownFormatter()));
                         });
                     break;
+                //case "Telegram": //TODO: si deve stilizzare il messaggio
+                //    _config.WriteTo.Conditional(
+                //        evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
+                //        wt => {
+                //            var apiKey = _serilogConfig?.SerilogOption?.TelegramOption?.Api_Key;
+                //            var chatId = _serilogConfig?.SerilogOption?.TelegramOption?.chatId;
+                //            if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(chatId))
+                //                wt.TeleSink(telegramApiKey: apiKey,telegramChatId: chatId, formatProvider: new TelegramFormatter());
+                //        });
+                //    break;
                 case "MSSqlServer":
                     _config.WriteTo.Conditional(
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
@@ -86,7 +98,7 @@ public class LoggerBuilder {
                             To = new List<string> { "alexbypa@gmail.com" },
                             Credentials = new NetworkCredential("xxxxxxxxx@gmail.com", "------")
                         })
-                    );//TODO:To better understand how it works and use the html template
+                    );//TODO:Possiamo usare lo stesso meccanismo usato per il sink di Telegram !
                     break;
             }
         }
