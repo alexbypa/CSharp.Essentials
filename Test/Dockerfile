@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY . .
+COPY ./Test ./Test
 WORKDIR /src/Test
 RUN dotnet publish Test.csproj -c Release -o /app/publish
 
