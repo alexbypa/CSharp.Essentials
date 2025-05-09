@@ -113,8 +113,6 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
 >
 > 💬 **Telegram Notice:** When using the Telegram sink, log messages are formatted for human readability, and may include emojis or markdown. For this reason, it's strongly recommended to set the `Level` to only `Error` or `Fatal` to avoid exceeding Telegram's rate limits and to prevent excessive message noise.
 
-> 💬 **Telegram Notice:** When using the Telegram sink, log messages are formatted for human readability, and may include emojis or markdown. For this reason, it's strongly recommended to set the `Level` to only `Error` or `Fatal` to avoid exceeding Telegram's rate limits and to prevent excessive message noise.
-
 > 🛠 **Tip:** Before publishing to production, test each sink you plan to use. You can enable Serilog self-logging to capture internal errors using:
 >
 > ```csharp
