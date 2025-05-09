@@ -17,7 +17,11 @@ public class SerilogOption {
 }
 public class PostgreSQL {
     public string? connectionstring { get; set; }
+    public string tableName { get; set; }
+    public string schemaName { get; set; }
+    public bool needAutoCreateTable { get; set; }
 }
+
 public class ElasticSearch {
     public string? nodeUris { get; set; }
     public string? indexFormat { get; set; }

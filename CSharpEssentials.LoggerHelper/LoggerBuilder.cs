@@ -45,11 +45,12 @@ public class LoggerBuilder {
                     _config.WriteTo.Conditional(
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
                         wt => {
-                                wt.PostgreSQL(
+                            wt.PostgreSQL(
                                     connectionString: _serilogConfig?.SerilogOption?.PostgreSQL?.connectionstring,
-                                    tableName: "logs",
-                                    schemaName: "public",
-                                    columnOptions:  new Dictionary<string, ColumnWriterBase>
+                                    tableName: _serilogConfig.SerilogOption.PostgreSQL.tableName,
+                                    schemaName: _serilogConfig.SerilogOption.PostgreSQL.schemaName,
+                                    needAutoCreateTable: true,
+                                    columnOptions: new Dictionary<string, ColumnWriterBase>
                                     {
                                         {"message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
                                         {"message_template", new MessageTemplateColumnWriter(NpgsqlDbType.Text) },
@@ -59,8 +60,7 @@ public class LoggerBuilder {
                                         {"properties", new LogEventSerializedColumnWriter(NpgsqlDbType.Jsonb) },
                                         {"props_test", new PropertiesColumnWriter(NpgsqlDbType.Jsonb) },
                                         {"machine_name", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "l") }
-                                    },
-                                    needAutoCreateTable: true
+                                    }
                                 );
                         }
                         );
@@ -116,6 +116,29 @@ public class LoggerBuilder {
 
         return this;
     }
+    public static ColumnWriterBase CreateColumnWriter(string typeName, List<string> args) {
+        var type = Type.GetType(typeName, throwOnError: true);
+        var ctor = type
+            .GetConstructors()
+            .FirstOrDefault(c => c.GetParameters().Length == args.Count);
+
+        if (ctor == null)
+            throw new InvalidOperationException($"No constructor with {args.Count} args found for {typeName}");
+
+        var parameters = ctor.GetParameters();
+        var typedArgs = args
+            .Select((arg, i) => ConvertArgument(arg, parameters[i].ParameterType))
+            .ToArray();
+
+        return (ColumnWriterBase)ctor.Invoke(typedArgs);
+    }
+
+    private static object ConvertArgument(string value, Type targetType) {
+        if (targetType.IsEnum)
+            return Enum.Parse(targetType, value);
+        return Convert.ChangeType(value, targetType);
+    }
+
     public static Serilog.Sinks.MSSqlServer.ColumnOptions GetColumnOptions() {
         var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
         // Override the default Primary Column of Serilog by custom column name

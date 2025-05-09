@@ -1,72 +1,82 @@
-[![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml)
+﻿[![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml)
 [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 [![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 
-# CSharpEssentials.LoggerHelper
+# 📦 CSharpEssentials.LoggerHelper
 
-A flexible and powerful logging library for .NET applications that simplifies the implementation of structured logging with multiple sink options.
+A flexible and modular logging library for .NET applications that simplifies structured logging with multi-sink support, including SQL Server, PostgreSQL, Console, File, Email, Telegram, and Elasticsearch.
 
-## Features
+---
 
-- Multi-sink logging support:
-  - SQL Server
-  - PostgreSQL
-  - Console
-  - File
-  - Elasticsearch
-  - Email
-  - Telegram
-- Conditional logging based on log levels
-- Structured logging with custom properties
-- Asynchronous and synchronous logging methods
-- Machine name, transaction ID, and action tracking
-- JSON configuration support
+## 📚 Table of Contents
 
-## Installation
+* [✨ Features](#-features)
+* [🚀 Installation](#-installation)
+* [⚙️ Configuration](#%ef%b8%8f-configuration)
+* [📌 Log Levels](#-log-levels)
+* [🧪 ASP.NET Core Setup](#-aspnet-core-setup)
+* [🧑‍💻 Usage Examples](#-usage-examples)
+* [🧬 Database Schema](#-database-schema)
+* [🔁 Demo API](#-demo-api)
+* [🙌 Contributing](#-contributing)
+* [📄 License](#-license)
+* [👤 Author](#-author)
+
+---
+
+## ✨ Features
+
+* ✅ Multi-sink logging support:
+
+  * Console
+  * File
+  * SQL Server
+  * PostgreSQL
+  * Elasticsearch
+  * Email
+  * Telegram
+* ✅ Structured logs with custom properties
+* ✅ Sync and async logging
+* ✅ Request/response middleware logger
+* ✅ Transaction ID, action, machine name
+* ✅ Custom levels per sink
+* ✅ JSON configuration via `appsettings.LoggerHelper.json`
+
+---
+
+## 🚀 Installation
 
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper
 ```
 
-## Configuration
+---
 
-The library requires an external configuration file named `appsettings.LoggerHelper.json` in your project root directory. The library will read its configuration exclusively from this file.
+## ⚙️ Configuration
 
-Create an `appsettings.LoggerHelper.json` file in your project root with the following structure:
+Create a file named `appsettings.LoggerHelper.json` in your project root:
+
+<details>
+<summary>Click to expand JSON example</summary>
 
 ```json
 {
   "Serilog": {
     "SerilogConfiguration": {
       "SerilogCondition": [
-        {
-          "Sink": "Console",
-          "Level": ["Information", "Warning", "Error", "Fatal"]
-        },
-        {
-          "Sink": "File",
-          "Level": ["Error", "Fatal"]
-        },
-        {
-          "Sink": "PostgreSQL",
-          "Level": ["Error", "Fatal"]
-        },
-        {
-          "Sink": "MSSqlServer",
-          "Level": ["Error", "Fatal"]
-        },
-        {
-          "Sink": "Telegram",
-          "Level": ["Fatal"]
-        },
-        {
-          "Sink": "ElasticSearch",
-          "Level": []
-        }
+        { "Sink": "Console", "Level": ["Information", "Warning", "Error", "Fatal"] },
+        { "Sink": "File", "Level": ["Error", "Fatal"] },
+        { "Sink": "PostgreSQL", "Level": ["Error", "Fatal"] },
+        { "Sink": "MSSqlServer", "Level": ["Error", "Fatal"] },
+        { "Sink": "Telegram", "Level": ["Fatal"] },
+        { "Sink": "ElasticSearch", "Level": [] }
       ],
       "SerilogOption": {
         "PostgreSQL": {
-          "connectionstring": "Host=localhost;Database=logs;Username=postgres;Password=yourpassword"
+          "connectionstring": "Host=localhost;Database=logs;Username=postgres;Password=yourpassword",
+          "tableName": "logs",
+          "schemaName": "public",
+          "needAutoCreateTable": true
         },
         "MSSqlServer": {
           "connectionString": "Server=localhost;Database=Logs;Trusted_Connection=True;",
@@ -94,87 +104,85 @@ Create an `appsettings.LoggerHelper.json` file in your project root with the fol
 }
 ```
 
-## Log Level Configuration
+</details>
 
-The library uses the `SerilogCondition` array in the configuration to determine which log levels should be written to each sink:
+> ⚠️ **Important:**
+> The logger will **only write to a sink** if the `Level` array in `SerilogCondition` contains at least one valid log level (e.g., `"Error"`, `"Warning"`).
+> If the `Level` array is empty (e.g., `"Level": []`), **that sink will be ignored**, and **`WriteTo` will not be applied**, even if the sink configuration exists.
+>
+> 🧩 PostgreSQL is preconfigured with a default column mapping for logs. The following columns are used automatically:
+> `message`, `message_template`, `level`, `raise_date`, `exception`, `properties`, `props_test`, `machine_name`. No custom mapping is required in the JSON.
 
-- Each sink has its own configuration entry with an array of log levels
-- If a level is present in the array, logs of that level will be written to the corresponding sink
-- If the `Level` array for a sink is empty (like `"Level": []`), **no logs** will be written to that sink regardless of their level
-- If a sink is not listed in the `SerilogCondition` array, it won't be used
+---
 
-For example, in the configuration above:
-- The Console sink will receive Information, Warning, Error, and Fatal logs
-- The PostgreSQL and MSSqlServer sinks will only receive Error and Fatal logs
-- The Telegram sink will only receive Fatal logs
-- The ElasticSearch sink won't receive any logs (empty array)
+## 📌 Log Levels
 
-## Setup in ASP.NET Core Application
+Each sink only receives log levels specified in the `SerilogCondition` array:
 
-Register the logger in your `Program.cs`:
+| Sink          | Levels                             |
+| ------------- | ---------------------------------- |
+| Console       | Information, Warning, Error, Fatal |
+| File          | Error, Fatal                       |
+| PostgreSQL    | Error, Fatal                       |
+| MSSqlServer   | Error, Fatal                       |
+| Telegram      | Fatal                              |
+| Elasticsearch | *(disabled)*                       |
+
+---
+
+## 🧪 ASP.NET Core Setup
+
+Register the logger in `Program.cs`:
 
 ```csharp
 using CSharpEssentials.LoggerHelper;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add logger configuration
+// Add LoggerHelper configuration
 builder.Services.addloggerConfiguration(builder);
-
-// ... other services
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// ... configure app
-
-// Add this middleware to automatically log all requests and responses with Information level
+// Logs every HTTP request and response
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
+app.MapControllers();
 app.Run();
 ```
 
-> **Note**: By adding `app.UseMiddleware<RequestResponseLoggingMiddleware>()` to your Program.cs, all HTTP requests and responses in your Web API will be automatically logged with Information level.
+---
 
-## Usage
+## 🧑‍💻 Usage Examples
 
-First, implement the `IRequest` interface in your request model:
-
-```csharp
-public class MyRequest : IRequest
-{
-    public string IdTransaction { get; set; } = Guid.NewGuid().ToString();
-    public string Action { get; set; } = "YourActionName";
-    
-    // Other properties
-}
-```
-
-Then use the logger in your code:
+### 🔹 With request object
 
 ```csharp
-using CSharpEssentials.LoggerHelper;
-using Serilog.Events;
-
-// For synchronous logging
-var request = new MyRequest();
 loggerExtension<MyRequest>.TraceSync(
     request,
     LogEventLevel.Information,
     null,
-    "Operation completed successfully: {OperationName}",
+    "Operation successful: {OperationName}",
     "CreateUser"
 );
+```
 
-// For asynchronous logging
-await Task.Run(() => loggerExtension<MyRequest>.TraceAsync(
+### 🔹 Async logging
+
+```csharp
+await loggerExtension<MyRequest>.TraceAsync(
     request,
     LogEventLevel.Error,
     exception,
     "Error during operation: {OperationName}",
     "UpdateUser"
-));
+);
+```
 
-// For logging without a request object
+### 🔹 Without request object
+
+```csharp
 loggerExtension<IRequest>.TraceSync(
     null,
     LogEventLevel.Warning,
@@ -184,46 +192,66 @@ loggerExtension<IRequest>.TraceSync(
 );
 ```
 
-## Log Parameters
+---
 
-The `TraceSync` and `TraceAsync` methods accept the following parameters:
-
-- **request**: An object implementing `IRequest` (contains IdTransaction and Action)
-- **level**: Log severity level (Debug, Information, Warning, Error, Fatal)
-- **ex**: Exception object (can be null)
-- **message**: Log message with optional placeholders for variables
-- **args**: Additional parameters to be inserted into message placeholders
-
-## Database Schema
+## 🧬 Database Schema
 
 ### PostgreSQL
 
-The logger creates a table with the following columns:
-- timestamp
-- level
-- message
-- exception
-- properties
-- IdTransaction
-- MachineName
-- Action
+| Column            |
+| ----------------- |
+| message           |
+| message\_template |
+| level             |
+| raise\_date       |
+| exception         |
+| properties        |
+| props\_test       |
+| machine\_name     |
 
 ### SQL Server
 
-The logger creates a table with the following columns:
-- LogEvent (JSON)
-- IdTransaction
-- MachineName
-- Action
+| Column          |
+| --------------- |
+| LogEvent (JSON) |
+| IdTransaction   |
+| MachineName     |
+| Action          |
 
-## License
+---
 
-[MIT](LICENSE)
+## 🔁 Demo API
 
-## Author
+Try it live with a demo Web API to validate each log level:
 
-Alessandro Chiodo
+| Method | Endpoint             | Description        |
+| ------ | -------------------- | ------------------ |
+| GET    | /LoggerTest/info     | Log: Information   |
+| GET    | /LoggerTest/debug    | Log: Debug         |
+| GET    | /LoggerTest/warning  | Log: Warning       |
+| GET    | /LoggerTest/error    | Log with Exception |
+| GET    | /LoggerTest/critical | Log: Critical      |
 
-## Version
+> GitHub Repository (Demo): [LoggerHelper.DemoApi](https://github.com/alexbypa/CSharpEssentials.DemoApi)
+> Try it in Postman or Swagger!
 
-Current version: 1.0.1
+---
+
+## 🙌 Contributing
+
+Contributions, ideas and issues are welcome!
+Feel free to open a pull request or discussion on [GitHub](https://github.com/alexbypa/CSharp.Essentials).
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## 👤 Author
+
+**Alessandro Chiodo**
+📧 GitHub · NuGet · LinkedIn
+📦 [NuGet Package](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
