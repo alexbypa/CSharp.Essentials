@@ -254,7 +254,7 @@ Try it live with a demo Web API to validate each log level:
 | GET    | /LoggerTest/error    | Log with Exception |
 | GET    | /LoggerTest/critical | Log: Critical      |
 
-> GitHub Repository (Demo): [LoggerHelper.DemoApi](https://github.com/alexbypa/CSharpEssentials.DemoApi)
+> GitHub Repository (Demo): [LoggerHelper.DemoApi](https://github.com/alexbypa/CSharp.Essentials/tree/main/Test)
 > Try it in Postman or Swagger!
 
 ---
