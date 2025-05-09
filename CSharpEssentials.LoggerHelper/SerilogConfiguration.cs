@@ -42,6 +42,9 @@ public class SinkMsSqlOptionsSection {
 }
 public class SinkFileOptions {
     public string? Path { get; set; }
+    public string RollingInterval { get; set; }
+    public int RetainedFileCountLimit { get; set; }
+    public bool Shared { get; set; }
 }
 public class TelegramOption {
     public string? Api_Key { get; set; }

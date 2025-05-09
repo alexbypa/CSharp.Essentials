@@ -4,7 +4,6 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
-//using Serilog.Sinks.PostgreSQL.ColumnWriters;
 using System.Data;
 using System.Text.RegularExpressions;
 
@@ -24,7 +23,6 @@ public static class LoggerExtensionConfig {
     }
 }
 public class loggerExtension<T> where T : IRequest {
-    //TODO: Inserire tutte le opzioni di serilog del controller per ricordarsi facilmente di tutte le funzionalità esposte !!!!!
     //TODO: Riprendere le altre tipologie di estensione Enrich etc etc json ....
     public static readonly ILogger log;
     public static string postGreSQLConnectionString = "";
@@ -35,113 +33,6 @@ public class loggerExtension<T> where T : IRequest {
 
         var builder = new LoggerBuilder(configuration).AddDynamicSinks();
         log = builder.Build();
-        
-        /*
-        var loggingConfigurationSection = configuration.GetSection("Serilog:SerilogConfiguration");
-        var loggingConfig = loggingConfigurationSection.Get<SerilogConfiguration>();
-
-        //TODO: da ottimizzare va in lock
-
-        //TODO: da parametrizzare
-        var columnWriters = new Dictionary<string, ColumnWriterBase>{
-            { "timestamp", new TimestampColumnWriter() },
-            { "level", new LevelColumnWriter() },
-            { "message", new RenderedMessageColumnWriter() },
-            { "exception", new ExceptionColumnWriter() },
-            { "properties", new LogEventSerializedColumnWriter() },
-            { "IdTransaction", new SinglePropertyColumnWriter("IdTransaction", PropertyWriteMethod.ToString, NpgsqlDbType.Text) },
-            { "MachineName", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text) },
-            { "Action", new SinglePropertyColumnWriter("Action", PropertyWriteMethod.ToString, NpgsqlDbType.Text) }
-        };
-
-        log = new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration)
-            .WriteTo.Conditional(evt => {
-                if (loggingConfig != null && loggingConfig.SerilogCondition.FirstOrDefault(level => level.Level != null 
-                && level.Sink.Equals("PostgreSQL") && level.Level.Contains(evt.Level.ToString())) != null)
-                    return true;
-                else
-                    return false;
-            },
-            wt => {
-                if (loggingConfig.SerilogCondition.Any(level =>
-                        level.Sink.Equals("PostgreSQL") &&
-                        level.Level != null)) {
-                    var cs = loggingConfig?.SerilogOption?.PostgreSQL?.connectionstring;
-                    if (!string.IsNullOrEmpty(cs))
-                    wt.PostgreSQL(
-                        connectionString: cs,
-                        tableName: "Logs",
-                        columnOptions: columnWriters,
-                        needAutoCreateTable: true,
-                        failureCallback: e => {
-                            if (!string.IsNullOrWhiteSpace(cs))
-                                configuration.GetConnectionString(cs);
-                            Console.WriteLine($"CONN : {cs} Errore durante il logging su PostgreSQL: {e.Message}");
-                        }
-                    );
-                }
-            }
-            )
-            .WriteTo.Conditional(evt => {
-                if (loggingConfig != null && loggingConfig?.SerilogCondition?.FirstOrDefault(level => level.Level != null && level.Sink != null && level.Sink.Equals("MSSqlServer") && level.Level.Contains(evt.Level.ToString())) != null)
-                    return true;
-                else
-                    return false;
-            },
-            wt => wt.MSSqlServer(loggingConfig?.SerilogOption?.MSSqlServer?.connectionString,
-            new MSSqlServerSinkOptions {
-                TableName = loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.tableName,
-                SchemaName = loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.schemaName,
-                AutoCreateSqlTable = loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.autoCreateSqlTable ?? false,
-                BatchPostingLimit = loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.batchPostingLimit ?? 100,
-                BatchPeriod = string.IsNullOrEmpty(loggingConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.period) ? TimeSpan.FromSeconds(10) : TimeSpan.Parse(loggingConfig.SerilogOption.MSSqlServer.sinkOptionsSection.period),
-            }, columnOptions: GetColumnOptions()
-            )
-            .WriteTo.Conditional(evt => {
-                 return loggingConfig != null && loggingConfig?.SerilogCondition?.FirstOrDefault(item => item.Level != null && item.Sink != null && item.Sink.Equals("File") && item.Level.Contains(evt.Level.ToString())) != null;
-             }, wt => wt.File("logs/log.txt"))
-            .WriteTo.Conditional(evt => {
-                return loggingConfig != null &&
-                    loggingConfig.SerilogCondition != null &&
-                    loggingConfig.SerilogCondition.Any(level =>
-                        level.Level != null &&
-                        level.Sink != null &&
-                        level.Sink.Equals("ElasticSearch") &&
-                        level.Level.Contains(evt.Level.ToString()));
-            }, wt =>
-            {
-                var elasticUrl = loggingConfig?.SerilogOption?.ElasticSearch?.nodeUris ?? "http://localhost:9200";
-                try {
-                    using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(1) };
-                    var response = client.GetAsync(elasticUrl).Result;
-                    if (response.IsSuccessStatusCode) {
-                        wt.Elasticsearch(nodeUris: loggingConfig?.SerilogOption?.ElasticSearch?.nodeUris, indexFormat: loggingConfig?.SerilogOption?.ElasticSearch?.nodeUris); 
-                    } else {
-                        Serilog.Debugging.SelfLog.WriteLine($"[ElasticSearch] HTTP status non valido: {response.StatusCode}");
-                    }
-                } catch (Exception ex) {
-                    Serilog.Debugging.SelfLog.WriteLine($"[ElasticSearch] Non raggiungibile: {ex.Message}");
-                }
-            })
-            .WriteTo.Conditional(evt => {
-                return loggingConfig != null && loggingConfig?.SerilogCondition?.FirstOrDefault(item => item.Level != null && item.Sink != null && item.Sink.Equals("Email") && item.Level.Contains(evt.Level.ToString())) != null;
-            }, wt => wt.Email(new EmailSinkOptions { From = "alexbypa@gmail.com" })) //TODO:
-            .WriteTo.Conditional(evt => {
-                if (loggingConfig != null && loggingConfig?.SerilogCondition?.FirstOrDefault(item => item.Level != null && item.Sink != null && item.Sink.Equals("Telegram") && item.Level.Contains(evt.Level.ToString())) != null)
-                    return true;
-                else
-                    return false;
-            }, wt => {
-                var apiKey = loggingConfig?.SerilogOption?.TelegramOption?.Api_Key;
-                var chatId = loggingConfig?.SerilogOption?.TelegramOption?.chatId;
-                if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(chatId))
-                    wt.Telegram(apiKey, chatId);
-            }
-            ))
-            .WriteTo.Console(LogEventLevel.Information)
-            .CreateLogger();
-        */
     }
     /// <summary>
     /// method to write log

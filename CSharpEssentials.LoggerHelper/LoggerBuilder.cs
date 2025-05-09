@@ -7,6 +7,7 @@ using Serilog.Sinks.PostgreSQL;
 using Serilog.Sinks.PostgreSQL.ColumnWriters;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 
 namespace CSharpEssentials.LoggerHelper;
@@ -16,7 +17,23 @@ public class LoggerBuilder {
     public LoggerBuilder(IConfiguration configuration) {
         _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
         _config = new LoggerConfiguration().ReadFrom.Configuration(configuration);
-        Serilog.Debugging.SelfLog.Enable(msg => File.AppendAllText(Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt"), msg)); //TODO: inserire un opzione diversa e documentarlo su Readme.md
+
+        //Serilog.Debugging.SelfLog.Enable(msg => File.AppendAllText(Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt"), msg)); //TODO: inserire un opzione diversa e documentarlo su Readme.md
+        var selfLogPath = Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt");
+        var stream = new FileStream(
+            selfLogPath,
+            FileMode.Append,
+            FileAccess.Write,
+            FileShare.ReadWrite
+        );
+
+        var writer = new StreamWriter(stream) { AutoFlush = true };
+
+        Serilog.Debugging.SelfLog.Enable(msg =>
+        {
+            writer.WriteLine(msg);
+        });
+
     }
     public LoggerBuilder AddDynamicSinks() {
         foreach (var condition in _serilogConfig.SerilogCondition ?? Enumerable.Empty<SerilogCondition>()) {
@@ -26,10 +43,17 @@ public class LoggerBuilder {
 
             switch (condition.Sink) {
                 case "File":
-                    var path = _serilogConfig.SerilogOption?.File?.Path ?? "logs/log.txt";
+                    var logDirectory = _serilogConfig?.SerilogOption?.File?.Path ?? "Logs";
+                    var logFilePath = Path.Combine(logDirectory, "log-.txt");
+                    Directory.CreateDirectory(logDirectory); 
                     _config.WriteTo.Conditional(
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                        wt => wt.File(path));
+                        wt => wt.File(
+                        logFilePath,
+                            rollingInterval: Enum.Parse<RollingInterval>(_serilogConfig?.SerilogOption?.File?.RollingInterval ?? "Day"),
+                            retainedFileCountLimit: _serilogConfig?.SerilogOption?.File?.RetainedFileCountLimit ?? 7,
+                            shared: _serilogConfig?.SerilogOption?.File?.Shared ?? true
+                            )); 
                     break;
                 case "Telegram":
                     _config.WriteTo.Conditional(
