@@ -1,8 +1,4 @@
-﻿[![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml)
-[![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
-[![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
-
-# 📦 CSharpEssentials.LoggerHelper
+﻿# 📦 CSharpEssentials.LoggerHelper
 
 A flexible and modular logging library for .NET applications that simplifies structured logging with multi-sink support, including SQL Server, PostgreSQL, Console, File, Email, Telegram, and Elasticsearch.
 
@@ -56,9 +52,6 @@ dotnet add package CSharpEssentials.LoggerHelper
 
 Create a file named `appsettings.LoggerHelper.json` in your project root:
 
-<details>
-<summary>Click to expand JSON example</summary>
-
 ```json
 {
   "Serilog": {
@@ -104,11 +97,9 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
 }
 ```
 
-</details>
-
 > ⚠️ **Important:**
 > The logger will **only write to a sink** if the `Level` array in `SerilogCondition` contains at least one valid log level (e.g., `"Error"`, `"Warning"`).
-> If the `Level` array is empty (e.g., `"Level": []`), **that sink will be ignored**, and **`WriteTo` will not be applied**, even if the sink configuration exists.
+> If the `Level` array is empty (e.g., `"Level": []`), **that sink will be ignored**, and **`WriteTo`**\*\* will not be applied\*\*, even if the sink configuration exists.
 >
 > 🧩 PostgreSQL is preconfigured with a default column mapping for logs. The following columns are used automatically:
 > `message`, `message_template`, `level`, `raise_date`, `exception`, `properties`, `props_test`, `machine_name`. No custom mapping is required in the JSON.
@@ -116,6 +107,15 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
 ---
 
 ## 📌 Log Levels
+
+> 🛠 **Tip:** Before publishing to production, test each sink you plan to use. You can enable Serilog self-logging to capture internal errors using:
+>
+> ```csharp
+> Serilog.Debugging.SelfLog.Enable(msg =>
+>     File.AppendAllText(Path.Combine(logPath, "serilog-selflog.txt"), msg));
+> ```
+>
+> Replace `logPath` with your local or shared log directory. This helps identify misconfigurations or sink loading issues early.
 
 Each sink only receives log levels specified in the `SerilogCondition` array. If a sink's `Level` array is **empty**, that sink will be **ignored entirely**, and no log will be written to it, even if it's configured elsewhere:
 
@@ -234,6 +234,16 @@ Try it live with a demo Web API to validate each log level:
 
 > GitHub Repository (Demo): [LoggerHelper.DemoApi](https://github.com/alexbypa/CSharpEssentials.DemoApi)
 > Try it in Postman or Swagger!
+
+---
+
+## 🧪 Troubleshooting
+
+### Sink not writing logs?
+
+* ✅ Make sure the `Level` array in `SerilogCondition` is **not empty**.
+* ✅ Ensure the sink’s NuGet package is installed **in the main application**, not only in LoggerHelper.
+* ✅ Check `serilog-selflog.txt` if enabled — it often reveals silent misconfigurations.
 
 ---
 
