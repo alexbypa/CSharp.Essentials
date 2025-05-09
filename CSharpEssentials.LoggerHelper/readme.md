@@ -117,7 +117,7 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
 
 ## 📌 Log Levels
 
-Each sink only receives log levels specified in the `SerilogCondition` array:
+Each sink only receives log levels specified in the `SerilogCondition` array. If a sink's `Level` array is **empty**, that sink will be **ignored entirely**, and no log will be written to it, even if it's configured elsewhere:
 
 | Sink          | Levels                             |
 | ------------- | ---------------------------------- |
