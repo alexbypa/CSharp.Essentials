@@ -7,6 +7,7 @@ namespace CSharpEssentials.LoggerHelper;
 public class RequestInfo : IRequest {
     public string IdTransaction { get; set; } = Guid.NewGuid().ToString();
     public string Action { get; set; }
+    public string ApplicationName { get; set; }
 }
 public class RequestResponseLoggingMiddleware {
     private readonly RequestDelegate _next;

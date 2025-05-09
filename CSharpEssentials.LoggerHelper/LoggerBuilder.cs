@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using NpgsqlTypes;
 using Serilog;
+using Serilog.Formatting.Json;
 using Serilog.Sinks.Email;
 using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.PostgreSQL;
@@ -16,7 +17,8 @@ public class LoggerBuilder {
     private readonly SerilogConfiguration _serilogConfig;
     public LoggerBuilder(IConfiguration configuration) {
         _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
-        _config = new LoggerConfiguration().ReadFrom.Configuration(configuration);
+        _config = new LoggerConfiguration().ReadFrom.Configuration(configuration)
+            .Enrich.With<RenderedMessageEnricher>();
 
         //Serilog.Debugging.SelfLog.Enable(msg => File.AppendAllText(Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt"), msg)); //TODO: inserire un opzione diversa e documentarlo su Readme.md
         var selfLogPath = Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt");
@@ -49,11 +51,13 @@ public class LoggerBuilder {
                     _config.WriteTo.Conditional(
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
                         wt => wt.File(
-                        logFilePath,
+                            new JsonFormatter(),
+                            logFilePath,
                             rollingInterval: Enum.Parse<RollingInterval>(_serilogConfig?.SerilogOption?.File?.RollingInterval ?? "Day"),
                             retainedFileCountLimit: _serilogConfig?.SerilogOption?.File?.RetainedFileCountLimit ?? 7,
                             shared: _serilogConfig?.SerilogOption?.File?.Shared ?? true
-                            )); 
+                            )
+                        ); 
                     break;
                 case "Telegram":
                     _config.WriteTo.Conditional(
@@ -113,7 +117,10 @@ public class LoggerBuilder {
                                 if (response.IsSuccessStatusCode) {
                                     wt.Elasticsearch(
                                         nodeUris: _serilogConfig?.SerilogOption?.ElasticSearch?.nodeUris,
-                                        indexFormat: _serilogConfig?.SerilogOption?.ElasticSearch?.indexFormat);
+                                        indexFormat: _serilogConfig?.SerilogOption?.ElasticSearch?.indexFormat,
+                                        autoRegisterTemplate:true,
+                                        restrictedToMinimumLevel:Serilog.Events.LogEventLevel.Information
+                                        );
 
                                 } else {
                                     Serilog.Debugging.SelfLog.WriteLine($"[ElasticSearch] HTTP status non valido: {response.StatusCode}");

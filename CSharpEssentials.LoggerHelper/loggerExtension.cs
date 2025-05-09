@@ -11,6 +11,7 @@ namespace CSharpEssentials.LoggerHelper;
 public interface IRequest {
     public string IdTransaction { get; }
     public string Action { get; }
+    public string ApplicationName { get; }
 }
 
 public static class LoggerExtensionConfig {
@@ -57,47 +58,33 @@ public class loggerExtension<T> where T : IRequest {
     /// <param name="message">indicates the log message</param>
     /// <param name="args">are additional parameters that can help identify particular scenarios</param>
     public static void TraceSync(IRequest request, LogEventLevel level, Exception? ex, string message, params object[] args) {
-        message += " {IdTransaction} {MachineName} {Action}";
+        message += " {IdTransaction} {MachineName} {Action} {ApplicationName}";
         List<object> arguments = new List<object>();
         if (args != null)
             arguments = args.ToList();
 
-        string IdTransaction = Guid.NewGuid().ToString();
-        string ActionLog = "UNDEFINED";
-        if (request == null) {
-            IdTransaction = Guid.NewGuid().ToString();
-            ActionLog = "CallFromExternalBusiness";
-        } else {
-            IdTransaction = request.IdTransaction;
-            ActionLog = request.Action;
-        }
+        var IdTransaction = request?.IdTransaction ?? Guid.NewGuid().ToString();
+        var Action = request?.Action ?? "UNKNOWN";
+        var ApplicationName = request?.ApplicationName ?? "UNKNOWN";
 
         arguments.Add(IdTransaction);
         arguments.Add(Environment.MachineName);
-        arguments.Add(ActionLog);
+        arguments.Add(Action);
+        arguments.Add(ApplicationName);
 
         int totPlaceHolders = arguments.Count;
         try {
             var matches = Regex.Matches(message, @"(?<!\{)\{[a-zA-Z_][a-zA-Z0-9_]*\}(?!\})", RegexOptions.None, TimeSpan.FromMilliseconds(200));
             totPlaceHolders = matches.Count;
             if (totPlaceHolders != arguments.Count) {
-                log.Error(new Exception("parametri non validi su loggerExtension"), message);
+                log.Warning("LoggerHelper: Placeholder count mismatch. MessageTemplate: {Message}, Expected: {Expected}, Actual: {Actual}",
+                message, matches.Count, arguments.Count);
             }
         } catch (Exception exRegEx) {
-            log.Error(new Exception("parametri non validi su loggerExtension: " + exRegEx.Message), message);
+            log.Warning("LoggerHelper: Regex failed to validate placeholders: {Error}", exRegEx.Message);
         }
 
-        if (level == LogEventLevel.Debug)
-            log.Debug(message, arguments.ToArray());
-        if (level == LogEventLevel.Information)
-            log.Information(message, arguments.ToArray());
-        if (level == LogEventLevel.Warning)
-            log.Warning(message, arguments.ToArray());
-        if (level == LogEventLevel.Error)
-            log.Error(ex, message, arguments.ToArray());
-        if (level == LogEventLevel.Fatal)
-            log.Fatal(ex, message, arguments.ToArray());
-
+        log.Write(level, ex, message, arguments.ToArray());
     }
     public static Serilog.Sinks.MSSqlServer.ColumnOptions GetColumnOptions() {
         var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
