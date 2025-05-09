@@ -108,6 +108,13 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
 
 ## 📌 Log Levels
 
+> 🖼️ Example of a Telegram-formatted log message:
+> ![Telegram Sample](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper/img/telegramSample.png)
+>
+> 💬 **Telegram Notice:** When using the Telegram sink, log messages are formatted for human readability, and may include emojis or markdown. For this reason, it's strongly recommended to set the `Level` to only `Error` or `Fatal` to avoid exceeding Telegram's rate limits and to prevent excessive message noise.
+
+> 💬 **Telegram Notice:** When using the Telegram sink, log messages are formatted for human readability, and may include emojis or markdown. For this reason, it's strongly recommended to set the `Level` to only `Error` or `Fatal` to avoid exceeding Telegram's rate limits and to prevent excessive message noise.
+
 > 🛠 **Tip:** Before publishing to production, test each sink you plan to use. You can enable Serilog self-logging to capture internal errors using:
 >
 > ```csharp
@@ -131,6 +138,23 @@ Each sink only receives log levels specified in the `SerilogCondition` array. If
 ---
 
 ## 🧪 ASP.NET Core Setup
+
+### Request/Response Logging Middleware
+
+The LoggerHelper package includes a built-in middleware that logs every incoming HTTP request and outgoing response automatically. It captures:
+
+* HTTP method, path, status code
+* Request body (if available)
+* Response body (if possible)
+* Duration in milliseconds
+
+To enable it, just call:
+
+```csharp
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
+```
+
+> 📌 This middleware uses `LogEventLevel.Information` by default and is automatically compatible with sinks that accept that level.
 
 Register the logger in `Program.cs`:
 
@@ -238,6 +262,18 @@ Try it live with a demo Web API to validate each log level:
 ---
 
 ## 🧪 Troubleshooting
+
+### File access denied?
+
+* ❌ If you get `System.IO.IOException` like: *"file is being used by another process"*, make sure:
+
+  * No other process (e.g. text editor, logging library) is locking the file.
+  * The file is not open in **append-only exclusive mode**.
+* ✅ For self-log output (`serilog-selflog.txt`), ensure that:
+
+  * The target folder exists.
+  * The executing process has **write permission** to it.
+  * Use `FileShare.ReadWrite` if needed.
 
 ### Sink not writing logs?
 
