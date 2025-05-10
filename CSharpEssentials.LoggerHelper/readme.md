@@ -249,18 +249,15 @@ loggerExtension<IRequest>.TraceSync(
 
 ## 🔁 Demo API
 
-Try it live with a demo Web API to validate each log level:
+## Demo API
 
-| Method | Endpoint             | Description        |
-| ------ | -------------------- | ------------------ |
-| GET    | /LoggerTest/info     | Log: Information   |
-| GET    | /LoggerTest/debug    | Log: Debug         |
-| GET    | /LoggerTest/warning  | Log: Warning       |
-| GET    | /LoggerTest/error    | Log with Exception |
-| GET    | /LoggerTest/critical | Log: Critical      |
+Try it live with a demo Web API to validate each log level dynamically:
 
-> GitHub Repository (Demo): [LoggerHelper.DemoApi](https://github.com/alexbypa/CSharp.Essentials/tree/main/Test)
-> Try it in Postman or Swagger!
+| Method | Endpoint | Query Parameters | Description |
+|:---|:---|:---|:---|
+| GET | /loggerHelper/info | `action`, `message`, `applicationName`, `level` | Sends a structured log with the specified level |
+
+🔗 [GitHub Repository (Demo)](https://github.com/alexbypa/CSharpEssentials.LoggerHelper/tree/main/CSharpEssentials.LoggerHelper.Demo) 
 
 ---
 
