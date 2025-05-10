@@ -6,7 +6,7 @@ namespace Test.Controllers.logger {
     [Route("loggerHelper")]
     public class LoggerController : Controller {
         [HttpGet(Name = "Info")]
-        public async Task<IActionResult> Info(string action, string message, string applicationName, Serilog.Events.LogEventLevel level) {
+        public async Task<IActionResult> Info(string action, string message, Serilog.Events.LogEventLevel level) {
             loggerExtension<Request>.TraceAsync(new Request{ Action = action, IdTransaction = Guid.NewGuid().ToString() }, level, null, message);
             return Ok();
         }

@@ -5,7 +5,16 @@
 
 # 📦 CSharpEssentials.LoggerHelper
 
-A flexible and modular logging library for .NET applications that simplifies structured logging with multi-sink support. Built on Serilog sinks, it enables dynamic writing to SQL Server, PostgreSQL, Console, File, Email, Telegram, and Elasticsearch based on configurable log levels.
+## Introduction
+
+`LoggerHelper` is a library designed to **simplify**, **standardize**, and **enhance** logging management in .NET applications, using **Serilog** as the core engine.
+
+It allows you to:
+
+* Send **structured logs** with guaranteed fields like `Action`, `IdTransaction`, `ApplicationName`, `MachineName`
+* Dynamically enable **multi-sink** support (Console, File, HTML Email, PostgreSQL, ElasticSearch)
+* **Automatically validate** message `{}` placeholders
+* Centralize configuration through **LoggerBuilder**, just by editing the **appsettings.json** file
 
 ---
 
@@ -60,38 +69,70 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
 ```json
 {
   "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Debug",
+        "System": "Debug"
+      }
+    },
     "SerilogConfiguration": {
+      "ApplicationName": "TestApp",
       "SerilogCondition": [
-        { "Sink": "Console", "Level": ["Information", "Warning", "Error", "Fatal"] },
-        { "Sink": "File", "Level": ["Error", "Fatal"] },
-        { "Sink": "PostgreSQL", "Level": ["Error", "Fatal"] },
-        { "Sink": "MSSqlServer", "Level": ["Error", "Fatal"] },
-        { "Sink": "Telegram", "Level": ["Fatal"] },
-        { "Sink": "ElasticSearch", "Level": [] }
+        {"Sink": "ElasticSearch","Level": []},
+        {"Sink": "MSSqlServer","Level": []},
+        {"Sink": "Email","Level": []},
+        {"Sink": "PostgreSQL","Level": ["Information","Warning","Error","Fatal"]},
+        {"Sink": "Telegram","Level": []},
+        {"Sink": "Console","Level": [ "Information" ]},
+        {"Sink": "File","Level": ["Information","Warning","Error","Fatal"]}
       ],
       "SerilogOption": {
-        "PostgreSQL": {
-          "connectionstring": "Host=localhost;Database=logs;Username=postgres;Password=yourpassword",
-          "tableName": "logs",
-          "schemaName": "public",
-          "needAutoCreateTable": true
-        },
-        "MSSqlServer": {
-          "connectionString": "Server=localhost;Database=Logs;Trusted_Connection=True;",
-          "sinkOptionsSection": {
-            "tableName": "Logs",
-            "schemaName": "dbo",
-            "autoCreateSqlTable": true,
-            "batchPostingLimit": 50,
-            "period": "00:00:30"
-          }
+        "File": {
+          "Path": "D:\\Logs\\ServerDemo",
+          "RollingInterval": "Day",
+          "RetainedFileCountLimit": 7,
+          "Shared": true
         },
         "TelegramOption": {
-          "Api_Key": "your-telegram-bot-api-key",
-          "chatId": "your-chat-id"
+          "chatId": "xxxxx",
+          "Api_Key": "sssss:ttttttttt"
         },
-        "File": {
-          "Path": "logs"
+        "PostgreSQL": {
+          "connectionString": "<YOUR CONNECTIONSTRING>",
+          "tableName": "public",
+          "schemaName": "dbo",
+          "needAutoCreateTable": true
+        },
+        "ElasticSearch": {
+          "nodeUris": "http://10.0.1.119:9200",
+          "indexFormat": "PixeloApp"
+        },
+        "Email": {
+          "From": "<Email Alert>",
+          "Port": 587,
+          "Host": "<Host EMail>",
+          "To": [ "recipient#1", "recipient#2" ],
+          "CredentialHost": "<UserName SMTP>",
+          "CredentialPassword": "<Password SMTP>"
+        },
+        "MSSqlServer": {
+          "connectionString": "<YOUR CONNECTIONSTRING>",
+          "sinkOptionsSection": {
+            "tableName": "logs",
+            "schemaName": "dbo",
+            "autoCreateSqlTable": true,
+            "batchPostingLimit": 100,
+            "period": "0.00:00:10"
+          },
+          "columnOptionsSection": {
+            "addStandardColumns": [
+              "LogEvent"
+            ],
+            "removeStandardColumns": [
+              "Properties"
+            ]
+          }
         },
         "GeneralConfig": {
           "EnableSelfLogging": false
@@ -99,8 +140,7 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
       }
     }
   }
-}
-```
+}```
 
 > ⚠️ **Important:**
 > The logger will **only write to a sink** if the `Level` array in `SerilogCondition` contains at least one valid log level (e.g., `"Error"`, `"Warning"`).

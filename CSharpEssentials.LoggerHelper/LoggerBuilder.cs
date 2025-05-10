@@ -8,7 +8,6 @@ using Serilog.Sinks.PostgreSQL;
 using Serilog.Sinks.PostgreSQL.ColumnWriters;
 using System.Data;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
 
 namespace CSharpEssentials.LoggerHelper;
@@ -22,7 +21,6 @@ public class LoggerBuilder {
             .Enrich.WithProperty("ApplicationName", appName)
             .Enrich.With<RenderedMessageEnricher>();
 
-        //Serilog.Debugging.SelfLog.Enable(msg => File.AppendAllText(Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt"), msg)); //TODO: inserire un opzione diversa e documentarlo su Readme.md
         var selfLogPath = Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt");
         var stream = new FileStream(
             selfLogPath,
@@ -32,7 +30,6 @@ public class LoggerBuilder {
         );
 
         var writer = new StreamWriter(stream) { AutoFlush = true };
-
         Serilog.Debugging.SelfLog.Enable(msg => {
             writer.WriteLine(msg);
         });
@@ -136,14 +133,17 @@ public class LoggerBuilder {
                     break;
                 case "Email":
                     _config.WriteTo.Conditional(
+                        //TODO: to hack if setting is null
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                        wt => wt.Email(options: new EmailSinkOptions {
-                            From = "xxxxxxx@gmail.com",
-                            Port = 587,
-                            Host = "xxx",
-                            To = new List<string> { "alexbypa@gmail.com" },
-                            Credentials = new NetworkCredential("xxxxxxxxx@gmail.com", "------")
-                        })
+                        wt => wt.Email(
+                            options: new EmailSinkOptions {
+                                From = _serilogConfig?.SerilogOption?.Email.From,
+                                Port = (int)_serilogConfig.SerilogOption.Email.Port,
+                                Host = _serilogConfig.SerilogOption.Email.Host,
+                                To = _serilogConfig.SerilogOption?.Email.To.ToList(),
+                                Credentials = new NetworkCredential(_serilogConfig?.SerilogOption?.Email.CredentialHost, _serilogConfig?.SerilogOption?.Email.CredentialPassword),
+                                IsBodyHtml = true
+                            })
                     );
                     break;
                 case "Console":

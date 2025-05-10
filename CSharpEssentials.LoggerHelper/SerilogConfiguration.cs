@@ -15,6 +15,15 @@ public class SerilogOption {
     public SinkFileOptions? File { get; set; }
     public GeneralConfig? GeneralConfig { get; set; }
     public ElasticSearch? ElasticSearch { get; set; }
+    public Email? Email { get; set; }
+}
+public class Email {
+    public string? From { get; set; }
+    public int? Port { get; set; }
+    public string? Host { get; set; }
+    public string[] To { get; set; }
+    public string? CredentialHost { get; set; }
+    public string? CredentialPassword { get; set; }
 }
 public class PostgreSQL {
     public string? connectionstring { get; set; }

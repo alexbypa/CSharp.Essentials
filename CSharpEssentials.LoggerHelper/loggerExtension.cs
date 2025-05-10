@@ -62,7 +62,7 @@ public class loggerExtension<T> where T : IRequest {
     /// <param name="message">indicates the log message</param>
     /// <param name="args">are additional parameters that can help identify particular scenarios</param>
     public static void TraceSync(IRequest request, LogEventLevel level, Exception? ex, string message, params object[] args) {
-        message += " {IdTransaction} {MachineName} {Action} {ApplicationName}";
+        message += " {IdTransaction} {MachineName} {Action}";
         List<object> arguments = new List<object>();
         if (args != null)
             arguments = args.ToList();
