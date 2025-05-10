@@ -1,6 +1,11 @@
-﻿# 📦 CSharpEssentials.LoggerHelper
+﻿[![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml)
+[![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
+[![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
+![Last Commit](https://img.shields.io/github/last-commit/AlessandroChiodo/CSharpEssentials.LoggerHelper?style=flat-square)
 
-A flexible and modular logging library for .NET applications that simplifies structured logging with multi-sink support, including SQL Server, PostgreSQL, Console, File, Email, Telegram, and Elasticsearch.
+# 📦 CSharpEssentials.LoggerHelper
+
+A flexible and modular logging library for .NET applications that simplifies structured logging with multi-sink support. Built on Serilog sinks, it enables dynamic writing to SQL Server, PostgreSQL, Console, File, Email, Telegram, and Elasticsearch based on configurable log levels.
 
 ---
 
