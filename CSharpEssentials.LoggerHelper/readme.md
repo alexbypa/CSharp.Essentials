@@ -7,7 +7,7 @@
 
 ## Introduction
 
-`LoggerHelper` is a library designed to **simplify**, **standardize**, and **enhance** logging management in .NET applications, using **Serilog** as the core engine.
+A flexible and modular structured logging library for .NET applications based on Serilog. Easily configure logging to Console, File, Email, PostgreSQL, ElasticSearch via simple JSON configuration. Includes automatic placeholder validation and multi-sink orchestration.
 
 It allows you to:
 
@@ -106,8 +106,8 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
           "needAutoCreateTable": true
         },
         "ElasticSearch": {
-          "nodeUris": "http://10.0.1.119:9200",
-          "indexFormat": "PixeloApp"
+          "nodeUris": "http://10.0.1.100:9200",
+          "indexFormat": "<YOUR INDEX FORMAT>"
         },
         "Email": {
           "From": "<Email Alert>",
