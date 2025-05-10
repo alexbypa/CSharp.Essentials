@@ -140,7 +140,8 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
       }
     }
   }
-}```
+}
+```
 
 > ⚠️ **Important:**
 > The logger will **only write to a sink** if the `Level` array in `SerilogCondition` contains at least one valid log level (e.g., `"Error"`, `"Warning"`).
