@@ -16,6 +16,7 @@ It allows you to:
 * **Automatically validate** message `{}` placeholders
 * Centralize configuration through **LoggerBuilder**, just by editing the **appsettings.json** file
 
+> In common usage scenarios, it is advisable to avoid logging `Information` level events to sinks like Telegram, MSSQL, or PostgreSQL. This practice prevents issues such as HTTP 429 (rate limits) on Telegram and reduces risks of deadlocks or insufficient storage in database systems.
 ---
 
 ## 📚 Table of Contents
