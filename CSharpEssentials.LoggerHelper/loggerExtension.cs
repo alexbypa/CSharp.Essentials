@@ -27,11 +27,15 @@ public class loggerExtension<T> where T : IRequest {
     //TODO: Riprendere le altre tipologie di estensione Enrich etc etc json ....
     public static readonly ILogger log;
     public static string postGreSQLConnectionString = "";
+
     static loggerExtension() {
         var configuration = new ConfigurationBuilder()
+#if DEBUG
+        .AddJsonFile("appsettings.LoggerHelper.debug.json")
+#else
         .AddJsonFile("appsettings.LoggerHelper.json")
+#endif
         .Build();
-
         var builder = new LoggerBuilder(configuration).AddDynamicSinks();
         log = builder.Build();
     }
@@ -65,12 +69,12 @@ public class loggerExtension<T> where T : IRequest {
 
         var IdTransaction = request?.IdTransaction ?? Guid.NewGuid().ToString();
         var Action = request?.Action ?? "UNKNOWN";
-        var ApplicationName = request?.ApplicationName ?? "UNKNOWN";
+        //var ApplicationName = request?.ApplicationName ?? "UNKNOWN";
 
         arguments.Add(IdTransaction);
         arguments.Add(Environment.MachineName);
         arguments.Add(Action);
-        arguments.Add(ApplicationName);
+        //arguments.Add(ApplicationName); //Added from Enrichment
 
         int totPlaceHolders = arguments.Count;
         try {

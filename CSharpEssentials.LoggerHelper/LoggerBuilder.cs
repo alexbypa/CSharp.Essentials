@@ -16,8 +16,10 @@ public class LoggerBuilder {
     private readonly LoggerConfiguration _config;
     private readonly SerilogConfiguration _serilogConfig;
     public LoggerBuilder(IConfiguration configuration) {
+        var appName = configuration["Serilog:SerilogConfiguration:ApplicationName"];
         _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
         _config = new LoggerConfiguration().ReadFrom.Configuration(configuration)
+            .Enrich.WithProperty("ApplicationName", appName)
             .Enrich.With<RenderedMessageEnricher>();
 
         //Serilog.Debugging.SelfLog.Enable(msg => File.AppendAllText(Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt"), msg)); //TODO: inserire un opzione diversa e documentarlo su Readme.md
@@ -31,8 +33,7 @@ public class LoggerBuilder {
 
         var writer = new StreamWriter(stream) { AutoFlush = true };
 
-        Serilog.Debugging.SelfLog.Enable(msg =>
-        {
+        Serilog.Debugging.SelfLog.Enable(msg => {
             writer.WriteLine(msg);
         });
 
@@ -47,7 +48,7 @@ public class LoggerBuilder {
                 case "File":
                     var logDirectory = _serilogConfig?.SerilogOption?.File?.Path ?? "Logs";
                     var logFilePath = Path.Combine(logDirectory, "log-.txt");
-                    Directory.CreateDirectory(logDirectory); 
+                    Directory.CreateDirectory(logDirectory);
                     _config.WriteTo.Conditional(
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
                         wt => wt.File(
@@ -57,7 +58,7 @@ public class LoggerBuilder {
                             retainedFileCountLimit: _serilogConfig?.SerilogOption?.File?.RetainedFileCountLimit ?? 7,
                             shared: _serilogConfig?.SerilogOption?.File?.Shared ?? true
                             )
-                        ); 
+                        );
                     break;
                 case "Telegram":
                     _config.WriteTo.Conditional(
@@ -80,6 +81,7 @@ public class LoggerBuilder {
                                     needAutoCreateTable: true,
                                     columnOptions: new Dictionary<string, ColumnWriterBase>
                                     {
+                                        { "ApplicationName", new SinglePropertyColumnWriter("ApplicationName", PropertyWriteMethod.ToString, NpgsqlDbType.Text) },
                                         {"message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
                                         {"message_template", new MessageTemplateColumnWriter(NpgsqlDbType.Text) },
                                         {"level", new LevelColumnWriter(true, NpgsqlDbType.Varchar) },
@@ -87,8 +89,10 @@ public class LoggerBuilder {
                                         {"exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
                                         {"properties", new LogEventSerializedColumnWriter(NpgsqlDbType.Jsonb) },
                                         {"props_test", new PropertiesColumnWriter(NpgsqlDbType.Jsonb) },
-                                        {"machine_name", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "l") }
-                                    }
+                                        {"MachineName", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "l") },
+                                        {"Action", new SinglePropertyColumnWriter("Action", PropertyWriteMethod.ToString, NpgsqlDbType.Text) },
+                                        {"IdTransaction", new SinglePropertyColumnWriter("IdTransaction", PropertyWriteMethod.ToString, NpgsqlDbType.Text) }
+                                 }
                                 );
                         }
                         );
@@ -118,8 +122,8 @@ public class LoggerBuilder {
                                     wt.Elasticsearch(
                                         nodeUris: _serilogConfig?.SerilogOption?.ElasticSearch?.nodeUris,
                                         indexFormat: _serilogConfig?.SerilogOption?.ElasticSearch?.indexFormat,
-                                        autoRegisterTemplate:true,
-                                        restrictedToMinimumLevel:Serilog.Events.LogEventLevel.Information
+                                        autoRegisterTemplate: true,
+                                        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information
                                         );
 
                                 } else {
@@ -140,6 +144,12 @@ public class LoggerBuilder {
                             To = new List<string> { "alexbypa@gmail.com" },
                             Credentials = new NetworkCredential("xxxxxxxxx@gmail.com", "------")
                         })
+                    );
+                    break;
+                case "Console":
+                    _config.WriteTo.Conditional(
+                        evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
+                        wt => wt.Console()
                     );
                     break;
             }
@@ -188,5 +198,7 @@ public class LoggerBuilder {
         };
         return columnOptions;
     }
-    public ILogger Build() => _config.WriteTo.Console().CreateLogger();
+    //public ILogger Build() => _config.WriteTo.Console().CreateLogger();
+    public ILogger Build() => _config.CreateLogger();
+
 }

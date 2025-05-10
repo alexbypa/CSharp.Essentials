@@ -1,5 +1,6 @@
 ﻿namespace CSharpEssentials.LoggerHelper;
 public class SerilogConfiguration {
+    public string? ApplicationName { get; set; }
     public List<SerilogCondition>? SerilogCondition { get; set; }
     public SerilogOption? SerilogOption { get; set; }
 }

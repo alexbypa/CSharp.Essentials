@@ -278,7 +278,6 @@ Try it live with a demo Web API to validate each log level dynamically:
 ### Sink not writing logs?
 
 * ✅ Make sure the `Level` array in `SerilogCondition` is **not empty**.
-* ✅ Ensure the sink’s NuGet package is installed **in the main application**, not only in LoggerHelper.
 * ✅ Check `serilog-selflog.txt` if enabled — it often reveals silent misconfigurations.
 
 ---
