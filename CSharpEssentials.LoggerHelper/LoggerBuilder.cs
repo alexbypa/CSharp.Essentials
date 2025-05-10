@@ -194,7 +194,8 @@ public class LoggerBuilder {
         columnOptions.AdditionalColumns = new List<SqlColumn> {
             new SqlColumn { DataType = SqlDbType.VarChar, ColumnName = "IdTransaction", DataLength = 250, AllowNull = false },
             new SqlColumn { DataType = SqlDbType.VarChar, ColumnName = "MachineName", DataLength = 250, AllowNull = false },
-            new SqlColumn { DataType = SqlDbType.VarChar, ColumnName = "Action", DataLength = 250, AllowNull = false }
+            new SqlColumn { DataType = SqlDbType.VarChar, ColumnName = "Action", DataLength = 250, AllowNull = false },
+            new SqlColumn { DataType = SqlDbType.VarChar, ColumnName = "ApplicationName", DataLength = 250, AllowNull = false }
         };
         return columnOptions;
     }

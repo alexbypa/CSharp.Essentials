@@ -13,10 +13,11 @@
 1.1.5 Removed TraceAsync on finally Invoke of RequestResponseLoggingMiddleware
 1.1.6 Fix with code QL
 1.2.1 Optmized with test web api
+1.2.2 Optmized Properties and sink Email
 </Description>
-    <Version>1.2.1</Version>
-    <AssemblyVersion>1.2.1</AssemblyVersion>
-    <FileVersion>1.2.1</FileVersion>
+    <Version>1.2.2</Version>
+    <AssemblyVersion>1.2.2</AssemblyVersion>
+    <FileVersion>1.2.2</FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageIcon>img/CSharpEssentials.png</PackageIcon>
     <RepositoryType>git</RepositoryType>

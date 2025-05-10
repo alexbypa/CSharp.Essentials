@@ -34,6 +34,9 @@ public class TelegramMarkdownFormatter : ITextFormatter {
 
         if (logEvent.Properties.ContainsKey("Action"))
             output.WriteLine($"`Action`: {Escape(logEvent.Properties["Action"].ToString())}");
+
+        if (logEvent.Properties.ContainsKey("ApplicationName"))
+            output.WriteLine($"`ApplicationName`: {Escape(logEvent.Properties["ApplicationName"].ToString())}");
     }
 
     private string Escape(string input) {

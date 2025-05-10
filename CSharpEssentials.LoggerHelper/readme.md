@@ -263,41 +263,73 @@ loggerExtension<IRequest>.TraceSync(
 
 ---
 
-## 🧬 Database Schema
+## Database Schema
 
 ### PostgreSQL
 
-| Column            |
-| ----------------- |
-| message           |
-| message\_template |
-| level             |
-| raise\_date       |
-| exception         |
-| properties        |
-| props\_test       |
-| machine\_name     |
+| Column            | Description                |
+| ----------------- | -------------------------- |
+| ApplicationName   | Application name           |
+| message           | Message content            |
+| message\_template | Message template           |
+| level             | Log level                  |
+| raise\_date       | Log timestamp              |
+| exception         | Exception details          |
+| properties        | Serialized properties      |
+| props\_test       | Additional serialized data |
+| MachineName       | Machine name               |
+| Action            | Action name                |
+| IdTransaction     | Unique transaction ID      |
 
 ### SQL Server
 
-| Column          |
-| --------------- |
-| LogEvent (JSON) |
-| IdTransaction   |
-| MachineName     |
-| Action          |
+| Column          | Type     | Description           |
+| --------------- | -------- | --------------------- |
+| Message         | nvarchar | Message content       |
+| MessageTemplate | nvarchar | Message template      |
+| Level           | nvarchar | Log level             |
+| TimeStamp       | datetime | Log timestamp         |
+| Exception       | nvarchar | Exception details     |
+| Properties      | nvarchar | Serialized properties |
+| LogEvent        | nvarchar | Serialized log event  |
+| IdTransaction   | varchar  | Unique transaction ID |
+| MachineName     | varchar  | Machine name          |
+| Action          | varchar  | Action name           |
 
 ---
 
-## 🔁 Demo API
+## Swagger Example
+
+| Field           | Description                                   |
+| --------------- | --------------------------------------------- |
+| action          | Action name                                   |
+| message         | Text to log                                   |
+| applicationName | Application name                              |
+| level           | Log level (Information, Warning, Error, etc.) |
+
+---
+
+## HTML Email Screenshot
+
+| Field           | Value                                |
+| --------------- | ------------------------------------ |
+| Timestamp       | 2025-05-10 17:45:00                  |
+| Level           | Error                                |
+| IdTransaction   | 7e7b9f65-ed13-439a-852b-18d9d28dd6ec |
+| MachineName     | PIXELO30                             |
+| Action          | GetUserDetails                       |
+| ApplicationName | LoggerHelperDemo                     |
+| Message         | Error occurred during request        |
+
+---
 
 ## Demo API
 
 Try it live with a demo Web API to validate each log level dynamically:
 
-| Method | Endpoint | Query Parameters | Description |
-|:---|:---|:---|:---|
-| GET | /loggerHelper/info | `action`, `message`, `applicationName`, `level` | Sends a structured log with the specified level |
+| Method | Endpoint        | Query Parameters             | Description                                     |
+| ------ | --------------- | ---------------------------- | ----------------------------------------------- |
+| GET    | `/loggerHelper` | `action`, `message`, `level` | Sends a structured log with the specified level |
 
 🔗 [GitHub Repository (Demo)](https://github.com/alexbypa/CSharpEssentials.LoggerHelper/tree/main/CSharpEssentials.LoggerHelper.Demo) 
 
