@@ -7,7 +7,7 @@
 
 ## Introduction
 
-A flexible and modular structured logging library for .NET applications based on Serilog. Easily configure logging to Console, File, Email, PostgreSQL, ElasticSearch via simple JSON configuration. Includes automatic placeholder validation and multi-sink orchestration.
+A flexible and modular structured logging library for .NET ( 6.0/8.0 ) applications based on Serilog. Easily configure logging to Console, File, Email, PostgreSQL, ElasticSearch via simple JSON configuration. Includes automatic placeholder validation and multi-sink orchestration.
 
 It allows you to:
 
