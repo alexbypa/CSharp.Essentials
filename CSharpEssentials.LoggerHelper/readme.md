@@ -206,7 +206,7 @@ app.UseMiddleware<RequestResponseLoggingMiddleware>();
 > ℹ️ **Important**: depending on the target framework version, you must configure `LoggerHelper` differently.
 
 If you are using **.NET 6.0**, you must call the configuration directly on the `builder`.
-If you are using **.NET 7.0 or later**, you must call it on the `builder.Services`.
+If you are using **.NET 8.0**, you must call it on the `builder.Services`.
 
 Here’s how you should do it:
 
