@@ -54,7 +54,61 @@ It allows you to:
 * ✅ JSON configuration via `appsettings.LoggerHelper.json`
 
 ---
+## ⚠️ Version 2.0.0 - Breaking Change
 
+> Starting from version **2.0.0**, the `Email` configuration section has been **renamed**.
+>
+> If you are upgrading from `1.x.x`, you MUST update your `appsettings.LoggerHelper.json`.
+
+Old (before 2.0.0):
+
+```json
+"Email": {
+  "From": "...",
+  "Host": "...",
+  "Port": 587,
+  "To": ["..."],
+  "CredentialHost": "...",
+  "CredentialPassword": "..."
+}
+```
+
+New (since 2.0.0):
+
+```json
+"Email": {
+  "From": "...",
+  "Host": "...",
+  "Port": 587,
+  "To": "...",
+  "CredentialHost": "...",
+  "CredentialPassword": "...",
+  "EnableSsl": true
+}
+```
+## 🚨 Why Email Handling Changed
+
+Starting from version 2.0.0, LoggerHelper **no longer uses** the standard [Serilog.Sinks.Email](https://github.com/serilog/serilog-sinks-email) for sending emails.
+
+**Reason:**  
+The official Serilog Email Sink does not support custom body formatting (HTML templates, structured logs, color coding, etc).  
+It only supports plain text messages generated via `RenderMessage()`, without the ability to control the message content.
+
+🔎 See discussion: [GitHub Issue - serilog/serilog-sinks-email](https://github.com/serilog/serilog-sinks-email/issues/44)
+
+**What changed:**  
+- LoggerHelper now uses a **custom internal SMTP sink**: `LoggerHelperEmailSink`.
+- This allows sending fully customized **HTML-formatted emails**.
+- Supports dynamic coloring based on log level (Information, Warning, Error).
+- Supports secure SMTP with SSL/TLS.
+
+✅ No third-party dependencies added.  
+✅ Full control over email appearance and content.
+
+---
+
+
+---
 ## 🚀 Installation
 
 ```bash

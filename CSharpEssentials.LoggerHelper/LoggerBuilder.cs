@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Configuration;
 using NpgsqlTypes;
 using Serilog;
 using Serilog.Formatting.Json;
@@ -20,6 +21,7 @@ public class LoggerBuilder {
         _config = new LoggerConfiguration().ReadFrom.Configuration(configuration)
             .Enrich.WithProperty("ApplicationName", appName)
             .Enrich.With<RenderedMessageEnricher>();
+
 
         var selfLogPath = Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt");
         var stream = new FileStream(
@@ -133,17 +135,17 @@ public class LoggerBuilder {
                     break;
                 case "Email":
                     _config.WriteTo.Conditional(
-                        //TODO: to hack if setting is null
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                        wt => wt.Email(
-                            options: new EmailSinkOptions {
-                                From = _serilogConfig?.SerilogOption?.Email.From,
-                                Port = (int)_serilogConfig.SerilogOption.Email.Port,
-                                Host = _serilogConfig.SerilogOption.Email.Host,
-                                To = _serilogConfig.SerilogOption?.Email.To.ToList(),
-                                Credentials = new NetworkCredential(_serilogConfig?.SerilogOption?.Email.CredentialHost, _serilogConfig?.SerilogOption?.Email.CredentialPassword),
-                                IsBodyHtml = true
-                            })
+                        wt => wt.Sink(new LoggerHelperEmailSink(
+                            smtpServer: _serilogConfig.SerilogOption?.Email.Host,
+                            smtpPort: (int)_serilogConfig.SerilogOption?.Email.Port,
+                            fromEmail: _serilogConfig.SerilogOption?.Email.From,
+                            toEmail: string.Join(",", _serilogConfig.SerilogOption?.Email.To),
+                            username: _serilogConfig.SerilogOption?.Email.username,
+                            password: _serilogConfig.SerilogOption?.Email.password,
+                            subjectPrefix: "[LoggerHelper]",
+                            enableSsl: (bool)_serilogConfig.SerilogOption?.Email?.EnableSsl
+                        ))
                     );
                     break;
                 case "Console":

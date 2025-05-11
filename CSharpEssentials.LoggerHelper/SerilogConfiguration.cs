@@ -21,9 +21,10 @@ public class Email {
     public string? From { get; set; }
     public int? Port { get; set; }
     public string? Host { get; set; }
-    public string[] To { get; set; }
-    public string? CredentialHost { get; set; }
-    public string? CredentialPassword { get; set; }
+    public string To { get; set; }
+    public string? password { get; set; }
+    public string? username { get; set; }
+    public bool EnableSsl { get; set; }
 }
 public class PostgreSQL {
     public string? connectionstring { get; set; }
