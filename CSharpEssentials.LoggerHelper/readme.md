@@ -81,8 +81,8 @@ New (since 2.0.0):
   "Host": "...",
   "Port": 587,
   "To": "...",
-  "CredentialHost": "...",
-  "CredentialPassword": "...",
+  "username": "...",
+  "password": "...",
   "EnableSsl": true
 }
 ```
@@ -168,8 +168,8 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
           "Port": 587,
           "Host": "<Host EMail>",
           "To": [ "recipient#1", "recipient#2" ],
-          "CredentialHost": "<UserName SMTP>",
-          "CredentialPassword": "<Password SMTP>"
+          "username": "<UserName SMTP>",
+          "password": "<Password SMTP>"
         },
         "MSSqlServer": {
           "connectionString": "<YOUR CONNECTIONSTRING>",

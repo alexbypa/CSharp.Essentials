@@ -17,12 +17,14 @@
 1.2.3 Update Readme.md
 1.3.1 Added compatibility with 6.0
 2.0.0 Fixed Email
+2.0.1 update readme.md
+
 
 
 </Description>
-    <Version>2.0.0</Version>
-    <AssemblyVersion>2.0.0</AssemblyVersion>
-    <FileVersion>2.0.0</FileVersion>
+    <Version>2.0.1</Version>
+    <AssemblyVersion>2.0.1</AssemblyVersion>
+    <FileVersion>2.0.1</FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
