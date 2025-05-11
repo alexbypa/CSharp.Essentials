@@ -203,6 +203,13 @@ app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 ## 🔥 Register the logger in `Program.cs`
 
+## 🚀 Important Setup
+
+> ⚠️ **IMPORTANT**:
+> You **must** call `AddLoggerConfiguration` during the `Program.cs` setup.
+> **Without it, LoggerHelper will NOT work.**
+> No logs will be captured, and no middleware will be active.
+
 > ℹ️ **Important**: depending on the target framework version, you must configure `LoggerHelper` differently.
 
 If you are using **.NET 6.0**, you must call the configuration directly on the `builder`.
