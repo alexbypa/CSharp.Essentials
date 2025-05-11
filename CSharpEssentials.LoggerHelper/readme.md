@@ -201,7 +201,14 @@ app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 > 📌 This middleware uses `LogEventLevel.Information` by default and is automatically compatible with sinks that accept that level.
 
-Register the logger in `Program.cs`:
+## 🔥 Register the logger in `Program.cs`
+
+> ℹ️ **Important**: depending on the target framework version, you must configure `LoggerHelper` differently.
+
+If you are using **.NET 6.0**, you must call the configuration directly on the `builder`.
+If you are using **.NET 7.0 or later**, you must call it on the `builder.Services`.
+
+Here’s how you should do it:
 
 ```csharp
 using CSharpEssentials.LoggerHelper;
@@ -209,7 +216,12 @@ using CSharpEssentials.LoggerHelper;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add LoggerHelper configuration
-builder.Services.addloggerConfiguration(builder);
+#if NET6_0
+    builder.AddLoggerConfiguration();
+#else
+    builder.Services.AddLoggerConfiguration(builder);
+#endif
+
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -220,6 +232,17 @@ app.UseMiddleware<RequestResponseLoggingMiddleware>();
 app.MapControllers();
 app.Run();
 ```
+
+---
+
+### 🧠 Explanation
+
+| Target Framework | Usage                                               |
+| :--------------- | :-------------------------------------------------- |
+| .NET 6.0         | `builder.AddLoggerConfiguration();`                 |
+| .NET 8.0         | `builder.Services.AddLoggerConfiguration(builder);` |
+
+This ensures full compatibility across different .NET versions.
 
 ---
 

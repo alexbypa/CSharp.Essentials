@@ -6,6 +6,9 @@ using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using System.Data;
 using System.Text.RegularExpressions;
+#if NET6_0
+using Microsoft.AspNetCore.Builder;
+#endif
 
 namespace CSharpEssentials.LoggerHelper;
 public interface IRequest {
@@ -15,6 +18,15 @@ public interface IRequest {
 }
 
 public static class LoggerExtensionConfig {
+#if NET6_0
+    public static IServiceCollection AddLoggerConfiguration(this WebApplicationBuilder builder) {
+        var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.LoggerHelper.json");
+        if (File.Exists(externalConfigPath)) {
+            builder.Configuration.AddJsonFile(externalConfigPath, optional: true, reloadOnChange: true);
+        }
+        return builder.Services;
+    }
+#else
     public static IServiceCollection addloggerConfiguration(this IServiceCollection services, IHostApplicationBuilder builder) {
         var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.LoggerHelper.json");
         if (File.Exists(externalConfigPath)) {
@@ -22,6 +34,7 @@ public static class LoggerExtensionConfig {
         }
         return services;
     }
+#endif
 }
 public class loggerExtension<T> where T : IRequest {
     //TODO: Riprendere le altre tipologie di estensione Enrich etc etc json ....
