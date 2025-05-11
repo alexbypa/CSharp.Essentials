@@ -23,7 +23,7 @@
     <AssemblyVersion>1.3.1</AssemblyVersion>
     <FileVersion>1.3.1</FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <PackageIcon>img/CSharpEssentials.png</PackageIcon>
+    <PackageIcon>CSharpEssentials.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
     <PackageTags>serilog, logger, structured-logging, email-sink, console-sink, database-logging, postgresql, elasticsearch, sink, logging-helper, dotnet-logging, aspnetcore-logging</PackageTags>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
@@ -45,16 +45,8 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.4" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
-
   <ItemGroup>
-    <None Update="img\CSharpEssentials.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Update="readme.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+    <None Include="CSharpEssentials.png" Pack="true" PackagePath="." />
+    <None Include="readme.md" Pack="true" PackagePath="." />
   </ItemGroup>
-
 </Project>
