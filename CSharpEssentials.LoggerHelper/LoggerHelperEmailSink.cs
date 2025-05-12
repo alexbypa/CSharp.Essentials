@@ -62,15 +62,6 @@ public class LoggerHelperEmailSink : ILogEventSink {
         var action = ExtractProperty(logEvent, "Action");
         var appName = ExtractProperty(logEvent, "ApplicationName");
         var machineName = ExtractProperty(logEvent, "MachineName");
-
-        var httpMethod = ExtractProperty(logEvent, "HttpMethod");
-        var path = ExtractProperty(logEvent, "Path");
-        var queryString = ExtractProperty(logEvent, "QueryString");
-        var requestBody = ExtractProperty(logEvent, "RequestBody");
-        var responseBody = ExtractProperty(logEvent, "ResponseBody");
-
-        var hasRequestSection = !string.IsNullOrEmpty(httpMethod);
-
         return $@"
 <html>
 <head>
@@ -110,27 +101,8 @@ public class LoggerHelperEmailSink : ILogEventSink {
 
 <div class='section highlight'>
   <h3>Log Message</h3>
-  <p>{System.Net.WebUtility.HtmlEncode(rawMessage)}</p>
+  <pre>{WebUtility.HtmlEncode(rawMessage)}</pre>
 </div>
-
-{(hasRequestSection ? $@"
-<div class='section'>
-  <h3>Request/Response Details</h3>
-  <table>
-    <tr>
-      <th>HTTP Method</th><th>Path</th><th>QueryString</th><th>RequestBody</th><th>ResponseBody</th>
-    </tr>
-    <tr>
-      <td>{System.Net.WebUtility.HtmlEncode(httpMethod)}</td>
-      <td>{System.Net.WebUtility.HtmlEncode(path)}</td>
-      <td>{System.Net.WebUtility.HtmlEncode(queryString)}</td>
-      <td>{System.Net.WebUtility.HtmlEncode(requestBody)}</td>
-      <td>{System.Net.WebUtility.HtmlEncode(responseBody)}</td>
-    </tr>
-  </table>
-</div>
-" : "")}
-
 </body>
 </html>";
     }

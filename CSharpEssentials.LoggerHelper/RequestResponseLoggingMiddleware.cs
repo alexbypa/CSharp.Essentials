@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Serilog.Events;
 using System.Text;
+using System.Web;
 
 namespace CSharpEssentials.LoggerHelper;
 
@@ -37,19 +38,24 @@ public class RequestResponseLoggingMiddleware {
 
             await _next(context);
 
-            // Cattura e logga la risposta
-            var responseBody = await ReadResponseBody(context.Response);
+            var logLevel = context.Response.StatusCode >= 400
+                ? LogEventLevel.Error
+                : LogEventLevel.Information;
 
+            var responseBody = await ReadResponseBody(context.Response);
+            var formattedLog = @$"
+HTTP METHOD : {context.Request.Method}
+PATH         : {context.Request.Path}
+QUERY STRING : {HttpUtility.UrlDecode(context.Request.QueryString.ToString())}
+BODY REQUEST : {(string.IsNullOrWhiteSpace(body) ? "(empty)" : body)}
+BODY RESPONSE: {(string.IsNullOrWhiteSpace(responseBody) ? "(empty)" : responseBody)}
+HTTP STATUS  : {(context.Response.StatusCode)}
+";
             loggerExtension<RequestInfo>.TraceAsync(
                 requestInfo,
-                LogEventLevel.Information,
+                logLevel,
                 null,
-                "HTTPMETHOD: {Method} PATH: {Path} QS: {QueryString} BODY REQUEST: {body} RESPONSEBODY: {responseBody}",
-                context.Request.Method,
-                context.Request.Path,
-                context.Request.QueryString,
-                body,
-                responseBody
+                formattedLog
             );
         } catch (Exception ex) {
             // Log dell'eccezione
@@ -89,4 +95,5 @@ public class RequestResponseLoggingMiddleware {
 
         return text;
     }
+
 }
