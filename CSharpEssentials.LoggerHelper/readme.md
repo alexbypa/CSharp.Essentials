@@ -1,4 +1,4 @@
-﻿![Frameworks](https://img.shields.io/badge/.NET-6.0%20%7C%207.0%20%7C%208.0-blue)
+﻿![Frameworks](https://img.shields.io/badge/.NET-6.0%20%20%7C%208.0-blue)
 [![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml)
 [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 [![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)

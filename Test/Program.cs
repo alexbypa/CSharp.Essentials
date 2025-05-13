@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 // builder.Services.AddHangFire<Request>(builder);
 #endregion
 #region LoggerHelper
-builder.Services.addloggerConfiguration(builder);
+builder.Services.AddloggerConfiguration(builder);
 #endregion
 #region httpExtension
 builder.Services.AddOptions();

@@ -27,7 +27,7 @@ public static class LoggerExtensionConfig {
         return builder.Services;
     }
 #else
-    public static IServiceCollection addloggerConfiguration(this IServiceCollection services, IHostApplicationBuilder builder) {
+    public static IServiceCollection AddloggerConfiguration(this IServiceCollection services, IHostApplicationBuilder builder) {
         var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.LoggerHelper.json");
         if (File.Exists(externalConfigPath)) {
             builder.Configuration.AddJsonFile(externalConfigPath, optional: true, reloadOnChange: true);
@@ -36,7 +36,7 @@ public static class LoggerExtensionConfig {
     }
 #endif
 }
-public class loggerExtension<T> where T : IRequest {
+    public class loggerExtension<T> where T : IRequest {
     //TODO: Riprendere le altre tipologie di estensione Enrich etc etc json ....
     public static readonly ILogger log;
     public static string postGreSQLConnectionString = "";
