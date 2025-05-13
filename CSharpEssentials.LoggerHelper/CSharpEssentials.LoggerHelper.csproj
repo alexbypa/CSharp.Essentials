@@ -19,13 +19,13 @@
 2.0.0 Fixed Email
 2.0.1 update readme.md
 2.0.2 Optimezed html template for middleware
-
+2.0.3 update readme.md
 
 
 </Description>
-    <Version>2.0.2</Version>
-    <AssemblyVersion>2.0.2</AssemblyVersion>
-    <FileVersion>2.0.2</FileVersion>
+    <Version>2.0.3</Version>
+    <AssemblyVersion>2.0.3</AssemblyVersion>
+    <FileVersion>2.0.3</FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
