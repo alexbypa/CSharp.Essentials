@@ -106,12 +106,12 @@ public class LoggerBuilder {
                             AutoCreateSqlTable = _serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.autoCreateSqlTable ?? false,
                             BatchPostingLimit = _serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.batchPostingLimit ?? 100,
                             BatchPeriod = string.IsNullOrEmpty(_serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.period) ? TimeSpan.FromSeconds(10) : TimeSpan.Parse(_serilogConfig.SerilogOption.MSSqlServer.sinkOptionsSection.period),
-                        }, columnOptions: GetColumnOptions()
+                        }, columnOptions: MSSQLServerOptions.GetColumnOptions()
                         ));
                     break;
                 case "ElasticSearch"://TODO: non sono ancora riuscito a trovare i logs su elasticsearch
                     _config.WriteTo.Conditional(
-                        evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
+                        evt =>  _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
                         wt => {
                             var elasticUrl = _serilogConfig?.SerilogOption?.ElasticSearch?.nodeUris ?? "http://localhost:9200";
                             try {
@@ -181,27 +181,5 @@ public class LoggerBuilder {
             return Enum.Parse(targetType, value);
         return Convert.ChangeType(value, targetType);
     }
-
-    public static Serilog.Sinks.MSSqlServer.ColumnOptions GetColumnOptions() {
-        var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
-        // Override the default Primary Column of Serilog by custom column name
-        //columnOptions.Id.ColumnName = "LogId";
-
-        // Removing all the default column
-        columnOptions.Store.Add(StandardColumn.LogEvent);
-        //columnOptions.Store.Remove(StandardColumn.MessageTemplate);
-        //columnOptions.Store.Remove(StandardColumn.Properties);
-
-        // Adding all the custom columns
-        columnOptions.AdditionalColumns = new List<SqlColumn> {
-            new SqlColumn { DataType = SqlDbType.VarChar, ColumnName = "IdTransaction", DataLength = 250, AllowNull = false },
-            new SqlColumn { DataType = SqlDbType.VarChar, ColumnName = "MachineName", DataLength = 250, AllowNull = false },
-            new SqlColumn { DataType = SqlDbType.VarChar, ColumnName = "Action", DataLength = 250, AllowNull = false },
-            new SqlColumn { DataType = SqlDbType.VarChar, ColumnName = "ApplicationName", DataLength = 250, AllowNull = false }
-        };
-        return columnOptions;
-    }
-    //public ILogger Build() => _config.WriteTo.Console().CreateLogger();
     public ILogger Build() => _config.CreateLogger();
-
 }

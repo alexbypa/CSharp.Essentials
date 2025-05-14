@@ -107,6 +107,21 @@ It only supports plain text messages generated via `RenderMessage()`, without th
 ✅ Full control over email appearance and content.
 
 ---
+> **ℹ️ Important note for development testing**  
+>  
+> During the development phase, **LoggerHelper** loads its configuration from the `appsettings.LoggerHelper.debug.json` file.  
+> This behavior is controlled by the following directive:
+> 
+> ```csharp
+> #if DEBUG
+>     .AddJsonFile("appsettings.LoggerHelper.debug.json")
+> #else
+>     .AddJsonFile("appsettings.LoggerHelper.json")
+> #endif
+> ```
+>  
+> Make sure to create and properly configure the `appsettings.LoggerHelper.debug.json` file when running tests locally.  
+> In **Release** mode, the configuration will instead be loaded from `appsettings.LoggerHelper.json`.
 
 
 ---

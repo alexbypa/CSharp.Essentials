@@ -3,19 +3,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
-using System.Data;
 using System.Text.RegularExpressions;
 #if NET6_0
 using Microsoft.AspNetCore.Builder;
 #endif
 
 namespace CSharpEssentials.LoggerHelper;
-public interface IRequest {
+public interface ILoggerRequest {
     public string IdTransaction { get; }
     public string Action { get; }
     public string ApplicationName { get; }
 }
+public interface IRequest : ILoggerRequest {}
 
 public static class LoggerExtensionConfig {
 #if NET6_0
@@ -36,7 +35,7 @@ public static class LoggerExtensionConfig {
     }
 #endif
 }
-    public class loggerExtension<T> where T : IRequest {
+public class loggerExtension<T> where T : IRequest {
     //TODO: Riprendere le altre tipologie di estensione Enrich etc etc json ....
     public static readonly ILogger log;
     public static string postGreSQLConnectionString = "";
@@ -64,7 +63,6 @@ public static class LoggerExtensionConfig {
     public static async void TraceAsync(IRequest request, LogEventLevel level, Exception? ex, string message, params object[] args) {
         await Task.Run(() => TraceSync(request, level, ex, message, args));
     }
-
     /// <summary>
     /// method to write log
     /// </summary>
@@ -82,12 +80,9 @@ public static class LoggerExtensionConfig {
 
         var IdTransaction = request?.IdTransaction ?? Guid.NewGuid().ToString();
         var Action = request?.Action ?? "UNKNOWN";
-        //var ApplicationName = request?.ApplicationName ?? "UNKNOWN";
-
         arguments.Add(IdTransaction);
         arguments.Add(Environment.MachineName);
         arguments.Add(Action);
-        //arguments.Add(ApplicationName); //Added from Enrichment
 
         int totPlaceHolders = arguments.Count;
         try {
@@ -100,25 +95,6 @@ public static class LoggerExtensionConfig {
         } catch (Exception exRegEx) {
             log.Warning("LoggerHelper: Regex failed to validate placeholders: {Error}", exRegEx.Message);
         }
-
         log.Write(level, ex, message, arguments.ToArray());
-    }
-    public static Serilog.Sinks.MSSqlServer.ColumnOptions GetColumnOptions() {
-        var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
-        // Override the default Primary Column of Serilog by custom column name
-        //columnOptions.Id.ColumnName = "LogId";
-
-        // Removing all the default column
-        columnOptions.Store.Add(StandardColumn.LogEvent);
-        //columnOptions.Store.Remove(StandardColumn.MessageTemplate);
-        //columnOptions.Store.Remove(StandardColumn.Properties);
-
-        // Adding all the custom columns
-        columnOptions.AdditionalColumns = new List<SqlColumn> {
-            new SqlColumn { DataType = SqlDbType.VarChar, ColumnName = "IdTransaction", DataLength = 250, AllowNull = false },
-            new SqlColumn { DataType = SqlDbType.VarChar, ColumnName = "MachineName", DataLength = 250, AllowNull = false },
-            new SqlColumn { DataType = SqlDbType.VarChar, ColumnName = "Action", DataLength = 250, AllowNull = false }
-        };
-        return columnOptions;
     }
 }
