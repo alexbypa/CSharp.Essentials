@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>📊 OTLP Metrics Dashboard (Enhanced)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f6f6f6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        canvas {
+            max-width: 900px;
+            margin: 30px auto;
+            display: block;
+        }
+
+        .alert {
+            background: #ffe0e0;
+            padding: 10px;
+            margin: 20px auto;
+            color: #b00020;
+            font-weight: bold;
+            width: fit-content;
+            border: 1px solid #b00020;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📊 OTLP Metrics Dashboard</h1>
+    <div id="alerts"></div>
+    <div id="charts"></div>
+
+    <script>
+        async function loadMetrics() {
+            const res = await fetch("/data/metrics");
+            const raw = await res.text();
+            let json;
+
+            try {
+                json = JSON.parse(raw);
+            } catch (e) {
+                document.getElementById("alerts").innerHTML = '<div class="alert">❌ Errore nel parsing del JSON!</div>';
+                return;
+            }
+
+            const allMetrics = {};
+
+            for (const entry of json) {
+                const resourceMetrics = entry.ResourceMetrics || [];
+                for (const rm of resourceMetrics) {
+                    const scopes = rm.ScopeMetrics || rm.InstrumentationLibraryMetrics || [];
+                    for (const scope of scopes) {
+                        const metrics = scope.Metrics || [];
+                        for (const m of metrics) {
+                            const name = m.Name || "unknown";
+                            const unit = m.Unit || "";
+                            const points = m.Gauge?.DataPoints || m.Sum?.DataPoints || [];
+
+                            if (!allMetrics[name]) allMetrics[name] = [];
+
+                            for (const p of points) {
+                                const ts = new Date(Number(p.TimeUnixNano || 0) / 1_000_000).toISOString();
+                                const val = p.AsInt ?? p.AsDouble ?? 0;
+                                allMetrics[name].push({ x: ts, y: val, unit });
+                            }
+                        }
+                    }
+                }
+            }
+
+            document.getElementById("charts").innerHTML = "";
+            document.getElementById("alerts").innerHTML = "";
+
+            for (const [metricName, data] of Object.entries(allMetrics)) {
+                createChart(metricName, data);
+                if (metricName.includes("active_connections") && data[data.length - 1].y > 50) {
+                    const alert = document.createElement("div");
+                    alert.className = "alert";
+                    alert.textContent = `⚠️ ${metricName} ha superato la soglia critica: ${data[data.length - 1].y}`;
+                    document.getElementById("alerts").appendChild(alert);
+                }
+            }
+        }
+
+        function createChart(name, data) {
+            const canvas = document.createElement("canvas");
+            document.getElementById("charts").appendChild(canvas);
+
+            new Chart(canvas, {
+                type: "line",
+                data: {
+                    datasets: [{
+                        label: name,
+                        data: data,
+                        borderColor: "teal",
+                        backgroundColor: "rgba(0,128,128,0.1)",
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { type: "time", time: { unit: "minute" }, title: { display: true, text: "Timestamp" } },
+                        y: { beginAtZero: true, title: { display: true, text: "Value" } }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: name
+                        },
+                        legend: {
+                            display: true
+                        }
+                    }
+                }
+            });
+        }
+        /*
+        function createChart(name, data) {
+    const canvas = document.createElement("canvas");
+    document.getElementById("charts").appendChild(canvas);
+
+    const labels = data.map(p => p.timestamp);
+    const values = data.map(p => p.value);
+
+    // Thresholds personalizzabili
+    const WARNING_THRESHOLD = 0.2;
+    const ALERT_THRESHOLD = 0.5;
+
+    const maxValue = Math.max(...values);
+    let badge = "";
+
+    if (maxValue >= ALERT_THRESHOLD) {
+        badge = " 🚨";
+    } else if (maxValue >= WARNING_THRESHOLD) {
+        badge = " ⚠️";
+    }
+
+    new Chart(canvas, {
+        type: "line",
+        data: {
+            labels,
+            datasets: [{
+                label: name,
+                data: values,
+                fill: false,
+                borderColor: "blue",
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `${name}${badge}`,
+                    color: maxValue >= ALERT_THRESHOLD ? 'red' : (maxValue >= WARNING_THRESHOLD ? 'orange' : 'black'),
+                    font: {
+                        size: 16
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+        */
+        loadMetrics();
+        setInterval(loadMetrics, 10000); // aggiorna ogni 10s
+    </script>
+</body>
+</html>

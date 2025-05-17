@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OTLP Trace Viewer</title>
+  <style>
+    body { font-family: Arial; background: #f7f7f7; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { padding: 8px 12px; border: 1px solid #ccc; }
+    th { background: #444; color: white; }
+    tr:nth-child(even) { background: #eee; }
+  </style>
+</head>
+<body>
+  <h1>OpenTelemetry Traces</h1>
+  <table id="traceTable">
+    <thead>
+      <tr><th>Timestamp</th><th>Service</th><th>Trace ID</th><th>Span ID</th><th>Name</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function loadTraces() {
+      const res = await fetch('/data/traces');
+      const data = await res.json();
+      const tbody = document.querySelector("#traceTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(row => {
+        const span = row.ResourceSpans?.[0]?.ScopeSpans?.[0]?.Spans?.[0];
+        const time = span?.StartTimeUnixNano || "–";
+        const service = row.ResourceSpans?.[0]?.Resource?.Attributes?.find(a => a.Key === "service.name")?.Value?.StringValue || "–";
+        const traceId = span?.TraceId || "–";
+        const spanId = span?.SpanId || "–";
+        const name = span?.Name || "–";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${time}</td><td>${service}</td><td>${traceId}</td><td>${spanId}</td><td>${name}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    loadTraces();
+    setInterval(loadTraces, 3000);
+  </script>
+</body>
+</html>

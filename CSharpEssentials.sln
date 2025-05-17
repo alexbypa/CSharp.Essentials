@@ -28,7 +28,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.loggerHelper", "Demo.loggerHelper\Demo.loggerHelper.csproj", "{E2B2D04F-AB71-4A20-B39A-3393BF4C1ECD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test6.0", "Test6.0\Test6.0.csproj", "{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test6.0", "Test6.0\Test6.0.csproj", "{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.LoggerHelper.Telemetry", "CSharpEssentials.LoggerHelper.Telemetry\CSharpEssentials.LoggerHelper.Telemetry.csproj", "{42939CC7-D4F0-4C07-8424-8E8674738768}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -76,6 +78,10 @@ Global
 		{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42939CC7-D4F0-4C07-8424-8E8674738768}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42939CC7-D4F0-4C07-8424-8E8674738768}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42939CC7-D4F0-4C07-8424-8E8674738768}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42939CC7-D4F0-4C07-8424-8E8674738768}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
