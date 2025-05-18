@@ -18,9 +18,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<MetricsDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("MetricsDb")));
 
-builder.Services.AddHostedService<MetricsWriterService>();
-builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
-CustomMetrics.Initialize(builder.Configuration);
+//TODO: Attiva / Disattiva il listener per i metodi
+//CustomMetrics.Initialize(builder.Configuration);
+//builder.Services.AddHostedService<MetricsWriterService>();
+//builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
+//builder.Services.AddLoggerTelemetry();
 #endregion
 
 builder.Services.AddCors(options => {
@@ -38,7 +40,6 @@ builder.Services.AddCors(options => {
 #endregion
 #region LoggerHelper
 builder.Services.AddloggerConfiguration(builder);
-builder.Services.AddLoggerTelemetry();
 #endregion
 #region httpExtension
 builder.Services.AddOptions();

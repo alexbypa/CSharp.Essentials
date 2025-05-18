@@ -45,9 +45,10 @@ It allows you to:
   * SQL Server
   * PostgreSQL
   * Elasticsearch
-  * Email
+  * Email (customizable HTML template support)
   * Telegram
-* ✅ Structured logs with custom properties
+
+* * ✅ Structured logs with custom properties
 * ✅ Sync and async logging
 * ✅ Request/response middleware logger
 * ✅ Transaction ID, action, machine name
@@ -105,6 +106,30 @@ It only supports plain text messages generated via `RenderMessage()`, without th
 
 ✅ No third-party dependencies added.  
 ✅ Full control over email appearance and content.
+
+### 🖌️ Email Template Customization (optional)
+
+LoggerHelper allows you to customize the **HTML structure and appearance** of the email body.
+You can provide an external `.html` file with placeholders like:
+
+```html
+{{Timestamp}}, {{Level}}, {{Message}}, {{Action}}, {{IdTransaction}}, {{MachineName}}, {{ApplicationName}}, {{LevelClass}}
+```
+
+Then, in the constructor or config, set:
+
+```json
+"LoggerHelper": {
+  "SerilogOption": {
+    "Email": {
+      ...
+      "TemplatePath": "Templates/email-template-default.html"
+    }
+  }
+}
+```
+
+## If the file is missing or invalid, LoggerHelper will **fall back to the internal default template**, ensuring backward compatibility.
 
 ---
 > **ℹ️ Important note for development testing**  

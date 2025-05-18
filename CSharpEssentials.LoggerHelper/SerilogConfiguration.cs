@@ -25,6 +25,7 @@ public class Email {
     public string? password { get; set; }
     public string? username { get; set; }
     public bool EnableSsl { get; set; }
+    public string? TemplatePath { get; set; }
 }
 public class PostgreSQL {
     public string? connectionstring { get; set; }

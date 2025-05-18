@@ -144,7 +144,8 @@ public class LoggerBuilder {
                             username: _serilogConfig.SerilogOption?.Email.username,
                             password: _serilogConfig.SerilogOption?.Email.password,
                             subjectPrefix: "[LoggerHelper]",
-                            enableSsl: (bool)_serilogConfig.SerilogOption?.Email?.EnableSsl
+                            enableSsl: (bool)_serilogConfig.SerilogOption?.Email?.EnableSsl,
+                            templatePath: _serilogConfig.SerilogOption?.Email?.TemplatePath 
                         ))
                     );
                     break;
