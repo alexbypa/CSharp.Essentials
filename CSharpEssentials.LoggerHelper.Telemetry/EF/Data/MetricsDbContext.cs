@@ -5,7 +5,6 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 
 public class MetricsDbContext : DbContext {
     public DbSet<MetricEntry> Metrics => Set<MetricEntry>();
-
     public MetricsDbContext(DbContextOptions<MetricsDbContext> options)
         : base(options) { }
 }

@@ -20,7 +20,16 @@ builder.Services.AddDbContext<MetricsDbContext>(options =>
 
 builder.Services.AddHostedService<MetricsWriterService>();
 builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
+CustomMetrics.Initialize(builder.Configuration);
 #endregion
+
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowAll", policy => {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // Add services to the container.
 
@@ -66,6 +75,9 @@ if (app.Environment.IsDevelopment()) {
 #region loggerExtension
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
 #endregion
+
+app.UseCors("AllowAll");
+
 app.UseAuthorization();
 
 app.MapControllers();

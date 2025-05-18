@@ -22,7 +22,8 @@ public class MetricsWriterService : BackgroundService {
             db.Metrics.AddRange(new[]
         {
             new MetricEntry { Name = "current_second", Value = CustomMetrics.CurrentSecondGauge.LastValue, Timestamp = now },
-            new MetricEntry { Name = "memory_used_mb", Value = CustomMetrics.MemoryUsedGauge.LastValue, Timestamp = now }
+            new MetricEntry { Name = "memory_used_mb", Value = CustomMetrics.MemoryUsedGauge.LastValue, Timestamp = now },
+            new MetricEntry { Name = "postgresql.connections.active", Value = CustomMetrics.ActivePostgresConnectionsGauge.LastValue, Timestamp = now }
         });
 
             await db.SaveChangesAsync(stoppingToken);
