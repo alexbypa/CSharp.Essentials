@@ -1,16 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics.Metrics;
+﻿using CSharpEssentials.LoggerHelper.Telemetry;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Test.Controllers.logger.telemetry;
 [ApiController]
 [Route("[controller]")]
 public class TelemetryMetricsController : ControllerBase {
-    private static readonly Meter Meter = new Meter("LoggerHelper");
-    private static readonly Counter<double> CpuUsage = Meter.CreateCounter<double>("cpu_usage");
+    [HttpGet("current")]
+    public IActionResult GetCurrentSecond() {
+        var second = CustomMetrics.CurrentSecond;
 
-    [HttpGet("elabora")]
-    public IActionResult Elabora() {
-        CpuUsage.Add(42.0, KeyValuePair.Create<string, object?>("source", "demo"));
-        return Ok("Metric sent");
+        var status = second switch {
+            >= 45 => "ALERT",
+            >= 30 => "WARNING",
+            _ => "OK"
+        };
+
+        return Ok(new {
+            current_second = new {
+                value = second,
+                status = status
+            }
+        });
     }
 }

@@ -3,185 +3,149 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>📊 OTLP Metrics Dashboard (Enhanced)</title>
+    <title>📊 OTLP Metrics Dashboard (Histogram Fix)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <style>
         body {
             font-family: sans-serif;
-            background: #f6f6f6;
-            margin: 0;
-            padding: 20px;
+            background: #f4f4f4;
+            margin: 20px;
         }
 
         h1 {
             text-align: center;
         }
 
+        .chart-container {
+            margin-bottom: 40px;
+        }
+
         canvas {
-            max-width: 900px;
-            margin: 30px auto;
-            display: block;
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 0 4px #ccc;
         }
 
         .alert {
-            background: #ffe0e0;
             padding: 10px;
-            margin: 20px auto;
-            color: #b00020;
+            margin-bottom: 10px;
             font-weight: bold;
-            width: fit-content;
-            border: 1px solid #b00020;
-            border-radius: 5px;
         }
+
+            .alert.warning {
+                background-color: #fff3cd;
+                color: #856404;
+                border-left: 4px solid #ffeeba;
+            }
+
+            .alert.critical {
+                background-color: #f8d7da;
+                color: #721c24;
+                border-left: 4px solid #f5c6cb;
+            }
     </style>
 </head>
 <body>
-    <h1>📊 OTLP Metrics Dashboard</h1>
-    <div id="alerts"></div>
+    <h1>📊 OTLP Metrics Dashboard (Histogram Fix)</h1>
     <div id="charts"></div>
 
     <script>
         async function loadMetrics() {
             const res = await fetch("/data/metrics");
-            const raw = await res.text();
-            let json;
+            const text = await res.text();
+            const json = JSON.parse(text);
 
-            try {
-                json = JSON.parse(raw);
-            } catch (e) {
-                document.getElementById("alerts").innerHTML = '<div class="alert">❌ Errore nel parsing del JSON!</div>';
-                return;
-            }
+            const container = document.getElementById("charts");
+            container.innerHTML = "";
 
             const allMetrics = {};
 
-            for (const entry of json) {
-                const resourceMetrics = entry.ResourceMetrics || [];
-                for (const rm of resourceMetrics) {
-                    const scopes = rm.ScopeMetrics || rm.InstrumentationLibraryMetrics || [];
-                    for (const scope of scopes) {
-                        const metrics = scope.Metrics || [];
-                        for (const m of metrics) {
-                            const name = m.Name || "unknown";
-                            const unit = m.Unit || "";
-                            const points = m.Gauge?.DataPoints || m.Sum?.DataPoints || [];
+            json.forEach(entry => {
+                (entry.ResourceMetrics || []).forEach(rm => {
+                    (rm.ScopeMetrics || []).forEach(scope => {
+                        (scope.Metrics || []).forEach(metric => {
+                            const name = metric.Name;
+                            const unit = metric.Unit || "";
+                            const points =
+                                metric.Sum?.DataPoints ||
+                                metric.Gauge?.DataPoints ||
+                                metric.Histogram?.DataPoints ||
+                                [];
 
                             if (!allMetrics[name]) allMetrics[name] = [];
 
-                            for (const p of points) {
+                            points.forEach(p => {
+                                const val = p.AsInt ?? p.AsDouble ?? p.Sum ?? 0;
                                 const ts = new Date(Number(p.TimeUnixNano || 0) / 1_000_000).toISOString();
-                                const val = p.AsInt ?? p.AsDouble ?? 0;
-                                allMetrics[name].push({ x: ts, y: val, unit });
-                            }
-                        }
-                    }
-                }
-            }
+                                const warnAttr = p.Attributes?.find(a => a.Key === "warningThreshold");
+                                const alertAttr = p.Attributes?.find(a => a.Key === "alertThreshold");
 
-            document.getElementById("charts").innerHTML = "";
-            document.getElementById("alerts").innerHTML = "";
-
-            for (const [metricName, data] of Object.entries(allMetrics)) {
-                createChart(metricName, data);
-                if (metricName.includes("active_connections") && data[data.length - 1].y > 50) {
-                    const alert = document.createElement("div");
-                    alert.className = "alert";
-                    alert.textContent = `⚠️ ${metricName} ha superato la soglia critica: ${data[data.length - 1].y}`;
-                    document.getElementById("alerts").appendChild(alert);
-                }
-            }
-        }
-
-        function createChart(name, data) {
-            const canvas = document.createElement("canvas");
-            document.getElementById("charts").appendChild(canvas);
-
-            new Chart(canvas, {
-                type: "line",
-                data: {
-                    datasets: [{
-                        label: name,
-                        data: data,
-                        borderColor: "teal",
-                        backgroundColor: "rgba(0,128,128,0.1)",
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: { type: "time", time: { unit: "minute" }, title: { display: true, text: "Timestamp" } },
-                        y: { beginAtZero: true, title: { display: true, text: "Value" } }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: name
-                        },
-                        legend: {
-                            display: true
-                        }
-                    }
-                }
+                                allMetrics[name].push({
+                                    x: ts,
+                                    y: val,
+                                    unit,
+                                    warning: warnAttr?.Value?.IntValue || warnAttr?.Value?.DoubleValue || null,
+                                    alert: alertAttr?.Value?.IntValue || alertAttr?.Value?.DoubleValue || null
+                                });
+                            });
+                        });
+                    });
+                });
             });
-        }
-        /*
-        function createChart(name, data) {
-    const canvas = document.createElement("canvas");
-    document.getElementById("charts").appendChild(canvas);
 
-    const labels = data.map(p => p.timestamp);
-    const values = data.map(p => p.value);
+            for (const [name, values] of Object.entries(allMetrics)) {
+                const containerDiv = document.createElement("div");
+                containerDiv.className = "chart-container";
 
-    // Thresholds personalizzabili
-    const WARNING_THRESHOLD = 0.2;
-    const ALERT_THRESHOLD = 0.5;
+                const max = Math.max(...values.map(v => v.y));
+                const latest = values[values.length - 1];
+                const warning = latest.warning;
+                const alert = latest.alert;
 
-    const maxValue = Math.max(...values);
-    let badge = "";
+                if (alert !== null && max >= alert) {
+                    const badge = document.createElement("div");
+                    badge.className = "alert critical";
+                    badge.textContent = `🚨 ALERT: ${name} = ${max}`;
+                    containerDiv.appendChild(badge);
+                } else if (warning !== null && max >= warning) {
+                    const badge = document.createElement("div");
+                    badge.className = "alert warning";
+                    badge.textContent = `⚠️ Warning: ${name} = ${max}`;
+                    containerDiv.appendChild(badge);
+                }
 
-    if (maxValue >= ALERT_THRESHOLD) {
-        badge = " 🚨";
-    } else if (maxValue >= WARNING_THRESHOLD) {
-        badge = " ⚠️";
-    }
+                const canvas = document.createElement("canvas");
+                containerDiv.appendChild(canvas);
+                container.appendChild(containerDiv);
 
-    new Chart(canvas, {
-        type: "line",
-        data: {
-            labels,
-            datasets: [{
-                label: name,
-                data: values,
-                fill: false,
-                borderColor: "blue",
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: `${name}${badge}`,
-                    color: maxValue >= ALERT_THRESHOLD ? 'red' : (maxValue >= WARNING_THRESHOLD ? 'orange' : 'black'),
-                    font: {
-                        size: 16
+                new Chart(canvas, {
+                    type: "line",
+                    data: {
+                        datasets: [{
+                            label: `${name} (${latest.unit})`,
+                            data: values,
+                            borderColor: "teal",
+                            backgroundColor: "rgba(0,128,128,0.1)",
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: { type: "time", time: { unit: "minute" }, title: { display: true, text: "Timestamp" } },
+                            y: { beginAtZero: true, title: { display: true, text: "Value" } }
+                        },
+                        plugins: {
+                            title: { display: true, text: name }
+                        }
                     }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
+                });
             }
         }
-    });
-}
-        */
+
         loadMetrics();
-        setInterval(loadMetrics, 10000); // aggiorna ogni 10s
+        setInterval(loadMetrics, 10000);
     </script>
 </body>
 </html>

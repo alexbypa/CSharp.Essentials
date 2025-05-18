@@ -7,10 +7,20 @@ using System.Text;
 using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Proto.Collector.Metrics.V1;
 using System.Text.Json;
-
+using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
+using CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+#region OpenTelemetry
+
+builder.Services.AddDbContext<MetricsDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("MetricsDb")));
+
+builder.Services.AddHostedService<MetricsWriterService>();
+builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
+#endregion
 
 // Add services to the container.
 
@@ -61,7 +71,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-#region Custom OpenTelemetry
+#region OpenTelemetry
 
 const string traceFile = "traces.json";
 

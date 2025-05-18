@@ -1,0 +1,52 @@
+function createChart(name, data) {
+    const canvas = document.createElement("canvas");
+    document.getElementById("charts").appendChild(canvas);
+
+    const labels = data.map(p => p.timestamp);
+    const values = data.map(p => p.value);
+
+    // Thresholds personalizzabili
+    const WARNING_THRESHOLD = 0.2;
+    const ALERT_THRESHOLD = 0.5;
+
+    const maxValue = Math.max(...values);
+    let badge = "";
+
+    if (maxValue >= ALERT_THRESHOLD) {
+        badge = " 🚨";
+    } else if (maxValue >= WARNING_THRESHOLD) {
+        badge = " ⚠️";
+    }
+
+    new Chart(canvas, {
+        type: "line",
+        data: {
+            labels,
+            datasets: [{
+                label: name,
+                data: values,
+                fill: false,
+                borderColor: "blue",
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `${name}${badge}`,
+                    color: maxValue >= ALERT_THRESHOLD ? 'red' : (maxValue >= WARNING_THRESHOLD ? 'orange' : 'black'),
+                    font: {
+                        size: 16
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}

@@ -16,7 +16,8 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                             otlp.Endpoint = new Uri("http://localhost:5133/v1/metrics"); // Porta della tua WebAPI ricevente
                             otlp.Protocol = OtlpExportProtocol.HttpProtobuf;
                         })
-                        .AddConsoleExporter(); // Per vedere le metriche anche su console
+                        .AddMeter("LoggerHelper.Metrics") 
+                        .AddConsoleExporter(); 
                 })
                 .WithTracing(tracerProviderBuilder => {
                     tracerProviderBuilder

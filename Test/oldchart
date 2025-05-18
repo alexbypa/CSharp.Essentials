@@ -1,0 +1,34 @@
+
+        function createChart(name, data) {
+            const canvas = document.createElement("canvas");
+            document.getElementById("charts").appendChild(canvas);
+
+            new Chart(canvas, {
+                type: "line",
+                data: {
+                    datasets: [{
+                        label: name,
+                        data: data,
+                        borderColor: "teal",
+                        backgroundColor: "rgba(0,128,128,0.1)",
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { type: "time", time: { unit: "minute" }, title: { display: true, text: "Timestamp" } },
+                        y: { beginAtZero: true, title: { display: true, text: "Value" } }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: name
+                        },
+                        legend: {
+                            display: true
+                        }
+                    }
+                }
+            });
+        }
