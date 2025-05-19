@@ -3,7 +3,7 @@ name: Publish NuGet Package
 on:
   push:
     branches:
-      - main # or main, or any other branch where you are releasing
+      - main
 
 permissions:
   contents: read
@@ -19,16 +19,16 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x' # Replace with your project's target framework
+          dotnet-version: '8.0.x'
 
-      - name: Install dependencies
-        run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore ./CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj
 
-      - name: Build Project
-        run: dotnet build --configuration Release
+      - name: Build project
+        run: dotnet build ./CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj --configuration Release --no-restore
 
-      - name: Create NuGet Package
-        run: dotnet pack --configuration Release -o ./nupkgs
+      - name: Create NuGet package
+        run: dotnet pack ./CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj --configuration Release --no-build -o ./nupkgs
 
-      - name: Publish NuGet Package
+      - name: Publish NuGet package
         run: dotnet nuget push "./nupkgs/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
