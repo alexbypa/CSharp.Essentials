@@ -3,6 +3,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
+using OpenTelemetry;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry {
     public static class LoggerTelemetryBuilder {
@@ -16,6 +17,9 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                             otlp.Endpoint = new Uri("http://localhost:5133/v1/metrics"); // Porta della tua WebAPI ricevente
                             otlp.Protocol = OtlpExportProtocol.HttpProtobuf;
                         })
+                        .AddView(instrumentName:"*", new ExplicitBucketHistogramConfiguration {
+                            TagKeys = new[] { "trace_id" }
+                        })
                         .AddMeter("LoggerHelper.Metrics") 
                         .AddConsoleExporter(); 
                 })
@@ -25,11 +29,12 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                         .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("LoggerHelper"))
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
-                        .AddOtlpExporter(otlp =>
-                        {
-                            otlp.Endpoint = new Uri("http://localhost:5133/v1/traces"); // Porta della tua WebAPI ricevente
-                            otlp.Protocol = OtlpExportProtocol.HttpProtobuf;
-                        })
+                        .AddProcessor(new SimpleActivityExportProcessor(new PostgreSqlTraceExporter(services.BuildServiceProvider())))
+                        //.AddOtlpExporter(otlp =>
+                        //{
+                        //    otlp.Endpoint = new Uri("http://localhost:5133/v1/traces"); // Porta della tua WebAPI ricevente
+                        //    otlp.Protocol = OtlpExportProtocol.HttpProtobuf;
+                        //})
                         .AddConsoleExporter(); // Per vedere le trace anche su console
                 });
 

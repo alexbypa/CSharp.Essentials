@@ -14,7 +14,7 @@ public class MetricsWriterService : BackgroundService {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
         while (!stoppingToken.IsCancellationRequested) {
             using var scope = _provider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<MetricsDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
 
             var now = DateTime.UtcNow;
 

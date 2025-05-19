@@ -4,6 +4,7 @@ using System.Diagnostics.Metrics;
 using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
 using System.Text.Json;
+using System.Diagnostics;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
 public class OpenTelemetryMeterListenerService : BackgroundService {
@@ -24,28 +25,36 @@ public class OpenTelemetryMeterListenerService : BackgroundService {
             }
         };
 
-        listener.SetMeasurementEventCallback<double>((instrument, measurement, tags, _) => {
+        listener.SetMeasurementEventCallback<double>((instrument, measurement, tags, _) =>
+        {
             var tagArray = tags.ToArray();
+            var traceId = Activity.Current?.TraceId.ToString();
 
-            _ = Task.Run(async () => {
+            _ = Task.Run(async () =>
+            {
                 using var scope = _provider.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<MetricsDbContext>();
+                var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
 
                 var tagDict = new Dictionary<string, object>();
-                foreach (var tag in tagArray) {
+                foreach (var tag in tagArray)
                     tagDict[tag.Key] = tag.Value!;
-                }
+
+                // ✅ Includi il traceId anche nei tags se utile
+                if (!string.IsNullOrWhiteSpace(traceId))
+                    tagDict["trace_id"] = traceId;
 
                 await db.Metrics.AddAsync(new MetricEntry {
                     Name = instrument.Name,
                     Value = measurement,
                     Timestamp = DateTime.UtcNow,
-                    TagsJson = JsonSerializer.Serialize(tagDict)
+                    TagsJson = JsonSerializer.Serialize(tagDict),
+                    TraceId = traceId
                 });
 
                 await db.SaveChangesAsync();
             });
         });
+
 
 
 

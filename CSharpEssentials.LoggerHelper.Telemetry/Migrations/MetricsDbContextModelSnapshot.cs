@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
 {
-    [DbContext(typeof(MetricsDbContext))]
+    [DbContext(typeof(TelemetriesDbContext))]
     partial class MetricsDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -40,12 +40,54 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("TraceId")
+                        .HasColumnType("text");
+
                     b.Property<double>("Value")
                         .HasColumnType("double precision");
 
                     b.HasKey("Id");
 
                     b.ToTable("Metrics");
+                });
+
+            modelBuilder.Entity("CSharpEssentials.LoggerHelper.Telemetry.EF.Models.TraceEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("DurationMs")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ParentSpanId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SpanId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TagsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("TraceId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TraceEntry");
                 });
 #pragma warning restore 612, 618
         }

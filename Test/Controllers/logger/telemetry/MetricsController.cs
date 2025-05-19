@@ -6,9 +6,9 @@ namespace Test.Controllers.logger.telemetry;
 [ApiController]
 [Route("api/[controller]")]
 public class MetricsController : ControllerBase {
-    private readonly MetricsDbContext _db;
+    private readonly TelemetriesDbContext _db;
 
-    public MetricsController(MetricsDbContext db) {
+    public MetricsController(TelemetriesDbContext db) {
         _db = db;
     }
 

@@ -1,15 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using NpgsqlTypes;
 using Serilog;
 using Serilog.Formatting.Json;
-using Serilog.Sinks.Email;
 using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.PostgreSQL;
 using Serilog.Sinks.PostgreSQL.ColumnWriters;
 using System.Data;
 using System.Diagnostics;
-using System.Net;
 
 namespace CSharpEssentials.LoggerHelper;
 public class LoggerBuilder {
@@ -19,6 +16,7 @@ public class LoggerBuilder {
         var appName = configuration["Serilog:SerilogConfiguration:ApplicationName"];
         _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
         _config = new LoggerConfiguration().ReadFrom.Configuration(configuration)
+            .WriteTo.Sink(new OpenTelemetryLogEventSink())//TODO: da configurare
             .Enrich.WithProperty("ApplicationName", appName)
             .Enrich.With<RenderedMessageEnricher>();
 

@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
 {
-    [DbContext(typeof(MetricsDbContext))]
+    [DbContext(typeof(TelemetriesDbContext))]
     [Migration("20250518092555_AddTagsJsonToMetricEntry")]
     partial class AddTagsJsonToMetricEntry
     {

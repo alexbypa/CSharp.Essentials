@@ -1,4 +1,4 @@
-using CSharpEssentials.LoggerHelper;
+﻿using CSharpEssentials.LoggerHelper;
 using CSharpEssentials.LoggerHelper.Telemetry;
 using CSharpEssentials.HttpHelper;
 using Microsoft.OpenApi.Models;
@@ -10,19 +10,21 @@ using System.Text.Json;
 using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 using CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region OpenTelemetry
 
-builder.Services.AddDbContext<MetricsDbContext>(options =>
+builder.Services.AddDbContext<TelemetriesDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("MetricsDb")));
 
 //TODO: Attiva / Disattiva il listener per i metodi
-//CustomMetrics.Initialize(builder.Configuration);
-//builder.Services.AddHostedService<MetricsWriterService>();
-//builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
-//builder.Services.AddLoggerTelemetry();
+CustomMetrics.Initialize(builder.Configuration);
+builder.Services.AddHostedService<MetricsWriterService>();
+builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
+builder.Services.AddLoggerTelemetry();
 #endregion
 
 builder.Services.AddCors(options => {
@@ -85,6 +87,27 @@ app.MapControllers();
 
 
 #region OpenTelemetry
+TraceIdMetricListener.Register();
+
+
+app.Use(async (context, next) => {
+    var activity = Activity.Current;
+
+    if (activity is not null) {
+        var traceId = activity.TraceId.ToString();
+
+
+        // 💡 workaround fondamentale
+        if (!activity.Tags.Any(t => t.Key == "trace_id"))
+            activity.SetTag("trace_id", traceId);
+
+        if (string.IsNullOrEmpty(Baggage.GetBaggage("trace_id")))
+            Baggage.SetBaggage("trace_id", traceId);
+    }
+
+    await next();
+});
+
 
 const string traceFile = "traces.json";
 
