@@ -15,6 +15,7 @@ public class TelemetryPublicApiController : ControllerBase {
     public async Task<IActionResult> GetMetrics() {
         var metrics = await _db.Metrics
             .OrderByDescending(m => m.Timestamp)
+            //.Where(m => m.TraceId == "f9b4725f67ef251892b3b9c39e4b5f2d")
             .Take(250)
             .ToListAsync();
         return Ok(metrics);

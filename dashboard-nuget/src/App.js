@@ -3,15 +3,20 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import TraceTable from "./TraceTable";
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 
 function App() {
-	const [metrics, setMetrics] = useState([]);
-	const [filter, setFilter] = useState("all");
+  const [metrics, setMetrics] = useState([]);
+  const [filter, setFilter] = useState("all");
+  const [selectedTraces, setSelectedTraces] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+
 
 useEffect(() => {
   const fetchData = async () => {
     try {
-      const res = await fetch("http://localhost:5133/api/metrics");
+      const res = await fetch("http://localhost:5133/api/TelemetryPublicApi/metrics");
       const data = await res.json();
       // aggiorna solo se diverso
       setMetrics(prev =>
@@ -49,6 +54,16 @@ useEffect(() => {
 	  }
 	  return null;
 	};  
+const fetchTraces = async (traceId) => {
+  try {
+    const res = await fetch(`http://localhost:5133/api/TelemetryPublicApi/traces/${traceId}`);
+    const data = await res.json();
+    setSelectedTraces(data);
+    setShowModal(true);
+  } catch (err) {
+    console.error("Failed to fetch traces", err);
+  }
+};
 
   return (
   <>
@@ -62,7 +77,7 @@ useEffect(() => {
           onChange={(e) => setFilter(e.target.value)}
         >
           <option value="all">Tutte</option>
-          {[...new Set(metrics.map(m => m.metric))].map((name, i) => (
+          {[...new Set(metrics.map(m => m.name))].map((name, i) => (
             <option key={i} value={name}>{name}</option>
           ))}
         </select>
@@ -80,21 +95,18 @@ useEffect(() => {
         </thead>
         <tbody>
           {metrics
-            .filter(m => filter === "all" || m.metric === filter)
+            .filter(m => filter === "all" || m.name === filter)
             .map((m, idx) => (
               <tr key={idx}>
                 <td>{new Date(m.timestamp).toLocaleString()}</td>
-                <td>{m.metric}</td>
+                <td>{m.name}</td>
                 <td>
-                  {m.traceId ? (
-                    <a href={`http://localhost:5133/api/traces/${m.traceId}`} target="_blank" rel="noreferrer">
-                      {m.traceId}
-                    </a>
-                  ) : "-"}
+                  <Button variant="outline-primary" size="sm" onClick={() => fetchTraces(m.traceId)}>
+                    Vedi Traces
+                  </Button>
                 </td>
-
-                <td>{m.value} {getStatusBadge(m.metric, parseFloat(m.value))}</td>
-                <td>{renderTags(m.tags)}</td>
+                <td>{m.value} {getStatusBadge(m.name, parseFloat(m.value))}</td>
+                <td>{renderTags(m.tagsJson)}</td>
               </tr>
             ))}
         </tbody>
@@ -105,7 +117,7 @@ useEffect(() => {
     <ResponsiveContainer width="100%" height={300}>
       <LineChart
         data={metrics
-          .filter(m => filter === "all" || m.metric === filter)
+          .filter(m => filter === "all" || m.name === filter)
           .map(m => ({
             time: new Date(m.timestamp).toLocaleTimeString(),
             value: parseFloat(m.value)
@@ -120,6 +132,29 @@ useEffect(() => {
         <Line type="monotone" dataKey="value" stroke="#007bff" activeDot={{ r: 8 }} />
       </LineChart>
     </ResponsiveContainer>
+      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Traces</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedTraces.length === 0 ? (
+            <p>Nessun trace trovato.</p>
+          ) : (
+            <ul>
+              {selectedTraces.map((trace, i) => (
+                <li key={i}>
+                  <pre>{JSON.stringify(trace, null, 2)}</pre>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Chiudi
+          </Button>
+        </Modal.Footer>
+      </Modal>
   </>
 );
 

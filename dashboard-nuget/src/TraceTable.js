@@ -2,10 +2,14 @@ import { useEffect, useState } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 function App() {
   const [metrics, setMetrics] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [showModal, setShowModal] = useState(false);
+  const [selectedTraces, setSelectedTraces] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,6 +50,17 @@ function App() {
     return null;
   };
 
+  const fetchTraces = async (traceId) => {
+    try {
+      const res = await fetch(`http://localhost:5133/api/traces/${traceId}`);
+      const data = await res.json();
+      setSelectedTraces(data);
+      setShowModal(true);
+    } catch (err) {
+      console.error("Failed to fetch traces", err);
+    }
+  };
+
   return (
     <>
       <div className="container mt-5">
@@ -83,9 +98,9 @@ function App() {
                   <td>{m.metric}</td>
                   <td>
                     {m.traceId ? (
-                      <a href={`http://localhost:5133/api/traces/${m.traceId}`} target="_blank" rel="noreferrer">
-                        {m.traceId}
-                      </a>
+                      <Button variant="outline-primary" size="sm" onClick={() => fetchTraces(m.traceId)}>
+                        Vedi Traces
+                      </Button>
                     ) : "-"}
                   </td>
                   <td>{m.value} {getStatusBadge(m.metric, parseFloat(m.value))}</td>
@@ -94,27 +109,27 @@ function App() {
               ))}
           </tbody>
         </table>
-      </div>
 
-      <h2 className="mt-5">📈 Grafico storico</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart
-          data={metrics
-            .filter(m => filter === "all" || m.metric === filter)
-            .map(m => ({
-              time: new Date(m.timestamp).toLocaleTimeString(),
-              value: parseFloat(m.value)
-            }))}
-          margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="time" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="value" stroke="#007bff" activeDot={{ r: 8 }} />
-        </LineChart>
-      </ResponsiveContainer>
+        <h2 className="mt-5">📈 Grafico storico</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart
+            data={metrics
+              .filter(m => filter === "all" || m.metric === filter)
+              .map(m => ({
+                time: new Date(m.timestamp).toLocaleTimeString(),
+                value: parseFloat(m.value)
+              }))}
+            margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="time" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="value" stroke="#007bff" activeDot={{ r: 8 }} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </>
   );
 }

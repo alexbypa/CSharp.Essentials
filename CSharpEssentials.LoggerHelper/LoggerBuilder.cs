@@ -12,7 +12,9 @@ namespace CSharpEssentials.LoggerHelper;
 public class LoggerBuilder {
     private readonly LoggerConfiguration _config;
     private readonly SerilogConfiguration _serilogConfig;
+    IConfiguration _configuration;
     public LoggerBuilder(IConfiguration configuration) {
+        _configuration = configuration;
         var appName = configuration["Serilog:SerilogConfiguration:ApplicationName"];
         _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
         _config = new LoggerConfiguration().ReadFrom.Configuration(configuration)
@@ -76,6 +78,9 @@ public class LoggerBuilder {
                                     tableName: _serilogConfig.SerilogOption.PostgreSQL.tableName,
                                     schemaName: _serilogConfig.SerilogOption.PostgreSQL.schemaName,
                                     needAutoCreateTable: true,
+                                    columnOptions: PostgreSQLOptions.BuildPostgresColumns(_configuration)
+
+                                    /*
                                     columnOptions: new Dictionary<string, ColumnWriterBase>
                                     {
                                         { "ApplicationName", new SinglePropertyColumnWriter("ApplicationName", PropertyWriteMethod.ToString, NpgsqlDbType.Text) },
@@ -89,7 +94,7 @@ public class LoggerBuilder {
                                         {"MachineName", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "l") },
                                         {"Action", new SinglePropertyColumnWriter("Action", PropertyWriteMethod.ToString, NpgsqlDbType.Text) },
                                         {"IdTransaction", new SinglePropertyColumnWriter("IdTransaction", PropertyWriteMethod.ToString, NpgsqlDbType.Text) }
-                                 }
+                                 }*/
                                 );
                         }
                         );

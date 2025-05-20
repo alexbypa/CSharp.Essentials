@@ -12,6 +12,7 @@ using CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using OpenTelemetry;
+using CSharpEssentials.LoggerHelper.Telemetry.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,7 +47,10 @@ builder.Services.AddHttpClients(builder.Configuration);
 #endregion
 builder.Services.AddHttpClient();
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+        .AddApplicationPart(typeof(TelemetryPublicApiController).Assembly);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => {

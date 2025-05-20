@@ -32,7 +32,15 @@ public class PostgreSQL {
     public string tableName { get; set; }
     public string schemaName { get; set; }
     public bool needAutoCreateTable { get; set; }
+    public ColumnsPostGreSQL[] ColumnsPostGreSQL { get; set; }
 }
+public class ColumnsPostGreSQL {
+    public string Name { get; set; }
+    public string Writer { get; set; }
+    public string Type { get; set; } // es: "Text", "Jsonb", "Timestamp"
+    public string Property { get; set; } // solo per SinglePropertyColumnWriter
+}
+
 
 public class ElasticSearch {
     public string? nodeUris { get; set; }
