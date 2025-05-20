@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import TraceTable from "./TraceTable";
 
 function App() {
 	const [metrics, setMetrics] = useState([]);
@@ -72,6 +73,7 @@ useEffect(() => {
           <tr>
             <th>Timestamp</th>
             <th>Metric</th>
+            <th>TraceId</th>
             <th>Value</th>
             <th>Tags</th>
           </tr>
@@ -83,6 +85,14 @@ useEffect(() => {
               <tr key={idx}>
                 <td>{new Date(m.timestamp).toLocaleString()}</td>
                 <td>{m.metric}</td>
+                <td>
+                  {m.traceId ? (
+                    <a href={`http://localhost:5133/api/traces/${m.traceId}`} target="_blank" rel="noreferrer">
+                      {m.traceId}
+                    </a>
+                  ) : "-"}
+                </td>
+
                 <td>{m.value} {getStatusBadge(m.metric, parseFloat(m.value))}</td>
                 <td>{renderTags(m.tags)}</td>
               </tr>

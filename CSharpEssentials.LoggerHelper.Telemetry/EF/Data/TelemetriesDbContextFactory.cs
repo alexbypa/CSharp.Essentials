@@ -10,7 +10,6 @@ public class TelemetriesDbContextFactory : IDesignTimeDbContextFactory<Telemetri
                .AddJsonFile("appsettings.json", optional: true)
                .Build();
         var connectionString = configuration.GetConnectionString("MetricsDb");
-        //var connectionString = "Host=51.178.131.166:1433;Username=postgres;Password=PixPstG!!;Database=HubGamePragmaticCasino;Search Path=dbo,public;ConnectionLifetime=30;";
 
         var optionsBuilder = new DbContextOptionsBuilder<TelemetriesDbContext>();
         optionsBuilder.UseNpgsql(connectionString);

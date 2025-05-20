@@ -20,6 +20,7 @@ public class MetricsController : ControllerBase {
             .Select(m => new {
                 m.Timestamp,
                 Metric = m.Name,
+                m.TraceId,
                 Value = m.Value.ToString("0.00") + (m.Name.Contains("duration") ? "ms" : ""),
                 Tags = m.TagsJson ?? ""
             })

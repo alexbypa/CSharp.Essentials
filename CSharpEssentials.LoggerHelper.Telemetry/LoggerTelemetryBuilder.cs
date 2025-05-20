@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using OpenTelemetry.Exporter;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using OpenTelemetry.Metrics;
-using OpenTelemetry;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry {
     public static class LoggerTelemetryBuilder {
         public static IServiceCollection AddLoggerTelemetry(this IServiceCollection services) {
+            services.AddControllers();
             services.AddOpenTelemetry()
                 .WithMetrics(metricProvider => {
                     metricProvider

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
 {
     [DbContext(typeof(TelemetriesDbContext))]
-    [Migration("20250519185911_AddtraceidToMetricEntry")]
-    partial class AddtraceidToMetricEntry
+    [Migration("20250520144000_updateexceptionOnLogEntry")]
+    partial class updateexceptionOnLogEntry
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,59 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("CSharpEssentials.LoggerHelper.Telemetry.EF.Models.LogEntry", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ApplicationName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("IdTransaction")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MachineName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("exception")
+                        .HasColumnType("text");
+
+                    b.Property<string>("level")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("message_template")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("properties")
+                        .HasColumnType("text");
+
+                    b.Property<string>("props_test")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("raise_date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LogEntry", "dbo");
+                });
 
             modelBuilder.Entity("CSharpEssentials.LoggerHelper.Telemetry.EF.Models.MetricEntry", b =>
                 {
@@ -44,7 +97,8 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("TraceId")
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<double>("Value")
                         .HasColumnType("double precision");
