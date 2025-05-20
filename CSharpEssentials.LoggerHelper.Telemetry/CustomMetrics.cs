@@ -10,8 +10,7 @@ public static class CustomMetrics {
     }
     public static readonly Meter Meter = new("LoggerHelper.Metrics", "1.0");
     public static int CurrentSecond => DateTime.UtcNow.Second;
-
-
+    //TODO: Aggiungere un pattern per aggiungere le metriche desiderate esternamente !
     public static readonly GaugeWrapper<int> CurrentSecondGauge =
                 new(Meter, "current_second", () => DateTime.UtcNow.Second, "seconds", "Current second of the minute");
 

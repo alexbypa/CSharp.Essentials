@@ -13,14 +13,13 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                     metricProvider
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
-                        .AddOtlpExporter(otlp => {
-                            otlp.Endpoint = new Uri("http://localhost:5133/v1/metrics"); // Porta della tua WebAPI ricevente
-                            otlp.Protocol = OtlpExportProtocol.HttpProtobuf;
-                        })
                         .AddView(instrumentName:"*", new ExplicitBucketHistogramConfiguration {
                             TagKeys = new[] { "trace_id" }
                         })
-                        .AddMeter("LoggerHelper.Metrics") 
+                        .AddReader(new PeriodicExportingMetricReader(new PostgreSqlMetricExporter(
+                            services.BuildServiceProvider()
+                        )))//TODO: Settare gli intervalli !
+                        .AddMeter("LoggerHelper.Metrics")
                         .AddConsoleExporter(); 
                 })
                 .WithTracing(tracerProviderBuilder => {
@@ -30,11 +29,6 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddProcessor(new SimpleActivityExportProcessor(new PostgreSqlTraceExporter(services.BuildServiceProvider())))
-                        //.AddOtlpExporter(otlp =>
-                        //{
-                        //    otlp.Endpoint = new Uri("http://localhost:5133/v1/traces"); // Porta della tua WebAPI ricevente
-                        //    otlp.Protocol = OtlpExportProtocol.HttpProtobuf;
-                        //})
                         .AddConsoleExporter(); // Per vedere le trace anche su console
                 });
 

@@ -16,13 +16,10 @@ using OpenTelemetry;
 var builder = WebApplication.CreateBuilder(args);
 
 #region OpenTelemetry
-
+//TODO: Attiva / Disattiva il listener per i metodi
 builder.Services.AddDbContext<TelemetriesDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("MetricsDb")));
-
-//TODO: Attiva / Disattiva il listener per i metodi
 CustomMetrics.Initialize(builder.Configuration);
-builder.Services.AddHostedService<MetricsWriterService>();
 builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
 builder.Services.AddLoggerTelemetry();
 #endregion
@@ -87,7 +84,6 @@ app.MapControllers();
 
 
 #region OpenTelemetry
-TraceIdMetricListener.Register();
 
 
 app.Use(async (context, next) => {

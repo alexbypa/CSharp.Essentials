@@ -2,59 +2,63 @@
 using System.Diagnostics;
 using Serilog.Events;
 using CSharpEssentials.LoggerHelper;
+using CSharpEssentials.LoggerHelper.Telemetry;
+using System.ComponentModel.DataAnnotations;
 
 namespace LoggerHelper.Demo.Controllers;
 
 [ApiController]
-[Route("[controller]")]
-public class TelemetryDemoController : ControllerBase {
+[Route("api/[controller]")]
+public class OrdineController : ControllerBase {
     private static readonly ActivitySource ActivitySource = new("LoggerHelper");
 
-    [HttpGet("elabora")]
-    public async Task<IActionResult> Elabora() {
-        using var activity = ActivitySource.StartActivity("ElaboraRequest");
-        
-        var request = new DemoRequest();
-        if (Activity.Current != null) 
-            request.IdTransaction = Activity.Current?.TraceId.ToString();
+    [HttpPost("crea")]
+    public async Task<IActionResult> CreaOrdine() {
+        //Ogni StartActivity crea un nuovo Span
+        //Quindi Span potrebbe divetare la action concatenata con il metodo in cui ci troviamo !
+        using var activity = ActivitySource.StartActivity("CreaOrdine");
+
+        var ordine = new OrdineRequest{ ClienteId = 123, Prodotto = "X", Quantita = 5 };
+        ordine.IdTransaction = activity.TraceId.ToString();
+        ordine.Action = "CreaOrdine";
 
         activity?.SetTag("utente", "mario.rossi");
-        //activity?.SetTag("cpu_usage", GetCpuUsage());
-        activity?.SetTag("memoria_mb", GC.GetTotalMemory(false) / 1024 / 1024);
-        activity?.SetTag("db_status", "ok");
+        activity?.SetTag("tipo_operazione", "Creazione ordine");
+        activity?.SetTag("cliente_id", ordine.ClienteId);
 
+        loggerExtension<OrdineRequest>.TraceAsync(ordine, LogEventLevel.Information, null, "Avvio creazione ordine");
 
+        try {
+            // ✅ Sub-Span: Convalida
+            using (var spanValidazione = ActivitySource.StartActivity("Convalida ordine")) {
+                loggerExtension<OrdineRequest>.TraceAsync(ordine, LogEventLevel.Information, null, "Avvio validazione ordine");
+                await Task.Delay(200); // Simula validazione
+                loggerExtension<OrdineRequest>.TraceAsync(ordine, LogEventLevel.Information, null, "Ordine valido");
+            }
 
-        loggerExtension<DemoRequest>.TraceAsync(
-            request,
-            LogEventLevel.Information,
-            null,
-             "Start Demo"
-            );
+            // ✅ Sub-Span: Salvataggio su DB
+            using (var spanDb = ActivitySource.StartActivity("Salvataggio DB")) {
+                loggerExtension<OrdineRequest>.TraceAsync(ordine, LogEventLevel.Information, null, "Inizio persistenza su database");
+                await Task.Delay(350); // Simula lentezza DB
+                loggerExtension<OrdineRequest>.TraceAsync(ordine, LogEventLevel.Information, null, "Ordine salvato correttamente");
+            }
 
-        // Simula un'elaborazione di 300ms
-        await Task.Delay(300);
+            loggerExtension<OrdineRequest>.TraceAsync(ordine, LogEventLevel.Information, null, "Creazione ordine completata con successo");
+        } catch (Exception ex) {
+            loggerExtension<OrdineRequest>.TraceAsync(ordine, LogEventLevel.Error, ex, "Errore nella creazione ordine");
+            throw;
+        }
 
-        loggerExtension<DemoRequest>.TraceAsync(
-            request,
-            LogEventLevel.Information,
-            null,
-             "Interrogo il DB"
-            );
-
-        await Task.Delay(200);
-        loggerExtension<DemoRequest>.TraceAsync(
-            request,
-            LogEventLevel.Information,
-            null,
-            "Finish Demo with success"
-            );
-
-        return Ok("Action completed");
+        return Ok("Ordine creato");
     }
 }
-public class DemoRequest : IRequest {
+
+public class OrdineRequest : IRequest {
     public string IdTransaction { get; set; } = Guid.NewGuid().ToString();
-    public string Action => "Test";
-    public string ApplicationName => "Demo Telemetry";
+    [Required(ErrorMessage = "Action is required")]
+    public string Action { get; set; }
+    public string ApplicationName { get; set; } = "Demo Telemetry";
+    public int ClienteId { get; set; }
+    public string Prodotto { get; set; }
+    public int Quantita { get; internal set; }
 }

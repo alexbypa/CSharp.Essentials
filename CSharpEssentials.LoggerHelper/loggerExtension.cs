@@ -4,6 +4,8 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
+
 #if NET6_0
 using Microsoft.AspNetCore.Builder;
 #endif
@@ -14,7 +16,7 @@ public interface ILoggerRequest {
     public string Action { get; }
     public string ApplicationName { get; }
 }
-public interface IRequest : ILoggerRequest {}
+public interface IRequest : ILoggerRequest { }
 
 public static class LoggerExtensionConfig {
 #if NET6_0
@@ -84,17 +86,22 @@ public class loggerExtension<T> where T : IRequest {
         arguments.Add(Environment.MachineName);
         arguments.Add(Action);
 
+        var spanName = Activity.Current?.DisplayName;
+        var logger = log;
+        if (!string.IsNullOrEmpty(spanName))
+            logger = log.ForContext("SpanName", spanName);
+
         int totPlaceHolders = arguments.Count;
         try {
             var matches = Regex.Matches(message, @"(?<!\{)\{[a-zA-Z_][a-zA-Z0-9_]*\}(?!\})", RegexOptions.None, TimeSpan.FromMilliseconds(200));
             totPlaceHolders = matches.Count;
             if (totPlaceHolders != arguments.Count) {
-                log.Warning("LoggerHelper: Placeholder count mismatch. MessageTemplate: {Message}, Expected: {Expected}, Actual: {Actual}",
+                logger.Warning("LoggerHelper: Placeholder count mismatch. MessageTemplate: {Message}, Expected: {Expected}, Actual: {Actual}",
                 message, matches.Count, arguments.Count);
             }
         } catch (Exception exRegEx) {
-            log.Warning("LoggerHelper: Regex failed to validate placeholders: {Error}", exRegEx.Message);
+            logger.Warning("LoggerHelper: Regex failed to validate placeholders: {Error}", exRegEx.Message);
         }
-        log.Write(level, ex, message, arguments.ToArray());
+        logger.Write(level, ex, message, arguments.ToArray());
     }
 }
