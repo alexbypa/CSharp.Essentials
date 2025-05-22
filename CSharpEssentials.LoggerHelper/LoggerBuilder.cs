@@ -78,23 +78,7 @@ public class LoggerBuilder {
                                     tableName: _serilogConfig.SerilogOption.PostgreSQL.tableName,
                                     schemaName: _serilogConfig.SerilogOption.PostgreSQL.schemaName,
                                     needAutoCreateTable: true,
-                                    columnOptions: PostgreSQLOptions.BuildPostgresColumns(_configuration)
-
-                                    /*
-                                    columnOptions: new Dictionary<string, ColumnWriterBase>
-                                    {
-                                        { "ApplicationName", new SinglePropertyColumnWriter("ApplicationName", PropertyWriteMethod.ToString, NpgsqlDbType.Text) },
-                                        {"message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
-                                        {"message_template", new MessageTemplateColumnWriter(NpgsqlDbType.Text) },
-                                        {"level", new LevelColumnWriter(true, NpgsqlDbType.Varchar) },
-                                        {"raise_date", new TimestampColumnWriter(NpgsqlDbType.Timestamp) },
-                                        {"exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
-                                        {"properties", new LogEventSerializedColumnWriter(NpgsqlDbType.Jsonb) },
-                                        {"props_test", new PropertiesColumnWriter(NpgsqlDbType.Jsonb) },
-                                        {"MachineName", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "l") },
-                                        {"Action", new SinglePropertyColumnWriter("Action", PropertyWriteMethod.ToString, NpgsqlDbType.Text) },
-                                        {"IdTransaction", new SinglePropertyColumnWriter("IdTransaction", PropertyWriteMethod.ToString, NpgsqlDbType.Text) }
-                                 }*/
+                                    columnOptions: PostgreSQLOptions.BuildPostgresColumns(_serilogConfig).GetAwaiter().GetResult()
                                 );
                         }
                         );

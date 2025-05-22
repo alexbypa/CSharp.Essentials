@@ -41,15 +41,16 @@ namespace Test.Controllers.logger {
 
         [HttpGet("usernotfound")]
         public async Task<IActionResult> GetUserNotFound() {
+            int idUser = 23;
             _request.Action = "GetUserNotFound";
-            var response = await _httpClient.GetAsync("api/users/23");
+            var response = await _httpClient.GetAsync($"api/users/{idUser}");
 
             if (!response.IsSuccessStatusCode) {
                 return StatusCode((int)response.StatusCode, "User not found");
             }
 
             var content = await response.Content.ReadAsStringAsync();
-            loggerExtension<Request>.TraceAsync(_request, Serilog.Events.LogEventLevel.Information, null, "send request on page usernotfound");
+            loggerExtension<Request>.TraceAsync(_request, Serilog.Events.LogEventLevel.Information, null, "send request on page {idUser} usernotfound", idUser);
             return Content(content, "application/json");
         }
         [HttpGet(Name = "Info")]
@@ -61,6 +62,6 @@ namespace Test.Controllers.logger {
     class Request : IRequest {
         public string IdTransaction { get; set; }
         public string Action { get; set; }
-        public string ApplicationName { get; set; } = "LoggerHelper";
+        public string ApplicationName { get; set; } = "LoggerHelper Demo";
     }
 }

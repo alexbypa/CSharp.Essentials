@@ -423,6 +423,46 @@ loggerExtension<IRequest>.TraceSync(
 
 ---
 
+## 🔄 Updated PostgreSQL Configuration (v2.1+)
+
+You can now configure custom column mappings for the PostgreSQL sink using the new `ColumnsPostGreSQL` section.
+Additionally, if `addAutoIncrementColumn` is set to `true`, the table will automatically include an `id SERIAL PRIMARY KEY`.
+
+### ✅ Example
+
+```json
+"PostgreSQL": {
+  "connectionString": "<YOUR CONNECTIONSTRING>",
+  "tableName": "LogEntry_temp",
+  "schemaName": "public",
+  "addAutoIncrementColumn": true,
+  "ColumnsPostGreSQL": [
+    { "Name": "Message", "Writer": "Rendered", "Type": "text" },
+    { "Name": "MessageTemplate", "Writer": "Template", "Type": "text" },
+    { "Name": "Level", "Writer": "Level", "Type": "varchar" },
+    { "Name": "TimeStamp", "Writer": "timestamp", "Type": "timestamp" },
+    { "Name": "Exception", "Writer": "Exception", "Type": "text" },
+    { "Name": "Properties", "Writer": "Properties", "Type": "jsonb" },
+    { "Name": "LogEvent", "Writer": "Serialized", "Type": "jsonb" },
+    { "Name": "IdTransaction", "Writer": "Single", "Property": "IdTransaction", "Type": "varchar" },
+    { "Name": "MachineName", "Writer": "Single", "Property": "MachineName", "Type": "varchar" },
+    { "Name": "Action", "Writer": "Single", "Property": "Action", "Type": "varchar" },
+    { "Name": "ApplicationName", "Writer": "Single", "Property": "ApplicationName", "Type": "varchar" }
+  ]
+}
+```
+
+### ℹ️ Notes:
+
+* If `addAutoIncrementColumn` is `true`, LoggerHelper will:
+  * Automatically create the table (if it does not exist)
+  * Add the `id SERIAL PRIMARY KEY` field (if not already present)
+* The column `id` will appear physically at the end of the table unless you manually reorder it in SQL.
+* The entire `ColumnsPostGreSQL` array is **optional**:
+
+  * If omitted, LoggerHelper will apply a default column set compatible with standard structured logs.
+
+---
 ## Swagger Example
 
 | Field           | Description                                   |

@@ -32,6 +32,7 @@ public class PostgreSQL {
     public string tableName { get; set; }
     public string schemaName { get; set; }
     public bool needAutoCreateTable { get; set; }
+    public bool addAutoIncrementColumn { get; set; }
     public ColumnsPostGreSQL[] ColumnsPostGreSQL { get; set; }
 }
 public class ColumnsPostGreSQL {
