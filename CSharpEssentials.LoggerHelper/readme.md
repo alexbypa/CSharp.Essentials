@@ -18,4 +18,4 @@
 * ✅ Modular integration 
 
 ## Basic usage
-Check out the how to use file [here](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md).
+Check out the how to use package [here](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md).
