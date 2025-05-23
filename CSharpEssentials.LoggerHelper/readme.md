@@ -391,8 +391,8 @@ ElasticSearch is ideal for indexing and searching logs at scale. When integrated
 
 ```json
 "ElasticSearch": {
-  "nodeUris": "http://10.0.1.119:9200",
-  "indexFormat": "PixeloApp"
+  "nodeUris": "http://<YOUR_IP>:9200",
+  "indexFormat": "<YOUR_INDEX>"
 }
 ```
 
