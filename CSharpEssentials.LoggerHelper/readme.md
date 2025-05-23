@@ -28,6 +28,7 @@
 * [📣 Telegram Sink](#telegram-sink)
 * [📨 HTML Email Sink](#html-email-sink)
 * [💾 MS SQL Sink](#ms-sql-sink)
+* [🔍 ElasticSearch Sink](#elasticsearch)
 * [🧪 Demo API](#demo-api)
 
 ## 📘 Introduction<a id='introduction'></a>   [🔝](#table-of-contents)
@@ -376,6 +377,30 @@ This sink automatically adds the following custom fields to each log:
 * `ApplicationName`: name of the application logging the message.
 
 ---
+## 🔍 ElasticSearch Sink<a id='elasticsearch'></a>   [🔝](#table-of-contents)
+
+ElasticSearch is ideal for indexing and searching logs at scale. When integrated with **Kibana**, it enables advanced analytics and visualization of log data.
+
+### Benefits
+
+* 🔎 Fast full-text search and filtering
+* 📊 Seamless integration with Kibana for dashboards
+* 📁 Efficient storage and querying for large volumes of structured logs
+
+### Example Configuration
+
+```json
+"ElasticSearch": {
+  "nodeUris": "http://10.0.1.119:9200",
+  "indexFormat": "PixeloApp"
+}
+```
+
+* `nodeUris`: The ElasticSearch node endpoint.
+* `indexFormat`: The format or name of the index that will store log entries.
+
+---
+
 ## 🧪 Demo API<a id='demo-api'></a>   [🔝](#table-of-contents)
 Try live: [Demo Project](https://github.com/alexbypa/CSharpEssentials.LoggerHelper/tree/main/CSharpEssentials.LoggerHelper.Demo)
 
