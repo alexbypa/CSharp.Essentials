@@ -30,8 +30,7 @@
 * [💾 MS SQL Sink](#ms-sql-sink)
 * [🧪 Demo API](#demo-api)
 
-## 📘 Introduction<a id='introduction'></a>
-[🔝 Back to top](#table-of-contents)
+## 📘 Introduction<a id='introduction'></a>[🔝 Back to top](#table-of-contents)
 **LoggerHelper** is a flexible and modular structured logging library for .NET (6.0/8.0) applications based on Serilog. It enables structured, multi-sink logging through a plug-and-play approach.
 
 ### 🔑 Key Benefits:
