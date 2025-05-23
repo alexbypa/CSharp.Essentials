@@ -6,6 +6,20 @@
 
 # 📦 CSharpEssentials.LoggerHelper
 
+## 📜 Version History
+
+* **1.1.2** – Added Middleware
+* **1.1.4** – Removed `TraceAsync` on `finally` block of `RequestResponseLoggingMiddleware`
+* **1.1.6** – Fixed issues detected by CodeQL
+* **1.2.1** – Optimized with test Web API
+* **1.2.2** – Optimized `Properties` handling and Email sink
+* **1.3.1** – Added compatibility with .NET 6.0
+* **2.0.0** – Fixed Email configuration and sink behavior
+* **2.0.2** – Optimized HTML template for middleware
+* **2.0.4** – Rollback: removed .NET 7.0 support
+* **2.0.5** – Fixed `IRequest` interface
+* **2.0.6** – Added external email template support
+
 <a id='table-of-contents'></a>
 ## 📑 Table of Contents
 * 📘[Introduction](#introduction)
