@@ -8,7 +8,7 @@
 
 ## 📑 Table of Contents
 * 📘[Introduction](#introduction)
-* 🚀 <a href='#installation'>Installation</a>
+* 🚀[Installation](#installation)
 * [🐘 PostgreSQL Sink](#postgresql-sink)
 * [📣 Telegram Sink](#telegram-sink)
 * [📨 HTML Email Sink](#html-email-sink)
@@ -48,7 +48,7 @@
 #endif
 ```
 
-## 🚀 [Installation](#installation)
+## 🚀 Installation <a id='installation></a>
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper
 ```
