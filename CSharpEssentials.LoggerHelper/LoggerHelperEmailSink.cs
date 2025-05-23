@@ -65,25 +65,25 @@ public class LoggerHelperEmailSink : ILogEventSink {
         } else {
             template = _defaultTemplate; // embedded fallback
         }
-        var rawMessage = logEvent.RenderMessage();
-        var timestamp = logEvent.Timestamp.ToString("yyyy-MM-dd HH:mm:ss");
-        var level = logEvent.Level.ToString();
-        var levelClass = GetLevelColorClass(logEvent.Level);
+        string rawMessage = logEvent.RenderMessage();
+        string timestamp = logEvent.Timestamp.ToString("yyyy-MM-dd HH:mm:ss");
+        string level = logEvent.Level.ToString();
+        string levelClass = GetLevelColorClass(logEvent.Level);
 
-        var idTransaction = ExtractProperty(logEvent, "IdTransaction");
-        var action = ExtractProperty(logEvent, "Action");
-        var appName = ExtractProperty(logEvent, "ApplicationName");
-        var machineName = ExtractProperty(logEvent, "MachineName");
 
-        return template
+        // Base replacements
+        template = template
             .Replace("{{Timestamp}}", timestamp)
             .Replace("{{Level}}", level)
             .Replace("{{LevelClass}}", levelClass)
-            .Replace("{{IdTransaction}}", idTransaction)
-            .Replace("{{Action}}", action)
-            .Replace("{{ApplicationName}}", appName)
-            .Replace("{{MachineName}}", machineName)
             .Replace("{{Message}}", WebUtility.HtmlEncode(rawMessage));
+
+        // Dynamic replacements for any {{PropertyName}} found in the template
+        foreach (var prop in logEvent.Properties) {
+            template = template.Replace($"{{{{{prop.Key}}}}}", WebUtility.HtmlEncode(prop.Value?.ToString()));
+        }
+
+        return template;
     }
     private string LoadDefaultTemplate() {
         return @"

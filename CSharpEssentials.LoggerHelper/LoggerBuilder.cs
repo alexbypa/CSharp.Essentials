@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
-using NpgsqlTypes;
 using Serilog;
 using Serilog.Formatting.Json;
 using Serilog.Sinks.MSSqlServer;
-using Serilog.Sinks.PostgreSQL;
 using Serilog.Sinks.PostgreSQL.ColumnWriters;
 using System.Data;
 using System.Diagnostics;
@@ -66,7 +64,7 @@ public class LoggerBuilder {
                             wt.Sink(new CustomTelegramSink(
                                 _serilogConfig?.SerilogOption?.TelegramOption?.Api_Key,
                                 _serilogConfig?.SerilogOption?.TelegramOption?.chatId,
-                                new TelegramMarkdownFormatter()));
+                                new LoggerHelperTelegramMarkdownFormatter()));
                         });
                     break;
                 case "PostgreSQL":
@@ -93,7 +91,9 @@ public class LoggerBuilder {
                             AutoCreateSqlTable = _serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.autoCreateSqlTable ?? false,
                             BatchPostingLimit = _serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.batchPostingLimit ?? 100,
                             BatchPeriod = string.IsNullOrEmpty(_serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.period) ? TimeSpan.FromSeconds(10) : TimeSpan.Parse(_serilogConfig.SerilogOption.MSSqlServer.sinkOptionsSection.period),
-                        }, columnOptions: MSSQLServerOptions.GetColumnOptions()
+                        }, 
+                        //columnOptions: MSSQLServerOptions.GetColumnOptions()
+                        columnOptions: MSSQLServerOptions.GetColumnsOptions_v2(_serilogConfig?.SerilogOption.MSSqlServer)
                         ));
                     break;
                 case "ElasticSearch"://TODO: non sono ancora riuscito a trovare i logs su elasticsearch

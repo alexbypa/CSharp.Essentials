@@ -53,6 +53,7 @@ public class GeneralConfig {
 public class MSSqlServer {
     public string? connectionString { get; set; }
     public SinkMsSqlOptionsSection? sinkOptionsSection { get; set; }
+    public string[] additionalColumns { get; set; }
 }
 public class SinkMsSqlOptionsSection {
     public string? tableName { get; set; }

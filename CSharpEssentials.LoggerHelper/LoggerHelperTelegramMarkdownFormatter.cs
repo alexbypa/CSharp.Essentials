@@ -2,7 +2,15 @@
 using Serilog.Formatting;
 
 namespace CSharpEssentials.LoggerHelper;
-public class TelegramMarkdownFormatter : ITextFormatter {
+/// <summary>
+/// Custom formatter for Telegram output using Markdown syntax.
+/// Displays log level with emoji, timestamp, message, exception (if any),
+/// and all properties enriched via ForContext.
+/// </summary>
+internal class LoggerHelperTelegramMarkdownFormatter : ITextFormatter {
+    /// <summary>
+    /// Formats the log event for output to Telegram (Markdown-escaped).
+    /// </summary>
     public void Format(LogEvent logEvent, TextWriter output) {
         string emoji = logEvent.Level switch {
             LogEventLevel.Information => "\u2139\ufe0f", // ℹ️
@@ -26,19 +34,13 @@ public class TelegramMarkdownFormatter : ITextFormatter {
             output.WriteLine("```");
         }
 
-        if (logEvent.Properties.ContainsKey("MachineName"))
-            output.WriteLine($"`Machine`: {Escape(logEvent.Properties["MachineName"].ToString())}");
-
-        if (logEvent.Properties.ContainsKey("IdTransaction"))
-            output.WriteLine($"`Id`: {Escape(logEvent.Properties["IdTransaction"].ToString())}");
-
-        if (logEvent.Properties.ContainsKey("Action"))
-            output.WriteLine($"`Action`: {Escape(logEvent.Properties["Action"].ToString())}");
-
-        if (logEvent.Properties.ContainsKey("ApplicationName"))
-            output.WriteLine($"`ApplicationName`: {Escape(logEvent.Properties["ApplicationName"].ToString())}");
+        foreach (var prop in logEvent.Properties) {
+            output.WriteLine($"`{prop.Key}`: {Escape(prop.Value.ToString())}");
+        }
     }
-
+    /// <summary>
+    /// Escapes Markdown special characters to avoid formatting issues in Telegram.
+    /// </summary>
     private string Escape(string input) {
         return input
             .Replace("_", "\\_")
