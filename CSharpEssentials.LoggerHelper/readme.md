@@ -30,7 +30,7 @@
 * [💾 MS SQL Sink](#ms-sql-sink)
 * [🧪 Demo API](#demo-api)
 
-## 📘 Introduction<a id='introduction'></a>[🔝](#table-of-contents)
+## 📘 Introduction<a id='introduction'></a>   [🔝](#table-of-contents)
 **LoggerHelper** is a flexible and modular structured logging library for .NET (6.0/8.0) applications based on Serilog. It enables structured, multi-sink logging through a plug-and-play approach.
 
 ### 🔑 Key Benefits:
@@ -51,8 +51,7 @@
 #endif
 ```
 
-## 🚀 Installation <a id='installation'></a>
-[🔝 Back to top](#table-of-contents)
+## 🚀 Installation <a id='installation'></a>    [🔝](#table-of-contents)
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper
 ```
@@ -156,8 +155,7 @@ Example `appsettings.LoggerHelper.json` configuration (⚠️ or `appsettings.Lo
   }
 }
 ```
-## 🐘 PostgreSQL Sink<a id='postgresql-sink'></a>
-[🔝 Back to top](#table-of-contents)
+## 🐘 PostgreSQL Sink<a id='postgresql-sink'></a>   [🔝](#table-of-contents)
 
 LoggerHelper supports logging to PostgreSQL with optional custom schema definition.
 
@@ -188,8 +186,7 @@ If custom `ColumnsPostGreSQL` is defined, logs will include all specified fields
 
 > 🧩 Tip: PostgreSQL sink is ideal for deep analytics and long-term log storage.
 
-## 🐘 Telegram Sink<a id='telegram-sink'></a>
-[🔝 Back to top](#table-of-contents)
+## 🐘 Telegram Sink<a id='telegram-sink'></a>   [🔝](#table-of-contents)
 LoggerHelper supports Telegram notifications to alert on critical events.
 
 > ⚠️ **Recommended Levels**: Use only `Error` or `Fatal` to avoid exceeding Telegram rate limits.
@@ -240,8 +237,7 @@ await _logger.TraceAsync(
 );
 ```
 
-## 📨 HTML Email Sink<a id='html-email-sink'></a>
-[🔝 Back to top](#table-of-contents)
+## 📨 HTML Email Sink<a id='html-email-sink'></a>   [🔝](#table-of-contents)
 ---
 
 ## ⚠️ Version 2.0.0 - Breaking Change
@@ -333,8 +329,7 @@ Then, in the `appsettings.LoggerHelper.json` configuration file, set:
 
 If the file is missing or invalid, LoggerHelper will **fall back to the internal default template**, ensuring backward compatibility.
 ---
-## 💾 MS SQL Sink<a id='ms-sql-sink'></a>
-[🔝 Back to top](#table-of-contents)
+## 💾 MS SQL Sink<a id='ms-sql-sink'></a>    [🔝](#table-of-contents)
 This sink writes logs to a Microsoft SQL Server table and supports additional context properties out of the box.
 
 ### Configuration Example
@@ -381,8 +376,7 @@ This sink automatically adds the following custom fields to each log:
 * `ApplicationName`: name of the application logging the message.
 
 ---
-## 🧪 Demo API<a id='demo-api'></a>
-[🔝 Back to top](#table-of-contents)
+## 🧪 Demo API<a id='demo-api'></a>   [🔝](#table-of-contents)
 Try live: [Demo Project](https://github.com/alexbypa/CSharpEssentials.LoggerHelper/tree/main/CSharpEssentials.LoggerHelper.Demo)
 
 ### Example Endpoint
