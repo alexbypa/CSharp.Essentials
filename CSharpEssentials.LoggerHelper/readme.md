@@ -183,9 +183,7 @@ If custom `ColumnsPostGreSQL` is defined, logs will include all specified fields
 
 > 🧩 Tip: PostgreSQL sink is ideal for deep analytics and long-term log storage.
 
-## 📣 Telegram Sink
-[#telegram-sink](#telegram-sink)
-
+## 🐘 Telegram Sink<a id='telegram-sink'></a>
 LoggerHelper supports Telegram notifications to alert on critical events.
 
 > ⚠️ **Recommended Levels**: Use only `Error` or `Fatal` to avoid exceeding Telegram rate limits.
@@ -236,8 +234,7 @@ await _logger.TraceAsync(
 );
 ```
 
-## 📨 HTML Email Sink
-
+## 📨 HTML Email Sink<a id='html-email-sink'></a>
 ---
 
 ## ⚠️ Version 2.0.0 - Breaking Change
@@ -329,8 +326,7 @@ Then, in the `appsettings.LoggerHelper.json` configuration file, set:
 
 If the file is missing or invalid, LoggerHelper will **fall back to the internal default template**, ensuring backward compatibility.
 ---
-## 💾 MS SQL Sink
-
+## 💾 MS SQL Sink<a id='ms-sql-sink'></a>
 This sink writes logs to a Microsoft SQL Server table and supports additional context properties out of the box.
 
 ### Configuration Example
@@ -377,9 +373,7 @@ This sink automatically adds the following custom fields to each log:
 * `ApplicationName`: name of the application logging the message.
 
 ---
-
-## 🧪 Demo API
-
+## 🧪 Demo API<a id='demo-api'></a>
 Try live: [Demo Project](https://github.com/alexbypa/CSharpEssentials.LoggerHelper/tree/main/CSharpEssentials.LoggerHelper.Demo)
 
 ### Example Endpoint
