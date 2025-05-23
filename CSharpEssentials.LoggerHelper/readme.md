@@ -7,9 +7,8 @@
 # 📦 CSharpEssentials.LoggerHelper
 
 ## 📑 Table of Contents
-
-* [📘 Introduction](#introduction)
-* [🛠️ Installation](#installation)
+* 📘[Introduction](#introduction)
+* 🚀 <a href='#installation'>Installation</a>
 * [🐘 PostgreSQL Sink](#postgresql-sink)
 * [📣 Telegram Sink](#telegram-sink)
 * [📨 HTML Email Sink](#html-email-sink)
@@ -28,8 +27,7 @@
 
 👉 For more examples, refer to the detailed configuration sections below.
 
-## Introduction
-
+## 📘 Introduction<a id='introduction'></a>
 **LoggerHelper** is a flexible and modular structured logging library for .NET (6.0/8.0) applications based on Serilog. It enables structured, multi-sink logging through a plug-and-play approach.
 
 ### 🔑 Key Benefits:
@@ -50,8 +48,7 @@
 #endif
 ```
 
-## 🚀 Installation
-
+## 🚀 [Installation](#installation)
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper
 ```
@@ -155,7 +152,7 @@ Example `appsettings.LoggerHelper.json` configuration (⚠️ or `appsettings.Lo
   }
 }
 ```
-## 🐘 PostgreSQL Sink(#postgresql-sink)
+[## 🐘 PostgreSQL Sink](#postgresql-sink)
 
 LoggerHelper supports logging to PostgreSQL with optional custom schema definition.
 
@@ -187,6 +184,7 @@ If custom `ColumnsPostGreSQL` is defined, logs will include all specified fields
 > 🧩 Tip: PostgreSQL sink is ideal for deep analytics and long-term log storage.
 
 ## 📣 Telegram Sink
+[#telegram-sink](#telegram-sink)
 
 LoggerHelper supports Telegram notifications to alert on critical events.
 
