@@ -120,7 +120,22 @@ Example `appsettings.LoggerHelper.json` configuration (⚠️ or `appsettings.Lo
           "connectionString": "<YOUR CONNECTIONSTRING>",
           "tableName": "public",
           "schemaName": "dbo",
-          "needAutoCreateTable": true
+          "needAutoCreateTable": true,          
+          "addAutoIncrementColumn": true,
+          "ColumnsPostGreSQL": [
+              {"Name": "Message","Writer": "Rendered","Type": "text"},
+              {"Name": "MessageTemplate","Writer": "Template","Type": "text"},
+              {"Name": "Level","Writer": "Level","Type": "varchar"},
+              {"Name": "TimeStamp","Writer": "timestamp","Type": "timestamp"},
+              {"Name": "Exception","Writer": "Exception","Type": "text"},
+              {"Name": "Properties","Writer": "Properties","Type": "jsonb"},
+              {"Name": "LogEvent","Writer": "Serialized","Type": "jsonb"},
+              {"Name": "IdTransaction","Writer": "Single","Property": "IdTransaction","Type": "varchar"},
+              {"Name": "MachineName","Writer": "Single","Property": "MachineName","Type": "varchar"},
+              {"Name": "Action","Writer": "Single","Property": "Action","Type": "varchar"},
+              {"Name": "ApplicationName","Writer": "Single","Property": "ApplicationName","Type": "varchar"}
+          ]
+
         },
         "ElasticSearch": {
           "nodeUris": "http://10.0.1.100:9200",
@@ -186,6 +201,8 @@ If custom `ColumnsPostGreSQL` is defined, logs will include all specified fields
 
 
 > 🧩 Tip: PostgreSQL sink is ideal for deep analytics and long-term log storage.
+> ⚠️ **Note:** When using `ColumnsPostGreSQL`, always enable `SelfLog` during development to detect unsupported or misconfigured column definitions. Invalid types or property names will be silently ignored unless explicitly logged via Serilog’s internal diagnostics.
+
 
 ## 🐘 Telegram Sink<a id='telegram-sink'></a>   [🔝](#table-of-contents)
 LoggerHelper supports Telegram notifications to alert on critical events.
