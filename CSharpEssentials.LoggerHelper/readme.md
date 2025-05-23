@@ -1,4 +1,4 @@
-﻿![Frameworks](https://img.shields.io/badge/.NET-6.0%20%20%7C%208.0-blue)
+﻿[![Frameworks](https://img.shields.io/badge/.NET-6.0%20%20%7C%208.0-blue)](https://dotnet.microsoft.com/en-us/download)
 [![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml)
 [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 [![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
@@ -6,161 +6,82 @@
 
 # 📦 CSharpEssentials.LoggerHelper
 
+## 📑 Table of Contents
+
+* [📘 Introduction](#introduction)
+* [🛠️ Installation](#installation)
+* [🐘 PostgreSQL Sink](#postgresql-sink)
+* [📣 Telegram Sink](#telegram-sink)
+* [📨 HTML Email Sink](#html-email-sink)
+* [💾 MS SQL Sink](#ms-sql-sink)
+* [🧪 Demo API](#demo-api)
+
+## 📊 Summary Table
+
+| Sink            | Configuration Key   | Required Settings                 | Additional Notes                                                        |
+| --------------- | ------------------- | --------------------------------- | ----------------------------------------------------------------------- |
+| PostgreSQL Sink | `PostgreSql`        | ConnectionString, TableName       | Logs are mapped automatically to predefined columns                     |
+| Email Sink      | `LoggerHelperEmail` | From, Host, Port, To, Credentials | Since 2.0.0 the section has been renamed from `Email`                   |
+| Telegram Sink   | `Telegram`          | BotToken, ChatId                  | Use [https://t.me/BotFather](https://t.me/BotFather) to create your bot |
+| File Sink       | `File`              | Path                              | Standard Serilog file sink                                              |
+| Console Sink    | `Console`           | Level                             | No extra setup required                                                 |
+
+👉 For more examples, refer to the detailed configuration sections below.
+
 ## Introduction
 
-A flexible and modular structured logging library for .NET ( 6.0/8.0 ) applications based on Serilog. Easily configure logging to Console, File, Email, PostgreSQL, ElasticSearch via simple JSON configuration. Includes automatic placeholder validation and multi-sink orchestration.
+**LoggerHelper** is a flexible and modular structured logging library for .NET (6.0/8.0) applications based on Serilog. It enables structured, multi-sink logging through a plug-and-play approach.
 
-It allows you to:
+### 🔑 Key Benefits:
 
-* Send **structured logs** with guaranteed fields like `Action`, `IdTransaction`, `ApplicationName`, `MachineName`
-* Dynamically enable **multi-sink** support (Console, File, HTML Email, PostgreSQL, ElasticSearch)
-* **Automatically validate** message `{}` placeholders
-* Centralize configuration through **LoggerBuilder**, just by editing the **appsettings.json** file
+* ✅ Structured logs: `Action`, `IdTransaction`, `ApplicationName`, `MachineName`
+* ✅ Multi-sink: Console, File, Email (HTML), PostgreSQL, ElasticSearch, Telegram
+* ✅ Placeholder validation: avoids runtime `{}` mismatch errors
+* ✅ One config file: `appsettings.LoggerHelper.json`
+* ✅ Modular integration via `LoggerBuilder`
 
-> In common usage scenarios, it is advisable to avoid logging `Information` level events to sinks like Telegram, MSSQL, or PostgreSQL. This practice prevents issues such as HTTP 429 (rate limits) on Telegram and reduces risks of deadlocks or insufficient storage in database systems.
----
+> ⚠️ **Important for developers:** In development mode, LoggerHelper **automatically uses** `appsettings.LoggerHelper.debug.json`. This allows safe testing without affecting production settings.
 
-## 📚 Table of Contents
-
-* [✨ Features](#-features)
-* [🚀 Installation](#-installation)
-* [⚙️ Configuration](#%ef%b8%8f-configuration)
-* [📌 Log Levels](#-log-levels)
-* [🧪 ASP.NET Core Setup](#-aspnet-core-setup)
-* [🧑‍💻 Usage Examples](#-usage-examples)
-* [🧬 Database Schema](#-database-schema)
-* [🔁 Demo API](#-demo-api)
-* [🙌 Contributing](#-contributing)
-* [📄 License](#-license)
-* [👤 Author](#-author)
-
----
-
-## ✨ Features
-
-* ✅ Multi-sink logging support:
-
-  * Console
-  * File
-  * SQL Server
-  * PostgreSQL
-  * Elasticsearch
-  * Email (customizable HTML template support)
-  * Telegram
-
-* * ✅ Structured logs with custom properties
-* ✅ Sync and async logging
-* ✅ Request/response middleware logger
-* ✅ Transaction ID, action, machine name
-* ✅ Custom levels per sink
-* ✅ JSON configuration via `appsettings.LoggerHelper.json`
-
----
-## ⚠️ Version 2.0.0 - Breaking Change
-
-> Starting from version **2.0.0**, the `Email` configuration section has been **renamed**.
->
-> If you are upgrading from `1.x.x`, you MUST update your `appsettings.LoggerHelper.json`.
-
-Old (before 2.0.0):
-
-```json
-"Email": {
-  "From": "...",
-  "Host": "...",
-  "Port": 587,
-  "To": ["..."],
-  "CredentialHost": "...",
-  "CredentialPassword": "..."
-}
+```csharp
+#if DEBUG
+    .AddJsonFile("appsettings.LoggerHelper.debug.json")
+#else
+    .AddJsonFile("appsettings.LoggerHelper.json")
+#endif
 ```
 
-New (since 2.0.0):
-
-```json
-"Email": {
-  "From": "...",
-  "Host": "...",
-  "Port": 587,
-  "To": "...",
-  "username": "...",
-  "password": "...",
-  "EnableSsl": true
-}
-```
-## 🚨 Why Email Handling Changed
-
-Starting from version 2.0.0, LoggerHelper **no longer uses** the standard [Serilog.Sinks.Email](https://github.com/serilog/serilog-sinks-email) for sending emails.
-
-**Reason:**  
-The official Serilog Email Sink does not support custom body formatting (HTML templates, structured logs, color coding, etc).  
-It only supports plain text messages generated via `RenderMessage()`, without the ability to control the message content.
-
-🔎 See discussion: [GitHub Issue - serilog/serilog-sinks-email](https://github.com/serilog/serilog-sinks-email/issues/44)
-
-**What changed:**  
-- LoggerHelper now uses a **custom internal SMTP sink**: `LoggerHelperEmailSink`.
-- This allows sending fully customized **HTML-formatted emails**.
-- Supports dynamic coloring based on log level (Information, Warning, Error).
-- Supports secure SMTP with SSL/TLS.
-
-✅ No third-party dependencies added.  
-✅ Full control over email appearance and content.
-
-### 🖌️ Email Template Customization (optional)
-
-LoggerHelper allows you to customize the **HTML structure and appearance** of the email body.
-You can provide an external `.html` file with placeholders like:
-
-```html
-{{Timestamp}}, {{Level}}, {{Message}}, {{Action}}, {{IdTransaction}}, {{MachineName}}, {{ApplicationName}}, {{LevelClass}}
-```
-
-Then, in the constructor or config, set:
-
-```json
-"LoggerHelper": {
-  "SerilogOption": {
-    "Email": {
-      ...
-      "TemplatePath": "Templates/email-template-default.html"
-    }
-  }
-}
-```
-
-## If the file is missing or invalid, LoggerHelper will **fall back to the internal default template**, ensuring backward compatibility.
-
----
-> **ℹ️ Important note for development testing**  
->  
-> During the development phase, **LoggerHelper** loads its configuration from the `appsettings.LoggerHelper.debug.json` file.  
-> This behavior is controlled by the following directive:
-> 
-> ```csharp
-> #if DEBUG
->     .AddJsonFile("appsettings.LoggerHelper.debug.json")
-> #else
->     .AddJsonFile("appsettings.LoggerHelper.json")
-> #endif
-> ```
->  
-> Make sure to create and properly configure the `appsettings.LoggerHelper.debug.json` file when running tests locally.  
-> In **Release** mode, the configuration will instead be loaded from `appsettings.LoggerHelper.json`.
-
-
----
 ## 🚀 Installation
 
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper
 ```
 
----
-
 ## ⚙️ Configuration
 
-Create a file named `appsettings.LoggerHelper.json` in your project root:
+The full configuration JSON can be found in the original README. Important:
+
+* Define the `SerilogCondition` for each sink with the desired `Level`
+* If `Level` is empty, the sink is ignored
+
+## ⚙️ General Setup
+
+To activate LoggerHelper and enable request/response logging, configure your application in `Program.cs` as follows:
+
+```csharp
+#if NET6_0
+    builder.AddLoggerConfiguration();
+#else
+    builder.Services.AddLoggerConfiguration(builder);
+#endif
+```
+
+Enable HTTP middleware logging:
+
+```csharp
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
+```
+
+Example `appsettings.LoggerHelper.json` configuration (⚠️ or `appsettings.LoggerHelper.debug.json` during development):
 
 ```json
 {
@@ -179,13 +100,13 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
         {"Sink": "MSSqlServer","Level": []},
         {"Sink": "Email","Level": []},
         {"Sink": "PostgreSQL","Level": ["Information","Warning","Error","Fatal"]},
-        {"Sink": "Telegram","Level": []},
+        {"Sink": "Telegram","Level": ["Fatal"]},
         {"Sink": "Console","Level": [ "Information" ]},
         {"Sink": "File","Level": ["Information","Warning","Error","Fatal"]}
       ],
       "SerilogOption": {
         "File": {
-          "Path": "D:\\Logs\\ServerDemo",
+          "Path": "D:\Logs\ServerDemo",
           "RollingInterval": "Day",
           "RetainedFileCountLimit": 7,
           "Shared": true
@@ -222,12 +143,8 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
             "period": "0.00:00:10"
           },
           "columnOptionsSection": {
-            "addStandardColumns": [
-              "LogEvent"
-            ],
-            "removeStandardColumns": [
-              "Properties"
-            ]
+            "addStandardColumns": ["LogEvent"],
+            "removeStandardColumns": ["Properties"]
           }
         },
         "GeneralConfig": {
@@ -238,304 +155,251 @@ Create a file named `appsettings.LoggerHelper.json` in your project root:
   }
 }
 ```
+## 🐘 PostgreSQL Sink(#postgresql-sink)
 
-> ⚠️ **Important:**
-> The logger will **only write to a sink** if the `Level` array in `SerilogCondition` contains at least one valid log level (e.g., `"Error"`, `"Warning"`).
-> If the `Level` array is empty (e.g., `"Level": []`), **that sink will be ignored**, and **`WriteTo`**\*\* will not be applied\*\*, even if the sink configuration exists.
->
-> 🧩 PostgreSQL is preconfigured with a default column mapping for logs. The following columns are used automatically:
-> `message`, `message_template`, `level`, `raise_date`, `exception`, `properties`, `props_test`, `machine_name`. No custom mapping is required in the JSON.
+LoggerHelper supports logging to PostgreSQL with optional custom schema definition.
 
----
+* If `ColumnsPostGreSQL` is **not set**, the following default columns will be created and used:
 
-## 📌 Log Levels
+  * `message`, `message_template`, `level`, `raise_date`, `exception`, `properties`, `props_test`, `machine_name`
+* If `ColumnsPostGreSQL` is defined, LoggerHelper will use the exact fields provided.
+* Setting `addAutoIncrementColumn: true` will add an `id SERIAL PRIMARY KEY` automatically.
 
-> 🖼️ Example of a Telegram-formatted log message:
-> ![Telegram Sample](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper/img/telegramSample.png)
->
-> 💬 **Telegram Notice:** When using the Telegram sink, log messages are formatted for human readability, and may include emojis or markdown. For this reason, it's strongly recommended to set the `Level` to only `Error` or `Fatal` to avoid exceeding Telegram's rate limits and to prevent excessive message noise.
-
-> 🛠 **Tip:** Before publishing to production, test each sink you plan to use. You can enable Serilog self-logging to capture internal errors using:
->
-> ```csharp
-> Serilog.Debugging.SelfLog.Enable(msg =>
->     File.AppendAllText(Path.Combine(logPath, "serilog-selflog.txt"), msg));
-> ```
->
-> Replace `logPath` with your local or shared log directory. This helps identify misconfigurations or sink loading issues early.
-
-Each sink only receives log levels specified in the `SerilogCondition` array. If a sink's `Level` array is **empty**, that sink will be **ignored entirely**, and no log will be written to it, even if it's configured elsewhere:
-
-| Sink          | Levels                             |
-| ------------- | ---------------------------------- |
-| Console       | Information, Warning, Error, Fatal |
-| File          | Error, Fatal                       |
-| PostgreSQL    | Error, Fatal                       |
-| MSSqlServer   | Error, Fatal                       |
-| Telegram      | Fatal                              |
-| Elasticsearch | *(disabled)*                       |
-
----
-
-## 🧪 ASP.NET Core Setup
-
-### Request/Response Logging Middleware
-
-The LoggerHelper package includes a built-in middleware that logs every incoming HTTP request and outgoing response automatically. It captures:
-
-* HTTP method, path, status code
-* Request body (if available)
-* Response body (if possible)
-* Duration in milliseconds
-
-To enable it, just call:
-
-```csharp
-app.UseMiddleware<RequestResponseLoggingMiddleware>();
-```
-
-> 📌 This middleware uses `LogEventLevel.Information` by default and is automatically compatible with sinks that accept that level.
-
-## 🔥 Register the logger in `Program.cs`
-
-## 🚀 Important Setup
-
-> ⚠️ **IMPORTANT**:
-> You **must** call `AddLoggerConfiguration` during the `Program.cs` setup.
-> **Without it, LoggerHelper will NOT work.**
-> No logs will be captured, and no middleware will be active.
-
-> ℹ️ **Important**: depending on the target framework version, you must configure `LoggerHelper` differently.
-
-If you are using **.NET 6.0**, you must call the configuration directly on the `builder`.
-If you are using **.NET 8.0**, you must call it on the `builder.Services`.
-
-Here’s how you should do it:
-
-```csharp
-using CSharpEssentials.LoggerHelper;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Add LoggerHelper configuration
-#if NET6_0
-    builder.AddLoggerConfiguration();
-#else
-    builder.Services.AddLoggerConfiguration(builder);
-#endif
-
-builder.Services.AddControllers();
-
-var app = builder.Build();
-
-// Logs every HTTP request and response
-app.UseMiddleware<RequestResponseLoggingMiddleware>();
-
-app.MapControllers();
-app.Run();
-```
-
----
-
-### 🧠 Explanation
-
-| Target Framework | Usage                                               |
-| :--------------- | :-------------------------------------------------- |
-| .NET 6.0         | `builder.AddLoggerConfiguration();`                 |
-| .NET 8.0         | `builder.Services.AddLoggerConfiguration(builder);` |
-
-This ensures full compatibility across different .NET versions.
-
----
-
-## 🧑‍💻 Usage Examples
-
-### 🔹 With request object
-
-```csharp
-loggerExtension<MyRequest>.TraceSync(
-    request,
-    LogEventLevel.Information,
-    null,
-    "Operation successful: {OperationName}",
-    "CreateUser"
-);
-```
-
-### 🔹 Async logging
-
-```csharp
-await loggerExtension<MyRequest>.TraceAsync(
-    request,
-    LogEventLevel.Error,
-    exception,
-    "Error during operation: {OperationName}",
-    "UpdateUser"
-);
-```
-
-### 🔹 Without request object
-
-```csharp
-loggerExtension<IRequest>.TraceSync(
-    null,
-    LogEventLevel.Warning,
-    null,
-    "System warning: {WarningMessage}",
-    "Low disk space"
-);
-```
-
----
-
-## Database Schema
-
-### PostgreSQL
-
-| Column            | Description                |
-| ----------------- | -------------------------- |
-| ApplicationName   | Application name           |
-| message           | Message content            |
-| message\_template | Message template           |
-| level             | Log level                  |
-| raise\_date       | Log timestamp              |
-| exception         | Exception details          |
-| properties        | Serialized properties      |
-| props\_test       | Additional serialized data |
-| MachineName       | Machine name               |
-| Action            | Action name                |
-| IdTransaction     | Unique transaction ID      |
-
-### SQL Server
-
-| Column          | Type     | Description           |
-| --------------- | -------- | --------------------- |
-| Message         | nvarchar | Message content       |
-| MessageTemplate | nvarchar | Message template      |
-| Level           | nvarchar | Log level             |
-| TimeStamp       | datetime | Log timestamp         |
-| Exception       | nvarchar | Exception details     |
-| Properties      | nvarchar | Serialized properties |
-| LogEvent        | nvarchar | Serialized log event  |
-| IdTransaction   | varchar  | Unique transaction ID |
-| MachineName     | varchar  | Machine name          |
-| Action          | varchar  | Action name           |
-
----
-
-## 🔄 Updated PostgreSQL Configuration (v2.1+)
-
-You can now configure custom column mappings for the PostgreSQL sink using the new `ColumnsPostGreSQL` section.
-Additionally, if `addAutoIncrementColumn` is set to `true`, the table will automatically include an `id SERIAL PRIMARY KEY`.
-
-### ✅ Example
+Example configuration:
 
 ```json
 "PostgreSQL": {
-  "connectionString": "<YOUR CONNECTIONSTRING>",
-  "tableName": "LogEntry_temp",
+  "connectionString": "...",
+  "tableName": "Logs",
   "schemaName": "public",
   "addAutoIncrementColumn": true,
   "ColumnsPostGreSQL": [
     { "Name": "Message", "Writer": "Rendered", "Type": "text" },
-    { "Name": "MessageTemplate", "Writer": "Template", "Type": "text" },
-    { "Name": "Level", "Writer": "Level", "Type": "varchar" },
-    { "Name": "TimeStamp", "Writer": "timestamp", "Type": "timestamp" },
-    { "Name": "Exception", "Writer": "Exception", "Type": "text" },
-    { "Name": "Properties", "Writer": "Properties", "Type": "jsonb" },
-    { "Name": "LogEvent", "Writer": "Serialized", "Type": "jsonb" },
-    { "Name": "IdTransaction", "Writer": "Single", "Property": "IdTransaction", "Type": "varchar" },
-    { "Name": "MachineName", "Writer": "Single", "Property": "MachineName", "Type": "varchar" },
-    { "Name": "Action", "Writer": "Single", "Property": "Action", "Type": "varchar" },
-    { "Name": "ApplicationName", "Writer": "Single", "Property": "ApplicationName", "Type": "varchar" }
+    { "Name": "Level", "Writer": "Level", "Type": "varchar" }
   ]
 }
 ```
+## 🧪 PostgreSQL Table Structure
 
-### ℹ️ Notes:
+If custom `ColumnsPostGreSQL` is defined, logs will include all specified fields.
 
-* If `addAutoIncrementColumn` is `true`, LoggerHelper will:
-  * Automatically create the table (if it does not exist)
-  * Add the `id SERIAL PRIMARY KEY` field (if not already present)
-* The column `id` will appear physically at the end of the table unless you manually reorder it in SQL.
-* The entire `ColumnsPostGreSQL` array is **optional**:
 
-  * If omitted, LoggerHelper will apply a default column set compatible with standard structured logs.
+> 🧩 Tip: PostgreSQL sink is ideal for deep analytics and long-term log storage.
 
----
-## Swagger Example
+## 📣 Telegram Sink
 
-| Field           | Description                                   |
-| --------------- | --------------------------------------------- |
-| action          | Action name                                   |
-| message         | Text to log                                   |
-| applicationName | Application name                              |
-| level           | Log level (Information, Warning, Error, etc.) |
+LoggerHelper supports Telegram notifications to alert on critical events.
 
----
+> ⚠️ **Recommended Levels**: Use only `Error` or `Fatal` to avoid exceeding Telegram rate limits.
 
-## HTML Email Screenshot
+### 🛠 Example Configuration
 
-| Field           | Value                                |
-| --------------- | ------------------------------------ |
-| Timestamp       | 2025-05-10 17:45:00                  |
-| Level           | Error                                |
-| IdTransaction   | 7e7b9f65-ed13-439a-852b-18d9d28dd6ec |
-| MachineName     | PIXELO30                             |
-| Action          | GetUserDetails                       |
-| ApplicationName | LoggerHelperDemo                     |
-| Message         | Error occurred during request        |
+```json
+"TelegramOption": {
+  "chatId": "<YOUR_CHAT_ID>",
+  "Api_Key": "<YOUR_BOT_API_KEY>"
+}
+```
 
----
+To configure a Telegram Bot:
 
-## Demo API
+1. Open Telegram and search for [@BotFather](https://t.me/BotFather)
+2. Create a new bot and copy the API token
+3. Use [https://api.telegram.org/bot<YourBotToken>/getUpdates](https://core.telegram.org/bots/api#getupdates) to get your chat ID after sending a message to the bot
 
-Try it live with a demo Web API to validate each log level dynamically:
+> 📸 Example of a formatted Telegram message:
+> ![Telegram Sample](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper/img/telegramSample.png)
 
-| Method | Endpoint        | Query Parameters             | Description                                     |
-| ------ | --------------- | ---------------------------- | ----------------------------------------------- |
-| GET    | `/loggerHelper` | `action`, `message`, `level` | Sends a structured log with the specified level |
+## 💡 Usage Examples
 
-🔗 [GitHub Repository (Demo)](https://github.com/alexbypa/CSharpEssentials.LoggerHelper/tree/main/CSharpEssentials.LoggerHelper.Demo) 
+```csharp
+_logger.TraceSync(
+    new Request {
+        IdTransaction = Guid.NewGuid().ToString(),
+        Action = "SampleAction",
+        ApplicationName = "MyApp"
+    },
+    LogEventLevel.Information,
+    null,
+    "Sample log message: {Parameter}",
+    123
+);
+```
 
----
+Or async:
 
-## 🧪 Troubleshooting
+```csharp
+await _logger.TraceAsync(
+    request,
+    LogEventLevel.Error,
+    ex,
+    "Something failed: {ErrorMessage}",
+    ex.Message
+);
+```
 
-### File access denied?
-
-* ❌ If you get `System.IO.IOException` like: *"file is being used by another process"*, make sure:
-
-  * No other process (e.g. text editor, logging library) is locking the file.
-  * The file is not open in **append-only exclusive mode**.
-* ✅ For self-log output (`serilog-selflog.txt`), ensure that:
-
-  * The target folder exists.
-  * The executing process has **write permission** to it.
-  * Use `FileShare.ReadWrite` if needed.
-
-### Sink not writing logs?
-
-* ✅ Make sure the `Level` array in `SerilogCondition` is **not empty**.
-* ✅ Check `serilog-selflog.txt` if enabled — it often reveals silent misconfigurations.
+## 📨 HTML Email Sink
 
 ---
 
-## 🙌 Contributing
+## ⚠️ Version 2.0.0 - Breaking Change
 
-Contributions, ideas and issues are welcome!
-Feel free to open a pull request or discussion on [GitHub](https://github.com/alexbypa/CSharp.Essentials).
+> Starting from version **2.0.0**, the `Email` configuration section has been **renamed**.
+>
+> If you are upgrading from `1.x.x`, you MUST update your `appsettings.LoggerHelper.json`.
+
+Old (before 2.0.0):
+
+```json
+"Email": {
+  "From": "...",
+  "Host": "...",
+  "Port": 587,
+  "To": ["..."],
+  "CredentialHost": "...",
+  "CredentialPassword": "..."
+}
+```
+
+New (since 2.0.0):
+
+```json
+"Email": {
+  "From": "...",
+  "Host": "...",
+  "Port": 587,
+  "To": "...",
+  "username": "...",
+  "password": "...",
+  "EnableSsl": true
+}
+```
+
+## 🚨 Why Email Handling Changed
+
+Starting from version 2.0.0, LoggerHelper **no longer uses** the standard [Serilog.Sinks.Email](https://github.com/serilog/serilog-sinks-email) for sending emails.
+
+**Reason:**
+The official Serilog Email Sink does not support custom body formatting (HTML templates, structured logs, color coding, etc).
+It only supports plain text messages generated via `RenderMessage()`, without the ability to control the message content.
+
+🔎 See discussion: [GitHub Issue - serilog/serilog-sinks-email](https://github.com/serilog/serilog-sinks-email/issues/44)
+
+**What changed:**
+
+* LoggerHelper now uses a **custom internal SMTP sink**: `LoggerHelperEmailSink`.
+* This allows sending fully customized **HTML-formatted emails**.
+* Supports dynamic coloring based on log level (Information, Warning, Error).
+* Supports secure SMTP with SSL/TLS.
+
+✅ No third-party dependencies added.
+✅ Full control over email appearance and content.
+
+Since v2.0.0, LoggerHelper no longer uses `Serilog.Sinks.Email`. It ships with `LoggerHelperEmailSink`, allowing:
+
+* ✅ Full HTML customization via external template
+* ✅ Dynamic styling based on log level
+* ✅ Secure SMTP (SSL/TLS)
+
+Example HTML placeholders:
+
+```html
+{{Timestamp}}, {{Level}}, {{Message}}, {{Action}}, {{IdTransaction}}, {{MachineName}}, {{ApplicationName}}, {{LevelClass}}
+```
+
+### 🖌️ Email Template Customization (optional)
+
+LoggerHelper allows you to customize the **HTML structure and appearance** of the email body.
+You can provide an external `.html` file with placeholders like:
+
+```html
+{{Timestamp}}, {{Level}}, {{Message}}, {{Action}}, {{IdTransaction}}, {{MachineName}}, {{ApplicationName}}, {{LevelClass}}
+```
+
+Then, in the `appsettings.LoggerHelper.json` configuration file, set:
+
+```json
+"LoggerHelper": {
+  "SerilogOption": {
+    "Email": {
+      ...
+      "TemplatePath": "Templates/email-template-default.html"
+    }
+  }
+}
+```
+
+If the file is missing or invalid, LoggerHelper will **fall back to the internal default template**, ensuring backward compatibility.
+---
+## 💾 MS SQL Sink
+
+This sink writes logs to a Microsoft SQL Server table and supports additional context properties out of the box.
+
+### Configuration Example
+
+```json
+"MSSqlServer": {
+  "connectionString": "<YOUR CONNECTIONSTRING>",
+  "sinkOptionsSection": {
+    "tableName": "logs",
+    "schemaName": "dbo",
+    "autoCreateSqlTable": true,
+    "batchPostingLimit": 100,
+    "period": "0.00:00:10"
+  },
+  "columnOptionsSection": {
+    "addStandardColumns": [
+      "LogEvent"
+    ],
+    "removeStandardColumns": [
+      "Properties"
+    ]
+  }
+}
+```
+
+### Explanation
+
+* `connectionString`: Full connection string to the SQL Server instance.
+* `tableName`: Name of the table that will receive log entries.
+* `schemaName`: Schema to use for the log table (default is `dbo`).
+* `autoCreateSqlTable`: If true, the log table will be created automatically if it does not exist.
+* `batchPostingLimit`: Number of log events to post in each batch.
+* `period`: Interval for batching log posts.
+* `addStandardColumns`: Additional default Serilog columns to include (e.g., `LogEvent`).
+* `removeStandardColumns`: Columns to exclude from the standard set.
+
+### Additional Columns
+
+This sink automatically adds the following custom fields to each log:
+
+* `IdTransaction`: a unique identifier for tracking a transaction.
+* `MachineName`: name of the server or machine.
+* `Action`: custom action tag if set via `Request.Action`.
+* `ApplicationName`: name of the application logging the message.
 
 ---
 
-## 📄 License
+## 🧪 Demo API
 
-This project is licensed under the [MIT License](LICENSE).
+Try live: [Demo Project](https://github.com/alexbypa/CSharpEssentials.LoggerHelper/tree/main/CSharpEssentials.LoggerHelper.Demo)
 
----
+### Example Endpoint
+
+```http
+GET /loggerHelper?action=Login&message=Start login&level=Information
+```
+
+## 🧰 Troubleshooting
+
+Enable Serilog internal diagnostics:
+
+```csharp
+SelfLog.Enable(msg => File.AppendAllText("serilog-selflog.txt", msg));
+```
 
 ## 👤 Author
 
 **Alessandro Chiodo**
-📧 GitHub · NuGet · LinkedIn
 📦 [NuGet Package](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
+🔗 [GitHub](https://github.com/alexbypa/CSharp.Essentials)
