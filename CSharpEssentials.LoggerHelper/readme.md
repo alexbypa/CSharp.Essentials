@@ -6,6 +6,7 @@
 
 # 📦 CSharpEssentials.LoggerHelper
 
+<a id='table-of-contents'></a>
 ## 📑 Table of Contents
 * 📘[Introduction](#introduction)
 * 🚀[Installation](#installation)
@@ -27,6 +28,7 @@
 
 👉 For more examples, refer to the detailed configuration sections below.
 
+[🔝 Back to top](#table-of-contents)
 ## 📘 Introduction<a id='introduction'></a>
 **LoggerHelper** is a flexible and modular structured logging library for .NET (6.0/8.0) applications based on Serilog. It enables structured, multi-sink logging through a plug-and-play approach.
 
@@ -48,6 +50,7 @@
 #endif
 ```
 
+[🔝 Back to top](#table-of-contents)
 ## 🚀 Installation <a id='installation'></a>
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper
@@ -152,6 +155,7 @@ Example `appsettings.LoggerHelper.json` configuration (⚠️ or `appsettings.Lo
   }
 }
 ```
+[🔝 Back to top](#table-of-contents)
 ## 🐘 PostgreSQL Sink<a id='postgresql-sink'></a>
 
 LoggerHelper supports logging to PostgreSQL with optional custom schema definition.
@@ -183,6 +187,7 @@ If custom `ColumnsPostGreSQL` is defined, logs will include all specified fields
 
 > 🧩 Tip: PostgreSQL sink is ideal for deep analytics and long-term log storage.
 
+[🔝 Back to top](#table-of-contents)
 ## 🐘 Telegram Sink<a id='telegram-sink'></a>
 LoggerHelper supports Telegram notifications to alert on critical events.
 
@@ -234,6 +239,7 @@ await _logger.TraceAsync(
 );
 ```
 
+[🔝 Back to top](#table-of-contents)
 ## 📨 HTML Email Sink<a id='html-email-sink'></a>
 ---
 
@@ -326,6 +332,7 @@ Then, in the `appsettings.LoggerHelper.json` configuration file, set:
 
 If the file is missing or invalid, LoggerHelper will **fall back to the internal default template**, ensuring backward compatibility.
 ---
+[🔝 Back to top](#table-of-contents)
 ## 💾 MS SQL Sink<a id='ms-sql-sink'></a>
 This sink writes logs to a Microsoft SQL Server table and supports additional context properties out of the box.
 
@@ -373,6 +380,7 @@ This sink automatically adds the following custom fields to each log:
 * `ApplicationName`: name of the application logging the message.
 
 ---
+[🔝 Back to top](#table-of-contents)
 ## 🧪 Demo API<a id='demo-api'></a>
 Try live: [Demo Project](https://github.com/alexbypa/CSharpEssentials.LoggerHelper/tree/main/CSharpEssentials.LoggerHelper.Demo)
 
