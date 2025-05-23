@@ -417,16 +417,20 @@ ElasticSearch is ideal for indexing and searching logs at scale. When integrated
 * `indexFormat`: The format or name of the index that will store log entries.
 
 ---
+## 🧪 Demo API <a id='demo-api'></a>   [🔝](#table-of-contents)
 
-## 🧪 Demo API<a id='demo-api'></a>   [🔝](#table-of-contents)
-Try live: [Demo Project](https://github.com/alexbypa/CSharpEssentials.LoggerHelper/tree/main/CSharpEssentials.LoggerHelper.Demo)
+
+Try live with full logging and structured output:
+
+📁 [Demo Project](https://github.com/alexbypa/CSharp.Essentials/tree/main/Demo.loggerHelper)
+
+✅ Now available for both **.NET 6.0** and **.NET 8.0**:
+- [`/Test6.0`](https://github.com/alexbypa/CSharp.Essentials/tree/main/Test6.0) → Compatible with legacy environments
+- [`/Test8.0`](https://github.com/alexbypa/CSharp.Essentials/tree/main/Test8.0) → Optimized for latest runtime features
 
 ### Example Endpoint
 
-```http
-GET /loggerHelper?action=Login&message=Start login&level=Information
-```
-
+---
 ## 🧰 Troubleshooting
 
 Enable Serilog internal diagnostics:
