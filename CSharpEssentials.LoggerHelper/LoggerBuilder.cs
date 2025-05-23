@@ -13,14 +13,13 @@ public class LoggerBuilder {
     IConfiguration _configuration;
     public LoggerBuilder(IConfiguration configuration) {
         _configuration = configuration;
+
         var appName = configuration["Serilog:SerilogConfiguration:ApplicationName"];
         _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
         _config = new LoggerConfiguration().ReadFrom.Configuration(configuration)
             .WriteTo.Sink(new OpenTelemetryLogEventSink())//TODO: da configurare
             .Enrich.WithProperty("ApplicationName", appName)
             .Enrich.With<RenderedMessageEnricher>();
-
-
         var selfLogPath = Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt");
         var stream = new FileStream(
             selfLogPath,
@@ -147,27 +146,12 @@ public class LoggerBuilder {
 
         return this;
     }
-    public static ColumnWriterBase CreateColumnWriter(string typeName, List<string> args) {
-        var type = Type.GetType(typeName, throwOnError: true);
-        var ctor = type
-            .GetConstructors()
-            .FirstOrDefault(c => c.GetParameters().Length == args.Count);
-
-        if (ctor == null)
-            throw new InvalidOperationException($"No constructor with {args.Count} args found for {typeName}");
-
-        var parameters = ctor.GetParameters();
-        var typedArgs = args
-            .Select((arg, i) => ConvertArgument(arg, parameters[i].ParameterType))
-            .ToArray();
-
-        return (ColumnWriterBase)ctor.Invoke(typedArgs);
-    }
-
-    private static object ConvertArgument(string value, Type targetType) {
-        if (targetType.IsEnum)
-            return Enum.Parse(targetType, value);
-        return Convert.ChangeType(value, targetType);
-    }
     public ILogger Build() => _config.CreateLogger();
+}
+public static class ServiceLocator {
+    public static IServiceProvider? Instance { get; set; }
+
+    public static T? GetService<T>() where T : class {
+        return Instance?.GetService(typeof(T)) as T;
+    }
 }

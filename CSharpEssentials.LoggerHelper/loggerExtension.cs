@@ -5,6 +5,7 @@ using Serilog;
 using Serilog.Events;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 #if NET6_0
 using Microsoft.AspNetCore.Builder;
@@ -52,6 +53,11 @@ public class loggerExtension<T> where T : IRequest {
         .Build();
         var builder = new LoggerBuilder(configuration).AddDynamicSinks();
         log = builder.Build();
+
+        var enricher = ServiceLocator.GetService<IContextLogEnricher>();
+        log = enricher != null
+               ? enricher.Enrich(log, context: null)
+               : log;
     }
     /// <summary>
     /// method to write log
@@ -102,6 +108,10 @@ public class loggerExtension<T> where T : IRequest {
         } catch (Exception exRegEx) {
             logger.Warning("LoggerHelper: Regex failed to validate placeholders: {Error}", exRegEx.Message);
         }
+        var enricher = ServiceLocator.GetService<IContextLogEnricher>();
+        if (enricher != null)
+            logger = enricher.Enrich(logger, request);
+
         logger.Write(level, ex, message, arguments.ToArray());
     }
 }

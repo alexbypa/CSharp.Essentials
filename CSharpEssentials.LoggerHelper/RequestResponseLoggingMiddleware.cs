@@ -23,7 +23,7 @@ public class RequestResponseLoggingMiddleware {
         var originalBodyStream = context.Response.Body;
         using var responseBodyStream = new MemoryStream();
         context.Response.Body = responseBodyStream;
-
+        
         try {
             context.Request.EnableBuffering();
             using var reader = new StreamReader(
