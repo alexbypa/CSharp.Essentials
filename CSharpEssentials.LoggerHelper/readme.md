@@ -30,18 +30,6 @@
 * [💾 MS SQL Sink](#ms-sql-sink)
 * [🧪 Demo API](#demo-api)
 
-## 📊 Summary Table
-
-| Sink            | Configuration Key   | Required Settings                 | Additional Notes                                                        |
-| --------------- | ------------------- | --------------------------------- | ----------------------------------------------------------------------- |
-| PostgreSQL Sink | `PostgreSql`        | ConnectionString, TableName       | Logs are mapped automatically to predefined columns                     |
-| Email Sink      | `LoggerHelperEmail` | From, Host, Port, To, Credentials | Since 2.0.0 the section has been renamed from `Email`                   |
-| Telegram Sink   | `Telegram`          | BotToken, ChatId                  | Use [https://t.me/BotFather](https://t.me/BotFather) to create your bot |
-| File Sink       | `File`              | Path                              | Standard Serilog file sink                                              |
-| Console Sink    | `Console`           | Level                             | No extra setup required                                                 |
-
-👉 For more examples, refer to the detailed configuration sections below.
-
 ## 📘 Introduction<a id='introduction'></a>
 [🔝 Back to top](#table-of-contents)
 **LoggerHelper** is a flexible and modular structured logging library for .NET (6.0/8.0) applications based on Serilog. It enables structured, multi-sink logging through a plug-and-play approach.
