@@ -9,7 +9,7 @@
 ## 📑 Table of Contents
 * 📘[Introduction](#introduction)
 * 🚀[Installation](#installation)
-* [🐘 PostgreSQL Sink](#postgresql-sink)
+* 🐘[PostgreSQL Sink](#postgresql-sink)
 * [📣 Telegram Sink](#telegram-sink)
 * [📨 HTML Email Sink](#html-email-sink)
 * [💾 MS SQL Sink](#ms-sql-sink)
@@ -152,7 +152,7 @@ Example `appsettings.LoggerHelper.json` configuration (⚠️ or `appsettings.Lo
   }
 }
 ```
-[## 🐘 PostgreSQL Sink](#postgresql-sink)
+## 🐘 PostgreSQL Sink<a id='postgresql-sink'></a>
 
 LoggerHelper supports logging to PostgreSQL with optional custom schema definition.
 
