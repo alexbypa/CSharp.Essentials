@@ -4,15 +4,11 @@ using Serilog.Events;
 using Microsoft.Extensions.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHttpClient();
 
-// Add services to the container.
-
-#region hangFire
-// builder.Services.AddHangFire<Request>(builder);
-#endregion
 #region LoggerHelper
 #if NET6_0
-    builder.AddLoggerConfiguration();
+builder.AddLoggerConfiguration();
 #else
     builder.Services.AddLoggerConfiguration(builder);
 #endif
@@ -36,9 +32,6 @@ builder.Services.AddSwaggerGen(c => {
 var app = builder.Build();
 app.UseStaticFiles(); // << deve essere PRIMA di app.UseRouting()
 
-#region hangFire
-// app.UseCustomHangfireDashboard(builder.Configuration);
-#endregion
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
