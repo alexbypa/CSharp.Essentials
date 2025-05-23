@@ -48,7 +48,7 @@
 #endif
 ```
 
-## 🚀 Installation <a id='installation></a>
+## 🚀 Installation <a id='installation'></a>
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper
 ```
