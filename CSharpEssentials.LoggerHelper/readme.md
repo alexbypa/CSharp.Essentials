@@ -428,8 +428,6 @@ Try live with full logging and structured output:
 - [`/Test6.0`](https://github.com/alexbypa/CSharp.Essentials/tree/main/Test6.0) → Compatible with legacy environments
 - [`/Test8.0`](https://github.com/alexbypa/CSharp.Essentials/tree/main/Test8.0) → Optimized for latest runtime features
 
-### Example Endpoint
-
 ---
 ## 🧰 Troubleshooting
 
