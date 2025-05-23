@@ -25,10 +25,10 @@
 2.0.5 Fix IRequest interface
 2.0.6 Added email template 
 2.0.7 Added addAutoIncrementColumn and ColumnsPostGreSQL on sink postgresQL
-</Description>
-    <Version>2.0.7</Version>
-    <AssemblyVersion>2.0.7</AssemblyVersion>
-    <FileVersion>2.0.7</FileVersion>
+2.0.8 update readme.md</Description>
+    <Version>2.0.8</Version>
+    <AssemblyVersion>2.0.8</AssemblyVersion>
+    <FileVersion>2.0.8</FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
