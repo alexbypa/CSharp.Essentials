@@ -6,10 +6,18 @@ using Serilog.Sinks.MSSqlServer;
 using System.Diagnostics;
 
 namespace CSharpEssentials.LoggerHelper;
-public class LoggerBuilder {
-    private readonly LoggerConfiguration _config;
+/// <summary>
+/// Responsible for building the Serilog logger configuration dynamically based on the provided appsettings.json configuration.
+/// </summary>
+internal class LoggerBuilder {
+private readonly LoggerConfiguration _config;
     private readonly SerilogConfiguration _serilogConfig;
     IConfiguration _configuration;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LoggerBuilder"/> class.
+    /// Reads the Serilog configuration section and sets up basic enrichers and self-logging.
+    /// </summary>
+    /// <param name="configuration">Application configuration (e.g., appsettings.json).</param>
     internal LoggerBuilder(IConfiguration configuration) {
         _configuration = configuration;
 
@@ -33,6 +41,10 @@ public class LoggerBuilder {
         });
 
     }
+    /// <summary>
+    /// Dynamically adds sinks to the LoggerConfiguration based on conditions specified in the Serilog configuration.
+    /// </summary>
+    /// <returns>The current instance of LoggerBuilder for chaining.</returns>
     internal LoggerBuilder AddDynamicSinks() {
         foreach (var condition in _serilogConfig.SerilogCondition ?? Enumerable.Empty<SerilogCondition>()) {
             Debug.Print(condition.Sink);
@@ -145,5 +157,9 @@ public class LoggerBuilder {
 
         return this;
     }
+    /// <summary>
+    /// Builds and returns the configured Serilog logger instance.
+    /// </summary>
+    /// <returns>The created <see cref="ILogger"/> instance.</returns>
     public ILogger Build() => _config.CreateLogger();
 }
