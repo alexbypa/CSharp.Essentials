@@ -33,6 +33,7 @@
 * [📨 HTML Email Sink](#html-email-sink)
 * [💾 MS SQL Sink](#ms-sql-sink)
 * [🔍 ElasticSearch Sink](#elasticsearch)
+* [🔍 Extending LogEvent Properties](#customprop)
 * [🧪 Demo API](#demo-api)
 
 ## 📘 Introduction<a id='introduction'></a>   [🔝](#table-of-contents)
@@ -94,8 +95,6 @@ app.UseMiddleware<RequestResponseLoggingMiddleware>();
 * Starting from version **2.0.9**, you can include **extra log fields** in your consumer application by extending the `IRequest` interface.
 * In your custom class, add your desired fields, and they will be available in your logs and in the email template.
 
-You can see an example in the [demo controller](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/LoggerController.cs).
-Whereas the custom class to generate extra fields can be found [here](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/MyCustomEnricher.cs).
 
 ✅ **Email sink Template Customization**
 * In the HTML email template, you can now reference these **custom fields** directly using **placeholders** like:
@@ -498,6 +497,78 @@ Try live with full logging and structured output:
 - [`/Test8.0`](https://github.com/alexbypa/CSharp.Essentials/tree/main/Test8.0) → Optimized for latest runtime features
 
 ---
+
+## 🚀 Extending LogEvent Properties from Your Project<a id='customprop'></a>   [🔝](#table-of-contents)
+
+Starting from version **2.0.9**, you can extend the default log event context by implementing your own **custom enricher**. This allows you to **add extra fields** to the log context and ensure they are included in **all log sinks** (not only in email notifications, but also in any other sink that supports additional fields—especially in the databases, where from version **2.0.8** onwards you can add dedicated columns for these custom properties).
+**How to configure it:**
+
+✅ **1️⃣ Register your custom enricher and logger configuration in `Program.cs`**
+Before building the app:
+
+```csharp
+builder.Services.AddSingleton<IContextLogEnricher, MyCustomEnricher>();
+builder.Services.AddloggerConfiguration(builder);
+```
+
+✅ **2️⃣ Assign the service provider to `LoggerHelperServiceLocator`**
+After building the app:
+
+```csharp
+LoggerHelperServiceLocator.Instance = app.Services;
+```
+
+✅ **3️⃣ Create your custom enricher class**
+Example implementation:
+
+```csharp
+public class MyCustomEnricher : IContextLogEnricher {
+    public ILogger Enrich(ILogger logger, object? context) {
+        if (context is MyCustomRequest req) {
+            return logger
+                .ForContext("Username", req.Username)
+                .ForContext("IpAddress", req.IpAddress);
+        }
+        return logger;
+    }
+
+    public LoggerConfiguration Enrich(LoggerConfiguration configuration) => configuration;
+}
+```
+
+✅ **4️⃣ Use your custom request class in your application**
+Example usage:
+
+```csharp
+var myRequest = new MyCustomRequest {
+    IdTransaction = Guid.NewGuid().ToString(),
+    Action = "UserLogin",
+    ApplicationName = "MyApp",
+    MachineName = Environment.MachineName,
+    Username = "JohnDoe",
+    IpAddress = "192.168.1.100"
+};
+
+loggerExtension<MyCustomRequest>.TraceSync(myRequest, LogEventLevel.Information, null, "User login event");
+```
+
+✅ **5️⃣ Update your email template to include the new fields**
+Example additions:
+
+```html
+<tr><th>User Name</th><td>{{Username}}</td></tr>
+<tr><th>Ip Address</th><td>{{IpAddress}}</td></tr>
+```
+✅ ** MSSQL and PostgresQL sink Template Customization**
+- To add extra fields on table of MSSQL add fields on array **additionalColumns**
+- To add extra fields on table of postgre add fields on array **ColumnsPostGreSQL**
+
+🔗 **Download Example**
+You can see an example in the [demo controller](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/LoggerController.cs).
+Whereas the custom class to generate extra fields can be found [here](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/MyCustomEnricher.cs).
+
+---
+
 ## 🧰 Troubleshooting
 
 Enable Serilog internal diagnostics:
