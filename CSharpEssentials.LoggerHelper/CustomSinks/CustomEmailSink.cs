@@ -3,9 +3,12 @@ using Serilog.Events;
 using System.Net;
 using System.Net.Mail;
 
-namespace CSharpEssentials.LoggerHelper;
-public class LoggerHelperEmailSink : ILogEventSink {
-    private readonly string _smtpServer;
+namespace CSharpEssentials.LoggerHelper.CustomSinks;
+/// <summary>
+/// Custom Serilog sink that sends log events as HTML emails using SMTP.
+/// </summary>
+internal class CustomEmailSink : ILogEventSink {
+private readonly string _smtpServer;
     private readonly int _smtpPort;
     private readonly string _fromEmail;
     private readonly string _toEmail;
@@ -14,8 +17,19 @@ public class LoggerHelperEmailSink : ILogEventSink {
     private readonly bool _enableSsl;
     private readonly string _templatePath;
     private readonly string _defaultTemplate;
-
-    public LoggerHelperEmailSink(
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CustomEmailSink"/> class.
+    /// </summary>
+    /// <param name="smtpServer">SMTP server address.</param>
+    /// <param name="smtpPort">SMTP server port.</param>
+    /// <param name="fromEmail">Sender email address.</param>
+    /// <param name="toEmail">Recipient email address.</param>
+    /// <param name="username">Username for SMTP authentication.</param>
+    /// <param name="password">Password for SMTP authentication.</param>
+    /// <param name="subjectPrefix">Subject prefix for the email.</param>
+    /// <param name="enableSsl">Whether to use SSL for SMTP.</param>
+    /// <param name="templatePath">Path to the HTML template file.</param>
+    public CustomEmailSink(
         string smtpServer,
         int smtpPort,
         string fromEmail,
@@ -35,7 +49,10 @@ public class LoggerHelperEmailSink : ILogEventSink {
         _templatePath = templatePath;
         _defaultTemplate = LoadDefaultTemplate(); // embedded di backup
     }
-
+    /// <summary>
+    /// Emits the log event by sending it as an email using the configured SMTP settings.
+    /// </summary>
+    /// <param name="logEvent">The log event to send.</param>
     public void Emit(LogEvent logEvent) {
         try {
             var rawMessage = logEvent.RenderMessage();
@@ -57,6 +74,11 @@ public class LoggerHelperEmailSink : ILogEventSink {
             Serilog.Debugging.SelfLog.WriteLine($"Error sending email: {ex}");
         }
     }
+    /// <summary>
+    /// Generates the HTML email body based on the log event and the template.
+    /// </summary>
+    /// <param name="logEvent">The log event to include in the email.</param>
+    /// <returns>The HTML body of the email.</returns>
     private string GenerateHtmlBody(LogEvent logEvent) {
         string template;
         if (!string.IsNullOrWhiteSpace(_templatePath) && File.Exists(_templatePath)) {
@@ -84,6 +106,10 @@ public class LoggerHelperEmailSink : ILogEventSink {
 
         return template;
     }
+    /// <summary>
+    /// Loads the default HTML template embedded in the code as a fallback.
+    /// </summary>
+    /// <returns>The default HTML email template.</returns>
     private string LoadDefaultTemplate() {
         return @"
 <html>
@@ -127,69 +153,6 @@ public class LoggerHelperEmailSink : ILogEventSink {
 </body>
 </html>";
     }
-
-
-    //    private string GenerateHtmlBody(LogEvent logEvent) {
-    //        var rawMessage = logEvent.RenderMessage();
-    //        var timestamp = logEvent.Timestamp.ToString("yyyy-MM-dd HH:mm:ss");
-    //        var level = logEvent.Level.ToString();
-    //        var levelClass = GetLevelColorClass(logEvent.Level);
-
-    //        var idTransaction = ExtractProperty(logEvent, "IdTransaction");
-    //        var action = ExtractProperty(logEvent, "Action");
-    //        var appName = ExtractProperty(logEvent, "ApplicationName");
-    //        var machineName = ExtractProperty(logEvent, "MachineName");
-    //        return $@"
-    //<html>
-    //<head>
-    //  <style>
-    //    body {{ font-family: Arial, sans-serif; margin: 20px; }}
-    //    .header {{ font-size: 24px; font-weight: bold; color: green; }}
-    //    .section {{ margin-top: 20px; }}
-    //    .label {{ font-weight: bold; color: #555; }}
-    //    .value {{ margin-bottom: 10px; }}
-    //    .level-info {{ color: green; font-weight: bold; }}
-    //    .level-warning {{ color: orange; font-weight: bold; }}
-    //    .level-error {{ color: red; font-weight: bold; }}
-    //    table {{ width: 100%; border-collapse: collapse; margin-top: 10px; }}
-    //    td, th {{ border: 1px solid #ddd; padding: 8px; }}
-    //    th {{ background-color: #f2f2f2; }}
-    //    .highlight {{ background-color: #e8f5e9; padding: 8px; border-radius: 5px; }}
-    //  </style>
-    //</head>
-    //<body>
-
-    //<div class='header'>LoggerHelper Notification 🚀</div>
-
-    //<div class='section'>
-    //  <span class='label'>Timestamp:</span> <span class='value'>{timestamp}</span><br/>
-    //  <span class='label'>Level:</span> <span class='value {levelClass}'>{level}</span><br/>
-    //</div>
-
-    //<div class='section'>
-    //  <h3>Core Details</h3>
-    //  <table>
-    //    <tr><th>IdTransaction</th><td>{idTransaction}</td></tr>
-    //    <tr><th>Action</th><td>{action}</td></tr>
-    //    <tr><th>ApplicationName</th><td>{appName}</td></tr>
-    //    <tr><th>MachineName</th><td>{machineName}</td></tr>
-    //  </table>
-    //</div>
-
-    //<div class='section highlight'>
-    //  <h3>Log Message</h3>
-    //  <pre>{WebUtility.HtmlEncode(rawMessage)}</pre>
-    //</div>
-    //</body>
-    //</html>";
-    //    }
-    private string ExtractProperty(LogEvent logEvent, string propertyName) {
-        if (logEvent.Properties.TryGetValue(propertyName, out var value)) {
-            return value.ToString().Trim('"');
-        }
-        return "";
-    }
-
     private string GetLevelColorClass(LogEventLevel level) {
         return level switch {
             LogEventLevel.Information => "level-info",

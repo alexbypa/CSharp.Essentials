@@ -4,12 +4,12 @@ using Serilog.Debugging;
 using Serilog.Sinks.PostgreSQL;
 using Serilog.Sinks.PostgreSQL.ColumnWriters;
 
-namespace CSharpEssentials.LoggerHelper;
+namespace CSharpEssentials.LoggerHelper.CustomSinks;
 /// <summary>
 /// Provides helper methods for PostgreSQL integration with Serilog, including automatic
 /// table creation and optional auto-increment primary key column.
 /// </summary>
-public class PostgreSQLOptions {
+internal class CustomPostgresQLSink {
     // Ensures the 'id' column is only added once
     private static bool _idColumnEnsured = false;
     /// <summary>

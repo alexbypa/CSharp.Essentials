@@ -11,15 +11,35 @@ using Microsoft.AspNetCore.Builder;
 #endif
 
 namespace CSharpEssentials.LoggerHelper;
+/// <summary>
+/// Interface representing the basic logging request data.
+/// </summary>
 public interface ILoggerRequest {
+    /// <summary>
+    /// Gets the unique transaction ID for tracking logs.
+    /// </summary>
     public string IdTransaction { get; }
+    /// <summary>
+    /// Gets the action name or context for the log entry.
+    /// </summary>
     public string Action { get; }
+    /// <summary>
+    /// Gets the application name associated with the log entry.
+    /// </summary>
     public string ApplicationName { get; }
 }
+/// <summary>
+/// Marker interface extending ILoggerRequest for request-based logging.
+/// </summary>
 public interface IRequest : ILoggerRequest { }
-
+/// <summary>
+/// Helper class for configuring and writing logs with Serilog.
+/// </summary>
 public static class LoggerExtensionConfig {
 #if NET6_0
+    /// <summary>
+    /// Adds external LoggerHelper configuration (e.g., appsettings.LoggerHelper.json) to a WebApplicationBuilder.
+    /// </summary>
     public static IServiceCollection AddLoggerConfiguration(this WebApplicationBuilder builder) {
         var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.LoggerHelper.json");
         if (File.Exists(externalConfigPath)) {
@@ -28,6 +48,9 @@ public static class LoggerExtensionConfig {
         return builder.Services;
     }
 #else
+    /// <summary>
+    /// Adds external LoggerHelper configuration (e.g., appsettings.LoggerHelper.json) to a WebApplicationBuilder.
+    /// </summary>
     public static IServiceCollection AddloggerConfiguration(this IServiceCollection services, IHostApplicationBuilder builder) {
         var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.LoggerHelper.json");
         if (File.Exists(externalConfigPath)) {
@@ -37,6 +60,10 @@ public static class LoggerExtensionConfig {
     }
 #endif
 }
+/// <summary>
+/// Static logger extension for writing log entries enriched with transaction context.
+/// </summary>
+/// <typeparam name="T">The request type implementing IRequest.</typeparam>
 public class loggerExtension<T> where T : IRequest {
     public static readonly ILogger log;
     public static string postGreSQLConnectionString = "";
@@ -58,7 +85,7 @@ public class loggerExtension<T> where T : IRequest {
                : log;
     }
     /// <summary>
-    /// method to write log
+    /// method to write log Async
     /// </summary>
     /// <param name="Action">Action is the parameter that indicates the area of ​​interest in which the log is being written</param>
     /// <param name="IdTransaction">IdTransaction is the reference code for retrieving the log (for example, if you use a warehouse program, each operation on a product could be the barcode of the item)</param>
@@ -70,7 +97,7 @@ public class loggerExtension<T> where T : IRequest {
         await Task.Run(() => TraceSync(request, level, ex, message, args));
     }
     /// <summary>
-    /// method to write log
+    /// method to write log Sync
     /// </summary>
     /// <param name="Action">Action is the parameter that indicates the area of ​​interest in which the log is being written</param>
     /// <param name="IdTransaction">IdTransaction is the reference code for retrieving the log (for example, if you use a warehouse program, each operation on a product could be the barcode of the item)</param>
