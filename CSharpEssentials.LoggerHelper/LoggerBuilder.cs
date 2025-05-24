@@ -1,9 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using CSharpEssentials.LoggerHelper.CustomSinks;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Formatting.Json;
 using Serilog.Sinks.MSSqlServer;
-using Serilog.Sinks.PostgreSQL.ColumnWriters;
-using System.Data;
 using System.Diagnostics;
 
 namespace CSharpEssentials.LoggerHelper;
@@ -11,7 +10,7 @@ public class LoggerBuilder {
     private readonly LoggerConfiguration _config;
     private readonly SerilogConfiguration _serilogConfig;
     IConfiguration _configuration;
-    public LoggerBuilder(IConfiguration configuration) {
+    internal LoggerBuilder(IConfiguration configuration) {
         _configuration = configuration;
 
         var appName = configuration["Serilog:SerilogConfiguration:ApplicationName"];
@@ -34,7 +33,7 @@ public class LoggerBuilder {
         });
 
     }
-    public LoggerBuilder AddDynamicSinks() {
+    internal LoggerBuilder AddDynamicSinks() {
         foreach (var condition in _serilogConfig.SerilogCondition ?? Enumerable.Empty<SerilogCondition>()) {
             Debug.Print(condition.Sink);
             if (condition.Level == null || !condition.Level.Any())
@@ -147,11 +146,4 @@ public class LoggerBuilder {
         return this;
     }
     public ILogger Build() => _config.CreateLogger();
-}
-public static class ServiceLocator {
-    public static IServiceProvider? Instance { get; set; }
-
-    public static T? GetService<T>() where T : class {
-        return Instance?.GetService(typeof(T)) as T;
-    }
 }

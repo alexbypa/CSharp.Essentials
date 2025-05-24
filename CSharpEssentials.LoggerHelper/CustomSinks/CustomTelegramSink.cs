@@ -2,20 +2,23 @@
 using Serilog.Events;
 using Serilog.Formatting;
 
-namespace CSharpEssentials.LoggerHelper;
-public class CustomTelegramSink : ILogEventSink {
+namespace CSharpEssentials.LoggerHelper.CustomSinks;
+public class CustomTelegramSink : ILogEventSink
+{
     private readonly string _botToken;
     private readonly string _chatId;
     private readonly ITextFormatter _formatter;
     private static readonly HttpClient _client = new HttpClient();
 
-    public CustomTelegramSink(string botToken, string chatId, ITextFormatter formatter) {
+    public CustomTelegramSink(string botToken, string chatId, ITextFormatter formatter)
+    {
         _botToken = botToken;
         _chatId = chatId;
         _formatter = formatter;
     }
 
-    public void Emit(LogEvent logEvent) {
+    public void Emit(LogEvent logEvent)
+    {
         using var sw = new StringWriter();
         _formatter.Format(logEvent, sw);
         var message = sw.ToString();
@@ -23,7 +26,8 @@ public class CustomTelegramSink : ILogEventSink {
         SendMessageAsync(message).Wait();
     }
 
-    private async Task SendMessageAsync(string message) {
+    private async Task SendMessageAsync(string message)
+    {
         var url = $"https://api.telegram.org/bot{_botToken}/sendMessage";
 
         var data = new Dictionary<string, string>

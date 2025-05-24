@@ -30,7 +30,7 @@ builder.Services.AddSwaggerGen(c => {
 });
 
 var app = builder.Build();
-ServiceLocator.Instance = app.Services;
+LoggerHelperServiceLocator.Instance = app.Services;
 
 app.UseStaticFiles(); // << deve essere PRIMA di app.UseRouting()
 

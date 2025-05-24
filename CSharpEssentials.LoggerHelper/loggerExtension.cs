@@ -5,7 +5,6 @@ using Serilog;
 using Serilog.Events;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 #if NET6_0
 using Microsoft.AspNetCore.Builder;
@@ -39,7 +38,6 @@ public static class LoggerExtensionConfig {
 #endif
 }
 public class loggerExtension<T> where T : IRequest {
-    //TODO: Riprendere le altre tipologie di estensione Enrich etc etc json ....
     public static readonly ILogger log;
     public static string postGreSQLConnectionString = "";
 
@@ -54,7 +52,7 @@ public class loggerExtension<T> where T : IRequest {
         var builder = new LoggerBuilder(configuration).AddDynamicSinks();
         log = builder.Build();
 
-        var enricher = ServiceLocator.GetService<IContextLogEnricher>();
+        var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
         log = enricher != null
                ? enricher.Enrich(log, context: null)
                : log;
@@ -108,7 +106,7 @@ public class loggerExtension<T> where T : IRequest {
         } catch (Exception exRegEx) {
             logger.Warning("LoggerHelper: Regex failed to validate placeholders: {Error}", exRegEx.Message);
         }
-        var enricher = ServiceLocator.GetService<IContextLogEnricher>();
+        var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
         if (enricher != null)
             logger = enricher.Enrich(logger, request);
 
