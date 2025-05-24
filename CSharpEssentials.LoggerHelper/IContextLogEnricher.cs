@@ -4,7 +4,7 @@ namespace CSharpEssentials.LoggerHelper;
 /// <summary>
 /// Interface for enriching Serilog loggers with additional context information.
 /// </summary>
-internal interface IContextLogEnricher {
+public interface IContextLogEnricher {
     /// <summary>
     /// Enriches the given <see cref="ILogger"/> instance with custom context data.
     /// </summary>
