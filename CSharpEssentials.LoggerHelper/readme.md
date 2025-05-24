@@ -6,7 +6,7 @@
 
 # 📦 CSharpEssentials.LoggerHelper
 
-## 📘 Introduction<a id='introduction'></a>   
+## 📘 Introduction
 **LoggerHelper** is a flexible and modular structured logging library for .NET (6.0/8.0) applications based on Serilog. It enables structured, multi-sink logging through a plug-and-play approach.
 
 ### 🔑 Key Benefits:
@@ -17,5 +17,8 @@
 * ✅ One config file: `appsettings.LoggerHelper.json`
 * ✅ Modular integration 
 
-## Basic usage
-Check out the how to use package [here](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md).
+## 🚀 Basic Usage
+
+👉 **Check out how to use the package in the documentation**  
+📖 [View the usage guide here!](https://github.com/alexbypa/CSharpEssentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
+
