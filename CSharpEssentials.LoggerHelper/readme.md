@@ -20,5 +20,5 @@
 ## 🚀 Basic Usage
 
 👉 **Check out how to use the package in the documentation**  
-📖 [View the usage guide here!](https://github.com/alexbypa/CSharpEssentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
+📖 [View the usage guide here!](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
 
