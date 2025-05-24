@@ -106,8 +106,27 @@ Whereas the custom class to generate extra fields can be found [here](https://gi
 ```
 
 ✅ **MSSQL and PostgresQL sink Template Customization**
-To add extra fields on table of MSSQL add fields on array additionalColumns
-To add extra fields on table of postgre add fields on array ColumnsPostGreSQL
+- To add extra fields on table of MSSQL add fields on array additionalColumns
+- To add extra fields on table of postgre add fields on array ColumnsPostGreSQL
+---
+
+🔧 **Service Registration and LoggerHelper Initialization**
+To use your custom enricher (`MyCustomEnricher`) and register the configuration, add the following lines in your `Program.cs` **before building the app**:
+
+```csharp
+builder.Services.AddSingleton<IContextLogEnricher, MyCustomEnricher>();
+//
+builder.Services.AddloggerConfiguration(builder);
+```
+
+Then, **after building the app**, assign the service provider to `LoggerHelperServiceLocator`:
+
+```csharp
+LoggerHelperServiceLocator.Instance = app.Services;
+```
+
+This ensures that your custom enricher is available globally for all log entries and that the logger configuration is properly loaded.
+
 ---
 
 
