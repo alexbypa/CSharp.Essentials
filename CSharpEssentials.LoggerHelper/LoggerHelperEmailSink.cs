@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Routing.Template;
-using Serilog.Core;
+﻿using Serilog.Core;
 using Serilog.Events;
 using System.Net;
 using System.Net.Mail;
