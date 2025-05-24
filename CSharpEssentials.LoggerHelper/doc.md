@@ -89,46 +89,6 @@ app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 ---
 
-### ⚠️ Breaking Changes - Version 2.0.9
-✅ **Extended log enrichment with custom fields**
-
-* Starting from version **2.0.9**, you can include **extra log fields** in your consumer application by extending the `IRequest` interface.
-* In your custom class, add your desired fields, and they will be available in your logs and in the email template.
-
-
-✅ **Email sink Template Customization**
-* In the HTML email template, you can now reference these **custom fields** directly using **placeholders** like:
-
-```html
-<tr><th>User Name</th><td>{{Username}}</td></tr>
-<tr><th>Ip Address</th><td>{{IpAddress}}</td></tr>
-```
-
-✅ **MSSQL and PostgresQL sink Template Customization**
-- To add extra fields on table of MSSQL add fields on array additionalColumns
-- To add extra fields on table of postgre add fields on array ColumnsPostGreSQL
----
-
-🔧 **Service Registration and LoggerHelper Initialization**
-To use your custom enricher (`MyCustomEnricher`) and register the configuration, add the following lines in your `Program.cs` **before building the app**:
-
-```csharp
-builder.Services.AddSingleton<IContextLogEnricher, MyCustomEnricher>();
-//
-builder.Services.AddloggerConfiguration(builder);
-```
-
-Then, **after building the app**, assign the service provider to `LoggerHelperServiceLocator`:
-
-```csharp
-LoggerHelperServiceLocator.Instance = app.Services;
-```
-
-This ensures that your custom enricher is available globally for all log entries and that the logger configuration is properly loaded.
-
----
-
-
 Example `appsettings.LoggerHelper.json` configuration (⚠️ or `appsettings.LoggerHelper.debug.json` during development):
 ```json
 {
@@ -561,7 +521,7 @@ Example additions:
 <tr><th>User Name</th><td>{{Username}}</td></tr>
 <tr><th>Ip Address</th><td>{{IpAddress}}</td></tr>
 ```
-✅ ** MSSQL and PostgresQL sink Template Customization**
+✅ **6️⃣ MSSQL and PostgresQL sink Template Customization**
 - To add extra fields on table of MSSQL add fields on array **additionalColumns**
 - To add extra fields on table of postgre add fields on array **ColumnsPostGreSQL**
 
