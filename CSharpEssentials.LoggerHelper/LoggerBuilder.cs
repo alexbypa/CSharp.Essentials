@@ -74,7 +74,7 @@ private readonly LoggerConfiguration _config;
                             wt.Sink(new CustomTelegramSink(
                                 _serilogConfig?.SerilogOption?.TelegramOption?.Api_Key,
                                 _serilogConfig?.SerilogOption?.TelegramOption?.chatId,
-                                new LoggerHelperTelegramMarkdownFormatter()));
+                                new CustomTelegramSinkFormatter()));
                         });
                     break;
                 case "PostgreSQL":
@@ -86,7 +86,7 @@ private readonly LoggerConfiguration _config;
                                     tableName: _serilogConfig.SerilogOption.PostgreSQL.tableName,
                                     schemaName: _serilogConfig.SerilogOption.PostgreSQL.schemaName,
                                     needAutoCreateTable: true,
-                                    columnOptions: PostgreSQLOptions.BuildPostgresColumns(_serilogConfig).GetAwaiter().GetResult()
+                                    columnOptions: CustomPostgresQLSink.BuildPostgresColumns(_serilogConfig).GetAwaiter().GetResult()
                                 );
                         }
                         );
@@ -102,8 +102,8 @@ private readonly LoggerConfiguration _config;
                             BatchPostingLimit = _serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.batchPostingLimit ?? 100,
                             BatchPeriod = string.IsNullOrEmpty(_serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.period) ? TimeSpan.FromSeconds(10) : TimeSpan.Parse(_serilogConfig.SerilogOption.MSSqlServer.sinkOptionsSection.period),
                         }, 
-                        //columnOptions: MSSQLServerOptions.GetColumnOptions()
-                        columnOptions: MSSQLServerOptions.GetColumnsOptions_v2(_serilogConfig?.SerilogOption.MSSqlServer)
+                        //columnOptions: CustomMSSQLServerSink.GetColumnOptions()
+                        columnOptions: CustomMSSQLServerSink.GetColumnsOptions_v2(_serilogConfig?.SerilogOption.MSSqlServer)
                         ));
                     break;
                 case "ElasticSearch"://TODO: non sono ancora riuscito a trovare i logs su elasticsearch
@@ -133,7 +133,7 @@ private readonly LoggerConfiguration _config;
                 case "Email":
                     _config.WriteTo.Conditional(
                         evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                        wt => wt.Sink(new LoggerHelperEmailSink(
+                        wt => wt.Sink(new CustomEmailSink(
                             smtpServer: _serilogConfig.SerilogOption?.Email.Host,
                             smtpPort: (int)_serilogConfig.SerilogOption?.Email.Port,
                             fromEmail: _serilogConfig.SerilogOption?.Email.From,

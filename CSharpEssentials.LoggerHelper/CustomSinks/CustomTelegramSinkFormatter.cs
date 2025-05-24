@@ -1,13 +1,13 @@
 ﻿using Serilog.Events;
 using Serilog.Formatting;
 
-namespace CSharpEssentials.LoggerHelper;
+namespace CSharpEssentials.LoggerHelper.CustomSinks;
 /// <summary>
 /// Custom formatter for Telegram output using Markdown syntax.
 /// Displays log level with emoji, timestamp, message, exception (if any),
 /// and all properties enriched via ForContext.
 /// </summary>
-internal class LoggerHelperTelegramMarkdownFormatter : ITextFormatter {
+internal class CustomTelegramSinkFormatter : ITextFormatter {
     /// <summary>
     /// Formats the log event for output to Telegram (Markdown-escaped).
     /// </summary>

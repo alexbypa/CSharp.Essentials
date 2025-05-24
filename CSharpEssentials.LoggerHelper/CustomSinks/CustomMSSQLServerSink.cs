@@ -1,12 +1,12 @@
 ﻿using Serilog.Sinks.MSSqlServer;
 using System.Data;
 
-namespace CSharpEssentials.LoggerHelper;
+namespace CSharpEssentials.LoggerHelper.CustomSinks;
 /// <summary>
 /// Helper class to generate ColumnOptions dynamically for MSSQL Sink,
 /// including custom application fields such as IdTransaction, Action, etc.
 /// </summary>
-public static class MSSQLServerOptions {
+internal static class CustomMSSQLServerSink {
     /// <summary>
     /// Builds a ColumnOptions object using the provided MSSqlServer config section,
     /// dynamically including additional columns as specified in configuration.
