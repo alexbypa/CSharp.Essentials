@@ -20,6 +20,7 @@
 * **2.0.5** – Fixed `IRequest` interface
 * **2.0.6** – Added external email template support
 * **2.0.7** - Added addAutoIncrementColumn and ColumnsPostGreSQL on sink postgresQL
+* **2.0.8** - Enhanced MSSQL Sink Configuration : Introduced comprehensive management of custom columns for the MSSQL sink.
 
 
 <a id='table-of-contents'></a>
@@ -85,7 +86,7 @@ app.UseMiddleware<RequestResponseLoggingMiddleware>();
 ```
 
 Example `appsettings.LoggerHelper.json` configuration (⚠️ or `appsettings.LoggerHelper.debug.json` during development):
-
+From version 2.0.8 added : standardColumns
 ```json
 {
   "Serilog": {
@@ -160,6 +161,7 @@ Example `appsettings.LoggerHelper.json` configuration (⚠️ or `appsettings.Lo
             "batchPostingLimit": 100,
             "period": "0.00:00:10"
           },
+          "standardColumns": [ "Message", "MessageTemplate", "Level", "Exception", "TimeStamp" ],
           "columnOptionsSection": {
             "addStandardColumns": ["LogEvent"],
             "removeStandardColumns": ["Properties"]
