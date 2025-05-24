@@ -21,6 +21,7 @@
 * **2.0.6** – Added external email template support
 * **2.0.7** - Added addAutoIncrementColumn and ColumnsPostGreSQL on sink postgresQL
 * **2.0.8** - Enhanced MSSQL Sink Configuration : Introduced comprehensive management of custom columns for the MSSQL sink.
+* **2.0.9** - Breaking Change: Added support for extending log context with custom fields (IRequest extensions)
 
 
 <a id='table-of-contents'></a>
@@ -85,8 +86,32 @@ Enable HTTP middleware logging:
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
 ```
 
+---
+
+### ⚠️ Breaking Changes - Version 2.0.9
+✅ **Extended log enrichment with custom fields**
+
+* Starting from version **2.0.9**, you can include **extra log fields** in your consumer application by extending the `IRequest` interface.
+* In your custom class, add your desired fields, and they will be available in your logs and in the email template.
+
+You can see an example in the [demo controller](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/LoggerController.cs).
+Whereas the custom class to generate extra fields can be found [here](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/MyCustomEnricher.cs).
+
+✅ **Email sink Template Customization**
+* In the HTML email template, you can now reference these **custom fields** directly using **placeholders** like:
+
+```html
+<tr><th>User Name</th><td>{{Username}}</td></tr>
+<tr><th>Ip Address</th><td>{{IpAddress}}</td></tr>
+```
+
+✅ **MSSQL and PostgresQL sink Template Customization**
+To add extra fields on table of MSSQL add fields on array additionalColumns
+To add extra fields on table of postgre add fields on array ColumnsPostGreSQL
+---
+
+
 Example `appsettings.LoggerHelper.json` configuration (⚠️ or `appsettings.LoggerHelper.debug.json` during development):
-From version 2.0.8 added : standardColumns
 ```json
 {
   "Serilog": {
@@ -166,6 +191,15 @@ From version 2.0.8 added : standardColumns
             "addStandardColumns": ["LogEvent"],
             "removeStandardColumns": ["Properties"]
           }
+            "additionalColumns": [
+            "IdTransaction",
+            "Action",
+            "MachineName",
+            "ApplicationName",
+            "Username",
+            "IpAddress"
+          ]
+
         },
         "GeneralConfig": {
           "EnableSelfLogging": false
@@ -353,6 +387,18 @@ If the file is missing or invalid, LoggerHelper will **fall back to the internal
 ---
 ## 💾 MS SQL Sink<a id='ms-sql-sink'></a>    [🔝](#table-of-contents)
 This sink writes logs to a Microsoft SQL Server table and supports additional context properties out of the box.
+
+### 📦 Changes
+
+✅ **Version 2.0.8**  
+* Added **complete management of standard columns** for the MSSQL sink (`standardColumns` option).
+* Introduced the new **`additionalColumns`** array, which by default includes the base fields of the package:
+
+  * `IdTransaction`
+  * `Action`
+  * `MachineName`
+  * `ApplicationName`
+
 
 ### Configuration Example
 
