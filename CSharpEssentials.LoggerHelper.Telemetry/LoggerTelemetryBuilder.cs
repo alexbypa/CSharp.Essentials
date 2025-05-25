@@ -1,4 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
+using CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -6,13 +11,32 @@ using OpenTelemetry.Trace;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry {
     public static class LoggerTelemetryBuilder {
-        public static IServiceCollection AddLoggerTelemetry(this IServiceCollection services) {
+        public static IServiceCollection AddLoggerTelemetry(this IServiceCollection services, WebApplicationBuilder builder) {
+        var configuration = new ConfigurationBuilder()
+#if DEBUG
+    .AddJsonFile("appsettings.LoggerHelper.debug.json")
+#else
+    .AddJsonFile("appsettings.LoggerHelper.json")
+#endif
+        .Build();
+            LoggerTelemetryOptions loggerTelemetryOptions = configuration.GetSection("Serilog:SerilogConfiguration:LoggerTelemetryOptions").Get<LoggerTelemetryOptions>();
+            
+            if (!loggerTelemetryOptions?.IsEnabled ?? false)
+                return services;
+            
+            services.AddDbContext<TelemetriesDbContext>(options =>
+                options.UseNpgsql(loggerTelemetryOptions.ConnectionString));
+
+            CustomMetrics.Initialize(builder.Configuration);
+            builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
+
             services.AddControllers();
             services.AddOpenTelemetry()
                 .WithMetrics(metricProvider => {
                     metricProvider
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
+                        .AddRuntimeInstrumentation()
                         .AddView(instrumentName:"*", new ExplicitBucketHistogramConfiguration {
                             TagKeys = new[] { "trace_id" }
                         })

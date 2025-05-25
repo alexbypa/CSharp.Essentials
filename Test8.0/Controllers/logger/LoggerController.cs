@@ -1,14 +1,15 @@
 ﻿using CSharpEssentials.LoggerHelper;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel;
 
 namespace Test.Controllers.logger;
 [ApiController]
 [Route("loggerHelper")]
-public class LoggerController : Controller {
+public class LoggerHelperController : Controller {
     private readonly HttpClient _httpClient;
     private Request _request;
     int _page = 2;
-    public LoggerController(IHttpClientFactory httpClientFactory) {
+    public LoggerHelperController(IHttpClientFactory httpClientFactory) {
         _httpClient = httpClientFactory.CreateClient();
         _httpClient.BaseAddress = new Uri("https://reqres.in/");
         //ApplicationName is on appSettings.json

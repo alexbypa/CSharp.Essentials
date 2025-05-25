@@ -66,19 +66,9 @@ public static class LoggerExtensionConfig {
 /// <typeparam name="T">The request type implementing IRequest.</typeparam>
 public class loggerExtension<T> where T : IRequest {
     protected static readonly ILogger log;
-    protected static string postGreSQLConnectionString = "";
-
     static loggerExtension() {
-        var configuration = new ConfigurationBuilder()
-#if DEBUG
-        .AddJsonFile("appsettings.LoggerHelper.debug.json")
-#else
-        .AddJsonFile("appsettings.LoggerHelper.json")
-#endif
-        .Build();
-        var builder = new LoggerBuilder(configuration).AddDynamicSinks();
+        var builder = new LoggerBuilder().AddDynamicSinks();
         log = builder.Build();
-
         var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
         log = enricher != null
                ? enricher.Enrich(log, context: null)

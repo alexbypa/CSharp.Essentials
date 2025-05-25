@@ -12,17 +12,22 @@ namespace CSharpEssentials.LoggerHelper;
 internal class LoggerBuilder {
 private readonly LoggerConfiguration _config;
     private readonly SerilogConfiguration _serilogConfig;
-    IConfiguration _configuration;
     /// <summary>
     /// Initializes a new instance of the <see cref="LoggerBuilder"/> class.
     /// Reads the Serilog configuration section and sets up basic enrichers and self-logging.
     /// </summary>
     /// <param name="configuration">Application configuration (e.g., appsettings.json).</param>
-    internal LoggerBuilder(IConfiguration configuration) {
-        _configuration = configuration;
-
-        var appName = configuration["Serilog:SerilogConfiguration:ApplicationName"];
+    internal LoggerBuilder() {
+        var configuration = new ConfigurationBuilder()
+#if DEBUG
+    .AddJsonFile("appsettings.LoggerHelper.debug.json")
+#else
+    .AddJsonFile("appsettings.LoggerHelper.json")
+#endif
+        .Build();
         _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
+
+        var appName = _serilogConfig.ApplicationName;
         _config = new LoggerConfiguration().ReadFrom.Configuration(configuration)
             .WriteTo.Sink(new OpenTelemetryLogEventSink())//TODO: da configurare
             .Enrich.WithProperty("ApplicationName", appName)
@@ -34,12 +39,10 @@ private readonly LoggerConfiguration _config;
             FileAccess.Write,
             FileShare.ReadWrite
         );
-
         var writer = new StreamWriter(stream) { AutoFlush = true };
         Serilog.Debugging.SelfLog.Enable(msg => {
             writer.WriteLine(msg);
         });
-
     }
     /// <summary>
     /// Dynamically adds sinks to the LoggerConfiguration based on conditions specified in the Serilog configuration.

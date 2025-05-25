@@ -9,29 +9,25 @@ using System.Diagnostics;
 namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
 public class OpenTelemetryMeterListenerService : BackgroundService {
     private readonly IServiceProvider _provider;
-
     public OpenTelemetryMeterListenerService(IServiceProvider provider) {
         _provider = provider;
     }
-
     protected override Task ExecuteAsync(CancellationToken stoppingToken) {
         var listener = new MeterListener();
 
         listener.InstrumentPublished = (instrument, listener) => {
             // Prende TUTTE le metriche, ma puoi filtrare per nome o origine
-            if (instrument.Meter.Name.StartsWith("Microsoft.AspNetCore") ||
-                instrument.Meter.Name.StartsWith("System.Net.Http")) {
+            //TODO: per adesso tracciamo tutti 
+            //if (instrument.Meter.Name.StartsWith("Microsoft.AspNetCore") ||
+            //    instrument.Meter.Name.StartsWith("System.Net.Http")) {
                 listener.EnableMeasurementEvents(instrument);
-            }
+            //}
         };
-
-        listener.SetMeasurementEventCallback<double>((instrument, measurement, tags, _) =>
-        {
+        listener.SetMeasurementEventCallback<double>((instrument, measurement, tags, _) => {
             var tagArray = tags.ToArray();
             var traceId = Activity.Current?.TraceId.ToString();
 
-            _ = Task.Run(async () =>
-            {
+            _ = Task.Run(async () => {
                 using var scope = _provider.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
 
@@ -54,12 +50,7 @@ public class OpenTelemetryMeterListenerService : BackgroundService {
                 await db.SaveChangesAsync();
             });
         });
-
-
-
-
         listener.Start();
-
         return Task.CompletedTask;
     }
 }
