@@ -102,7 +102,6 @@ private readonly LoggerConfiguration _config;
                             BatchPostingLimit = _serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.batchPostingLimit ?? 100,
                             BatchPeriod = string.IsNullOrEmpty(_serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.period) ? TimeSpan.FromSeconds(10) : TimeSpan.Parse(_serilogConfig.SerilogOption.MSSqlServer.sinkOptionsSection.period),
                         }, 
-                        //columnOptions: CustomMSSQLServerSink.GetColumnOptions()
                         columnOptions: CustomMSSQLServerSink.GetColumnsOptions_v2(_serilogConfig?.SerilogOption.MSSqlServer)
                         ));
                     break;
@@ -123,10 +122,10 @@ private readonly LoggerConfiguration _config;
                                         );
 
                                 } else {
-                                    Serilog.Debugging.SelfLog.WriteLine($"[ElasticSearch] HTTP status non valido: {response.StatusCode}");
+                                    Serilog.Debugging.SelfLog.WriteLine($"[ElasticSearch] HTTP status not valid: {response.StatusCode}");
                                 }
                             } catch (Exception ex) {
-                                Serilog.Debugging.SelfLog.WriteLine($"[ElasticSearch] Non raggiungibile: {ex.Message}");
+                                Serilog.Debugging.SelfLog.WriteLine($"[ElasticSearch] Unreachable: {ex.Message}");
                             }
                         });
                     break;
