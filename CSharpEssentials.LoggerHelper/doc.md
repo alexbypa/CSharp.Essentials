@@ -363,7 +363,7 @@ Then, in the `appsettings.LoggerHelper.json` configuration file, set:
 
 If the file is missing or invalid, LoggerHelper will **fall back to the internal default template**, ensuring backward compatibility.
 > 📸 Example of a formatted email message:
-> ![Email Sample](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper/img/emailSample.png)
+> ![Email Sample](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper/img/emailsample.png)
 
 
 ---
