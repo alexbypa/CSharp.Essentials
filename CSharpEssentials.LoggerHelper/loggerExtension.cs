@@ -65,8 +65,8 @@ public static class LoggerExtensionConfig {
 /// </summary>
 /// <typeparam name="T">The request type implementing IRequest.</typeparam>
 public class loggerExtension<T> where T : IRequest {
-    public static readonly ILogger log;
-    public static string postGreSQLConnectionString = "";
+    protected static readonly ILogger log;
+    protected static string postGreSQLConnectionString = "";
 
     static loggerExtension() {
         var configuration = new ConfigurationBuilder()

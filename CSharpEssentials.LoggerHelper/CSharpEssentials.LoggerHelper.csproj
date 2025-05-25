@@ -48,10 +48,8 @@
     <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
-    <PackageReference Include="Serilog.Sinks.Email" Version="4.1.0" />
     <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="8.1.0" />
     <PackageReference Include="Serilog.Sinks.Postgresql.Alternative" Version="3.5.0" />
-    <PackageReference Include="Serilog.Sinks.Telegram" Version="0.2.1" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.4" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>

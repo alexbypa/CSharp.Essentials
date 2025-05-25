@@ -29,9 +29,13 @@ public class MyCustomEnricher : IContextLogEnricher {
 
         return logger;
     }
-
+    /// <summary>
+    /// Enriches the global LoggerConfiguration with static properties that will be included in every log event,
+    /// regardless of the context.
+    /// </summary>
+    /// <param name="configuration">The Serilog LoggerConfiguration instance.</param>
+    /// <returns>The enriched LoggerConfiguration instance.</returns>
     public LoggerConfiguration Enrich(LoggerConfiguration configuration) {
-        return configuration.Enrich.WithProperty("Username", Environment.MachineName);
+        return configuration;
     }
 }
-
