@@ -7,16 +7,28 @@ using System.Diagnostics;
 using System.Text.Json;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry;
-
+/// <summary>
+/// Exports OpenTelemetry metrics to a PostgreSQL database.
+/// Iterates over each MetricPoint in the batch, extracts the value and tags,
+/// then creates and saves a MetricEntry record in EF Core.
+/// </summary>
 public class PostgreSqlMetricExporter : BaseExporter<Metric> {
     private readonly IServiceProvider _provider;
-
+    /// <summary>
+    /// Initializes a new instance of PostgreSqlMetricExporter.
+    /// </summary>
+    /// <param name="provider">Service provider to resolve the EF DbContext scope for saving metrics.</param>
     public PostgreSqlMetricExporter(IServiceProvider provider) {
         _provider = provider;
     }
-
-
+    /// <summary>
+    /// Export a batch of metrics to PostgreSQL.
+    /// </summary>
+    /// <param name="batch">The batch of metrics provided by OpenTelemetry.
+    /// Each Metric contains multiple MetricPoints to persist.</param>
+    /// <returns>ExportResult.Success if all metrics were handled (errors are logged).</returns>
     public override ExportResult Export(in Batch<Metric> batch) {
+        // Create a new DI scope to retrieve TelemetriesDbContext
         using var scope = _provider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
         foreach (var metric in batch) {
@@ -80,42 +92,6 @@ public class PostgreSqlMetricExporter : BaseExporter<Metric> {
             db.SaveChanges();
         } catch (Exception ex) {
             Debug.WriteLine($"Errore durante l'elaborazione della metrica {ex}");
-        }
-        return ExportResult.Success;
-    }
-    public ExportResult Export_Withbug(in Batch<Metric> batch) {
-        try {
-            using var scope = _provider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
-
-            foreach (var metric in batch) {
-                foreach (ref readonly var metricPoint in metric.GetMetricPoints()) {
-                    // Semplificazione: usiamo solo valore "double"
-                    var value = metricPoint.GetSumDouble();
-
-                    var tags = new Dictionary<string, object>();
-                    foreach (var tag in metricPoint.Tags)
-                        tags[tag.Key] = tag.Value!;
-
-                    // Extract trace_id se presente
-                    string? traceId = null;
-                    if (tags.TryGetValue("trace_id", out var traceValue))
-                        traceId = traceValue?.ToString();
-
-                    var metricEntry = new MetricEntry {
-                        Name = metric.Name,
-                        Value = value,
-                        Timestamp = DateTime.UtcNow,
-                        TagsJson = JsonSerializer.Serialize(tags),
-                        TraceId = traceId
-                    };
-
-                    db.Metrics.Add(metricEntry);
-                }
-            }
-            db.SaveChanges();
-        } catch (Exception ex) {
-            Debug.Print(ex.ToString());
         }
         return ExportResult.Success;
     }

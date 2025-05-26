@@ -11,9 +11,6 @@ public static class CustomMetrics {
     public static readonly Meter Meter = new("LoggerHelper.Metrics", "1.0");
     public static int CurrentSecond => DateTime.UtcNow.Second;
     //TODO: Aggiungere un pattern per aggiungere le metriche desiderate esternamente !
-    public static readonly GaugeWrapper<int> CurrentSecondGauge =
-                new(Meter, "current_second", () => DateTime.UtcNow.Second, "seconds", "Current second of the minute");
-
     public static readonly GaugeWrapper<double> MemoryUsedGauge =
         new(Meter, "memory_used_mb", () => {
             var bytes = GC.GetTotalMemory(false);
@@ -32,7 +29,7 @@ public static class CustomMetrics {
 
             return result is long l ? l : Convert.ToInt64(result);
         } catch {
-            return -1; // valore segnaposto in caso di errore
+            return -1; 
         }
     }
 }

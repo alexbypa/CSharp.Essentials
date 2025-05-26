@@ -6,12 +6,24 @@ using System.Diagnostics;
 using System.Text.Json;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry;
+/// <summary>
+/// Exports completed OpenTelemetry Activities (spans) to a PostgreSQL database.
+/// Creates TraceEntry records for each Activity with properties like TraceId, SpanId, timestamps, and tags.
+/// </summary>
 public class PostgreSqlTraceExporter : BaseExporter<Activity> {
     private readonly IServiceProvider _provider;
-
+    /// <summary>
+    /// Initializes a new instance of the PostgreSqlTraceExporter.
+    /// </summary>
+    /// <param name="provider">DI service provider to create scopes for EF context resolution.</param>
     public PostgreSqlTraceExporter(IServiceProvider provider) {
         _provider = provider;
     }
+    /// <summary>
+    /// Exports a batch of completed Activity instances to the database.
+    /// </summary>
+    /// <param name="batch">Batch of Activities to export.</param>
+    /// <returns>ExportResult indicating success or failure.</returns>
     public override ExportResult Export(in Batch<Activity> batch) {
         using var scope = _provider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
