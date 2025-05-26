@@ -58,6 +58,7 @@ public class PostgreSqlMetricExporter : BaseExporter<Metric> {
                     foreach (var tag in point.Tags)
                         tags[tag.Key] = tag.Value!;
 
+                    //TODO: verificare che trace_id sia sempre presente
                     tags.TryGetValue("trace_id", out var traceValue);
 
                     // popoliamo l'entità EF

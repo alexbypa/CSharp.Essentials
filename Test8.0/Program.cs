@@ -40,25 +40,7 @@ var app = builder.Build();
 LoggerHelperServiceLocator.Instance = app.Services;
 
 #region OpenTelemetry
-
-
-app.Use(async (context, next) => {
-    var activity = Activity.Current;
-
-    if (activity is not null) {
-        var traceId = activity.TraceId.ToString();
-
-
-        // 💡 workaround fondamentale
-        if (!activity.Tags.Any(t => t.Key == "trace_id"))
-            activity.SetTag("trace_id", traceId);
-
-        if (string.IsNullOrEmpty(Baggage.GetBaggage("trace_id")))
-            Baggage.SetBaggage("trace_id", traceId);
-    }
-
-    await next();
-});
+app.UseMiddleware<TraceIdPropagationMiddleware>(); // Middleware to propagate TraceId into Activity and Baggage
 #endregion
 
 app.UseStaticFiles(); // << deve essere PRIMA di app.UseRouting()

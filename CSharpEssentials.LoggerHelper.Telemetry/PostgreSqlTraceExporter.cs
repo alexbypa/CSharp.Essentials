@@ -21,6 +21,8 @@ public class PostgreSqlTraceExporter : BaseExporter<Activity> {
             var end = start + activity.Duration;
             var tags = activity.Tags.ToDictionary(t => t.Key, t => (object)t.Value);
 
+            tags["trace_id"] = activity.TraceId.ToString();
+
             // Include anche eventuali log (eventi)
             if (activity.Events.Any()) {
                 var logs = activity.Events.Select(e => new {

@@ -30,6 +30,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
             builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
 
             services.AddControllers();
+
             services.AddOpenTelemetry()
                 .WithMetrics(metricProvider => {
                     metricProvider
@@ -40,7 +41,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                             TagKeys = new[] { "trace_id" }
                         })
                         .AddReader(new PeriodicExportingMetricReader(new PostgreSqlMetricExporter(services.BuildServiceProvider()), 20000, 30000))//TODO: Settare gli intervalli !
-                        //.AddMeter("LoggerHelper.Metrics")
+                        //.AddMeter("LoggerHelper.Metrics") //Deve filtrare tutto
                         .AddConsoleExporter(); 
                 })
                 .WithTracing(tracerProviderBuilder => {
