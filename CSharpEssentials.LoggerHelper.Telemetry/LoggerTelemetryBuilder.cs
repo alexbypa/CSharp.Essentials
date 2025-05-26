@@ -20,7 +20,6 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
 #endif
         .Build();
             LoggerTelemetryOptions loggerTelemetryOptions = configuration.GetSection("Serilog:SerilogConfiguration:LoggerTelemetryOptions").Get<LoggerTelemetryOptions>();
-            
             if (!loggerTelemetryOptions?.IsEnabled ?? false)
                 return services;
             
@@ -40,19 +39,23 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                         .AddView(instrumentName:"*", new ExplicitBucketHistogramConfiguration {
                             TagKeys = new[] { "trace_id" }
                         })
-                        .AddReader(new PeriodicExportingMetricReader(new PostgreSqlMetricExporter(
-                            services.BuildServiceProvider()
-                        )))//TODO: Settare gli intervalli !
-                        .AddMeter("LoggerHelper.Metrics")
+                        .AddReader(new PeriodicExportingMetricReader(new PostgreSqlMetricExporter(services.BuildServiceProvider()), 20000, 30000))//TODO: Settare gli intervalli !
+                        //.AddMeter("LoggerHelper.Metrics")
                         .AddConsoleExporter(); 
                 })
                 .WithTracing(tracerProviderBuilder => {
                     tracerProviderBuilder
-                        .AddSource("LoggerHelper")
+                        //.AddSource("LoggerHelper")
                         .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("LoggerHelper"))
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
-                        .AddProcessor(new SimpleActivityExportProcessor(new PostgreSqlTraceExporter(services.BuildServiceProvider())))
+                        //.AddProcessor(new SimpleActivityExportProcessor(new PostgreSqlTraceExporter(services.BuildServiceProvider())))
+                        .AddProcessor(new BatchActivityExportProcessor(
+                            new PostgreSqlTraceExporter(services.BuildServiceProvider()),
+                            maxQueueSize: 2048,
+                            scheduledDelayMilliseconds: 5000,
+                            exporterTimeoutMilliseconds: 30000
+                        ))
                         .AddConsoleExporter(); // Per vedere le trace anche su console
                 });
 

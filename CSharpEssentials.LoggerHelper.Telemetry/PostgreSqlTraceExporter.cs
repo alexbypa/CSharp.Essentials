@@ -12,7 +12,6 @@ public class PostgreSqlTraceExporter : BaseExporter<Activity> {
     public PostgreSqlTraceExporter(IServiceProvider provider) {
         _provider = provider;
     }
-
     public override ExportResult Export(in Batch<Activity> batch) {
         using var scope = _provider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
@@ -20,7 +19,6 @@ public class PostgreSqlTraceExporter : BaseExporter<Activity> {
         foreach (var activity in batch) {
             var start = activity.StartTimeUtc;
             var end = start + activity.Duration;
-
             var tags = activity.Tags.ToDictionary(t => t.Key, t => (object)t.Value);
 
             // Include anche eventuali log (eventi)
@@ -46,7 +44,11 @@ public class PostgreSqlTraceExporter : BaseExporter<Activity> {
             });
         }
 
-        db.SaveChanges();
+        try {
+            db.SaveChanges();
+        }catch (Exception ex) {
+            Debug.WriteLine($"Error saving trace entries: {ex.ToString()}");
+        }
 
         return ExportResult.Success;
     }
