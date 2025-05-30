@@ -4,14 +4,35 @@
     <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Sink MS SQL for CSharpEssentials.LoggerHelper</Title>
+    <Version>1.0.0</Version>
+    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
+    <PackageIcon>CSharpEssentials.png</PackageIcon>
+    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\CSharpEssentials.LoggerHelper.Sink.File\img\CSharpEssentials.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="8.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
+    <None Include="readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
