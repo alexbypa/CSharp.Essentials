@@ -1,4 +1,10 @@
-﻿# 📦 CSharpEssentials.LoggerHelper
+﻿[![Frameworks](https://img.shields.io/badge/.NET-6.0%20%20%7C%208.0-blue)](https://dotnet.microsoft.com/en-us/download)
+[![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml)
+[![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
+[![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
+![Last Commit](https://img.shields.io/github/last-commit/alexbypa/CSharp.Essentials?style=flat-square)
+
+# 📦 CSharpEssentials.LoggerHelper
 
 ## Introduction
 
