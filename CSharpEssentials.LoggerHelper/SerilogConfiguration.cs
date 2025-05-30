@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-
-namespace CSharpEssentials.LoggerHelper;
+﻿namespace CSharpEssentials.LoggerHelper;
 public class SerilogConfiguration {
     public string? ApplicationName { get; set; }
     public List<SerilogCondition>? SerilogCondition { get; set; }

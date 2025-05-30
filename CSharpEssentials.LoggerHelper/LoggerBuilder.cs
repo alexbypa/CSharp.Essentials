@@ -1,17 +1,20 @@
 ﻿using CSharpEssentials.LoggerHelper.CustomSinks;
 using Microsoft.Extensions.Configuration;
 using Serilog;
-using Serilog.Formatting.Json;
-using Serilog.Sinks.MSSqlServer;
-using System.Diagnostics;
+using System.Runtime.Loader;
 
 namespace CSharpEssentials.LoggerHelper;
 /// <summary>
 /// Responsible for building the Serilog logger configuration dynamically based on the provided appsettings.json configuration.
 /// </summary>
 internal class LoggerBuilder {
-private readonly LoggerConfiguration _config;
+    private readonly LoggerConfiguration _config;
     private readonly SerilogConfiguration _serilogConfig;
+    /// <summary>
+    /// Builds and returns the configured Serilog logger instance.
+    /// </summary>
+    /// <returns>The created <see cref="ILogger"/> instance.</returns>
+    public ILogger Build() => _config.CreateLogger();
     /// <summary>
     /// Initializes a new instance of the <see cref="LoggerBuilder"/> class.
     /// Reads the Serilog configuration section and sets up basic enrichers and self-logging.
@@ -49,119 +52,79 @@ private readonly LoggerConfiguration _config;
     /// </summary>
     /// <returns>The current instance of LoggerBuilder for chaining.</returns>
     internal LoggerBuilder AddDynamicSinks() {
+        var baseDir = AppContext.BaseDirectory;
+        foreach (var dll in Directory.EnumerateFiles(baseDir, "CSharpEssentials.LoggerHelper.Sink.*.dll")) {
+            try {
+                AssemblyLoadContext.Default.LoadFromAssemblyPath(dll);
+            } catch {
+                // ignora i DLL inutili o non validi
+            }
+        }
+        var assemblies = AssemblyLoadContext.Default.Assemblies;
+
+        if (!SinkPluginRegistry.All.Any()) {
+            var pluginTypes = assemblies
+                .SelectMany(a => {
+                    try { return a.GetTypes(); } catch { return Array.Empty<Type>(); }
+                })
+                .Where(t =>
+                    typeof(ISinkPlugin).IsAssignableFrom(t)
+                    && !t.IsInterface
+                    && !t.IsAbstract);
+
+            foreach (var t in pluginTypes) {
+                var instance = (ISinkPlugin)Activator.CreateInstance(t)!;
+                SinkPluginRegistry.Register(instance);
+            }
+        }
+
         foreach (var condition in _serilogConfig.SerilogCondition ?? Enumerable.Empty<SerilogCondition>()) {
-            Debug.Print(condition.Sink);
             if (condition.Level == null || !condition.Level.Any())
                 continue;
 
-            switch (condition.Sink) {
-                case "File":
-                    var logDirectory = _serilogConfig?.SerilogOption?.File?.Path ?? "Logs";
-                    var logFilePath = Path.Combine(logDirectory, "log-.txt");
-                    Directory.CreateDirectory(logDirectory);
-                    _config.WriteTo.Conditional(
-                        evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                        wt => wt.File(
-                            new JsonFormatter(),
-                            logFilePath,
-                            rollingInterval: Enum.Parse<RollingInterval>(_serilogConfig?.SerilogOption?.File?.RollingInterval ?? "Day"),
-                            retainedFileCountLimit: _serilogConfig?.SerilogOption?.File?.RetainedFileCountLimit ?? 7,
-                            shared: _serilogConfig?.SerilogOption?.File?.Shared ?? true
-                            )
+            var plugin = SinkPluginRegistry.All
+                .FirstOrDefault(p => p.CanHandle(condition.Sink));
+            if (plugin != null) {
+                // delego completamente al plugin
+                plugin.HandleSink(_config, condition, _serilogConfig);
+            } else {
+                switch (condition.Sink) {
+                    case "Telegram":
+                        _config.WriteTo.Conditional(
+                            evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
+                            wt => {
+                                wt.Sink(new CustomTelegramSink(
+                                    _serilogConfig?.SerilogOption?.TelegramOption?.Api_Key,
+                                    _serilogConfig?.SerilogOption?.TelegramOption?.chatId,
+                                    new CustomTelegramSinkFormatter()));
+                            });
+                        break;
+                    case "Email":
+                        _config.WriteTo.Conditional(
+                            evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
+                            wt => wt.Sink(new CustomEmailSink(
+                                smtpServer: _serilogConfig.SerilogOption?.Email.Host,
+                                smtpPort: (int)_serilogConfig.SerilogOption?.Email.Port,
+                                fromEmail: _serilogConfig.SerilogOption?.Email.From,
+                                toEmail: string.Join(",", _serilogConfig.SerilogOption?.Email.To),
+                                username: _serilogConfig.SerilogOption?.Email.username,
+                                password: _serilogConfig.SerilogOption?.Email.password,
+                                subjectPrefix: "[LoggerHelper]",
+                                enableSsl: (bool)_serilogConfig.SerilogOption?.Email?.EnableSsl,
+                                templatePath: _serilogConfig.SerilogOption?.Email?.TemplatePath
+                            ))
                         );
-                    break;
-                case "Telegram":
-                    _config.WriteTo.Conditional(
-                        evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                        wt => {
-                            wt.Sink(new CustomTelegramSink(
-                                _serilogConfig?.SerilogOption?.TelegramOption?.Api_Key,
-                                _serilogConfig?.SerilogOption?.TelegramOption?.chatId,
-                                new CustomTelegramSinkFormatter()));
-                        });
-                    break;
-                case "PostgreSQL":
-                    _config.WriteTo.Conditional(
-                        evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                        wt => {
-                            wt.PostgreSQL(
-                                    connectionString: _serilogConfig?.SerilogOption?.PostgreSQL?.connectionstring,
-                                    tableName: _serilogConfig.SerilogOption.PostgreSQL.tableName,
-                                    schemaName: _serilogConfig.SerilogOption.PostgreSQL.schemaName,
-                                    needAutoCreateTable: true,
-                                    columnOptions: CustomPostgresQLSink.BuildPostgresColumns(_serilogConfig).GetAwaiter().GetResult()
-                                );
-                        }
+                        break;
+                    case "Console":
+                        _config.WriteTo.Conditional(
+                            evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
+                            wt => wt.Console()
                         );
-                    break;
-                case "MSSqlServer":
-                    _config.WriteTo.Conditional(
-                        evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                        wt => wt.MSSqlServer(_serilogConfig?.SerilogOption?.MSSqlServer?.connectionString,
-                        new MSSqlServerSinkOptions {
-                            TableName = _serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.tableName,
-                            SchemaName = _serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.schemaName,
-                            AutoCreateSqlTable = _serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.autoCreateSqlTable ?? false,
-                            BatchPostingLimit = _serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.batchPostingLimit ?? 100,
-                            BatchPeriod = string.IsNullOrEmpty(_serilogConfig?.SerilogOption?.MSSqlServer?.sinkOptionsSection?.period) ? TimeSpan.FromSeconds(10) : TimeSpan.Parse(_serilogConfig.SerilogOption.MSSqlServer.sinkOptionsSection.period),
-                        }, 
-                        columnOptions: CustomMSSQLServerSink.GetColumnsOptions_v2(_serilogConfig?.SerilogOption.MSSqlServer)
-                        ));
-                    break;
-                case "ElasticSearch"://TODO: non sono ancora riuscito a trovare i logs su elasticsearch
-                    _config.WriteTo.Conditional(
-                        evt =>  _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                        wt => {
-                            var elasticUrl = _serilogConfig?.SerilogOption?.ElasticSearch?.nodeUris ?? "http://localhost:9200";
-                            try {
-                                using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(1) };
-                                var response = client.GetAsync(elasticUrl).Result;
-                                if (response.IsSuccessStatusCode) {
-                                    wt.Elasticsearch(
-                                        nodeUris: _serilogConfig?.SerilogOption?.ElasticSearch?.nodeUris,
-                                        indexFormat: _serilogConfig?.SerilogOption?.ElasticSearch?.indexFormat,
-                                        autoRegisterTemplate: true,
-                                        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information
-                                        );
-
-                                } else {
-                                    Serilog.Debugging.SelfLog.WriteLine($"[ElasticSearch] HTTP status not valid: {response.StatusCode}");
-                                }
-                            } catch (Exception ex) {
-                                Serilog.Debugging.SelfLog.WriteLine($"[ElasticSearch] Unreachable: {ex.Message}");
-                            }
-                        });
-                    break;
-                case "Email":
-                    _config.WriteTo.Conditional(
-                        evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                        wt => wt.Sink(new CustomEmailSink(
-                            smtpServer: _serilogConfig.SerilogOption?.Email.Host,
-                            smtpPort: (int)_serilogConfig.SerilogOption?.Email.Port,
-                            fromEmail: _serilogConfig.SerilogOption?.Email.From,
-                            toEmail: string.Join(",", _serilogConfig.SerilogOption?.Email.To),
-                            username: _serilogConfig.SerilogOption?.Email.username,
-                            password: _serilogConfig.SerilogOption?.Email.password,
-                            subjectPrefix: "[LoggerHelper]",
-                            enableSsl: (bool)_serilogConfig.SerilogOption?.Email?.EnableSsl,
-                            templatePath: _serilogConfig.SerilogOption?.Email?.TemplatePath 
-                        ))
-                    );
-                    break;
-                case "Console":
-                    _config.WriteTo.Conditional(
-                        evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                        wt => wt.Console()
-                    );
-                    break;
+                        break;
+                }
             }
         }
 
         return this;
     }
-    /// <summary>
-    /// Builds and returns the configured Serilog logger instance.
-    /// </summary>
-    /// <returns>The created <see cref="ILogger"/> instance.</returns>
-    public ILogger Build() => _config.CreateLogger();
 }

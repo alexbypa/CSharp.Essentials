@@ -12,7 +12,7 @@ public class LoggerController : Controller {
         _httpClient = httpClientFactory.CreateClient();
         _httpClient.BaseAddress = new Uri("https://reqres.in/");
         //ApplicationName is on appSettings.json
-        _request = new Request { IdTransaction = Guid.NewGuid().ToString(), Action = "Users" };
+        _request = new Request { IdTransaction = Guid.NewGuid().ToString(), Action = "Users", Username = "John 6.0", IpAddress = "10.0.10.10" };
     }
     [HttpGet("users")]
     public async Task<IActionResult> GetUsers() {
@@ -49,4 +49,6 @@ class Request : IRequest {
     public string IdTransaction { get; set; }
     public string Action { get; set; }
     public string ApplicationName { get; set; }
+    public string Username { get; set; }
+    public string IpAddress { get; set; }
 }

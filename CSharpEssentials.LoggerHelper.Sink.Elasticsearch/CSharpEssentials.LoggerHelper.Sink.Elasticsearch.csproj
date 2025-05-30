@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>1.0.0</PackageId>
+    <Title>Sink ElasticSearch for CSharpEssentials.LoggerHelper</Title>
+    <Authors>Alessandro Chiodo</Authors>
+    <Description>Sink ElasticSearch for CSharpEssentials.LoggerHelper</Description>
+    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
+    <PackageTags>telemetries, loggerhelper, serilog, logger, structured-logging, email-sink, console-sink, database-logging, postgresql, elasticsearch, sink, logging-helper, dotnet-logging, aspnetcore-logging</PackageTags>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
+  </ItemGroup>
+
+</Project>

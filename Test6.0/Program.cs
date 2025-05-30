@@ -1,13 +1,14 @@
 using CSharpEssentials.LoggerHelper;
 using Microsoft.OpenApi.Models;
 using Serilog.Events;
-using Microsoft.Extensions.DependencyInjection;
+using Test.Controllers.logger;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient();
 
 #region LoggerHelper
 #if NET6_0
+builder.Services.AddSingleton<IContextLogEnricher, MyCustomEnricher>();
 builder.AddLoggerConfiguration();
 #else
     builder.Services.AddLoggerConfiguration(builder);
