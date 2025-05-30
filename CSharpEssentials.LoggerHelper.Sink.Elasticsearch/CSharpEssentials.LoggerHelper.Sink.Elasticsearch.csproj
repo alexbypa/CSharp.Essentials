@@ -14,6 +14,7 @@
     <PackageTags>telemetries, loggerhelper, serilog, logger, structured-logging, email-sink, console-sink, database-logging, postgresql, elasticsearch, sink, logging-helper, dotnet-logging, aspnetcore-logging</PackageTags>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +23,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
