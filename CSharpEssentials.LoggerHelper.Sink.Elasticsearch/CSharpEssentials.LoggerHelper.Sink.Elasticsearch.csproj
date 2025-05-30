@@ -1,43 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <FileVersion>2.0.9</FileVersion>10
+    <FileVersion>2.0.9</FileVersion>
     <Title>Sink ElasticSearch for CSharpEssentials.LoggerHelper</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>Sink ElasticSearch for CSharpEssentials.LoggerHelper</Description>
-    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Sink.Elasticsearch</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Sink.Elasticsearch</RepositoryUrl>
     <PackageTags>telemetries, loggerhelper, serilog, logger, structured-logging, email-sink, console-sink, database-logging, postgresql, elasticsearch, sink, logging-helper, dotnet-logging, aspnetcore-logging</PackageTags>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Include="..\CSharpEssentials.LoggerHelper\readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
   </ItemGroup>
-
   <ItemGroup>
+    <None Update="LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Update="readme.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
-
 </Project>
