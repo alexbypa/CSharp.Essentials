@@ -56,6 +56,32 @@
     .AddJsonFile("appsettings.LoggerHelper.json")
 #endif
 ```
+---
+🚨 IMPORTANT (v3.0.0 and later) 🚨
+
+The CSharpEssentials.LoggerHelper core no longer includes any built-in sinks.
+Instead, each sink (Console, File, MSSqlServer, Elasticsearch, PostgreSql, etc.) is now a separate NuGet package under the CSharpEssentials.LoggerHelper.Sink.* namespace.
+
+After installing CSharpEssentials.LoggerHelper (v3.0.0+), you must explicitly add each sink you need. For example:
+
+bash
+Copia
+Modifica
+dotnet add package CSharpEssentials.LoggerHelper                      # Core “Hub” only
+dotnet add package CSharpEssentials.LoggerHelper.Sink.File            # File sink
+dotnet add package CSharpEssentials.LoggerHelper.Sink.Console         # Console sink
+dotnet add package CSharpEssentials.LoggerHelper.Sink.Console         # Console sink
+dotnet add package CSharpEssentials.LoggerHelper.Sink.Elasticsearch   # Console ElasticSearch
+— Why?
+
+Fewer unnecessary dependencies – only pull in the sinks you actually use.
+
+Independent versioning – update each sink on its own schedule, without bumping the entire core.
+
+Greater modularity – swap, extend, or remove individual sinks without touching the core engine.
+
+👉 Make sure to update your project references accordingly to take advantage of this more modular design!
+---
 
 ## 🚀 Installation <a id='installation'></a>    [🔝](#table-of-contents)
 ```bash
