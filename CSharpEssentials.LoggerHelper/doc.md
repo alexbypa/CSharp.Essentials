@@ -22,6 +22,7 @@
 * **2.0.7** - Added addAutoIncrementColumn and ColumnsPostGreSQL on sink postgresQL
 * **2.0.8** - Enhanced MSSQL Sink Configuration : Introduced comprehensive management of custom columns for the MSSQL sink.
 * **2.0.9** - Breaking Change: Added support for extending log context with custom fields (IRequest extensions)
+* **3.0.1** - Moved all built-in sinks into separate NuGet packages; updated documentation to highlight explicit sink installation and aligned sink package versions
 
 
 <a id='table-of-contents'></a>
@@ -62,7 +63,7 @@
 The CSharpEssentials.LoggerHelper core no longer includes any built-in sinks.
 Instead, each sink (Console, File, MSSqlServer, Elasticsearch, PostgreSql, etc.) is now a separate NuGet package under the CSharpEssentials.LoggerHelper.Sink.* namespace.
 
-After installing CSharpEssentials.LoggerHelper (v3.0.0+), you must explicitly add each sink you need. For example:
+After installing CSharpEssentials.LoggerHelper (v3.0.1+), you must explicitly add each sink you need. For example:
 
 bash
 Copia
