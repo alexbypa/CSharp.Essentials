@@ -115,12 +115,6 @@ internal class LoggerBuilder {
                             ))
                         );
                         break;
-                    case "Console":
-                        _config.WriteTo.Conditional(
-                            evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                            wt => wt.Console()
-                        );
-                        break;
                 }
             }
         }

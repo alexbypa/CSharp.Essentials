@@ -26,8 +26,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.RecaptchaH
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper", "CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj", "{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.loggerHelper", "Demo.loggerHelper\Demo.loggerHelper.csproj", "{E2B2D04F-AB71-4A20-B39A-3393BF4C1ECD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test6.0", "Test6.0\Test6.0.csproj", "{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Telemetry", "CSharpEssentials.LoggerHelper.Telemetry\CSharpEssentials.LoggerHelper.Telemetry.csproj", "{42939CC7-D4F0-4C07-8424-8E8674738768}"
@@ -59,7 +57,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.Elasticsearch", "CSharpEssentials.LoggerHelper.Sink.Elasticsearch\CSharpEssentials.LoggerHelper.Sink.Elasticsearch.csproj", "{5CFCB118-40DC-4D2C-934C-0E98CB421DBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.LoggerHelper.Sink.File", "CSharpEssentials.LoggerHelper.Sink.File\CSharpEssentials.LoggerHelper.Sink.File.csproj", "{F041C304-EEEF-4616-BE55-7A7B1C1DED8E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.File", "CSharpEssentials.LoggerHelper.Sink.File\CSharpEssentials.LoggerHelper.Sink.File.csproj", "{F041C304-EEEF-4616-BE55-7A7B1C1DED8E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.Console", "CSharpEssentials.LoggerHelper.Sink.Console\CSharpEssentials.LoggerHelper.Sink.Console.csproj", "{FEDF352B-F191-439C-8043-73A4E853D20B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,10 +99,6 @@ Global
 		{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E2B2D04F-AB71-4A20-B39A-3393BF4C1ECD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E2B2D04F-AB71-4A20-B39A-3393BF4C1ECD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E2B2D04F-AB71-4A20-B39A-3393BF4C1ECD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E2B2D04F-AB71-4A20-B39A-3393BF4C1ECD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -131,6 +127,10 @@ Global
 		{F041C304-EEEF-4616-BE55-7A7B1C1DED8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F041C304-EEEF-4616-BE55-7A7B1C1DED8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F041C304-EEEF-4616-BE55-7A7B1C1DED8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEDF352B-F191-439C-8043-73A4E853D20B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEDF352B-F191-439C-8043-73A4E853D20B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEDF352B-F191-439C-8043-73A4E853D20B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEDF352B-F191-439C-8043-73A4E853D20B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

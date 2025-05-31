@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CSharpEssentials.HangFireHelper\CSharpEssentials.HangFireHelper.csproj" />
     <ProjectReference Include="..\CSharpEssentials.HttpHelper\CSharpEssentials.HttpHelper.csproj" />
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Console\CSharpEssentials.LoggerHelper.Sink.Console.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Elasticsearch\CSharpEssentials.LoggerHelper.Sink.Elasticsearch.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.File\CSharpEssentials.LoggerHelper.Sink.File.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.MSSqlServer\CSharpEssentials.LoggerHelper.Sink.MSSqlServer.csproj" />
