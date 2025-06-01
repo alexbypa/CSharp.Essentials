@@ -26,10 +26,13 @@
 2.0.6 Added email template 
 2.0.7 Added addAutoIncrementColumn and ColumnsPostGreSQL on sink postgresQL
 2.0.8 - Enhanced MSSQL Sink Configuration : Introduced comprehensive management of custom columns for the MSSQL sink.
-2.0.9 - Breaking Change: Added support for extending log context with custom fields (IRequest extensions)</Description>
-    <Version>3.0.1</Version>
-    <AssemblyVersion>3.0.1</AssemblyVersion>
-    <FileVersion>3.0.1</FileVersion>
+2.0.9 - Breaking Change: Added support for extending log context with custom fields (IRequest extensions)
+3.0.1 - Moved all built-in sinks into separate NuGet packages; updated documentation to highlight explicit sink installation and aligned sink package versions
+3.0.2 - ⚠️ Version 3.0.1 introduced an issue where `Serilog.Sinks.Elasticsearch` included an internal reference to `Serilog.Sinks.Console`, causing duplicate registration and build errors in some projects.
+</Description>
+    <Version>3.0.2</Version>
+    <AssemblyVersion>3.0.2</AssemblyVersion>
+    <FileVersion>3.0.2</FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <RepositoryType>git</RepositoryType>

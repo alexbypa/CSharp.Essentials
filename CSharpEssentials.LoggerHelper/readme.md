@@ -6,6 +6,16 @@
 
 # 📦 CSharpEssentials.LoggerHelper
 
+## 🐛 Known Issues in 3.0.1
+⚠️ Version 3.0.1 introduced an issue where `Serilog.Sinks.Elasticsearch` included an internal reference to `Serilog.Sinks.Console`, causing duplicate registration and build errors in some projects.
+
+✅ This issue is fixed in version **3.0.2**.  
+👉 Please update your package reference from `3.0.1` to `3.0.2` to avoid conflicts.
+
+```bash
+dotnet add package Serilog.Sinks.Elasticsearch --version 3.0.2
+```
+
 ## Introduction
 
 **CSharpEssentials.LoggerHelper** is a flexible, modular structured logging **HUB** for .NET (6.0/8.0) applications built on Serilog.  

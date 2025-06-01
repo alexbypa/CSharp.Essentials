@@ -26,28 +26,26 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.RecaptchaH
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper", "CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj", "{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test6.0", "Test6.0\Test6.0.csproj", "{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Telemetry", "CSharpEssentials.LoggerHelper.Telemetry\CSharpEssentials.LoggerHelper.Telemetry.csproj", "{42939CC7-D4F0-4C07-8424-8E8674738768}"
 EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "dashboard-nuget", "dashboard-nuget\", "{3E1BD27F-2E77-4C40-91A7-44B8E13EAF0A}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
-		Debug.AspNetCompiler.VirtualPath = "/localhost_56521"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_51167"
 		Debug.AspNetCompiler.PhysicalPath = "dashboard-nuget\"
-		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_56521\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51167\"
 		Debug.AspNetCompiler.Updateable = "true"
 		Debug.AspNetCompiler.ForceOverwrite = "true"
 		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/localhost_56521"
+		Release.AspNetCompiler.VirtualPath = "/localhost_51167"
 		Release.AspNetCompiler.PhysicalPath = "dashboard-nuget\"
-		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_56521\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51167\"
 		Release.AspNetCompiler.Updateable = "true"
 		Release.AspNetCompiler.ForceOverwrite = "true"
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
-		VWDPort = "56521"
+		VWDPort = "51167"
 		SlnRelativePath = "dashboard-nuget\"
 	EndProjectSection
 EndProject
@@ -99,10 +97,6 @@ Global
 		{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5F7B7C0-42D2-4D1D-B196-4D1419F391CE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CCC1AACF-4E83-4C01-8D50-2BE11E9B4289}.Release|Any CPU.Build.0 = Release|Any CPU
 		{42939CC7-D4F0-4C07-8424-8E8674738768}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{42939CC7-D4F0-4C07-8424-8E8674738768}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42939CC7-D4F0-4C07-8424-8E8674738768}.Release|Any CPU.ActiveCfg = Release|Any CPU
