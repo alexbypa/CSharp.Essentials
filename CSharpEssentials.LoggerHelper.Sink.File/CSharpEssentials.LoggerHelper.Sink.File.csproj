@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Sink File for CSharpEssentials.LoggerHelper</Title>
-    <Version>3.0.1</Version>
+    <Version>3.0.2</Version>
     <Description>Sink File for package LoggerHelper</Description>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageId>CSharpEssentials.LoggerHelper.Sink.File</PackageId>
@@ -13,14 +14,14 @@
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
     <PackageTags>telemetries, loggerhelper, serilog, logger, structured-logging, email-sink, console-sink, database-logging, postgresql, elasticsearch, sink, logging-helper, dotnet-logging, aspnetcore-logging</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <AssemblyVersion>3.0.1</AssemblyVersion>
-    <FileVersion>3.0.1</FileVersion>
+    <AssemblyVersion></AssemblyVersion>
+    <FileVersion></FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="img\CSharpEssentials.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="3.0.0" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="3.0.2" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>

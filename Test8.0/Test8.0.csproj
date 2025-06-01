@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="3.0.2" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.Console" Version="3.0.2" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.Elasticsearch" Version="3.0.2" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.File" Version="3.0.2" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.MSSqlServer" Version="3.0.2" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.Postgresql" Version="3.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
       <PrivateAssets>all</PrivateAssets>
@@ -15,18 +21,9 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\CSharpEssentials.HangFireHelper\CSharpEssentials.HangFireHelper.csproj" />
     <ProjectReference Include="..\CSharpEssentials.HttpHelper\CSharpEssentials.HttpHelper.csproj" />
-    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Telemetry\CSharpEssentials.LoggerHelper.Telemetry.csproj" />
-    <!--
-    <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Console\CSharpEssentials.LoggerHelper.Sink.Console.csproj" />
-    <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Elasticsearch\CSharpEssentials.LoggerHelper.Sink.Elasticsearch.csproj" />
-    <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.File\CSharpEssentials.LoggerHelper.Sink.File.csproj" />
-    <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.MSSqlServer\CSharpEssentials.LoggerHelper.Sink.MSSqlServer.csproj" />
-    <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Postgresql\CSharpEssentials.LoggerHelper.Sink.Postgresql.csproj" />
-    -->
   </ItemGroup>
 </Project>

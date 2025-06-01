@@ -28,6 +28,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Telemetry", "CSharpEssentials.LoggerHelper.Telemetry\CSharpEssentials.LoggerHelper.Telemetry.csproj", "{42939CC7-D4F0-4C07-8424-8E8674738768}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.MSSqlServer", "CSharpEssentials.LoggerHelper.Sink.MSSqlServer\CSharpEssentials.LoggerHelper.Sink.MSSqlServer.csproj", "{65E4759C-9BF1-47AD-A158-8A7E39FDF9D4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.Postgresql", "CSharpEssentials.LoggerHelper.Sink.Postgresql\CSharpEssentials.LoggerHelper.Sink.Postgresql.csproj", "{134B59B8-4BCC-4A9E-A670-3D9FB5D4F8AD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.Elasticsearch", "CSharpEssentials.LoggerHelper.Sink.Elasticsearch\CSharpEssentials.LoggerHelper.Sink.Elasticsearch.csproj", "{5CFCB118-40DC-4D2C-934C-0E98CB421DBC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.File", "CSharpEssentials.LoggerHelper.Sink.File\CSharpEssentials.LoggerHelper.Sink.File.csproj", "{F041C304-EEEF-4616-BE55-7A7B1C1DED8E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.Console", "CSharpEssentials.LoggerHelper.Sink.Console\CSharpEssentials.LoggerHelper.Sink.Console.csproj", "{FEDF352B-F191-439C-8043-73A4E853D20B}"
+EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "dashboard-nuget", "dashboard-nuget\", "{3E1BD27F-2E77-4C40-91A7-44B8E13EAF0A}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
@@ -49,15 +59,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "dashboard-nuget", "dashboar
 		SlnRelativePath = "dashboard-nuget\"
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.MSSqlServer", "CSharpEssentials.LoggerHelper.Sink.MSSqlServer\CSharpEssentials.LoggerHelper.Sink.MSSqlServer.csproj", "{65E4759C-9BF1-47AD-A158-8A7E39FDF9D4}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.Postgresql", "CSharpEssentials.LoggerHelper.Sink.Postgresql\CSharpEssentials.LoggerHelper.Sink.Postgresql.csproj", "{134B59B8-4BCC-4A9E-A670-3D9FB5D4F8AD}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.Elasticsearch", "CSharpEssentials.LoggerHelper.Sink.Elasticsearch\CSharpEssentials.LoggerHelper.Sink.Elasticsearch.csproj", "{5CFCB118-40DC-4D2C-934C-0E98CB421DBC}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.File", "CSharpEssentials.LoggerHelper.Sink.File\CSharpEssentials.LoggerHelper.Sink.File.csproj", "{F041C304-EEEF-4616-BE55-7A7B1C1DED8E}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpEssentials.LoggerHelper.Sink.Console", "CSharpEssentials.LoggerHelper.Sink.Console\CSharpEssentials.LoggerHelper.Sink.Console.csproj", "{FEDF352B-F191-439C-8043-73A4E853D20B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test6.0", "Test6.0\Test6.0.csproj", "{F5840048-E541-45AF-911A-8AA896374000}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -101,10 +103,6 @@ Global
 		{42939CC7-D4F0-4C07-8424-8E8674738768}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42939CC7-D4F0-4C07-8424-8E8674738768}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42939CC7-D4F0-4C07-8424-8E8674738768}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3E1BD27F-2E77-4C40-91A7-44B8E13EAF0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E1BD27F-2E77-4C40-91A7-44B8E13EAF0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3E1BD27F-2E77-4C40-91A7-44B8E13EAF0A}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E1BD27F-2E77-4C40-91A7-44B8E13EAF0A}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{65E4759C-9BF1-47AD-A158-8A7E39FDF9D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{65E4759C-9BF1-47AD-A158-8A7E39FDF9D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65E4759C-9BF1-47AD-A158-8A7E39FDF9D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -125,6 +123,14 @@ Global
 		{FEDF352B-F191-439C-8043-73A4E853D20B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEDF352B-F191-439C-8043-73A4E853D20B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEDF352B-F191-439C-8043-73A4E853D20B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E1BD27F-2E77-4C40-91A7-44B8E13EAF0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E1BD27F-2E77-4C40-91A7-44B8E13EAF0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E1BD27F-2E77-4C40-91A7-44B8E13EAF0A}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E1BD27F-2E77-4C40-91A7-44B8E13EAF0A}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{F5840048-E541-45AF-911A-8AA896374000}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5840048-E541-45AF-911A-8AA896374000}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5840048-E541-45AF-911A-8AA896374000}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5840048-E541-45AF-911A-8AA896374000}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

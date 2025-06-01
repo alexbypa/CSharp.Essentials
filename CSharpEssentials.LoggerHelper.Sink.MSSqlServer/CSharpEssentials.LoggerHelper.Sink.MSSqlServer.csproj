@@ -2,17 +2,18 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Sink MS SQL for CSharpEssentials.LoggerHelper</Title>
-    <Version>3.0.1</Version>
+    <Version>3.0.2</Version>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <AssemblyVersion>3.0.1</AssemblyVersion>
-    <FileVersion>3.0.1</FileVersion>
+    <AssemblyVersion></AssemblyVersion>
+    <FileVersion></FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
@@ -24,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="3.0.0" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="3.0.2" />
     <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="8.2.0" />
   </ItemGroup>
 
