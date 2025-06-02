@@ -23,7 +23,8 @@
 * **2.0.8** - Enhanced MSSQL Sink Configuration : Introduced comprehensive management of custom columns for the MSSQL sink.
 * **2.0.9** - Breaking Change: Added support for extending log context with custom fields (IRequest extensions)
 * **3.0.1** - Moved all built-in sinks into separate NuGet packages; updated documentation to highlight explicit sink installation and aligned sink package versions
-
+* **3.0.2** - Duplicate registration and build errors in some Sinks
+* **3.0.3** - Added workaround for Path wrong on sink file and fixed Environment development toload appSettings.LoggerHelper.Debug.json
 
 <a id='table-of-contents'></a>
 ## 📑 Table of Contents
