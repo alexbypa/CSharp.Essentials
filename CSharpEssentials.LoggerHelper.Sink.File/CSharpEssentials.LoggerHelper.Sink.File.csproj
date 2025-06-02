@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Sink File for CSharpEssentials.LoggerHelper</Title>
-    <Version>3.0.3</Version>
+    <Version>3.0.4</Version>
     <Description>Sink File for package LoggerHelper</Description>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageId>CSharpEssentials.LoggerHelper.Sink.File</PackageId>

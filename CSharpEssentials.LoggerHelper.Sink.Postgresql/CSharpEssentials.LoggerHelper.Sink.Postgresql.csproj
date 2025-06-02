@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Sink postgresql for package LoggerHelper</Title>
-    <Version>3.0.3</Version>
+    <Version>3.0.4</Version>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <AssemblyVersion></AssemblyVersion>
