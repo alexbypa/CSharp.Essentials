@@ -4,11 +4,13 @@ using Microsoft.OpenApi.Models;
 using OpenTelemetry;
 using Serilog.Events;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Test.Controllers.logger;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient();
 
+Console.WriteLine($".NET runtime in use: {RuntimeInformation.FrameworkDescription}");
 
 #region LoggerHelper
 builder.Services.AddSingleton<IContextLogEnricher, MyCustomEnricher>();
