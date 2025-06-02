@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Sink File for CSharpEssentials.LoggerHelper</Title>
-    <Version>3.0.2</Version>
+    <Version>3.0.3</Version>
     <Description>Sink File for package LoggerHelper</Description>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageId>CSharpEssentials.LoggerHelper.Sink.File</PackageId>
@@ -16,6 +16,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
+    <PackageIcon>CSharpEssentials.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="img\CSharpEssentials.png" />
@@ -25,6 +26,10 @@
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="readme.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

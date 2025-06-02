@@ -1,6 +1,8 @@
 ﻿using CSharpEssentials.LoggerHelper.CustomSinks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.VisualBasic;
 using Serilog;
+using System.Diagnostics;
 using System.Runtime.Loader;
 
 namespace CSharpEssentials.LoggerHelper;
@@ -10,6 +12,31 @@ namespace CSharpEssentials.LoggerHelper;
 internal class LoggerBuilder {
     private readonly LoggerConfiguration _config;
     private readonly SerilogConfiguration _serilogConfig;
+    /// <summary>
+    /// Dynamically loads and registers available sink plugins by scanning the current
+    /// application's base directory for assemblies matching the sink naming convention.
+    /// 
+    /// If the "_excludeSinkFile" flag is set to true (e.g., due to missing log file directory),
+    /// the "File" sink plugin will be excluded from registration.
+    /// </summary>
+    internal static IConfiguration BuildLoggerConfiguration() {
+        var builder = new ConfigurationBuilder();
+
+        // Carica sempre l'appsettings di default
+        builder.AddJsonFile("appsettings.LoggerHelper.json", optional: true, reloadOnChange: true);
+
+        // Leggi la variabile di ambiente
+        var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                       ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+
+        // Se l'ambiente è "Development", carica anche il file di Debug
+        if (string.Equals(envName, "Development", StringComparison.OrdinalIgnoreCase)) {
+            builder.AddJsonFile("appsettings.LoggerHelper.debug.json", optional: true, reloadOnChange: true);
+        }
+
+        return builder.Build();
+    }
+
     /// <summary>
     /// Builds and returns the configured Serilog logger instance.
     /// </summary>
@@ -21,13 +48,7 @@ internal class LoggerBuilder {
     /// </summary>
     /// <param name="configuration">Application configuration (e.g., appsettings.json).</param>
     internal LoggerBuilder() {
-        var configuration = new ConfigurationBuilder()
-#if DEBUG
-    .AddJsonFile("appsettings.LoggerHelper.debug.json")
-#else
-    .AddJsonFile("appsettings.LoggerHelper.json")
-#endif
-        .Build();
+        var configuration = BuildLoggerConfiguration();
         _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
 
         var appName = _serilogConfig.ApplicationName;
@@ -36,17 +57,32 @@ internal class LoggerBuilder {
             .Enrich.WithProperty("ApplicationName", appName)
             .Enrich.With<RenderedMessageEnricher>();
         var selfLogPath = Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt");
-        var stream = new FileStream(
-            selfLogPath,
-            FileMode.Append,
-            FileAccess.Write,
-            FileShare.ReadWrite
-        );
-        var writer = new StreamWriter(stream) { AutoFlush = true };
-        Serilog.Debugging.SelfLog.Enable(msg => {
-            writer.WriteLine(msg);
-        });
+
+        var logFileDir = Path.GetDirectoryName(selfLogPath);
+        try {
+            if (!string.IsNullOrEmpty(logFileDir) && !Directory.Exists(logFileDir)) {
+                Directory.CreateDirectory(logFileDir);
+            }
+            var stream = new FileStream(
+                selfLogPath,
+                FileMode.Append,
+                FileAccess.Write,
+                FileShare.ReadWrite
+            );
+            var writer = new StreamWriter(stream) { AutoFlush = true };
+            Serilog.Debugging.SelfLog.Enable(msg => {
+                writer.WriteLine(msg);
+            });
+        } catch (Exception ex) {
+            _initializationErrors.Add(($"Could not create log directory '{logFileDir}'", ex));
+            _excludeSinkFile = true; // 🚀 Attivo il flag
+        }
     }
+    public delegate void ErrorHandler(string message, Exception exception);
+    private readonly List<(string Message, Exception Exception)> _initializationErrors = new();
+    public IEnumerable<(string Message, Exception Exception)> GetInitializationErrors() => _initializationErrors;
+    private bool _excludeSinkFile;
+
     /// <summary>
     /// Dynamically adds sinks to the LoggerConfiguration based on conditions specified in the Serilog configuration.
     /// </summary>
@@ -85,8 +121,8 @@ internal class LoggerBuilder {
             var plugin = SinkPluginRegistry.All
                 .FirstOrDefault(p => p.CanHandle(condition.Sink));
             if (plugin != null) {
-                // delego completamente al plugin
-                plugin.HandleSink(_config, condition, _serilogConfig);
+                if (!(_excludeSinkFile && condition.Sink.Contains("File", StringComparison.InvariantCultureIgnoreCase)))
+                    plugin.HandleSink(_config, condition, _serilogConfig);
             } else {
                 switch (condition.Sink) {
                     case "Telegram":

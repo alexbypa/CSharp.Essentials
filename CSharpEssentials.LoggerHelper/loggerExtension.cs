@@ -68,11 +68,16 @@ public class loggerExtension<T> where T : IRequest {
     protected static readonly ILogger log;
     static loggerExtension() {
         var builder = new LoggerBuilder().AddDynamicSinks();
+
         log = builder.Build();
         var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
         log = enricher != null
                ? enricher.Enrich(log, context: null)
                : log;
+
+        builder.GetInitializationErrors().ToList().ForEach(error => {
+            TraceAsync(new RequestInfo { Action = "Config" }, LogEventLevel.Error, error.Exception, "LoggerHelper Initialization Error: {Message}", error.Message);
+        });
     }
     /// <summary>
     /// method to write log Async

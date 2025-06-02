@@ -33,7 +33,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
 #endif
         .Build();
             LoggerTelemetryOptions loggerTelemetryOptions = configuration.GetSection("Serilog:SerilogConfiguration:LoggerTelemetryOptions").Get<LoggerTelemetryOptions>();
-            if (!loggerTelemetryOptions?.IsEnabled ?? false)
+            if (!loggerTelemetryOptions?.IsEnabled ?? true)
                 return services;
 
             services.AddDbContext<TelemetriesDbContext>(options =>

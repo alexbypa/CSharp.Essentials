@@ -7,12 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="3.0.2" />
-    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.Console" Version="3.0.2" />
-    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.Elasticsearch" Version="3.0.2" />
-    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.File" Version="3.0.2" />
-    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.MSSqlServer" Version="3.0.2" />
-    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.Postgresql" Version="3.0.2" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.Console" Version="3.0.3" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.Elasticsearch" Version="3.0.3" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.File" Version="3.0.3" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.MSSqlServer" Version="3.0.3" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.Postgresql" Version="3.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
       <PrivateAssets>all</PrivateAssets>
@@ -25,5 +24,6 @@
     <ProjectReference Include="..\CSharpEssentials.HangFireHelper\CSharpEssentials.HangFireHelper.csproj" />
     <ProjectReference Include="..\CSharpEssentials.HttpHelper\CSharpEssentials.HttpHelper.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Telemetry\CSharpEssentials.LoggerHelper.Telemetry.csproj" />
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
   </ItemGroup>
 </Project>
