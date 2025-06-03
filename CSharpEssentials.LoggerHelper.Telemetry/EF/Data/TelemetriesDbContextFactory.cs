@@ -7,9 +7,9 @@ public class TelemetriesDbContextFactory : IDesignTimeDbContextFactory<Telemetri
     public TelemetriesDbContext CreateDbContext(string[] args) {
         IConfigurationRoot configuration = new ConfigurationBuilder()
                .SetBasePath(Directory.GetCurrentDirectory()) // Dove cercare il file
-               .AddJsonFile("appsettings.json", optional: true)
+               .AddJsonFile("appsettings.LoggerHelper.debug.json", optional: true)
                .Build();
-        var connectionString = configuration.GetConnectionString("MetricsDb");
+        var connectionString = configuration.GetValue<string>("Serilog:SerilogConfiguration:LoggerTelemetryOptions:ConnectionString");
 
         var optionsBuilder = new DbContextOptionsBuilder<TelemetriesDbContext>();
         optionsBuilder.UseNpgsql(connectionString);

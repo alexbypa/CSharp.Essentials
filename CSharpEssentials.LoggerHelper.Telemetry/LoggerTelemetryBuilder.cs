@@ -38,13 +38,19 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
 
             services.AddDbContext<TelemetriesDbContext>(options =>
                 options.UseNpgsql(loggerTelemetryOptions.ConnectionString));
-
+            
+            // Applica automaticamente le migration se mancanti
+            using (var scope = services.BuildServiceProvider().CreateScope()) {
+                var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
+                db.Database.Migrate();
+            }
             // Initialize any custom metrics (e.g., static meters)
             CustomMetrics.Initialize(builder.Configuration);
             builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
 
             services.AddControllers();
             services.AddOpenTelemetry()
+                
                 .WithMetrics(metricProvider => {
                     metricProvider
                         .AddAspNetCoreInstrumentation()
@@ -54,9 +60,10 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                             TagKeys = new[] { "trace_id" }
                         })
                         .AddReader(new PeriodicExportingMetricReader(new PostgreSqlMetricExporter(services.BuildServiceProvider()), 20000, 30000))//TODO: Settare gli intervalli !
-                        //.AddMeter("LoggerHelper.Metrics") //Commento in quanto deve filtrare tutto
+                        .AddMeter("LoggerHelper.Metrics") //Commento in quanto deve filtrare tutto
                         .AddConsoleExporter();
                 })
+                
                 .WithTracing(tracerProviderBuilder => {
                     tracerProviderBuilder
                         //.AddSource("LoggerHelper")
