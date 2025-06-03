@@ -32,9 +32,14 @@ jobs:
         languages: ${{ matrix.language }}
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '8.x'
+        dotnet-version: '9.0.300'
+        
+    #- name: Setup .NET
+    #  uses: actions/setup-dotnet@v4
+    #  with:
+    #    dotnet-version: '8.x'
 
     - name: Restore LoggerHelper only
       run: dotnet restore ./CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj
