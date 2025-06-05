@@ -89,6 +89,99 @@ internal class LoggerBuilder {
     /// <returns>The current instance of LoggerBuilder for chaining.</returns>
     internal LoggerBuilder AddDynamicSinks() {
         var baseDir = AppContext.BaseDirectory;
+        path = $"AddDynamicSinks Path: {baseDir}";
+        IEnumerable<string> pluginDlls = Enumerable.Empty<string>();
+        try {
+            if (Directory.Exists(baseDir)) {
+                pluginDlls = Directory.EnumerateFiles(baseDir, "CSharpEssentials.LoggerHelper.Sink.*.dll");
+            }
+        } catch (Exception ex) {
+            _initializationErrors.Add(("Impossibile enumerare i plugin sinks", ex));
+        }
+
+        foreach (var dllPath in pluginDlls) {
+            try {
+                var ctx = new TolerantPluginLoadContext(dllPath);
+                var asmName = new AssemblyName(Path.GetFileNameWithoutExtension(dllPath));
+                ctx.LoadFromAssemblyName(asmName);
+            } catch {}
+        }
+
+        if (!SinkPluginRegistry.All.Any()) {
+            var assemblies = AssemblyLoadContext.Default.Assemblies;
+            var pluginTypes = assemblies
+                .SelectMany(a => {
+                    try { return a.GetTypes(); } catch { return Array.Empty<Type>(); }
+                })
+                .Where(t =>
+                    typeof(ISinkPlugin).IsAssignableFrom(t)
+                    && !t.IsInterface
+                    && !t.IsAbstract
+                );
+
+            foreach (var t in pluginTypes) {
+                try {
+                    var instance = (ISinkPlugin)Activator.CreateInstance(t)!;
+                    SinkPluginRegistry.Register(instance);
+                } catch (Exception ex) {
+                    _initializationErrors.Add(($"Errore registrando il plugin {t.FullName}", ex));
+                }
+            }
+        }
+
+        foreach (var condition in _serilogConfig.SerilogCondition ?? Enumerable.Empty<SerilogCondition>()) {
+            if (condition.Level == null || condition.Level.Count == 0)
+                continue;
+
+            var plugin = SinkPluginRegistry.All
+                .FirstOrDefault(p => p.CanHandle(condition.Sink));
+
+            if (plugin != null) {
+                if (_excludeSinkFile
+                    && condition.Sink.Equals("File", StringComparison.OrdinalIgnoreCase)) {
+                    continue;
+                }
+
+                plugin.HandleSink(_config, condition, _serilogConfig);
+            } else {
+                switch (condition.Sink) {
+                    case "Telegram":
+                        _config.WriteTo.Conditional(
+                            evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
+                            wt => wt.Sink(new CustomTelegramSink(
+                                _serilogConfig?.SerilogOption?.TelegramOption?.Api_Key,
+                                _serilogConfig?.SerilogOption?.TelegramOption?.chatId,
+                                new CustomTelegramSinkFormatter()))
+                        );
+                        break;
+
+                    case "Email":
+                        _config.WriteTo.Conditional(
+                            evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
+                            wt => wt.Sink(new CustomEmailSink(
+                                smtpServer: _serilogConfig.SerilogOption?.Email.Host,
+                                smtpPort: (int)_serilogConfig.SerilogOption?.Email.Port,
+                                fromEmail: _serilogConfig.SerilogOption?.Email.From,
+                                toEmail: string.Join(",", _serilogConfig.SerilogOption?.Email.To),
+                                username: _serilogConfig.SerilogOption?.Email.username,
+                                password: _serilogConfig.SerilogOption?.Email.password,
+                                subjectPrefix: "[LoggerHelper]",
+                                enableSsl: (bool)_serilogConfig.SerilogOption?.Email.EnableSsl,
+                                templatePath: _serilogConfig.SerilogOption?.Email.TemplatePath
+                            ))
+                        );
+                        break;
+                }
+            }
+        }
+
+        return this;
+    }
+
+    internal LoggerBuilder AddDynamicSinks_deprecate(out string path) {
+        var baseDir = AppContext.BaseDirectory;
+
+        path = "AddDynamicSinks Path: " + baseDir;
         foreach (var dll in Directory.EnumerateFiles(baseDir, "CSharpEssentials.LoggerHelper.Sink.*.dll")) {
             try {
                 AssemblyLoadContext.Default.LoadFromAssemblyPath(dll);

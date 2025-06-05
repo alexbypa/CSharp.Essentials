@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Sink MS SQL for CSharpEssentials.LoggerHelper</Title>
-    <Version>3.0.4</Version>
+    <Version>3.0.5</Version>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>

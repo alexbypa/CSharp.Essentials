@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>3.0.4</Version>
+    <Version>3.0.5</Version>
     <Title>Sink ElasticSearch for CSharpEssentials.LoggerHelper</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>Sink ElasticSearch for CSharpEssentials.LoggerHelper</Description>
