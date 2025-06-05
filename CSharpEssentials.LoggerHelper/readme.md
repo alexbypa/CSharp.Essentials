@@ -6,36 +6,53 @@
 
 # 📦 CSharpEssentials.LoggerHelper
 
-## 🐛 Known Issues in 3.0.1
-⚠️ Version 3.0.1 introduced an issue where `Serilog.Sinks.Elasticsearch` included an internal reference to `Serilog.Sinks.Console`, causing duplicate registration and build errors in some projects.
+## 🚀 Why CSharpEssentials.LoggerHelper?
 
-✅ This issue is fixed in version **3.0.2**.  
-👉 Please update your package reference from `3.0.1` to `3.0.2` to avoid conflicts.
+- **🔌 Modular Architecture**  
+  Instead of bundling dozens of sinks into one monolithic library, each sink lives in its own NuGet sub‐package (e.g., `CSharpEssentials.LoggerHelper.Sink.File`, `...Sink.MSSqlServer`, and so on). You install only what you need.
 
-```bash
-dotnet add package Serilog.Sinks.Elasticsearch --version 3.0.2
+- **⚡️ Dynamic Sink Loading**  
+  Our **`TolerantPluginLoadContext`** ensures that sinks load “on the fly” at runtime without crashing your app—missing dependencies or version mismatches? No worries. Other sinks continue to work flawlessly.
+
+- **📄 Centralized Configuration**  
+  Manage all your sinks and log‐levels in a single JSON file (`appsettings.LoggerHelper.json`). Clean, intuitive, and flexible.
+
+- **🛠️ “CurrentError” Error Tracking**  
+  A brand‐new `CurrentError` static property captures the last exception thrown inside the library. Perfect for production scenarios where you want to expose the most recent failure (for example, inserting it into an HTTP header) :
+```cs
+          if (!string.IsNullOrEmpty(loggerExtension<ProviderRequest>.CurrentError))
+            HttpContext.Response.Headers["loggerExtension.CurrentError"] = loggerExtension<ProviderRequest>.CurrentError;
 ```
+- **📈 Structured, Level‐Based Routing**  
+  Direct logs to one or many sinks based on level (`Information`, `Warning`, `Error`, etc.). You decide what goes where—and it’s easy to change on the fly.
 
-## Introduction
+- **🔀 Infinite Extensibility**  
+  Write your own `ISinkPlugin` implementations, drop them in a folder, and CSharpEssentials.LoggerHelper will discover and register them automatically.
 
-**CSharpEssentials.LoggerHelper** is a flexible, modular structured logging **HUB** for .NET (6.0/8.0) applications built on Serilog.  
-The **Hub core** package acts as a central routing engine—directing log events to one or more sinks based on your configuration and log level.  
-All built-in sink implementations have been removed from the core and moved into dedicated sub-packages, so you install only the sinks you need and can extend the Hub with **any number** of additional sinks.
-
----
-
-## Key Benefits
-
-- 🔧 **HUB Core**: minimal dependencies, central logger routing engine  
-- 🟢 **Structured logs**: includes Action, IdTransaction, ApplicationName, MachineName  
-- 🔀 **Level-based routing**: assign sinks per log level (Information, Warning, Error, …)  
-- 📦 **Modular sinks**: each sink lives in its own NuGet package under `CSharpEssentials.LoggerHelper.Sink.*`  
-- ➕ **Infinite extensibility**: add as many sinks as you want by installing extra sub-packages  
-- ⚡️ **Placeholder validation**: catches template mismatches at startup  
-- 📁 **Single config file**: `appsettings.LoggerHelper.json`
+- **💡 SelfLog Support**  
+  Serilog’s internal SelfLog writes to a file you specify so you never miss a diagnostic message if something goes wrong in your logging pipeline.
 
 ---
 
+## 🆕 What’s New in **v3.0.5**
+
+Version **3.0.5** is a major milestone! Highlights:
+
+1. **Dynamic Loading Revamped**  
+   - Introduces `TolerantPluginLoadContext`—a custom `AssemblyLoadContext` that quietly ignores missing dependencies.  
+   - No more “Could not load assembly” exceptions when a plugin references a missing formatter or helper library. Other sinks keep on working smoothly.
+
+2. **`CurrentError` Property on `loggerExtension`**  
+   - Capture and store the last exception message (`Exception.Message`) that occurred inside LoggerHelper.  
+   - Now you can read `LoggerExtension<YourContext>.CurrentError` and expose it (e.g., as an HTTP header) in production, simplifying troubleshooting.
+
+3. **Quality‐of‐Life Improvements**  
+   - Updated to support .NET 8.0 (and .NET 6.0).  
+   - Minor bug fixes, performance optimizations, and improved documentation links.
+
+> **NOTE:** If you currently reference older versions of Serilog sinks in your project, double‐check the [Known Issues](#known‐issues) section below before upgrading.
+
+---
 ## Available Sink Packages
 
 - **Console**: `CSharpEssentials.LoggerHelper.Sink.Console`  
@@ -43,7 +60,6 @@ All built-in sink implementations have been removed from the core and moved into
 - **MSSqlServer**: `CSharpEssentials.LoggerHelper.Sink.MSSqlServer`  
 - **PostgreSQL**: `CSharpEssentials.LoggerHelper.Sink.PostgreSql`  
 - **ElasticSearch**: `CSharpEssentials.LoggerHelper.Sink.Elasticsearch`  
-- _…and any custom sink you implement_
 
 ---
 
