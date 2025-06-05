@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.VisualBasic;
 using Serilog;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.Loader;
 
 namespace CSharpEssentials.LoggerHelper;
@@ -87,9 +88,11 @@ internal class LoggerBuilder {
     /// Dynamically adds sinks to the LoggerConfiguration based on conditions specified in the Serilog configuration.
     /// </summary>
     /// <returns>The current instance of LoggerBuilder for chaining.</returns>
-    internal LoggerBuilder AddDynamicSinks() {
+    internal LoggerBuilder AddDynamicSinks(out string path) {
         var baseDir = AppContext.BaseDirectory;
         path = $"AddDynamicSinks Path: {baseDir}";
+
+        // 1) Individuo tutti i file DLL che corrispondono al pattern "CSharpEssentials.LoggerHelper.Sink.*.dll"
         IEnumerable<string> pluginDlls = Enumerable.Empty<string>();
         try {
             if (Directory.Exists(baseDir)) {
@@ -99,14 +102,25 @@ internal class LoggerBuilder {
             _initializationErrors.Add(("Impossibile enumerare i plugin sinks", ex));
         }
 
+        // 2) Per ciascun DLL, provo a caricarlo in un contesto “tollerante”
+        //    che ignora le eccezioni di dipendenza non trovata.
         foreach (var dllPath in pluginDlls) {
             try {
+                // Creo un nuovo AssemblyLoadContext che non “crolla” se mancano dipendenze
                 var ctx = new TolerantPluginLoadContext(dllPath);
+                // Chiedo di caricare l’assembly a partire dal suo AssemblyName
+                // (il metodo LoadFromAssemblyName farà partire la risoluzione tramite _resolver interno)
                 var asmName = new AssemblyName(Path.GetFileNameWithoutExtension(dllPath));
                 ctx.LoadFromAssemblyName(asmName);
-            } catch {}
+                // Se dovessero mancare dipendenze (Es. Serilog.Formatting.Elasticsearch),
+                // il TolerantPluginLoadContext cattura l’errore e torna null senza sollevare.
+            } catch {
+                // Se il DLL non è nemmeno un .NET assembly valido, lo ignoriamo del tutto.
+            }
         }
 
+        // 3) Se non ho registrato ancora alcun plugin, estraggo da tutti gli assembly caricati
+        //    le classi che implementano ISinkPlugin e le registro.
         if (!SinkPluginRegistry.All.Any()) {
             var assemblies = AssemblyLoadContext.Default.Assemblies;
             var pluginTypes = assemblies
@@ -129,14 +143,18 @@ internal class LoggerBuilder {
             }
         }
 
+        // 4) Infine, itero le condizioni e invoco HandleSink soltanto se esiste il plugin
         foreach (var condition in _serilogConfig.SerilogCondition ?? Enumerable.Empty<SerilogCondition>()) {
+            // Se non è stato impostato un livello per questo sink => skip
             if (condition.Level == null || condition.Level.Count == 0)
                 continue;
 
+            // Trovo un plugin in grado di gestire questo “Sink”
             var plugin = SinkPluginRegistry.All
                 .FirstOrDefault(p => p.CanHandle(condition.Sink));
 
             if (plugin != null) {
+                // Se si tratta di File ma ho forzato l’esclusione, skippo
                 if (_excludeSinkFile
                     && condition.Sink.Equals("File", StringComparison.OrdinalIgnoreCase)) {
                     continue;
@@ -144,6 +162,7 @@ internal class LoggerBuilder {
 
                 plugin.HandleSink(_config, condition, _serilogConfig);
             } else {
+                // Se non esiste un ISinkPlugin per questo Sink, gestisco manualmente Telegram/Email
                 switch (condition.Sink) {
                     case "Telegram":
                         _config.WriteTo.Conditional(
@@ -171,6 +190,8 @@ internal class LoggerBuilder {
                             ))
                         );
                         break;
+
+                        // Aggiungi qui altri casi manuali se ti servono
                 }
             }
         }

@@ -66,18 +66,23 @@ public static class LoggerExtensionConfig {
 /// <typeparam name="T">The request type implementing IRequest.</typeparam>
 public class loggerExtension<T> where T : IRequest {
     protected static readonly ILogger log;
+    public static string CurrentError { get; set; }
     static loggerExtension() {
-        var builder = new LoggerBuilder().AddDynamicSinks();
-
-        log = builder.Build();
-        var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
-        log = enricher != null
-               ? enricher.Enrich(log, context: null)
-               : log;
-
-        builder.GetInitializationErrors().ToList().ForEach(error => {
-            TraceAsync(new RequestInfo { Action = "Config" }, LogEventLevel.Error, error.Exception, "LoggerHelper Initialization Error: {Message}", error.Message);
-        });
+        string step = "AddDynamicSinks";
+        try {
+            var builder = new LoggerBuilder().AddDynamicSinks(out step);
+            log = builder.Build();
+            var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
+            log = enricher != null
+                   ? enricher.Enrich(log, context: null)
+                   : log;
+            builder.GetInitializationErrors().ToList().ForEach(error => {
+                TraceAsync(new RequestInfo { Action = "Config" }, LogEventLevel.Error, error.Exception, "LoggerHelper Initialization Error: {Message}", error.Message);
+            });
+        } catch (Exception ex) {
+            if (string.IsNullOrEmpty(CurrentError))
+                CurrentError = $"{step} [{AppContext.BaseDirectory}]: {ex.Message}";
+        }
     }
     /// <summary>
     /// method to write log Async
