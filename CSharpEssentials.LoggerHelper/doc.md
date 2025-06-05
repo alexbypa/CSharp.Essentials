@@ -25,6 +25,8 @@
 * **3.0.1** - Moved all built-in sinks into separate NuGet packages; updated documentation to highlight explicit sink installation and aligned sink package versions
 * **3.0.2** - Duplicate registration and build errors in some Sinks
 * **3.0.3** - Added workaround for Path wrong on sink file and fixed Environment development toload appSettings.LoggerHelper.Debug.json
+* **3.0.4** - Added framework 9.0
+* **3.0.5** - Fixed load assembly and added property CurrentError on loggerExtension
 
 <a id='table-of-contents'></a>
 ## 📑 Table of Contents
