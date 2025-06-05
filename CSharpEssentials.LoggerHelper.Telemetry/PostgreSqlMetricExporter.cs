@@ -79,7 +79,10 @@ public class PostgreSqlMetricExporter : BaseExporter<Metric> {
                         Value = value,
                         Timestamp = DateTime.UtcNow,
                         TagsJson = JsonSerializer.Serialize(tags),
-                        TraceId = traceValue?.ToString()
+                        TraceId = traceValue?.ToString(),
+                        BucketsJson = JsonSerializer.Serialize(bucketCounts),
+                        BoundariesJson = JsonSerializer.Serialize(boundaries)
+
                     };
 
                     db.Metrics.Add(entry);

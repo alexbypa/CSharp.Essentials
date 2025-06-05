@@ -10,6 +10,8 @@ public class MetricEntry {
     public DateTime Timestamp { get; set; }
     public string? TagsJson { get; set; }
     public string? TraceId { get; set; }
+    public string? BucketsJson { get; set; }
+    public string? BoundariesJson { get; set; }
 }
 public class MetricEntryConfiguration : IEntityTypeConfiguration<MetricEntry> {
     public void Configure(EntityTypeBuilder<MetricEntry> builder) {
