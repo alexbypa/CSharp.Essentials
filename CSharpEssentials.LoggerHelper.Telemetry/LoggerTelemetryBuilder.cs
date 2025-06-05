@@ -38,7 +38,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
 
             services.AddDbContext<TelemetriesDbContext>(options =>
                 options.UseNpgsql(loggerTelemetryOptions.ConnectionString));
-            
+
             // Applica automaticamente le migration se mancanti
             using (var scope = services.BuildServiceProvider().CreateScope()) {
                 var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
@@ -46,38 +46,62 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
             }
             // Initialize any custom metrics (e.g., static meters)
             CustomMetrics.Initialize(builder.Configuration);
+
             builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
 
             services.AddControllers();
             services.AddOpenTelemetry()
-                
                 .WithMetrics(metricProvider => {
                     metricProvider
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
+                        .AddSqlClientInstrumentation()
+                        .AddView(
+                            instrumentName: "http.client.request.duration",
+                            new ExplicitBucketHistogramConfiguration {
+                                Boundaries = new double[] { 50, 200, 500, 1000 },
+                                Name = "Alex",
+                                Description = "Tempi di durata!",
+                                TagKeys = new[] { "http.status_code", "trace_id" }
+                            }
+                        )
                         .AddRuntimeInstrumentation()
-                        .AddView(instrumentName: "*", new ExplicitBucketHistogramConfiguration {
+                        //.AddMeter("OpenTelemetry.Instrumentation.SqlClient") --> come lo intercetto ? 
+
+                        .AddMeter("LoggerHelper.Metrics") //Commento in quanto deve filtrare tutto
+
+                        .AddView(instrumentName: "LoggerHelper.Metrics.*", new ExplicitBucketHistogramConfiguration {
                             TagKeys = new[] { "trace_id" }
                         })
-                        .AddReader(new PeriodicExportingMetricReader(new PostgreSqlMetricExporter(services.BuildServiceProvider()), 20000, 30000))//TODO: Settare gli intervalli !
-                        .AddMeter("LoggerHelper.Metrics") //Commento in quanto deve filtrare tutto
-                        .AddConsoleExporter();
+
+                            //.AddView("db.client.commands.duration", MetricStreamConfiguration.Drop)
+
+                            .AddReader(new PeriodicExportingMetricReader(
+                                new PostgreSqlMetricExporter(
+                                    services.BuildServiceProvider()),
+                                    10000,
+                                    30000
+                                )
+                            )//TODO: Settare gli intervalli !
+
+                            .AddConsoleExporter();
                 })
-                
+
                 .WithTracing(tracerProviderBuilder => {
                     tracerProviderBuilder
                         //.AddSource("LoggerHelper")
                         .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("LoggerHelper"))
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
+
                         //.AddProcessor(new SimpleActivityExportProcessor(new PostgreSqlTraceExporter(services.BuildServiceProvider())))
                         .AddProcessor(new BatchActivityExportProcessor(
                             new PostgreSqlTraceExporter(services.BuildServiceProvider()),
                             maxQueueSize: 2048,
                             scheduledDelayMilliseconds: 5000,
                             exporterTimeoutMilliseconds: 30000
-                        ))
-                        .AddConsoleExporter(); // Per vedere le trace anche su console
+                        ));
+                    //.AddConsoleExporter(); // Per vedere le trace anche su console
                 });
 
             return services;

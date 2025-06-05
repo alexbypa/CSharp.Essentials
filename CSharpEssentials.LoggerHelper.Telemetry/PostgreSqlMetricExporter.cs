@@ -75,7 +75,7 @@ public class PostgreSqlMetricExporter : BaseExporter<Metric> {
 
                     // popoliamo l'entità EF
                     var entry = new MetricEntry {
-                        Name = metric.Name,
+                        Name = $"Exporter: {metric.Name}",
                         Value = value,
                         Timestamp = DateTime.UtcNow,
                         TagsJson = JsonSerializer.Serialize(tags),

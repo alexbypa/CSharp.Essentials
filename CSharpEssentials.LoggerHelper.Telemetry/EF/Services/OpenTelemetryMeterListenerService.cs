@@ -1,7 +1,10 @@
 ﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
+using Google.Protobuf.WellKnownTypes;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Text.Json;
@@ -9,6 +12,7 @@ using System.Text.Json;
 namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
 public class OpenTelemetryMeterListenerService : BackgroundService {
     private readonly IServiceProvider _provider;
+    private DateTime LastAlert = DateTime.Now;
     public OpenTelemetryMeterListenerService(IServiceProvider provider) {
         _provider = provider;
     }
@@ -33,8 +37,18 @@ public class OpenTelemetryMeterListenerService : BackgroundService {
                 if (!string.IsNullOrWhiteSpace(traceId))
                     tagDict["trace_id"] = traceId;
 
+                //TO HACK !
+                if (instrument.Name.Contains("db", StringComparison.InvariantCultureIgnoreCase)) {
+                    TimeSpan diff = DateTime.Now - LastAlert;
+                    if (diff.TotalSeconds > 30) {
+                        LastAlert = DateTime.Now;
+                        loggerExtension<MetricRequest>.TraceAsync(new MetricRequest { Action = "metric" }, Serilog.Events.LogEventLevel.Error, null, "Attention please ...");
+                    }
+                }
+
+
                 await db.Metrics.AddAsync(new MetricEntry {
-                    Name = instrument.Name,
+                    Name = $"Listener: {instrument.Name}",
                     Value = measurement,
                     Timestamp = DateTime.UtcNow,
                     TagsJson = JsonSerializer.Serialize(tagDict),
@@ -45,5 +59,13 @@ public class OpenTelemetryMeterListenerService : BackgroundService {
         });
         listener.Start();
         return Task.CompletedTask;
+    }
+
+    public class MetricRequest : IRequest {
+        public string IdTransaction { get; set; }
+
+        public string Action { get; set; }
+
+        public string ApplicationName { get; set; }
     }
 }
