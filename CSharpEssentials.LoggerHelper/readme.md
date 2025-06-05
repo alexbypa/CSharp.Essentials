@@ -60,6 +60,8 @@ Version **3.0.5** is a major milestone! Highlights:
 - **MSSqlServer**: `CSharpEssentials.LoggerHelper.Sink.MSSqlServer`  
 - **PostgreSQL**: `CSharpEssentials.LoggerHelper.Sink.PostgreSql`  
 - **ElasticSearch**: `CSharpEssentials.LoggerHelper.Sink.Elasticsearch`  
+- **Telegram**: `Used via HttpClient`  
+- **Email**: `Used via System.Net.Mail`  
 
 ---
 
