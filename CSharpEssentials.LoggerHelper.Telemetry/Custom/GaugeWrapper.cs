@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.Metrics;
 
-namespace CSharpEssentials.LoggerHelper.Telemetry;
+namespace CSharpEssentials.LoggerHelper.Telemetry.Custom;
 /// <summary>
 /// A wrapper around <see cref="ObservableGauge{T}"/> that simplifies
 /// creating an observable gauge instrument from a <see cref="Func{T}"/> provider.
@@ -47,7 +47,7 @@ public class GaugeWrapper<T> where T : struct {
     /// </param>
     public GaugeWrapper(Meter meter, string name, Func<T> valueProvider, string unit = "", string description = "") {
         _valueProvider = valueProvider;
-        Gauge = meter.CreateObservableGauge<T>(
+        Gauge = meter.CreateObservableGauge(
             name,
             () => {
                 _lastValue = _valueProvider();

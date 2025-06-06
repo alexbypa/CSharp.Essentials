@@ -41,7 +41,7 @@
 * [🧪 Demo API](#demo-api)
 
 ## 📘 Introduction<a id='introduction'></a>   [🔝](#table-of-contents)
-**LoggerHelper** is a flexible and modular structured logging library for .NET (6.0/8.0) applications based on Serilog. It enables structured, multi-sink logging through a plug-and-play approach.
+**LoggerHelper** is a flexible and modular structured logging library for .NET (6.0/8.0/9.0) applications based on Serilog. It enables structured, multi-sink logging through a plug-and-play approach.
 
 ### 🔑 Key Benefits:
 
@@ -68,14 +68,13 @@ Instead, each sink (Console, File, MSSqlServer, Elasticsearch, PostgreSql, etc.)
 
 After installing CSharpEssentials.LoggerHelper (v3.0.1+), you must explicitly add each sink you need. For example:
 
-bash
-Copia
-Modifica
+```bash
 dotnet add package CSharpEssentials.LoggerHelper                      # Core “Hub” only
 dotnet add package CSharpEssentials.LoggerHelper.Sink.File            # File sink
 dotnet add package CSharpEssentials.LoggerHelper.Sink.Console         # Console sink
 dotnet add package CSharpEssentials.LoggerHelper.Sink.Console         # Console sink
 dotnet add package CSharpEssentials.LoggerHelper.Sink.Elasticsearch   # Console ElasticSearch
+```
 — Why?
 
 Fewer unnecessary dependencies – only pull in the sinks you actually use.

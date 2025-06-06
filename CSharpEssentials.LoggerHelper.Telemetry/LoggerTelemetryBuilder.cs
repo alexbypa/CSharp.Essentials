@@ -1,6 +1,9 @@
-﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.Custom;
+using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 using CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
+using CSharpEssentials.LoggerHelper.Telemetry.middleware;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -62,6 +65,9 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                 builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
 
             services.AddControllers();
+
+            services.AddSingleton<IStartupFilter, TraceIdPropagationStartupFilter>();
+
             services.AddOpenTelemetry()
                 .WithMetrics(metricProvider => {
                     metricProvider
@@ -122,7 +128,6 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                     //TODO:
                     //.AddConsoleExporter(); // Per vedere le trace anche su console
                 });
-
             return services;
         }
     }

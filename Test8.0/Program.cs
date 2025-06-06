@@ -1,5 +1,6 @@
 ﻿using CSharpEssentials.LoggerHelper;
 using CSharpEssentials.LoggerHelper.Telemetry;
+using CSharpEssentials.LoggerHelper.Telemetry.middleware;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry;
 using Serilog.Events;
@@ -38,10 +39,6 @@ builder.Services.AddSwaggerGen(c => {
 
 var app = builder.Build();
 LoggerHelperServiceLocator.Instance = app.Services;
-
-#region OpenTelemetry
-app.UseMiddleware<TraceIdPropagationMiddleware>(); // Middleware to propagate TraceId into Activity and Baggage
-#endregion
 
 app.UseStaticFiles(); // << deve essere PRIMA di app.UseRouting()
 
