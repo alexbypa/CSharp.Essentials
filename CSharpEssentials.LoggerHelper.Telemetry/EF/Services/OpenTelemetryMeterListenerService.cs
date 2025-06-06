@@ -38,9 +38,10 @@ public class OpenTelemetryMeterListenerService : BackgroundService {
                     tagDict["trace_id"] = traceId;
 
                 //TO HACK !!!
+                //TODO: inserire options per customizzare gli alert !
                 if (instrument.Name.Contains("db", StringComparison.InvariantCultureIgnoreCase)) {
                     TimeSpan diff = DateTime.Now - LastAlert;
-                    if (diff.TotalSeconds > 10) {
+                    if (diff.TotalSeconds > 100) {
                         LastAlert = DateTime.Now;
                         loggerExtension<MetricRequest>.TraceAsync(new MetricRequest { Action = "metric" }, Serilog.Events.LogEventLevel.Error, null, "Attention please {Metric}, {measurement} {tagsJson}", instrument.Name, measurement, JsonSerializer.Serialize(tagDict));
                         Debug.Print(loggerExtension<MetricRequest>.CurrentError);

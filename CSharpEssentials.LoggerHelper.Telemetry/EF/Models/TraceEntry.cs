@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
+[Table("TraceEntry", Schema = "public")]
 public class TraceEntry {
     public Guid Id { get; set; } = Guid.NewGuid();
 

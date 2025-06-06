@@ -11,6 +11,7 @@ public class TelemetryPublicApiController : ControllerBase {
     public TelemetryPublicApiController(TelemetriesDbContext db) {
         _db = db;
     }
+    //Sfruttare le viste su postgresql per ottenere dati con metriche e webhook !
     [HttpGet("metrics")]
     public async Task<IActionResult> GetMetrics() {
         var metrics = await _db.Metrics

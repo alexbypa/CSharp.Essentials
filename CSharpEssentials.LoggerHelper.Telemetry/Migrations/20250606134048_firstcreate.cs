@@ -7,17 +7,17 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
 {
     /// <inheritdoc />
-    public partial class start : Migration
+    public partial class firstcreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
-                name: "dbo");
+                name: "public");
 
             migrationBuilder.CreateTable(
                 name: "LogEntry",
-                schema: "dbo",
+                schema: "public",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
@@ -27,7 +27,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
                     message_template = table.Column<string>(type: "text", nullable: false),
                     level = table.Column<string>(type: "text", nullable: false),
                     raise_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    exception = table.Column<string>(type: "text", nullable: false),
+                    exception = table.Column<string>(type: "text", nullable: true),
                     properties = table.Column<string>(type: "text", nullable: true),
                     props_test = table.Column<string>(type: "text", nullable: true),
                     MachineName = table.Column<string>(type: "text", nullable: false),
@@ -40,7 +40,8 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Metrics",
+                name: "MetricEntry",
+                schema: "public",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -53,11 +54,12 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Metrics", x => x.Id);
+                    table.PrimaryKey("PK_MetricEntry", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "TraceEntry",
+                schema: "public",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -81,13 +83,15 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
         {
             migrationBuilder.DropTable(
                 name: "LogEntry",
-                schema: "dbo");
+                schema: "public");
 
             migrationBuilder.DropTable(
-                name: "Metrics");
+                name: "MetricEntry",
+                schema: "public");
 
             migrationBuilder.DropTable(
-                name: "TraceEntry");
+                name: "TraceEntry",
+                schema: "public");
         }
     }
 }

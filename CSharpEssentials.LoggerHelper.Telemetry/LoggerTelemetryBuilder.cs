@@ -2,6 +2,7 @@
 using CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
@@ -36,18 +37,29 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
             if (!loggerTelemetryOptions?.IsEnabled ?? true)
                 return services;
 
-            services.AddDbContext<TelemetriesDbContext>(options =>
-                options.UseNpgsql(loggerTelemetryOptions.ConnectionString));
 
+            //services.AddDbContext<TelemetriesDbContext>(options =>
+            //    options.UseNpgsql(loggerTelemetryOptions.ConnectionString));
+
+            //TODO:
+            services.AddDbContext<TelemetriesDbContext>(options =>
+                options.UseNpgsql(loggerTelemetryOptions.ConnectionString)
+                .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
+
+            //TODO:
             // Applica automaticamente le migration se mancanti
             using (var scope = services.BuildServiceProvider().CreateScope()) {
                 var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
                 db.Database.Migrate();
             }
+
+            //TODO:
+            // Dovremmo aggiungere queste metriche custom su metric listener o no !
             // Initialize any custom metrics (e.g., static meters)
             CustomMetrics.Initialize(builder.Configuration);
 
-            builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
+            if (loggerTelemetryOptions?.MeterListenerServiceIsEnabled ?? false)
+                builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
 
             services.AddControllers();
             services.AddOpenTelemetry()
@@ -56,6 +68,8 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddSqlClientInstrumentation()
+                        //TODO:
+                        /*
                         .AddView(
                             instrumentName: "http.client.request.duration",
                             new ExplicitBucketHistogramConfiguration {
@@ -65,26 +79,30 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                                 TagKeys = new[] { "http.status_code", "trace_id" }
                             }
                         )
+                        */
                         .AddRuntimeInstrumentation()
-                        //.AddMeter("OpenTelemetry.Instrumentation.SqlClient") --> come lo intercetto ? 
 
-                        .AddMeter("LoggerHelper.Metrics") //Commento in quanto deve filtrare tutto
+                        //TODO:come lo intercetto ? 
+                        //.AddMeter("OpenTelemetry.Instrumentation.SqlClient") 
+
+                        .AddMeter("LoggerHelper.Metrics")
 
                         .AddView(instrumentName: "LoggerHelper.Metrics.*", new ExplicitBucketHistogramConfiguration {
                             TagKeys = new[] { "trace_id" }
                         })
 
-                            //.AddView("db.client.commands.duration", MetricStreamConfiguration.Drop)
+                        //TODO:
+                        //.AddView("db.client.commands.duration", MetricStreamConfiguration.Drop)
 
-                            .AddReader(new PeriodicExportingMetricReader(
-                                new PostgreSqlMetricExporter(
-                                    services.BuildServiceProvider()),
-                                    10000,
-                                    30000
-                                )
-                            )//TODO: Settare gli intervalli !
+                        .AddReader(new PeriodicExportingMetricReader(
+                            new PostgreSqlMetricExporter(
+                                services.BuildServiceProvider()),
+                                loggerTelemetryOptions?.CustomExporter?.exportIntervalMilliseconds ?? 20000,
+                                loggerTelemetryOptions?.CustomExporter?.exportTimeoutMilliseconds ?? 30000
+                            )
+                        )
 
-                            .AddConsoleExporter();
+                        .AddConsoleExporter();
                 })
 
                 .WithTracing(tracerProviderBuilder => {
@@ -101,6 +119,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                             scheduledDelayMilliseconds: 5000,
                             exporterTimeoutMilliseconds: 30000
                         ));
+                    //TODO:
                     //.AddConsoleExporter(); // Per vedere le trace anche su console
                 });
 

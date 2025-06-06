@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
 {
     [DbContext(typeof(TelemetriesDbContext))]
-    [Migration("20250520144000_updateexceptionOnLogEntry")]
-    partial class updateexceptionOnLogEntry
+    [Migration("20250606134048_firstcreate")]
+    partial class firstcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -75,7 +75,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LogEntry", "dbo");
+                    b.ToTable("LogEntry", "public");
                 });
 
             modelBuilder.Entity("CSharpEssentials.LoggerHelper.Telemetry.EF.Models.MetricEntry", b =>
@@ -105,7 +105,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Metrics");
+                    b.ToTable("MetricEntry", "public");
                 });
 
             modelBuilder.Entity("CSharpEssentials.LoggerHelper.Telemetry.EF.Models.TraceEntry", b =>
@@ -144,7 +144,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TraceEntry");
+                    b.ToTable("TraceEntry", "public");
                 });
 #pragma warning restore 612, 618
         }

@@ -72,7 +72,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LogEntry", "dbo");
+                    b.ToTable("LogEntry", "public");
                 });
 
             modelBuilder.Entity("CSharpEssentials.LoggerHelper.Telemetry.EF.Models.MetricEntry", b =>
@@ -102,7 +102,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Metrics");
+                    b.ToTable("MetricEntry", "public");
                 });
 
             modelBuilder.Entity("CSharpEssentials.LoggerHelper.Telemetry.EF.Models.TraceEntry", b =>
@@ -141,7 +141,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TraceEntry");
+                    b.ToTable("TraceEntry", "public");
                 });
 #pragma warning restore 612, 618
         }

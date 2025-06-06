@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <Version></Version>
+    <PackageIcon>CSharpEssentials.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
