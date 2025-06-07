@@ -17,8 +17,8 @@ public class UserSyncEndpoint : IEndpointDefinition {
         loggerExtension<IRequest>.TraceSync(new LoggerRequest(), Serilog.Events.LogEventLevel.Information, null, "Loaded LoggerHelper");
         if (!string.IsNullOrEmpty(loggerExtension<IRequest>.CurrentError))
             return Results.BadRequest(loggerExtension<IRequest>.CurrentError);
-        if (loggerExtension<IRequest>._errors.Any())
-            return Results.BadRequest(string.Join(",", loggerExtension<IRequest>._errors.ToList().Select(item => $"{item.SinkName}: {item.ErrorMessage}")));
+        if (loggerExtension<IRequest>.Errors.Any())
+            return Results.BadRequest(string.Join(",", loggerExtension<IRequest>.Errors.ToList().Select(item => $"{item.SinkName}: {item.ErrorMessage}")));
         try {
             var users = await service.SyncUsersAsync(page);
             return Results.Ok(users);
