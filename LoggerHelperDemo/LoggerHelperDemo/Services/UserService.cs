@@ -17,7 +17,7 @@ public class UserService : IUserService {
     }
 
     public async Task<IEnumerable<User>> SyncUsersAsync(int page) {
-        var resp = await _http.GetFromJsonAsync<ReqResResponse>($"https://reqres.in/api/users?page={page}");
+        var resp = await _http.GetFromJsonAsync<ReqResResponse>($"{_http.BaseAddress}/users?page={page}");
         if (resp?.Data == null)
             return Enumerable.Empty<User>();
 
