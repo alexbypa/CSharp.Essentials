@@ -1,6 +1,9 @@
 ﻿## 📘 Introduction<a id='introduction'></a>   [🔝](#table-of-contents)
 
+
 🚀 **CSharpEssentials.LoggerHelper** is a flexible and modular structured logging library for .NET 6/8/9. It’s powered by Serilog for most sinks, and extended with native support for Telegram (via `HttpClient`) and Email (via `System.Net.Mail`).
+
+⚠️ **Note**: The built-in Serilog Email Sink is currently affected by a blocking issue ([#44](https://github.com/serilog/serilog-sinks-email/issues/44)), so `CSharpEssentials.LoggerHelper` uses `System.Net.Mail` instead for full control and reliability in production.
 
 🧩 Each sink is delivered as an independent NuGet sub-package and dynamically loaded at runtime.
 
