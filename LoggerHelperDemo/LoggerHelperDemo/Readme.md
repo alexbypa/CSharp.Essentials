@@ -64,6 +64,51 @@ Enable HTTP middleware logging:
 ```csharp
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
 ```
+### Verifying LoggerHelper Initialization in Your Minimal API Endpoint
 
+After registering LoggerHelper in your pipeline, you can trigger sink loading and check for any initialization errors right in your endpoint handler:
+
+```csharp
+app.MapGet("/users/sync", async ([FromQuery] int page, IUserService service) =>
+{
+    // 1) Trigger sink loading and log startup event
+    await LoggerExtension<IRequest>.TraceAsync(
+        new LoggerRequest(),
+        Serilog.Events.LogEventLevel.Information,
+        properties: null,
+        messageTemplate: "Loaded LoggerHelper"
+    );
+
+    // 2) Check for a global initialization error
+    if (!string.IsNullOrEmpty(LoggerExtension<IRequest>.CurrentError))
+    {
+        return Results.BadRequest(LoggerExtension<IRequest>.CurrentError);
+    }
+
+    // 3) Check for per-sink initialization failures
+    if (LoggerExtension<IRequest>.Errors?.Any() == true)
+    {
+        var details = LoggerExtension<IRequest>.Errors
+            .Select(e => $"{e.SinkName}: {e.ErrorMessage}");
+        return Results.BadRequest(string.Join("; ", details));
+    }
+
+    // 4) Proceed with business logic if all sinks initialized successfully
+    var users = await service.SyncUsersAsync(page);
+    return Results.Ok(users);
+})
+.WithName("SyncUsers")
+.Produces<List<User>>(StatusCodes.Status200OK);
+```
+### Troubleshooting: Missing appsettings File
+
+If you run a request without the proper appsettings in place, you’ll see an error like this:
+
+![Configuration File 'appsettings.LoggerHelper.debug.json' not found](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/img/badrequest.png)
+
+> **Note:** the example above shows the runtime looking for `appsettings.LoggerHelper.debug.json`  
+> (in Development) or `appsettings.LoggerHelper.json` (in Production).  
+> Make sure you include one of these files in your project output folder, with the exact naming  
+> and JSON schema described in the **Configuration** section below.
 
 👉 [Click here to view full usage guide and examples](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
