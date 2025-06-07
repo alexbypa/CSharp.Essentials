@@ -1,5 +1,4 @@
 ﻿using Serilog;
-using System.Runtime.CompilerServices;
 
 namespace CSharpEssentials.LoggerHelper;
 // un “contratto” che ogni sink esterno dovrà implementare

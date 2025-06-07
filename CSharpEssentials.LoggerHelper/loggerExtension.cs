@@ -72,11 +72,12 @@ public class loggerExtension<T> where T : IRequest {
     protected static readonly ILogger log;
     public static string CurrentError { get; set; }
     public static readonly ConcurrentQueue<LogErrorEntry> Errors = new();
+    public static List<string> SinksLoaded = new List<string>();
     static loggerExtension() {
         string step = "Init";
         string SinkNameInError = "";
         try {
-            var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError, ref Errors);
+            var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError, ref Errors, ref SinksLoaded);
             log = builder.Build();
             var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
             log = enricher != null
