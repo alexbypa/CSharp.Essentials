@@ -51,4 +51,19 @@
 dotnet add package CSharpEssentials.LoggerHelper
 ```
 
+To activate LoggerHelper and enable request/response logging, configure your application in `Program.cs` as follows:
+```csharp
+#if NET6_0
+    builder.AddLoggerConfiguration();
+#else
+    builder.Services.AddLoggerConfiguration(builder);
+#endif
+```
+
+Enable HTTP middleware logging:
+```csharp
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
+```
+
+
 👉 [Click here to view full usage guide and examples](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)

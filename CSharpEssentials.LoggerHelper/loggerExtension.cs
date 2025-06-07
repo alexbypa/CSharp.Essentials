@@ -73,7 +73,7 @@ public class loggerExtension<T> where T : IRequest {
     public static string CurrentError { get; set; }
     public static readonly ConcurrentQueue<LogErrorEntry> _errors = new();
     static loggerExtension() {
-        string step = "AddDynamicSinks";
+        string step = "Init";
         string SinkNameInError = "";
         try {
             var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError);
@@ -132,6 +132,9 @@ public class loggerExtension<T> where T : IRequest {
         arguments.Add(Action);
 
         var spanName = Activity.Current?.DisplayName;
+        if (log == null)
+            return;
+
         var logger = log;
         if (!string.IsNullOrEmpty(spanName))
             logger = log.ForContext("SpanName", spanName);
