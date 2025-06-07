@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.Loader;
+using System.Xml.Linq;
 
 namespace CSharpEssentials.LoggerHelper;
 /// <summary>
@@ -16,21 +17,15 @@ internal class TolerantPluginLoadContext : AssemblyLoadContext {
     public TolerantPluginLoadContext(string pluginPath) : base(isCollectible: false) {
         _resolver = new AssemblyDependencyResolver(pluginPath);
     }
-    protected override Assembly Load(AssemblyName assemblyName) {
-        try {
-            // Provo a risolvere il path fisico di questo assembly (es. Serilog.Formatting.Elasticsearch.dll)
-            string? path = _resolver.ResolveAssemblyToPath(assemblyName);
-            if (path != null) {
-                // Se trovo un file compatibile, provo a caricarlo da quel percorso
-                return LoadFromAssemblyPath(path);
-            }
-        } catch {
-            // In caso di qualunque errore (versione sbagliata, PublicKeyToken diverso, file mancante),
-            // ritorno null e permetto al runtime di continuare con altri contesti o di ignorare.
-        }
+    protected override Assembly? Load(AssemblyName name) {
+        // Se mi chiedono 'CSharpEssentials.LoggerHelper' restituisco quella già caricata nel Default context
+        if (string.Equals(name.Name, "CSharpEssentials.LoggerHelper", StringComparison.OrdinalIgnoreCase))
+            return AssemblyLoadContext.Default.LoadFromAssemblyName(name);
 
-        // Se non l’ho risolto io, restituisco null in modo da lasciare al Default o ad altri contesti
-        // la possibilità di caricarlo, oppure di ignorarlo del tutto.
-        return null!;
+        // altrimenti risolvo come facevi tu
+        var path = _resolver.ResolveAssemblyToPath(name);
+        return path != null
+            ? LoadFromAssemblyPath(path)
+            : null;
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -60,7 +61,7 @@ internal class LoggerBuilder {
     /// See <see href="https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation">Configuration docs</see> for more info.
     /// </exception>
     internal LoggerBuilder() {
-    var configuration = BuildLoggerConfiguration();
+        var configuration = BuildLoggerConfiguration();
         _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
         if (_serilogConfig == null)
             throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
@@ -80,7 +81,7 @@ internal class LoggerBuilder {
     /// Dynamically adds sinks to the LoggerConfiguration based on conditions specified in the Serilog configuration.
     /// </summary>
     /// <returns>The current instance of LoggerBuilder for chaining.</returns>
-    internal LoggerBuilder AddDynamicSinks(out string path, out string SinkNameInError, ref ConcurrentQueue<LogErrorEntry> _Errors) {
+    internal LoggerBuilder AddDynamicSinks(out string path, out string SinkNameInError, ref ConcurrentQueue<LogErrorEntry> _Errors, ref List<string> SinksLoaded) {
         SinkNameInError = "";
         var baseDir = AppContext.BaseDirectory;
         path = $"AddDynamicSinks Path: {baseDir}";
@@ -101,53 +102,100 @@ internal class LoggerBuilder {
                 });
         }
 
-        // 2) Per ciascun DLL, provo a caricarlo in un contesto “tollerante”
-        //    che ignora le eccezioni di dipendenza non trovata.
+        // crea una lista per tenere i tuoi plugin loadati
+        var loadedAssemblies = new List<Assembly>();
         foreach (var dllPath in pluginDlls) {
             try {
-                // Creo un nuovo AssemblyLoadContext che non “crolla” se mancano dipendenze
                 var ctx = new TolerantPluginLoadContext(dllPath);
-                // Chiedo di caricare l’assembly a partire dal suo AssemblyName
-                // (il metodo LoadFromAssemblyName farà partire la risoluzione tramite _resolver interno)
-                var asmName = new AssemblyName(Path.GetFileNameWithoutExtension(dllPath));
-                ctx.LoadFromAssemblyName(asmName);
-                // Se dovessero mancare dipendenze (Es. Serilog.Formatting.Elasticsearch),
-                // il TolerantPluginLoadContext cattura l’errore e torna null senza sollevare.
-            } catch {
-                // Se il DLL non è nemmeno un .NET assembly valido, lo ignoriamo del tutto.
+                // invece di LoadFromAssemblyName, carica direttamente dal path
+                var asm = ctx.LoadFromAssemblyPath(dllPath);
+                loadedAssemblies.Add(asm);
+            } catch (Exception ex) {
+                _initializationErrors.Enqueue(new LogErrorEntry {
+                    Timestamp = DateTime.UtcNow,
+                    SinkName = Path.GetFileNameWithoutExtension(dllPath),
+                    ErrorMessage = ex.Message,
+                    ContextInfo = baseDir
+                });
             }
         }
 
-        // 3) Se non ho registrato ancora alcun plugin, estraggo da tutti gli assembly caricati
-        //    le classi che implementano ISinkPlugin e le registro.
-        if (!SinkPluginRegistry.All.Any()) {
-            var assemblies = AssemblyLoadContext.Default.Assemblies;
-            var pluginTypes = assemblies
-                .SelectMany(a => {
-                    try { return a.GetTypes(); } catch { return Array.Empty<Type>(); }
-                })
-                .Where(t =>
-                    typeof(ISinkPlugin).IsAssignableFrom(t)
-                    && !t.IsInterface
-                    && !t.IsAbstract
-                );
+        // Assemblies in Default + quelli appena caricati
+        var assembliesToScan = AssemblyLoadContext
+            .Default
+            .Assemblies
+            .Concat(loadedAssemblies);
 
-            foreach (var t in pluginTypes) {
+        //var pluginTypes = new List<Type>();
+        //foreach (var asm in assembliesToScan) {
+        //    Type[] types;
+        //    try {
+        //        // 1) Metti qui un breakpoint e verifica asm.FullName
+        //        types = asm.GetTypes();
+        //        Debug.WriteLine($"[DBG] {asm.GetName().Name} ha {types.Length} tipi.");
+        //    } catch (ReflectionTypeLoadException rtlex) {
+        //        // 2) Se arriva qui, esplodi loaderExceptions per capire perché
+        //        foreach (var lex in rtlex.LoaderExceptions)
+        //            Debug.WriteLine($"   ↳ Loader error: {lex.Message}");
+        //        continue;  // salta questo assembly
+        //    } catch (Exception ex) {
+        //        Debug.WriteLine($"   ↳ Errore generico in {asm.FullName}: {ex.Message}");
+        //        continue;
+        //    }
+
+        //    foreach (var t in types) {
+        //        // 3) Metti un breakpoint qui e guarda
+        //        bool assignable = typeof(ISinkPlugin).IsAssignableFrom(t);
+        //        bool isInterface = t.IsInterface;
+        //        bool isAbstract = t.IsAbstract;
+        //        Debug.WriteLine($"   Tipi: {t.FullName}  assignable={assignable}  isInterface={isInterface}  isAbstract={isAbstract}");
+
+        //        if (assignable && !isInterface && !isAbstract) {
+        //            pluginTypes.Add(t);
+        //        }
+        //    }
+        //}
+
+
+        var pluginTypes = assembliesToScan
+            .SelectMany(a => {
                 try {
-                    var instance = (ISinkPlugin)Activator.CreateInstance(t)!;
-                    SinkPluginRegistry.Register(instance);
-                } catch (Exception ex) {
-                    _Errors.Enqueue(
-                        new LogErrorEntry {
-                            Timestamp = DateTime.UtcNow,
-                            SinkName = t.Name,
-                            ErrorMessage = ex.Message,
-                            ContextInfo = AppContext.BaseDirectory
-                        });
-                    SinkNameInError = t.Name;
+                    return a.GetTypes();
+                } catch ( Exception ex ){
+                    _initializationErrors.Enqueue(new LogErrorEntry {
+                        Timestamp = DateTime.UtcNow,
+                        SinkName = a.FullName,
+                        ErrorMessage = ex.Message,
+                        ContextInfo = baseDir
+                    });
+                    return Array.Empty<Type>();
                 }
+            })
+            .Where(t =>
+                typeof(ISinkPlugin).IsAssignableFrom(t)
+                && !t.IsInterface
+                && !t.IsAbstract
+            )
+            .ToList();
+        
+        SinksLoaded = pluginTypes.Select(a => a.Name).ToList();
+
+        foreach (var t in pluginTypes) {
+            try {
+                var instance = (ISinkPlugin)Activator.CreateInstance(t)!;
+                SinkPluginRegistry.Register(instance);
+            } catch (Exception ex) {
+                _Errors.Enqueue(
+                    new LogErrorEntry {
+                        Timestamp = DateTime.UtcNow,
+                        SinkName = t.Name,
+                        ErrorMessage = ex.Message,
+                        ContextInfo = AppContext.BaseDirectory
+                    });
+                SinkNameInError = t.Name;
             }
         }
+
 
         // 4) Infine, itero le condizioni e invoco HandleSink soltanto se esiste il plugin
         foreach (var condition in _serilogConfig.SerilogCondition ?? Enumerable.Empty<SerilogCondition>()) {
