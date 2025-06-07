@@ -71,19 +71,26 @@ public static class LoggerExtensionConfig {
 public class loggerExtension<T> where T : IRequest {
     protected static readonly ILogger log;
     public static string CurrentError { get; set; }
-    public static readonly ConcurrentQueue<LogErrorEntry> _errors = new();
+    public static readonly ConcurrentQueue<LogErrorEntry> Errors = new();
     static loggerExtension() {
         string step = "Init";
         string SinkNameInError = "";
         try {
-            var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError);
+            var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError, ref Errors);
             log = builder.Build();
             var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
             log = enricher != null
                    ? enricher.Enrich(log, context: null)
                    : log;
-            builder.GetInitializationErrors().ToList().ForEach(error => {
-                TraceAsync(new RequestInfo { Action = "Config" }, LogEventLevel.Error, error.Exception, "LoggerHelper Initialization Error: {Message}", error.Message);
+            
+            Serilog.Debugging.SelfLog.Enable(msg =>
+            {
+                Errors.Enqueue(new LogErrorEntry {
+                    Timestamp = DateTime.UtcNow,
+                    SinkName = "SelfLog",
+                    ErrorMessage = msg,
+                    ContextInfo = AppContext.BaseDirectory
+                });
             });
         } catch (Exception ex) {
             if (string.IsNullOrEmpty(CurrentError))
@@ -95,7 +102,7 @@ public class loggerExtension<T> where T : IRequest {
                 StackTrace = ex.StackTrace,
                 ContextInfo = AppContext.BaseDirectory
             };
-            _errors.Enqueue(entry);
+            Errors.Enqueue(entry);
         }
     }
     /// <summary>
@@ -149,7 +156,7 @@ public class loggerExtension<T> where T : IRequest {
             }
         } catch (Exception exRegEx) {
             logger.Warning("LoggerHelper: Regex failed to validate placeholders: {Error}", exRegEx.Message);
-            _errors.Enqueue(new LogErrorEntry {
+            Errors.Enqueue(new LogErrorEntry {
                 Timestamp = DateTime.UtcNow,
                 SinkName = "TraceSync",
                 ErrorMessage = $"Regex validation failed: {exRegEx.Message}",

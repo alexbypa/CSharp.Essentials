@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="3.0.7" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper.Sink.Email" Version="3.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
@@ -18,10 +20,6 @@
 
   <ItemGroup>
     <Folder Include="Telemetry\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
   </ItemGroup>
 
 </Project>
