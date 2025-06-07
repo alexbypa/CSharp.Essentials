@@ -1,8 +1,7 @@
-﻿using CSharpEssentials.LoggerHelper.CustomSinks;
+﻿using CSharpEssentials.LoggerHelper.model;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualBasic;
 using Serilog;
-using System.Diagnostics;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -13,6 +12,7 @@ namespace CSharpEssentials.LoggerHelper;
 internal class LoggerBuilder {
     private readonly LoggerConfiguration _config;
     private readonly SerilogConfiguration _serilogConfig;
+    private static string fileNameSettings = "";
     /// <summary>
     /// Dynamically loads and registers available sink plugins by scanning the current
     /// application's base directory for assemblies matching the sink naming convention.
@@ -28,7 +28,7 @@ internal class LoggerBuilder {
         var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
                        ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
 
-        var fileName = envName?.Equals("Development", StringComparison.OrdinalIgnoreCase)
+        fileNameSettings = envName?.Equals("Development", StringComparison.OrdinalIgnoreCase)
                    == true
                    ? "appsettings.LoggerHelper.debug.json"
                    : "appsettings.LoggerHelper.json";
@@ -39,7 +39,7 @@ internal class LoggerBuilder {
         try {
             return builder.Build();
         } catch (FileNotFoundException fnf) {
-            throw new InvalidOperationException($"Configuration File '{fileName}' not found", fnf);
+            throw new InvalidOperationException($"Configuration File '{fileNameSettings}' not found", fnf);
         }
     }
 
@@ -48,52 +48,39 @@ internal class LoggerBuilder {
     /// </summary>
     /// <returns>The created <see cref="ILogger"/> instance.</returns>
     public ILogger Build() => _config.CreateLogger();
+
+    internal ConcurrentQueue<LogErrorEntry> _initializationErrors = new ConcurrentQueue<LogErrorEntry>();
     /// <summary>
     /// Initializes a new instance of the <see cref="LoggerBuilder"/> class.
     /// Reads the Serilog configuration section and sets up basic enrichers and self-logging.
     /// </summary>
     /// <param name="configuration">Application configuration (e.g., appsettings.json).</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the `Serilog:SerilogConfiguration` section is missing.  
+    /// See <see href="https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation">Configuration docs</see> for more info.
+    /// </exception>
     internal LoggerBuilder() {
-        var configuration = BuildLoggerConfiguration();
+    var configuration = BuildLoggerConfiguration();
         _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
+        if (_serilogConfig == null)
+            throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
+        if (_serilogConfig.SerilogOption == null)
+            throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration:SerilogOption' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
+        if (_serilogConfig.SerilogCondition == null)
+            throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration:SerilogCondition' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
 
         var appName = _serilogConfig.ApplicationName;
         _config = new LoggerConfiguration().ReadFrom.Configuration(configuration)
             .WriteTo.Sink(new OpenTelemetryLogEventSink())//TODO: da configurare
             .Enrich.WithProperty("ApplicationName", appName)
             .Enrich.With<RenderedMessageEnricher>();
-        var selfLogPath = Path.Combine(_serilogConfig?.SerilogOption?.File?.Path, "serilog-selflog.txt");
-
-        var logFileDir = Path.GetDirectoryName(selfLogPath);
-        try {
-            if (!string.IsNullOrEmpty(logFileDir) && !Directory.Exists(logFileDir)) {
-                Directory.CreateDirectory(logFileDir);
-            }
-            var stream = new FileStream(
-                selfLogPath,
-                FileMode.Append,
-                FileAccess.Write,
-                FileShare.ReadWrite
-            );
-            var writer = new StreamWriter(stream) { AutoFlush = true };
-            Serilog.Debugging.SelfLog.Enable(msg => {
-                writer.WriteLine(msg);
-            });
-        } catch (Exception ex) {
-            _initializationErrors.Add(($"Could not create log directory '{logFileDir}'", ex));
-            _excludeSinkFile = true; // 🚀 Attivo il flag
-        }
     }
-    public delegate void ErrorHandler(string message, Exception exception);
-    private readonly List<(string Message, Exception Exception)> _initializationErrors = new();
-    public IEnumerable<(string Message, Exception Exception)> GetInitializationErrors() => _initializationErrors;
     private bool _excludeSinkFile;
-
     /// <summary>
     /// Dynamically adds sinks to the LoggerConfiguration based on conditions specified in the Serilog configuration.
     /// </summary>
     /// <returns>The current instance of LoggerBuilder for chaining.</returns>
-    internal LoggerBuilder AddDynamicSinks(out string path, out string SinkNameInError) {
+    internal LoggerBuilder AddDynamicSinks(out string path, out string SinkNameInError, ref ConcurrentQueue<LogErrorEntry> _Errors) {
         SinkNameInError = "";
         var baseDir = AppContext.BaseDirectory;
         path = $"AddDynamicSinks Path: {baseDir}";
@@ -105,7 +92,13 @@ internal class LoggerBuilder {
                 pluginDlls = Directory.EnumerateFiles(baseDir, "CSharpEssentials.LoggerHelper.Sink.*.dll");
             }
         } catch (Exception ex) {
-            _initializationErrors.Add(("Impossibile enumerare i plugin sinks", ex));
+            _initializationErrors.Enqueue(
+                new LogErrorEntry {
+                    Timestamp = DateTime.UtcNow,
+                    SinkName = "Config",
+                    ErrorMessage = $"Plauing Sinks not found : {ex.Message}",
+                    ContextInfo = AppContext.BaseDirectory
+                });
         }
 
         // 2) Per ciascun DLL, provo a caricarlo in un contesto “tollerante”
@@ -144,7 +137,13 @@ internal class LoggerBuilder {
                     var instance = (ISinkPlugin)Activator.CreateInstance(t)!;
                     SinkPluginRegistry.Register(instance);
                 } catch (Exception ex) {
-                    _initializationErrors.Add(($"Errore registrando il plugin {t.FullName}", ex));
+                    _Errors.Enqueue(
+                        new LogErrorEntry {
+                            Timestamp = DateTime.UtcNow,
+                            SinkName = t.Name,
+                            ErrorMessage = ex.Message,
+                            ContextInfo = AppContext.BaseDirectory
+                        });
                     SinkNameInError = t.Name;
                 }
             }
@@ -168,114 +167,8 @@ internal class LoggerBuilder {
                 }
 
                 plugin.HandleSink(_config, condition, _serilogConfig);
-            } else {
-                // Se non esiste un ISinkPlugin per questo Sink, gestisco manualmente Telegram/Email
-                switch (condition.Sink) {
-                    case "Telegram":
-                        _config.WriteTo.Conditional(
-                            evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                            wt => wt.Sink(new CustomTelegramSink(
-                                _serilogConfig?.SerilogOption?.TelegramOption?.Api_Key,
-                                _serilogConfig?.SerilogOption?.TelegramOption?.chatId,
-                                new CustomTelegramSinkFormatter()))
-                        );
-                        break;
-
-                    case "Email":
-                        _config.WriteTo.Conditional(
-                            evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                            wt => wt.Sink(new CustomEmailSink(
-                                smtpServer: _serilogConfig.SerilogOption?.Email.Host,
-                                smtpPort: (int)_serilogConfig.SerilogOption?.Email.Port,
-                                fromEmail: _serilogConfig.SerilogOption?.Email.From,
-                                toEmail: string.Join(",", _serilogConfig.SerilogOption?.Email.To),
-                                username: _serilogConfig.SerilogOption?.Email.username,
-                                password: _serilogConfig.SerilogOption?.Email.password,
-                                subjectPrefix: "[LoggerHelper]",
-                                enableSsl: (bool)_serilogConfig.SerilogOption?.Email.EnableSsl,
-                                templatePath: _serilogConfig.SerilogOption?.Email.TemplatePath
-                            ))
-                        );
-                        break;
-
-                        // Aggiungi qui altri casi manuali se ti servono
-                }
             }
         }
-
-        return this;
-    }
-
-    internal LoggerBuilder AddDynamicSinks_deprecate(out string path) {
-        var baseDir = AppContext.BaseDirectory;
-
-        path = "AddDynamicSinks Path: " + baseDir;
-        foreach (var dll in Directory.EnumerateFiles(baseDir, "CSharpEssentials.LoggerHelper.Sink.*.dll")) {
-            try {
-                AssemblyLoadContext.Default.LoadFromAssemblyPath(dll);
-            } catch {
-                // ignora i DLL inutili o non validi
-            }
-        }
-        var assemblies = AssemblyLoadContext.Default.Assemblies;
-
-        if (!SinkPluginRegistry.All.Any()) {
-            var pluginTypes = assemblies
-                .SelectMany(a => {
-                    try { return a.GetTypes(); } catch { return Array.Empty<Type>(); }
-                })
-                .Where(t =>
-                    typeof(ISinkPlugin).IsAssignableFrom(t)
-                    && !t.IsInterface
-                    && !t.IsAbstract);
-
-            foreach (var t in pluginTypes) {
-                var instance = (ISinkPlugin)Activator.CreateInstance(t)!;
-                SinkPluginRegistry.Register(instance);
-            }
-        }
-
-        foreach (var condition in _serilogConfig.SerilogCondition ?? Enumerable.Empty<SerilogCondition>()) {
-            if (condition.Level == null || !condition.Level.Any())
-                continue;
-
-            var plugin = SinkPluginRegistry.All
-                .FirstOrDefault(p => p.CanHandle(condition.Sink));
-            if (plugin != null) {
-                if (!(_excludeSinkFile && condition.Sink.Contains("File", StringComparison.InvariantCultureIgnoreCase)))
-                    plugin.HandleSink(_config, condition, _serilogConfig);
-            } else {
-                switch (condition.Sink) {
-                    case "Telegram":
-                        _config.WriteTo.Conditional(
-                            evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                            wt => {
-                                wt.Sink(new CustomTelegramSink(
-                                    _serilogConfig?.SerilogOption?.TelegramOption?.Api_Key,
-                                    _serilogConfig?.SerilogOption?.TelegramOption?.chatId,
-                                    new CustomTelegramSinkFormatter()));
-                            });
-                        break;
-                    case "Email":
-                        _config.WriteTo.Conditional(
-                            evt => _serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
-                            wt => wt.Sink(new CustomEmailSink(
-                                smtpServer: _serilogConfig.SerilogOption?.Email.Host,
-                                smtpPort: (int)_serilogConfig.SerilogOption?.Email.Port,
-                                fromEmail: _serilogConfig.SerilogOption?.Email.From,
-                                toEmail: string.Join(",", _serilogConfig.SerilogOption?.Email.To),
-                                username: _serilogConfig.SerilogOption?.Email.username,
-                                password: _serilogConfig.SerilogOption?.Email.password,
-                                subjectPrefix: "[LoggerHelper]",
-                                enableSsl: (bool)_serilogConfig.SerilogOption?.Email?.EnableSsl,
-                                templatePath: _serilogConfig.SerilogOption?.Email?.TemplatePath
-                            ))
-                        );
-                        break;
-                }
-            }
-        }
-
         return this;
     }
 }

@@ -3,12 +3,9 @@ using Serilog.Events;
 using System.Net;
 using System.Net.Mail;
 
-namespace CSharpEssentials.LoggerHelper.CustomSinks;
-/// <summary>
-/// Custom Serilog sink that sends log events as HTML emails using SMTP.
-/// </summary>
+namespace CSharpEssentials.LoggerHelper.Sink.Email;
 internal class CustomEmailSink : ILogEventSink {
-private readonly string _smtpServer;
+    private readonly string _smtpServer;
     private readonly int _smtpPort;
     private readonly string _fromEmail;
     private readonly string _toEmail;
@@ -161,5 +158,4 @@ private readonly string _smtpServer;
             _ => ""
         };
     }
-
 }

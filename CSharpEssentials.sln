@@ -63,6 +63,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.LoggerHelp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggerHelperDemo", "LoggerHelperDemo\LoggerHelperDemo\LoggerHelperDemo.csproj", "{0DB4F5AF-56B4-3032-859E-8D9368CB810A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.LoggerHelper.Sink.Telegram", "CSharpEssentials.LoggerHelper.Sink.Telegram\CSharpEssentials.LoggerHelper.Sink.Telegram.csproj", "{2A0F21A5-D05E-470C-B343-F76FA96A22A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.LoggerHelper.Sink.Email", "CSharpEssentials.LoggerHelper.Sink.Email\CSharpEssentials.LoggerHelper.Sink.Email.csproj", "{4D66D2BA-8AAB-4C44-98C6-8AAD00D04AFA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -137,6 +141,14 @@ Global
 		{0DB4F5AF-56B4-3032-859E-8D9368CB810A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DB4F5AF-56B4-3032-859E-8D9368CB810A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DB4F5AF-56B4-3032-859E-8D9368CB810A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A0F21A5-D05E-470C-B343-F76FA96A22A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A0F21A5-D05E-470C-B343-F76FA96A22A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A0F21A5-D05E-470C-B343-F76FA96A22A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A0F21A5-D05E-470C-B343-F76FA96A22A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D66D2BA-8AAB-4C44-98C6-8AAD00D04AFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D66D2BA-8AAB-4C44-98C6-8AAD00D04AFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D66D2BA-8AAB-4C44-98C6-8AAD00D04AFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D66D2BA-8AAB-4C44-98C6-8AAD00D04AFA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
