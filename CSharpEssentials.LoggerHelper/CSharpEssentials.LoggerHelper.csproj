@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <Title>CSharpEssentials.LoggerHelper - Structured Logging Helper for Serilog (Console, Email, DB, PostgreSQL, ElasticSearch)</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>1.1.2 added Middleware

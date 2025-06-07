@@ -36,7 +36,6 @@ internal class LoggerBuilder {
         if (string.Equals(envName, "Development", StringComparison.OrdinalIgnoreCase)) {
             builder.AddJsonFile("appsettings.LoggerHelper.debug.json", optional: false, reloadOnChange: true);
         }
-
         try {
             return builder.Build();
         } catch (FileNotFoundException fnf) {

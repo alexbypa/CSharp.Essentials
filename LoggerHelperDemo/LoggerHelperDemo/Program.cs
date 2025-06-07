@@ -4,6 +4,7 @@ using LoggerHelperDemo.Persistence;
 using LoggerHelperDemo.Repositories;
 using LoggerHelperDemo.Services;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,8 @@ builder.Services.AddHttpClient<IUserService, UserService>(client => {
 });
 
 var app = builder.Build();
+
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 app.UseEndpointDefinitions();
 

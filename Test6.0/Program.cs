@@ -1,6 +1,7 @@
 using CSharpEssentials.LoggerHelper;
 using Microsoft.OpenApi.Models;
 using Serilog.Events;
+using System;
 using Test.Controllers.logger;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,5 +45,6 @@ app.UseMiddleware<RequestResponseLoggingMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();
