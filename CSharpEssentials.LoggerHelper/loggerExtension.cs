@@ -77,13 +77,6 @@ public class loggerExtension<T> where T : IRequest {
         string step = "Init";
         string SinkNameInError = "";
         try {
-            var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError, ref Errors, ref SinksLoaded);
-            log = builder.Build();
-            var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
-            log = enricher != null
-                   ? enricher.Enrich(log, context: null)
-                   : log;
-            
             Serilog.Debugging.SelfLog.Enable(msg =>
             {
                 Errors.Enqueue(new LogErrorEntry {
@@ -93,6 +86,14 @@ public class loggerExtension<T> where T : IRequest {
                     ContextInfo = AppContext.BaseDirectory
                 });
             });
+
+            var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError, ref Errors, ref SinksLoaded);
+            log = builder.Build();
+            var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
+            log = enricher != null
+                   ? enricher.Enrich(log, context: null)
+                   : log;
+            
         } catch (Exception ex) {
             if (string.IsNullOrEmpty(CurrentError))
                 CurrentError = $"{step} [{AppContext.BaseDirectory}]: {ex.Message}";

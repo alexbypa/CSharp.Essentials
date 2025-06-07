@@ -3,6 +3,7 @@ using LoggerHelperDemo.Entities;
 using LoggerHelperDemo.Models;
 using LoggerHelperDemo.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace LoggerHelperDemo.Endpoints;
 
@@ -20,6 +21,7 @@ public class UserSyncEndpoint : IEndpointDefinition {
         if (loggerExtension<IRequest>.Errors.Any())
             return Results.BadRequest(string.Join(",", loggerExtension<IRequest>.Errors.ToList().Select(item => $"{item.SinkName}: {item.ErrorMessage}")));
         try {
+            Debug.Print(loggerExtension<IRequest>.SinksLoaded.Count().ToString());
             var users = await service.SyncUsersAsync(page);
             return Results.Ok(users);
         } catch (Exception ex) {

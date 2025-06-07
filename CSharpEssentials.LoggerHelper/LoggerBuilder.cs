@@ -86,99 +86,65 @@ internal class LoggerBuilder {
         var baseDir = AppContext.BaseDirectory;
         path = $"AddDynamicSinks Path: {baseDir}";
 
-        // 1) Individuo tutti i file DLL che corrispondono al pattern "CSharpEssentials.LoggerHelper.Sink.*.dll"
-        IEnumerable<string> pluginDlls = Enumerable.Empty<string>();
-        try {
-            if (Directory.Exists(baseDir)) {
-                pluginDlls = Directory.EnumerateFiles(baseDir, "CSharpEssentials.LoggerHelper.Sink.*.dll");
-            }
-        } catch (Exception ex) {
-            _initializationErrors.Enqueue(
-                new LogErrorEntry {
-                    Timestamp = DateTime.UtcNow,
-                    SinkName = "Config",
-                    ErrorMessage = $"Plauing Sinks not found : {ex.Message}",
-                    ContextInfo = AppContext.BaseDirectory
-                });
-        }
+        var pluginDlls = Directory
+          .EnumerateFiles(baseDir, "CSharpEssentials.LoggerHelper.Sink.*.dll");
 
-        // crea una lista per tenere i tuoi plugin loadati
+        // 2) Caricali TUTTI nel default context
         var loadedAssemblies = new List<Assembly>();
-        foreach (var dllPath in pluginDlls) {
+        foreach (var dll in pluginDlls) {
             try {
-                var ctx = new TolerantPluginLoadContext(dllPath);
-                // invece di LoadFromAssemblyName, carica direttamente dal path
-                var asm = ctx.LoadFromAssemblyPath(dllPath);
+                // qui NON uso alcun AssemblyLoadContext custom!
+                var asm = AssemblyLoadContext.Default
+                             .LoadFromAssemblyPath(dll);
                 loadedAssemblies.Add(asm);
+                _initializationErrors.Enqueue(new LogErrorEntry {
+                    Timestamp = DateTime.UtcNow,
+                    SinkName = Path.GetFileNameWithoutExtension(dll),
+                    ErrorMessage = $"[DBG] Loaded in DEFAULT context",
+                    ContextInfo = baseDir
+                });
             } catch (Exception ex) {
                 _initializationErrors.Enqueue(new LogErrorEntry {
                     Timestamp = DateTime.UtcNow,
-                    SinkName = Path.GetFileNameWithoutExtension(dllPath),
+                    SinkName = Path.GetFileNameWithoutExtension(dll),
                     ErrorMessage = ex.Message,
                     ContextInfo = baseDir
                 });
             }
         }
 
-        // Assemblies in Default + quelli appena caricati
-        var assembliesToScan = AssemblyLoadContext
-            .Default
-            .Assemblies
-            .Concat(loadedAssemblies);
+        var pluginTypes = loadedAssemblies
+          .SelectMany(a => {
+              try { return a.GetTypes(); } catch (Exception ex) {
+                  _initializationErrors.Enqueue(new LogErrorEntry {
+                      Timestamp = DateTime.UtcNow,
+                      SinkName = a.FullName,
+                      ErrorMessage = ex.Message,
+                      ContextInfo = baseDir
+                  });
+                  return Array.Empty<Type>();
+              }
+          })
+          .Where(t =>
+              typeof(ISinkPlugin).IsAssignableFrom(t) &&
+              !t.IsInterface &&
+              !t.IsAbstract
+          )
+          .ToList();
 
-        //var pluginTypes = new List<Type>();
-        //foreach (var asm in assembliesToScan) {
-        //    Type[] types;
-        //    try {
-        //        // 1) Metti qui un breakpoint e verifica asm.FullName
-        //        types = asm.GetTypes();
-        //        Debug.WriteLine($"[DBG] {asm.GetName().Name} ha {types.Length} tipi.");
-        //    } catch (ReflectionTypeLoadException rtlex) {
-        //        // 2) Se arriva qui, esplodi loaderExceptions per capire perché
-        //        foreach (var lex in rtlex.LoaderExceptions)
-        //            Debug.WriteLine($"   ↳ Loader error: {lex.Message}");
-        //        continue;  // salta questo assembly
-        //    } catch (Exception ex) {
-        //        Debug.WriteLine($"   ↳ Errore generico in {asm.FullName}: {ex.Message}");
-        //        continue;
-        //    }
+#if DEBUG
+        foreach (var asm in loadedAssemblies)
+            Console.WriteLine($"[DBG] ToScan: {asm.FullName} @ {asm.Location}");
+#endif
 
-        //    foreach (var t in types) {
-        //        // 3) Metti un breakpoint qui e guarda
-        //        bool assignable = typeof(ISinkPlugin).IsAssignableFrom(t);
-        //        bool isInterface = t.IsInterface;
-        //        bool isAbstract = t.IsAbstract;
-        //        Debug.WriteLine($"   Tipi: {t.FullName}  assignable={assignable}  isInterface={isInterface}  isAbstract={isAbstract}");
+        if (!pluginTypes.Any())
+            _initializationErrors.Enqueue(new LogErrorEntry {
+                Timestamp = DateTime.UtcNow,
+                SinkName = "Init",
+                ErrorMessage = "No Sink loaded from reflection",
+                ContextInfo = baseDir
+            });
 
-        //        if (assignable && !isInterface && !isAbstract) {
-        //            pluginTypes.Add(t);
-        //        }
-        //    }
-        //}
-
-
-        var pluginTypes = assembliesToScan
-            .SelectMany(a => {
-                try {
-                    return a.GetTypes();
-                } catch ( Exception ex ){
-                    _initializationErrors.Enqueue(new LogErrorEntry {
-                        Timestamp = DateTime.UtcNow,
-                        SinkName = a.FullName,
-                        ErrorMessage = ex.Message,
-                        ContextInfo = baseDir
-                    });
-                    return Array.Empty<Type>();
-                }
-            })
-            .Where(t =>
-                typeof(ISinkPlugin).IsAssignableFrom(t)
-                && !t.IsInterface
-                && !t.IsAbstract
-            )
-            .ToList();
-        
-        SinksLoaded = pluginTypes.Select(a => a.Name).ToList();
 
         foreach (var t in pluginTypes) {
             try {

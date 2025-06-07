@@ -111,4 +111,7 @@ If you run a request without the proper appsettings in place, you’ll see an er
 > Make sure you include one of these files in your project output folder, with the exact naming  
 > and JSON schema described in the **Configuration** section below.
 
+
+
+
 👉 [Click here to view full usage guide and examples](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
