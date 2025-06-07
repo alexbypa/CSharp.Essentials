@@ -1,3 +1,4 @@
+using CSharpEssentials.LoggerHelper;
 using LoggerHelperDemo.Endpoints;
 using LoggerHelperDemo.Persistence;
 using LoggerHelperDemo.Repositories;
@@ -5,6 +6,8 @@ using LoggerHelperDemo.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddloggerConfiguration(builder);
 
 // 1) DbContext PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(opt =>

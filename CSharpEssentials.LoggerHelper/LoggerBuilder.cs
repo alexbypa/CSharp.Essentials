@@ -21,21 +21,27 @@ internal class LoggerBuilder {
     /// the "File" sink plugin will be excluded from registration.
     /// </summary>
     internal static IConfiguration BuildLoggerConfiguration() {
-        var builder = new ConfigurationBuilder();
-
-        // Carica sempre l'appsettings di default
-        builder.AddJsonFile("appsettings.LoggerHelper.json", optional: true, reloadOnChange: true);
+        var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory());
 
         // Leggi la variabile di ambiente
         var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
                        ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
 
-        // Se l'ambiente è "Development", carica anche il file di Debug
+        var fileName = envName?.Equals("Development", StringComparison.OrdinalIgnoreCase)
+                   == true
+                   ? "appsettings.LoggerHelper.debug.json"
+                   : "appsettings.LoggerHelper.json";
+
         if (string.Equals(envName, "Development", StringComparison.OrdinalIgnoreCase)) {
-            builder.AddJsonFile("appsettings.LoggerHelper.debug.json", optional: true, reloadOnChange: true);
+            builder.AddJsonFile("appsettings.LoggerHelper.debug.json", optional: false, reloadOnChange: true);
         }
 
-        return builder.Build();
+        try {
+            return builder.Build();
+        } catch (FileNotFoundException fnf) {
+            throw new InvalidOperationException($"Configuration File '{fileName}' not found", fnf);
+        }
     }
 
     /// <summary>
