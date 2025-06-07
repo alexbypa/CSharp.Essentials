@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using CSharpEssentials.LoggerHelper.model;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
-using System.Text.RegularExpressions;
+using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 #if NET6_0
 using Microsoft.AspNetCore.Builder;
@@ -69,10 +71,12 @@ public static class LoggerExtensionConfig {
 public class loggerExtension<T> where T : IRequest {
     protected static readonly ILogger log;
     public static string CurrentError { get; set; }
+    public static readonly ConcurrentQueue<LogErrorEntry> _errors = new();
     static loggerExtension() {
         string step = "AddDynamicSinks";
+        string SinkNameInError = "";
         try {
-            var builder = new LoggerBuilder().AddDynamicSinks(out step);
+            var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError);
             log = builder.Build();
             var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
             log = enricher != null
@@ -84,6 +88,14 @@ public class loggerExtension<T> where T : IRequest {
         } catch (Exception ex) {
             if (string.IsNullOrEmpty(CurrentError))
                 CurrentError = $"{step} [{AppContext.BaseDirectory}]: {ex.Message}";
+            var entry = new LogErrorEntry {
+                Timestamp = DateTime.UtcNow,
+                SinkName = SinkNameInError,
+                ErrorMessage = ex.Message,
+                StackTrace = ex.StackTrace,
+                ContextInfo = AppContext.BaseDirectory
+            };
+            _errors.Enqueue(entry);
         }
     }
     /// <summary>
@@ -134,6 +146,13 @@ public class loggerExtension<T> where T : IRequest {
             }
         } catch (Exception exRegEx) {
             logger.Warning("LoggerHelper: Regex failed to validate placeholders: {Error}", exRegEx.Message);
+            _errors.Enqueue(new LogErrorEntry {
+                Timestamp = DateTime.UtcNow,
+                SinkName = "TraceSync",
+                ErrorMessage = $"Regex validation failed: {exRegEx.Message}",
+                StackTrace = exRegEx.ToString(),
+                ContextInfo = request?.Action ?? "n/a"
+            });
         }
         var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
         if (enricher != null)

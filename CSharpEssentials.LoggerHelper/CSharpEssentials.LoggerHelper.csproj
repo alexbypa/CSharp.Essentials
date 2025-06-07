@@ -32,7 +32,7 @@
 3.0.3 - Fix load appsettings.LoggerHelper.debug.json when you debug with remote packges from nuget
 3.0.4 - Added framework 9.0
 3.0.5 - Fixed load assembly and added property CurrentError on loggerExtension</Description>
-    <Version>3.0.6</Version>
+    <Version>3.0.7</Version>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
@@ -55,10 +55,15 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="CSharpEssentials.png" Pack="true" PackagePath="." />
     <None Include="readme.md" Pack="true" PackagePath="." />
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE.txt" Pack="true" PackagePath="" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\CSharpEssentials.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 </Project>
