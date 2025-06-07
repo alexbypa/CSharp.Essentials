@@ -45,6 +45,7 @@ public static class LoggerExtensionConfig {
         if (File.Exists(externalConfigPath)) {
             builder.Configuration.AddJsonFile(externalConfigPath, optional: true, reloadOnChange: true);
         }
+        builder.Services.AddSingleton<LoggerErrorStore>();
         return builder.Services;
     }
 #else
@@ -56,6 +57,7 @@ public static class LoggerExtensionConfig {
         if (File.Exists(externalConfigPath)) {
             builder.Configuration.AddJsonFile(externalConfigPath, optional: true, reloadOnChange: true);
         }
+        builder.Services.AddSingleton<LoggerErrorStore>();
         return services;
     }
 #endif

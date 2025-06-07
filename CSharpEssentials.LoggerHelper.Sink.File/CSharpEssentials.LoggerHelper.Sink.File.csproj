@@ -22,7 +22,6 @@
     <Content Include="img\CSharpEssentials.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="3.0.2" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
@@ -34,6 +33,9 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
   </ItemGroup>
 
 </Project>
