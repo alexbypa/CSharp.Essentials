@@ -10,7 +10,7 @@
 * 📘[Introduction](#introduction)
 * 🚀[Installation](#installation)
 * 🔧[Configuration](#configuration)
-* [📨 HTML Email Sink (used with HttpClient)](#html-email-sink)
+* [📨 HTML Email Sink (used with System.Net.smtp)](#html-email-sink)
 * 🐘[PostgreSQL Sink](#postgresql-sink)
 * [📣 Telegram Sink (used with HttpClient)](#telegram-sink)
 * [💾 MS SQL Sink](#ms-sql-sink)
