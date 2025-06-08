@@ -7,8 +7,10 @@ namespace CSharpEssentials.LoggerHelper.Sink.File;
     // Determines if this plugin should handle the given sink name
     public bool CanHandle(string sinkName) => sinkName == "File";
     public void HandleSink(LoggerConfiguration loggerConfig, SerilogCondition condition, SerilogConfiguration serilogConfig) {
-        if (serilogConfig.SerilogOption == null || serilogConfig.SerilogOption.File == null)
+        if (serilogConfig.SerilogOption == null || serilogConfig.SerilogOption.File == null) {
             Serilog.Debugging.SelfLog.WriteLine($"Configuration exception : section file missing on Serilog:SerilogConfiguration:SerilogOption https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
+            return;
+        }
         var logDirectory = serilogConfig?.SerilogOption?.File?.Path ?? "Logs";
         var logFilePath = Path.Combine(logDirectory, "log-.txt");
         Directory.CreateDirectory(logDirectory);

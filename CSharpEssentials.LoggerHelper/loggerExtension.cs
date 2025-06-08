@@ -7,6 +7,8 @@ using Serilog.Events;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Text;
+
 
 #if NET6_0
 using Microsoft.AspNetCore.Builder;
@@ -64,6 +66,31 @@ public static class LoggerExtensionConfig {
     }
 #endif
 }
+
+// 1) Define a TextWriter that pushes into your queue
+class ErrorListTextWriter : TextWriter {
+    private readonly List<LogErrorEntry> _errors;
+
+    public ErrorListTextWriter(List<LogErrorEntry> errors) {
+        _errors = errors;
+    }
+
+    public override Encoding Encoding => Encoding.UTF8;
+
+    public override void WriteLine(string? value) {
+        if (string.IsNullOrEmpty(value))
+            return;
+
+        _errors.Add(new LogErrorEntry {
+            Timestamp = DateTime.UtcNow,
+            SinkName = "SelfLog",
+            ErrorMessage = value,
+            ContextInfo = AppContext.BaseDirectory
+        });
+    }
+
+    // You can optionally override Write(char) if you need to
+}
 /// <summary>
 /// Static logger extension for writing log entries enriched with transaction context.
 /// </summary>
@@ -71,21 +98,26 @@ public static class LoggerExtensionConfig {
 public class loggerExtension<T> where T : IRequest {
     protected static readonly ILogger log;
     public static string CurrentError { get; set; }
-    public static readonly ConcurrentQueue<LogErrorEntry> Errors = new();
+    public static readonly List<LogErrorEntry> Errors = new();
     public static List<string> SinksLoaded = new List<string>();
     static loggerExtension() {
         string step = "Init";
         string SinkNameInError = "";
         try {
-            Serilog.Debugging.SelfLog.Enable(msg =>
-            {
-                Errors.Enqueue(new LogErrorEntry {
-                    Timestamp = DateTime.UtcNow,
-                    SinkName = "SelfLog",
-                    ErrorMessage = msg,
-                    ContextInfo = AppContext.BaseDirectory
-                });
-            });
+
+            Serilog.Debugging.SelfLog.Enable(
+                new ErrorListTextWriter(Errors)
+            );
+
+            //Serilog.Debugging.SelfLog.Enable(msg =>
+            //{
+            //    Errors.Add(new LogErrorEntry {
+            //        Timestamp = DateTime.UtcNow,
+            //        SinkName = "SelfLog",
+            //        ErrorMessage = msg,
+            //        ContextInfo = AppContext.BaseDirectory
+            //    });
+            //});
 
             var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError, ref Errors, ref SinksLoaded);
             log = builder.Build();
@@ -104,7 +136,7 @@ public class loggerExtension<T> where T : IRequest {
                 StackTrace = ex.StackTrace,
                 ContextInfo = AppContext.BaseDirectory
             };
-            Errors.Enqueue(entry);
+            Errors.Add(entry);
         }
     }
     /// <summary>
@@ -158,7 +190,7 @@ public class loggerExtension<T> where T : IRequest {
             }
         } catch (Exception exRegEx) {
             logger.Warning("LoggerHelper: Regex failed to validate placeholders: {Error}", exRegEx.Message);
-            Errors.Enqueue(new LogErrorEntry {
+            Errors.Add(new LogErrorEntry {
                 Timestamp = DateTime.UtcNow,
                 SinkName = "TraceSync",
                 ErrorMessage = $"Regex validation failed: {exRegEx.Message}",
