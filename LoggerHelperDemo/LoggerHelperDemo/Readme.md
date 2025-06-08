@@ -53,18 +53,22 @@
 dotnet add package CSharpEssentials.LoggerHelper
 ```
 
-To activate LoggerHelper and enable request/response logging, configure your application in `Program.cs` as follows:
 ```csharp
 #if NET6_0
     builder.AddLoggerConfiguration();
 #else
     builder.Services.AddLoggerConfiguration(builder);
 #endif
-```
 
-Optionally Enable HTTP middleware logging:
-// Use this to capture and display **all** incoming requests and outgoing responses in your Web API
-```csharp
+// ───────────────────────────────────────────────────────────────
+// 🔧 **Register your custom context enricher**:
+// This tells LoggerHelper to invoke your `MyCustomEnricher` on every log call,
+// so you can inject properties from the ambient context (e.g. controller action,
+// HTTP request, user identity, IP address, etc.)
+builder.Services.AddSingleton<IContextLogEnricher, MyCustomEnricher>();
+// ───────────────────────────────────────────────────────────────
+
+// Optionally enable HTTP middleware logging
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
 ```
 
@@ -115,12 +119,40 @@ If you run a request without the proper appsettings in place, you’ll see an er
 
 ![Configuration File 'appsettings.LoggerHelper.debug.json' not found](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/img/badrequest.png)
 
-> **Note:** the example above shows the runtime looking for `appsettings.LoggerHelper.debug.json`  
-> (in Development) or `appsettings.LoggerHelper.json` (in Production).  
-> Make sure you include one of these files in your project output folder, with the exact naming  
-> and JSON schema described in the **Configuration** section below.
+Here’s a **Minimal Configuration Example** (in English) that uses **only** the File sink and writes **all** log levels (`Information`, `Warning`, `Error`, `Fatal`):
 
+```json
+{
+  "Serilog": {
+    "SerilogConfiguration": {
+      "ApplicationName": "DemoLogger 9.0",
+      "SerilogCondition": [
+        {
+          "Sink": "File",
+          "Level": [
+            "Information",
+            "Warning",
+            "Error",
+            "Fatal"
+          ]
+        }
+      ]
+    },
+    "SerilogOption": {
+      "File": {
+        "Path": "C:\\Logs\\DemoLogger",
+        "RollingInterval": "Day",
+        "RetainedFileCountLimit": 7,
+        "Shared": true
+      }
+    }
+  }
+}
+```
 
+* **SerilogConfiguration.ApplicationName**: your app’s name.
+* **SerilogCondition**: a list of sink-level mappings; here we map **all** levels to the `"File"` sink.
+* **SerilogOption.File**: settings specific to the File sink (output folder, rolling interval, retention, etc.).
 
 
 👉 [Click here to view full usage guide and examples](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
