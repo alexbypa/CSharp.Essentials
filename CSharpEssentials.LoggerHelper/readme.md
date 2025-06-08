@@ -34,9 +34,9 @@
 
 ---
 
-## 🆕 What’s New in **v3.0.5**
+## 🆕 What’s New in **v3.1.1**
 
-Version **3.0.5** is a major milestone! Highlights:
+Version **3.1.1** is a major milestone! Highlights:
 
 1. **Dynamic Loading Revamped**  
    - Introduces `TolerantPluginLoadContext`—a custom `AssemblyLoadContext` that quietly ignores missing dependencies.  
