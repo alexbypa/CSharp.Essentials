@@ -24,7 +24,7 @@
 
 ⚠️ **Note**: The built-in Serilog Email Sink is currently affected by a blocking issue ([#44](https://github.com/serilog/serilog-sinks-email/issues/44)), so `CSharpEssentials.LoggerHelper` uses `System.Net.Mail` instead for full control and reliability in production.
 
-🧩 Each sink is delivered as an independent NuGet sub-package and dynamically loaded at runtime.
+🧩 Each sink is delivered as an independent NuGet sub-package and dynamically loaded at runtime, acting as a routing hub that writes each log event to a given sink only if the event’s level matches that sink’s configured level (see **Configuration**).
 
 📦 Centralized and intuitive configuration via a single `appsettings.LoggerHelper.json` file with built-in placeholder validation.
 
@@ -62,6 +62,7 @@ To activate LoggerHelper and enable request/response logging, configure your app
 ```
 
 Enable HTTP middleware logging:
+// Use this to capture and display **all** incoming requests and outgoing responses in your Web API
 ```csharp
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
 ```
