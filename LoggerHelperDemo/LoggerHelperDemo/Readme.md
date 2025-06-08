@@ -250,7 +250,54 @@ If the file is missing or invalid, LoggerHelper will **fall back to the internal
 > ![Email Sample](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper/img/emailsample.png)
 
 
+### File + Email Sink Example
 
+This configuration writes **every** log event (`Information`, `Warning`, `Error`, `Fatal`) to the **File** sink, but only sends **Email** notifications for high-severity events (`Error` and `Fatal`):
+
+```json
+{
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Debug",
+        "System": "Debug"
+      }
+    },
+    "SerilogConfiguration": {
+      "ApplicationName": "DemoLogger 9.0",
+      "SerilogCondition": [
+        {
+          "Sink": "File",
+          "Level": [ "Information", "Warning", "Error", "Fatal" ]
+        },
+        {
+          "Sink": "Email",
+          "Level": [ "Error", "Fatal" ]
+        }
+      ],
+      "SerilogOption": {
+        "File": {
+          "Path": "C:\\Logs\\DemoLogger",
+          "RollingInterval": "Day",
+          "RetainedFileCountLimit": 7,
+          "Shared": true
+        },
+        "Email": {
+          "From": "jobscheduler.pixelo@gmail.com",
+          "Port": 587,
+          "Host": "smtp.gmail.com",
+          "To": "ops-team@example.com",
+          "Username": "alerts@example.com",
+          "Password": "YOUR_SMTP_PASSWORD",
+          "EnableSsl": true,
+          "TemplatePath": "Templates/email-template-default.html"
+        }
+      }
+    }
+  }
+}
+```
 
 
 
