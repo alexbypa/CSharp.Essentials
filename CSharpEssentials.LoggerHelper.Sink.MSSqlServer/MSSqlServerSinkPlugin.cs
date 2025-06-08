@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using Serilog.Debugging;
 using Serilog.Sinks.MSSqlServer;
 using System.Runtime.CompilerServices;
 
@@ -9,8 +10,11 @@ public class MSSqlServerSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) => sinkName == "MSSqlServer";
     // Applies the MSSqlServer sink configuration to the LoggerConfiguration
     public void HandleSink(LoggerConfiguration loggerConfig, SerilogCondition condition, SerilogConfiguration serilogConfig) {
+        if (serilogConfig.SerilogOption == null || serilogConfig.SerilogOption.PostgreSQL == null) {
+            SelfLog.WriteLine($"Configuration exception : section MSSqlServer missing on Serilog:SerilogConfiguration:SerilogOption https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
+            return;
+        }
         var opts = serilogConfig.SerilogOption.MSSqlServer;
-
         loggerConfig.WriteTo.Conditional(
             evt => serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
             wt => wt.MSSqlServer(serilogConfig?.SerilogOption?.MSSqlServer?.connectionString,

@@ -1,6 +1,7 @@
 ﻿using CSharpEssentials.LoggerHelper.model;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using Serilog.Debugging;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
@@ -180,7 +181,11 @@ internal class LoggerBuilder {
                     continue;
                 }
 
-                plugin.HandleSink(_config, condition, _serilogConfig);
+                try {
+                    plugin.HandleSink(_config, condition, _serilogConfig);
+                }catch (Exception ex) {
+                    SelfLog.WriteLine($"Exception {ex.Message} on sink {condition.Sink}");
+                }
             }
         }
         return this;
