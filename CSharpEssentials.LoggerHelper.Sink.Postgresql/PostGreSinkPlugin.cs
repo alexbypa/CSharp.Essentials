@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using Serilog.Debugging;
 using System.Runtime.CompilerServices;
 
 namespace CSharpEssentials.LoggerHelper.Sink.Postgresql;
@@ -7,8 +8,11 @@ namespace CSharpEssentials.LoggerHelper.Sink.Postgresql;
     public bool CanHandle(string sinkName) => sinkName == "PostgreSQL";
     // Applies the MSSqlServer sink configuration to the LoggerConfiguration
     public void HandleSink(LoggerConfiguration loggerConfig, SerilogCondition condition, SerilogConfiguration serilogConfig) {
-        var opts = serilogConfig.SerilogOption.MSSqlServer;
-
+        if (serilogConfig.SerilogOption == null || serilogConfig.SerilogOption.PostgreSQL == null) {
+            SelfLog.WriteLine($"Configuration exception : section PostgreSQL missing on Serilog:SerilogConfiguration:SerilogOption https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
+            return;
+        }
+        try {
         loggerConfig.WriteTo.Conditional(
                             evt => serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
                             wt => {
@@ -21,6 +25,10 @@ namespace CSharpEssentials.LoggerHelper.Sink.Postgresql;
                                     );
                             }
                             );
+        }catch (Exception ex) {
+            SelfLog.WriteLine($"Error HandleSink on PostgreSQL: {ex.Message}");
+        }
+
     }
 }
 // Static initializer to auto-register the plugin when the assembly is loaded

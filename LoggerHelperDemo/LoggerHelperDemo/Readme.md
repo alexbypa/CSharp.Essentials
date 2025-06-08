@@ -11,8 +11,8 @@
 * 🚀[Installation](#installation)
 * 🔧[Configuration](#configuration)
 * [📨 HTML Email Sink (used with System.Net.smtp)](#html-email-sink)
-* 🐘[PostgreSQL Sink](#postgresql-sink)
 * [📣 Telegram Sink (used with HttpClient)](#telegram-sink)
+* 🐘[PostgreSQL Sink](#postgresql-sink)
 * [💾 MS SQL Sink](#ms-sql-sink)
 * [🔍 ElasticSearch Sink](#elasticsearch)
 * [🔍 Extending LogEvent Properties](#customprop)
@@ -37,6 +37,7 @@
 🔧 Designed for extensibility with plugin support, level-based sink routing, Serilog SelfLog integration, and a safe debug mode.
 
 ### 📦 Available Sink Packages
+
 
 * **Console**: `CSharpEssentials.LoggerHelper.Sink.Console`
 * **File**: `CSharpEssentials.LoggerHelper.Sink.File`
@@ -298,6 +299,197 @@ This configuration writes **every** log event (`Information`, `Warning`, `Error`
   }
 }
 ```
+
+## 🐘 Telegram Sink<a id='telegram-sink'></a>   [🔝](#table-of-contents)
+LoggerHelper supports Telegram notifications to alert on critical events.
+
+> ⚠️ **Recommended Levels**: Use only `Error` or `Fatal` to avoid exceeding Telegram rate limits.
+
+### 🛠 Example Configuration
+
+```json
+"TelegramOption": {
+  "chatId": "<YOUR_CHAT_ID>",
+  "Api_Key": "<YOUR_BOT_API_KEY>"
+}
+```
+
+To configure a Telegram Bot:
+
+1. Open Telegram and search for [@BotFather](https://t.me/BotFather)
+2. Create a new bot and copy the API token
+3. Use [https://api.telegram.org/bot<YourBotToken>/getUpdates](https://core.telegram.org/bots/api#getupdates) to get your chat ID after sending a message to the bot
+
+> 📸 Example of a formatted Telegram message:
+> ![Telegram Sample](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper/img/telegramSample.png)
+
+### File + Email + Telegram Sink Example Configuration
+```json
+{
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Debug",
+        "System": "Debug"
+      }
+    },
+    "SerilogConfiguration": {
+      "ApplicationName": "DemoLogger 9.0",
+      "SerilogCondition": [
+        {
+          "Sink": "File",
+          "Level": [
+            "Information",
+            "Warning",
+            "Error",
+            "Fatal"
+          ]
+        },
+        {
+          "Sink": "Email",
+          "Level": [
+            "Error",
+            "Fatal"
+          ]
+        },
+        {
+          "Sink": "Telegram",
+          "Level": [
+            "Error",
+            "Fatal"
+          ]
+        }
+      ],
+      "SerilogOption": {
+        "File": {
+          "Path": "C:\\Logs\\DemoLogger",
+          "RollingInterval": "Day",
+          "RetainedFileCountLimit": 7,
+          "Shared": true
+        },
+        "Email": {
+          "From": "jobscheduler.pixelo@gmail.com",
+          "Port": 587,
+          "Host": "smtp.gmail.com",
+          "To": "alexbypa@gmail.com",
+          "username": "------",
+          "password": "-------------",
+          "EnableSsl": true,
+          "TemplatePath": "Templates/email-template-default.html"
+        },
+        "TelegramOption": {
+          "chatId": "xxxxxxxxxxx",
+          "Api_Key": "wwwwwwwwww:zxxxxxxxxzzzzz"
+        }
+      }
+    }
+  }
+}
+```
+
+## 🐘 PostgreSQL Sink<a id='postgresql-sink'></a>   [🔝](#table-of-contents)
+
+LoggerHelper supports logging to PostgreSQL with optional custom schema definition.
+
+* If `ColumnsPostGreSQL` is **not set**, the following default columns will be created and used:
+
+  * `message`, `message_template`, `level`, `raise_date`, `exception`, `properties`, `props_test`, `machine_name`
+* If `ColumnsPostGreSQL` is defined, LoggerHelper will use the exact fields provided.
+* Setting `addAutoIncrementColumn: true` will add an `id SERIAL PRIMARY KEY` automatically.
+
+Example configuration:
+
+```json
+"PostgreSQL": {
+  "connectionString": "...",
+  "tableName": "LogEntry",
+  "schemaName": "public",
+  "addAutoIncrementColumn": true,
+  "ColumnsPostGreSQL": [
+    { "Name": "Message", "Writer": "Rendered", "Type": "text" },
+    { "Name": "Level", "Writer": "Level", "Type": "varchar" }
+  ]
+}
+```
+## 🧪 PostgreSQL Table Structure
+
+If custom `ColumnsPostGreSQL` is defined, logs will include all specified fields.
+
+
+> 🧩 Tip: PostgreSQL sink is ideal for deep analytics and long-term log storage.
+> ⚠️ **Note:** When using `ColumnsPostGreSQL`, always enable `SelfLog` during development to detect unsupported or misconfigured column definitions. Invalid types or property names will be silently ignored unless explicitly logged via Serilog’s internal diagnostics.
+
+## 🚀 Extending LogEvent Properties from Your Project<a id='customprop'></a>   [🔝](#table-of-contents)
+
+Starting from version **2.0.9**, you can extend the default log event context by implementing your own **custom enricher**. This allows you to **add extra fields** to the log context and ensure they are included in **all log sinks** (not only in email notifications, but also in any other sink that supports additional fields—especially in the databases, where from version **2.0.8** onwards you can add dedicated columns for these custom properties).
+**How to configure it:**
+
+✅ **1️⃣ Register your custom enricher and logger configuration in `Program.cs`**
+Before building the app:
+
+```csharp
+builder.Services.AddSingleton<IContextLogEnricher, MyCustomEnricher>();
+builder.Services.AddloggerConfiguration(builder);
+```
+
+✅ **2️⃣ Assign the service provider to `LoggerHelperServiceLocator`**
+After building the app:
+
+```csharp
+LoggerHelperServiceLocator.Instance = app.Services;
+```
+
+✅ **3️⃣ Create your custom enricher class**
+Example implementation:
+
+```csharp
+public class MyCustomEnricher : IContextLogEnricher {
+    public ILogger Enrich(ILogger logger, object? context) {
+        if (context is MyCustomRequest req) {
+            return logger
+                .ForContext("Username", req.Username)
+                .ForContext("IpAddress", req.IpAddress);
+        }
+        return logger;
+    }
+
+    public LoggerConfiguration Enrich(LoggerConfiguration configuration) => configuration;
+}
+```
+👉 **Note:**
+In addition to the fields already provided by the package (e.g., `MachineName`, `Action`, `ApplicationName`, `IdTransaction`), you can add **custom fields**—such as the **logged-in username** and the **IP address** of the request—using your own properties.
+
+✅ **4️⃣ Use your custom request class in your application**
+Example usage:
+
+```csharp
+var myRequest = new MyCustomRequest {
+    IdTransaction = Guid.NewGuid().ToString(),
+    Action = "UserLogin",
+    ApplicationName = "MyApp",
+    MachineName = Environment.MachineName,
+    Username = "JohnDoe",
+    IpAddress = "192.168.1.100"
+};
+
+loggerExtension<MyCustomRequest>.TraceSync(myRequest, LogEventLevel.Information, null, "User login event");
+```
+
+✅ **5️⃣ Update your email template to include the new fields**
+Example additions:
+
+```html
+<tr><th>User Name</th><td>{{Username}}</td></tr>
+<tr><th>Ip Address</th><td>{{IpAddress}}</td></tr>
+```
+✅ **6️⃣ MSSQL and PostgresQL sink Template Customization**
+- To add extra fields on table of MSSQL add fields on array **additionalColumns**
+- To add extra fields on table of postgre add fields on array **ColumnsPostGreSQL**
+
+🔗 **Download Example**
+You can see an example in the [demo controller](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/LoggerController.cs).
+Whereas the custom class to generate extra fields can be found [here](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/MyCustomEnricher.cs).
 
 
 

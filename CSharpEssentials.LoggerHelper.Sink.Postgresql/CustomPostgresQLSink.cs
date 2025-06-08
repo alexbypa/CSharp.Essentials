@@ -33,7 +33,7 @@ BEGIN
         FROM information_schema.columns
         WHERE table_schema = '{0}'
           AND table_name = '{1}'
-          AND column_name = 'id'
+          AND lower(column_name) = 'id'
     ) THEN
         ALTER TABLE ""{0}"".""{1}""
         ADD COLUMN id SERIAL PRIMARY KEY;
@@ -50,7 +50,6 @@ $$;
     /// </summary>
     public static async Task<Dictionary<string, ColumnWriterBase>> BuildPostgresColumns(SerilogConfiguration config) {
         var colDefs = config.SerilogOption?.PostgreSQL?.ColumnsPostGreSQL;
-
         var result = new Dictionary<string, ColumnWriterBase>();
         if (colDefs != null)
             foreach (var col in colDefs) {

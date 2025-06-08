@@ -7,6 +7,10 @@ internal class TelegramSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) => sinkName == "Telegram";
     // Applies the MSSqlServer sink configuration to the LoggerConfiguration
     public void HandleSink(LoggerConfiguration loggerConfig, SerilogCondition condition, SerilogConfiguration serilogConfig) {
+        if (serilogConfig.SerilogOption == null || serilogConfig.SerilogOption.TelegramOption == null) {
+            Serilog.Debugging.SelfLog.WriteLine($"Configuration exception : section TelegramOption missing on Serilog:SerilogConfiguration:SerilogOption https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
+            return;
+        }
         var opts = serilogConfig.SerilogOption.MSSqlServer;
 
         loggerConfig.WriteTo.Conditional(

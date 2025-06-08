@@ -81,7 +81,7 @@ internal class LoggerBuilder {
     /// Dynamically adds sinks to the LoggerConfiguration based on conditions specified in the Serilog configuration.
     /// </summary>
     /// <returns>The current instance of LoggerBuilder for chaining.</returns>
-    internal LoggerBuilder AddDynamicSinks(out string path, out string SinkNameInError, ref ConcurrentQueue<LogErrorEntry> _Errors, ref List<string> SinksLoaded) {
+    internal LoggerBuilder AddDynamicSinks(out string path, out string SinkNameInError, ref List<LogErrorEntry> _Errors, ref List<string> SinksLoaded) {
         SinkNameInError = "";
         var baseDir = AppContext.BaseDirectory;
         path = $"AddDynamicSinks Path: {baseDir}";
@@ -151,7 +151,7 @@ internal class LoggerBuilder {
                 var instance = (ISinkPlugin)Activator.CreateInstance(t)!;
                 SinkPluginRegistry.Register(instance);
             } catch (Exception ex) {
-                _Errors.Enqueue(
+                _Errors.Add(
                     new LogErrorEntry {
                         Timestamp = DateTime.UtcNow,
                         SinkName = t.Name,
