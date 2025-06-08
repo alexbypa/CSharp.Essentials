@@ -42,9 +42,9 @@ Version **3.0.5** is a major milestone! Highlights:
    - Introduces `TolerantPluginLoadContext`—a custom `AssemblyLoadContext` that quietly ignores missing dependencies.  
    - No more “Could not load assembly” exceptions when a plugin references a missing formatter or helper library. Other sinks keep on working smoothly.
 
-2. **`CurrentError` Property on `loggerExtension`**  
-   - Capture and store the last exception message (`Exception.Message`) that occurred inside LoggerHelper.  
-   - Now you can read `LoggerExtension<YourContext>.CurrentError` and expose it (e.g., as an HTTP header) in production, simplifying troubleshooting.
+2. **`CurrentError` & Full Error List**  
+   - Capture and store the last exception message (`Exception.Message`) that occurred inside LoggerHelper via `LoggerExtension<YourContext>.CurrentError`.  
+   - **Roadmap:** we will surface **all** initialization errors in a dedicated dashboard (`CSharpEssentials.LoggerHelper.Dashboard`), so you can see both the single “last” failure and the complete list of errors in one place.
 
 3. **Quality‐of‐Life Improvements**  
    - Updated to support .NET 8.0 (and .NET 6.0).  
