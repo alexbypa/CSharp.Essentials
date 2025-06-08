@@ -9,6 +9,7 @@
 ## 📑 Table of Contents
 * 📘[Introduction](#introduction)
 * 🚀[Installation](#installation)
+* 🔧[Configuration](#configuration)
 * 🐘[PostgreSQL Sink](#postgresql-sink)
 * [📣 Telegram Sink (used with HttpClient)](#telegram-sink)
 * [📨 HTML Email Sink (used with HttpClient)](#html-email-sink)
@@ -61,25 +62,31 @@ To activate LoggerHelper and enable request/response logging, configure your app
 #endif
 ```
 
-Enable HTTP middleware logging:
+Optionally Enable HTTP middleware logging:
 // Use this to capture and display **all** incoming requests and outgoing responses in your Web API
 ```csharp
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
 ```
+
+## 🔧 Configuration <a id='configuration'></a>    [🔝](#table-of-contents)
+
 ### Verifying LoggerHelper Initialization in Your Minimal API Endpoint
 
 After registering LoggerHelper in your pipeline, you can trigger sink loading and check for any initialization errors right in your endpoint handler:
 
+> **Note:**  
+> `LoggerRequest` is a custom class that **must** implement `IRequest`.  
+> It provides the default log properties:
+> - `IdTransaction`  
+> - `Action`  
+> - `ApplicationName`  
+>
+> You can extend it with any additional fields you need, e.g. `UserLogged`, `IpAddress`, etc.
 ```csharp
 app.MapGet("/users/sync", async ([FromQuery] int page, IUserService service) =>
 {
     // 1) Trigger sink loading and log startup event
-    await LoggerExtension<IRequest>.TraceAsync(
-        new LoggerRequest(),
-        Serilog.Events.LogEventLevel.Information,
-        properties: null,
-        messageTemplate: "Loaded LoggerHelper"
-    );
+    loggerExtension<IRequest>.TraceSync(new LoggerRequest(), Serilog.Events.LogEventLevel.Information, null, "Loaded LoggerHelper");
 
     // 2) Check for a global initialization error
     if (!string.IsNullOrEmpty(LoggerExtension<IRequest>.CurrentError))
