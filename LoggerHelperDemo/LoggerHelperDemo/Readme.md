@@ -420,6 +420,104 @@ If custom `ColumnsPostGreSQL` is defined, logs will include all specified fields
 > 🧩 Tip: PostgreSQL sink is ideal for deep analytics and long-term log storage.
 > ⚠️ **Note:** When using `ColumnsPostGreSQL`, always enable `SelfLog` during development to detect unsupported or misconfigured column definitions. Invalid types or property names will be silently ignored unless explicitly logged via Serilog’s internal diagnostics.
 
+
+---
+## 💾 MS SQL Sink<a id='ms-sql-sink'></a>    [🔝](#table-of-contents)
+This sink writes logs to a Microsoft SQL Server table and supports additional context properties out of the box.
+
+### 📦 Changes
+
+✅ **Version 2.0.8**  
+* Added **complete management of standard columns** for the MSSQL sink (`standardColumns` option).
+* Introduced the new **`additionalColumns`** array, which by default includes the base fields of the package:
+
+  * `IdTransaction`
+  * `Action`
+  * `MachineName`
+  * `ApplicationName`
+
+
+### Configuration Example
+
+```json
+"MSSqlServer": {
+  "connectionString": "<YOUR CONNECTIONSTRING>",
+  "sinkOptionsSection": {
+    "tableName": "logs",
+    "schemaName": "dbo",
+    "autoCreateSqlTable": true,
+    "batchPostingLimit": 100,
+    "period": "0.00:00:10"
+  },
+  "columnOptionsSection": {
+    "addStandardColumns": [
+      "LogEvent"
+    ],
+    "removeStandardColumns": [
+      "Properties"
+    ]
+  }
+}
+```
+
+### Explanation
+
+* `connectionString`: Full connection string to the SQL Server instance.
+* `tableName`: Name of the table that will receive log entries.
+* `schemaName`: Schema to use for the log table (default is `dbo`).
+* `autoCreateSqlTable`: If true, the log table will be created automatically if it does not exist.
+* `batchPostingLimit`: Number of log events to post in each batch.
+* `period`: Interval for batching log posts.
+* `addStandardColumns`: Additional default Serilog columns to include (e.g., `LogEvent`).
+* `removeStandardColumns`: Columns to exclude from the standard set.
+
+### Additional Columns
+
+This sink automatically adds the following custom fields to each log:
+
+* `IdTransaction`: a unique identifier for tracking a transaction.
+* `MachineName`: name of the server or machine.
+* `Action`: custom action tag if set via `Request.Action`.
+* `ApplicationName`: name of the application logging the message.
+
+---
+## 🔍 ElasticSearch Sink<a id='elasticsearch'></a>   [🔝](#table-of-contents)
+
+ElasticSearch is ideal for indexing and searching logs at scale. When integrated with **Kibana**, it enables advanced analytics and visualization of log data.
+
+### Benefits
+
+* 🔎 Fast full-text search and filtering
+* 📊 Seamless integration with Kibana for dashboards
+* 📁 Efficient storage and querying for large volumes of structured logs
+
+### Example Configuration
+
+```json
+"ElasticSearch": {
+  "nodeUris": "http://<YOUR_IP>:9200",
+  "indexFormat": "<YOUR_INDEX>"
+}
+```
+
+* `nodeUris`: The ElasticSearch node endpoint.
+* `indexFormat`: The format or name of the index that will store log entries.
+
+---
+## 🧪 Demo API <a id='demo-api'></a>   [🔝](#table-of-contents)
+
+
+Try live with full logging and structured output:
+
+📁 [Demo Project]
+
+✅ Now available for both **.NET 6.0** and **.NET 8.0**:
+- [`/Test6.0`](https://github.com/alexbypa/CSharp.Essentials/tree/main/Test6.0) → Compatible with legacy environments
+- [`/Test8.0`](https://github.com/alexbypa/CSharp.Essentials/tree/main/Test8.0) → Optimized for latest runtime features
+
+---
+
+
 ## 🚀 Extending LogEvent Properties from Your Project<a id='customprop'></a>   [🔝](#table-of-contents)
 
 Starting from version **2.0.9**, you can extend the default log event context by implementing your own **custom enricher**. This allows you to **add extra fields** to the log context and ensure they are included in **all log sinks** (not only in email notifications, but also in any other sink that supports additional fields—especially in the databases, where from version **2.0.8** onwards you can add dedicated columns for these custom properties).

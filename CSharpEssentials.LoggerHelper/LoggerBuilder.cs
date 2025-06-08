@@ -176,8 +176,7 @@ internal class LoggerBuilder {
 
             if (plugin != null) {
                 // Se si tratta di File ma ho forzato l’esclusione, skippo
-                if (_excludeSinkFile
-                    && condition.Sink.Equals("File", StringComparison.OrdinalIgnoreCase)) {
+                if (_excludeSinkFile && condition.Sink.Equals("File", StringComparison.OrdinalIgnoreCase)) {
                     continue;
                 }
 
