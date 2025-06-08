@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LoggerHelper Notification</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        .header {
+            font-size: 24px;
+            font-weight: 600;
+            color: #007acc;
+            margin-bottom: 10px;
+        }
+
+        .meta {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+            .meta span {
+                display: inline-block;
+                margin-right: 10px;
+            }
+
+        .level-info {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .level-warning {
+            color: #ffc107;
+            font-weight: 600;
+        }
+
+        .level-error {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f1f1f1;
+            font-weight: 600;
+        }
+
+        .highlight {
+            background: #f3f9ff;
+            border-left: 4px solid #007acc;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .footer {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">LoggerHelper Notification 🚀</div>
+
+        <div class="meta">
+            <span><strong>Timestamp:</strong> {{Timestamp}}</span><br>
+            <span><strong>Level:</strong> <span class="level-{{LevelClass}}">{{Level}}</span></span>
+        </div>
+        <h3>Properties</h3>
+        <table>
+            <tr><th>IdTransaction</th><td>{{IdTransaction}}</td></tr>
+            <tr><th>Action</th><td>{{Action}}</td></tr>
+            <tr><th>Section</th><td>{{SpanName}}</td></tr>
+            <tr><th>ApplicationName</th><td>{{ApplicationName}}</td></tr>
+            <tr><th>MachineName</th><td>{{MachineName}}</td></tr>
+            <tr><th>User Name</th><td>{{Username}}</td></tr>
+            <tr><th>Ip Address</th><td>{{IpAddress}}</td></tr>
+        </table>
+
+        <h3>Log Message</h3>
+        <div class="highlight">{{Message}}</div>
+
+        <div class="footer">
+            &copy; 2025 LoggerHelper · Automated email notification
+        </div>
+    </div>
+</body>
+</html>

@@ -25,6 +25,7 @@ public class UserSyncEndpoint : IEndpointDefinition {
             var users = await service.SyncUsersAsync(page);
             return Results.Ok(users);
         } catch (Exception ex) {
+            loggerExtension<IRequest>.TraceSync(new LoggerRequest(), Serilog.Events.LogEventLevel.Error, ex, "Error on call page {page} on reqres.in", page);
             return Results.BadRequest(ex.Message);
         }
     }
