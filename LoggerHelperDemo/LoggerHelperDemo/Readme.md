@@ -18,7 +18,6 @@
 * [🔍 Extending LogEvent Properties](#customprop)
 * [🧪 Demo API](#demo-api)
 
-
 ## 📘 Introduction<a id='introduction'></a>   [🔝](#table-of-contents)
 
 🚀 **CSharpEssentials.LoggerHelper** is a flexible and modular structured logging library for .NET 6/8/9. It’s powered by Serilog for most sinks, and extended with native support for Telegram (via `HttpClient`) and Email (via `System.Net.Mail`).
@@ -300,7 +299,7 @@ This configuration writes **every** log event (`Information`, `Warning`, `Error`
 }
 ```
 
-## 🐘 Telegram Sink<a id='telegram-sink'></a>   [🔝](#table-of-contents)
+## 📣 Telegram Sink<a id='telegram-sink'></a>   [🔝](#table-of-contents)
 LoggerHelper supports Telegram notifications to alert on critical events.
 
 > ⚠️ **Recommended Levels**: Use only `Error` or `Fatal` to avoid exceeding Telegram rate limits.
@@ -589,6 +588,16 @@ Example additions:
 You can see an example in the [demo controller](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/LoggerController.cs).
 Whereas the custom class to generate extra fields can be found [here](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/MyCustomEnricher.cs).
 
+---
+## 🧪 Demo API <a id='demo-api'></a>   [🔝](#table-of-contents)
+
+
+Try live with full logging and structured output:
+
+📁 [Demo Project]
+
+✅ Now available for both **.NET 6.0** and **.NET 8.0**:
+- [`/Test6.0`](https://github.com/alexbypa/CSharp.Essentials/tree/main/LoggerHelperDemo) → Compatible with legacy environments
 
 
 👉 [Click here to view full usage guide and examples](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
