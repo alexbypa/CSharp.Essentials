@@ -10,9 +10,9 @@
 * 📘[Introduction](#introduction)
 * 🚀[Installation](#installation)
 * 🔧[Configuration](#configuration)
+* [📨 HTML Email Sink (used with HttpClient)](#html-email-sink)
 * 🐘[PostgreSQL Sink](#postgresql-sink)
 * [📣 Telegram Sink (used with HttpClient)](#telegram-sink)
-* [📨 HTML Email Sink (used with HttpClient)](#html-email-sink)
 * [💾 MS SQL Sink](#ms-sql-sink)
 * [🔍 ElasticSearch Sink](#elasticsearch)
 * [🔍 Extending LogEvent Properties](#customprop)
@@ -153,6 +153,105 @@ Here’s a **Minimal Configuration Example** (in English) that uses **only** the
 * **SerilogConfiguration.ApplicationName**: your app’s name.
 * **SerilogCondition**: a list of sink-level mappings; here we map **all** levels to the `"File"` sink.
 * **SerilogOption.File**: settings specific to the File sink (output folder, rolling interval, retention, etc.).
+
+
+## 📨 HTML Email Sink<a id='html-email-sink'></a>   [🔝](#table-of-contents)
+---
+
+## ⚠️ Version 2.0.0 - Breaking Change
+
+> Starting from version **2.0.0**, the `Email` configuration section has been **renamed**.
+>
+> If you are upgrading from `1.x.x`, you MUST update your `appsettings.LoggerHelper.json`.
+
+Old (before 2.0.0):
+
+```json
+"Email": {
+  "From": "...",
+  "Host": "...",
+  "Port": 587,
+  "To": ["..."],
+  "CredentialHost": "...",
+  "CredentialPassword": "..."
+}
+```
+
+New (since 2.0.0):
+
+```json
+"Email": {
+  "From": "...",
+  "Host": "...",
+  "Port": 587,
+  "To": "...",
+  "username": "...",
+  "password": "...",
+  "EnableSsl": true
+}
+```
+
+## 🚨 Why Email Handling Changed
+
+Starting from version 2.0.0, LoggerHelper **no longer uses** the standard [Serilog.Sinks.Email](https://github.com/serilog/serilog-sinks-email) for sending emails.
+
+**Reason:**
+The official Serilog Email Sink does not support custom body formatting (HTML templates, structured logs, color coding, etc).
+It only supports plain text messages generated via `RenderMessage()`, without the ability to control the message content.
+
+🔎 See discussion: [GitHub Issue - serilog/serilog-sinks-email](https://github.com/serilog/serilog-sinks-email/issues/44)
+
+**What changed:**
+
+* LoggerHelper now uses a **custom internal SMTP sink**: `LoggerHelperEmailSink`.
+* This allows sending fully customized **HTML-formatted emails**.
+* Supports dynamic coloring based on log level (Information, Warning, Error).
+* Supports secure SMTP with SSL/TLS.
+
+✅ No third-party dependencies added.
+✅ Full control over email appearance and content.
+
+Since v2.0.0, LoggerHelper no longer uses `Serilog.Sinks.Email`. It ships with `LoggerHelperEmailSink`, allowing:
+
+* ✅ Full HTML customization via external template
+* ✅ Dynamic styling based on log level
+* ✅ Secure SMTP (SSL/TLS)
+
+Example HTML placeholders:
+
+```html
+{{Timestamp}}, {{Level}}, {{Message}}, {{Action}}, {{IdTransaction}}, {{MachineName}}, {{ApplicationName}}, {{LevelClass}}
+```
+
+### 🖌️ Email Template Customization (optional)
+
+LoggerHelper allows you to customize the **HTML structure and appearance** of the email body.
+You can provide an external `.html` file with placeholders like:
+
+```html
+{{Timestamp}}, {{Level}}, {{Message}}, {{Action}}, {{IdTransaction}}, {{MachineName}}, {{ApplicationName}}, {{LevelClass}}
+```
+
+Then, in the `appsettings.LoggerHelper.json` configuration file, set:
+
+```json
+"LoggerHelper": {
+  "SerilogOption": {
+    "Email": {
+      ...
+      "TemplatePath": "Templates/email-template-default.html"
+    }
+  }
+}
+```
+
+If the file is missing or invalid, LoggerHelper will **fall back to the internal default template**, ensuring backward compatibility.
+> 📸 Example of a formatted email message:
+> ![Email Sample](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper/img/emailsample.png)
+
+
+
+
 
 
 👉 [Click here to view full usage guide and examples](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
