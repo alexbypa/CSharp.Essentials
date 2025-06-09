@@ -542,6 +542,9 @@ public class MyCustomEnricher : IContextLogEnricher {
 In addition to the fields already provided by the package (e.g., `MachineName`, `Action`, `ApplicationName`, `IdTransaction`), you can add **custom fields**—such as the **logged-in username** and the **IP address** of the request—using your own properties.
 
 ✅ **4️⃣ Use your custom request class in your application**
+
+> **Note:** your custom request class (e.g. `myRequest`) must implement the `ILoggerRequest` interface provided by **LoggerHelper**.
+
 Example usage:
 
 ```csharp
