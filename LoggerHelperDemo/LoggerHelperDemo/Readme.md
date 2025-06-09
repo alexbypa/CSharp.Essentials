@@ -113,11 +113,6 @@ app.MapGet("/users/sync", async ([FromQuery] int page, IUserService service) =>
 .WithName("SyncUsers")
 .Produces<List<User>>(StatusCodes.Status200OK);
 ```
-### Troubleshooting: Missing appsettings File
-
-If you run a request without the proper appsettings in place, you’ll see an error like this:
-
-![Configuration File 'appsettings.LoggerHelper.debug.json' not found](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/img/badrequest.png)
 
 Here’s a **Minimal Configuration Example** (in English) that uses **only** the File sink and writes **all** log levels (`Information`, `Warning`, `Error`, `Fatal`):
 
