@@ -114,7 +114,7 @@ app.MapGet("/users/sync", async ([FromQuery] int page, IUserService service) =>
 .Produces<List<User>>(StatusCodes.Status200OK);
 ```
 
-Here’s a **Minimal Configuration Example** (in English) that uses **only** the File sink and writes **all** log levels (`Information`, `Warning`, `Error`, `Fatal`):
+Here’s a **Minimal Configuration Example** that uses **only** the File sink and writes **all** log levels (`Information`, `Warning`, `Error`, `Fatal`):
 
 ```json
 {
@@ -245,7 +245,7 @@ If the file is missing or invalid, LoggerHelper will **fall back to the internal
 > ![Email Sample](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper/img/emailsample.png)
 
 
-### File + Email Sink Example
+### 🔧 File + Email sink example configuration
 
 This configuration writes **every** log event (`Information`, `Warning`, `Error`, `Fatal`) to the **File** sink, but only sends **Email** notifications for high-severity events (`Error` and `Fatal`):
 
