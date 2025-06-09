@@ -575,8 +575,9 @@ Whereas the custom class to generate extra fields can be found [here](https://gi
 ---
 ## 🧪 Demo API
 
-Try it live with full logging and structured output:
-## 📝 appsettings.loggerhelper.json (Development – Debug)
+Try it live with full logging and structured output on 📁 [Demo Project](https://github.com/alexbypa/CSharp.Essentials/tree/main/LoggerHelperDemo)
+
+### 📝 appsettings.loggerhelper.json (Development – Debug)
 
 This is the full `appsettings.LoggerHelper.json` used in the demo Minimal API (remember to use appsettings.LoggerHelper.debug.json on development):
 
@@ -738,4 +739,3 @@ This is the full `appsettings.LoggerHelper.json` used in the demo Minimal API (r
 }
 ```
 
-📁 [Demo Project](https://github.com/alexbypa/CSharp.Essentials/tree/main/LoggerHelperDemo)
