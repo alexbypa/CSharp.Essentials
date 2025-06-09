@@ -736,6 +736,6 @@ This is the full `appsettings.LoggerHelper.json` used in the demo Minimal API (r
     }
   }
 }
-
+```
 
 📁 [Demo Project](https://github.com/alexbypa/CSharp.Essentials/tree/main/LoggerHelperDemo)
