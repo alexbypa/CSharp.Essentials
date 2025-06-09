@@ -576,7 +576,7 @@ You can see an example in the [demo controller](https://github.com/alexbypa/CSha
 Whereas the custom class to generate extra fields can be found [here](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/MyCustomEnricher.cs).
 
 ---
-## 🧪 Demo API
+## 🧪 Demo API <a id='demo-api'></a>   [🔝](#table-of-contents)
 
 Try it live with full logging and structured output on 📁 [Demo Project](https://github.com/alexbypa/CSharp.Essentials/tree/main/LoggerHelperDemo)
 
