@@ -589,15 +589,8 @@ You can see an example in the [demo controller](https://github.com/alexbypa/CSha
 Whereas the custom class to generate extra fields can be found [here](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/MyCustomEnricher.cs).
 
 ---
-## 🧪 Demo API <a id='demo-api'></a>   [🔝](#table-of-contents)
+## 🧪 Demo API
 
+Try it live with full logging and structured output:
 
-Try live with full logging and structured output:
-
-📁 [Demo Project]
-
-✅ Now available for both **.NET 6.0** and **.NET 8.0**:
-- [`/Test6.0`](https://github.com/alexbypa/CSharp.Essentials/tree/main/LoggerHelperDemo) → Compatible with legacy environments
-
-
-👉 [Click here to view full usage guide and examples](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
+📁 [Demo Project](https://github.com/alexbypa/CSharp.Essentials/tree/main/LoggerHelperDemo)

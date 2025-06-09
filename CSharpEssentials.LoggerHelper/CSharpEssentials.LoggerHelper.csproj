@@ -36,7 +36,7 @@
       3.0.5 - Fixed load assembly and added property CurrentError on loggerExtension
       3.1.1 - Exposed the `SinkPluginRegistry.PluginError` event for centralized plugin‐error handling; improved error diagnostics in the README and prepared the Dashboard package layout
     </Description>
-    <Version>3.1.1</Version>
+    <Version>3.1.2</Version>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
