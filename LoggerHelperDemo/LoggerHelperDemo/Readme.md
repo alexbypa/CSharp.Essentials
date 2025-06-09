@@ -503,18 +503,6 @@ ElasticSearch is ideal for indexing and searching logs at scale. When integrated
 * `indexFormat`: The format or name of the index that will store log entries.
 
 ---
-## 🧪 Demo API <a id='demo-api'></a>   [🔝](#table-of-contents)
-
-
-Try live with full logging and structured output:
-
-📁 [Demo Project]
-
-✅ Now available for both **.NET 6.0** and **.NET 8.0**:
-- [`/Test6.0`](https://github.com/alexbypa/CSharp.Essentials/tree/main/Test6.0) → Compatible with legacy environments
-- [`/Test8.0`](https://github.com/alexbypa/CSharp.Essentials/tree/main/Test8.0) → Optimized for latest runtime features
-
----
 
 
 ## 🚀 Extending LogEvent Properties from Your Project<a id='customprop'></a>   [🔝](#table-of-contents)
