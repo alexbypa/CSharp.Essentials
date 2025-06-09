@@ -299,7 +299,8 @@ LoggerHelper supports Telegram notifications to alert on critical events.
 
 > ⚠️ **Recommended Levels**: Use only `Error` or `Fatal` to avoid exceeding Telegram rate limits.
 
-### 🛠 Example Configuration
+### 🔧 Telegram sink example configuration
+
 
 ```json
 "TelegramOption": {
@@ -575,5 +576,166 @@ Whereas the custom class to generate extra fields can be found [here](https://gi
 ## 🧪 Demo API
 
 Try it live with full logging and structured output:
+## 📝 appsettings.loggerhelper.json (Development – Debug)
+
+This is the full `appsettings.LoggerHelper.json` used in the demo Minimal API (remember to use appsettings.LoggerHelper.debug.json on development):
+
+```json
+{
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Debug",
+        "System": "Debug"
+      }
+    },
+    "SerilogConfiguration": {
+      "ApplicationName": "DemoLogger 9.0",
+      "SerilogCondition": [
+        {
+          "Sink": "ElasticSearch",
+          "Level": [
+            "Information",
+            "Warning",
+            "Error",
+            "Fatal"
+          ]
+        },
+        {
+          "Sink": "File",
+          "Level": [
+            "Information",
+            "Warning",
+            "Error",
+            "Fatal"
+          ]
+        },
+        {
+          "Sink": "Email",
+          "Level": [
+            "Information",
+            "Warning",
+            "Error",
+            "Fatal"
+          ]
+        },
+        {
+          "Sink": "Telegram",
+          "Level": [
+            "Information",
+            "Warning",
+            "Error",
+            "Fatal"
+          ]
+        },
+        {
+          "Sink": "PostgreSQL",
+          "Level": [
+            "Information",
+            "Warning",
+            "Error",
+            "Fatal"
+          ]
+        },
+        {
+          "Sink": "MSSqlServer",
+          "Level": [
+            "Information",
+            "Warning",
+            "Error",
+            "Fatal"
+          ]
+        },
+        {
+          "Sink": "Console",
+          "Level": [
+            "Information",
+            "Warning",
+            "Error",
+            "Fatal"
+          ]
+        }
+      ],
+      "SerilogOption": {
+        "File": {
+          "Path": "C:\\Logs\\DemoLogger",
+          "RollingInterval": "Day",
+          "RetainedFileCountLimit": 7,
+          "Shared": true
+        },
+        "Email": {
+          "From": "jobscheduler.pixelo@gmail.com",
+          "Port": 587,
+          "Host": "your_host",
+          "To": "recipient",
+          "username": "username_smtp",
+          "password": "password_smtp",
+          "EnableSsl": true,
+          "TemplatePath": "Templates/email-template-default.html"
+        },
+        "TelegramOption": {
+          "chatId": "chatid",
+          "Api_Key": "api_key"
+        },
+        "PostgreSQL": {
+          "connectionString": "your_connection",
+          "tableName": "LogEntry",
+          "schemaName": "public",
+          "needAutoCreateTable": true,
+          "addAutoIncrementColumn": true,
+          "ColumnsPostGreSQL": [
+            { "Name": "Message",           "Writer": "Rendered",   "Type": "text1111" },
+            { "Name": "MessageTemplate",   "Writer": "Template",   "Type": "text"     },
+            { "Name": "Level",             "Writer": "Level",      "Type": "varchar"  },
+            { "Name": "TimeStamp",         "Writer": "timestamp",  "Type": "timestamp"},
+            { "Name": "Exception",         "Writer": "Exception",  "Type": "text"     },
+            { "Name": "Properties",        "Writer": "Properties", "Type": "jsonb"    },
+            { "Name": "LogEvent",          "Writer": "Serialized", "Type": "jsonb"    },
+            { "Name": "IdTransaction",     "Writer": "Single",     "Property": "IdTransaction",   "Type": "varchar" },
+            { "Name": "MachineName",       "Writer": "Single",     "Property": "MachineName",     "Type": "varchar" },
+            { "Name": "Action",            "Writer": "Single",     "Property": "Action",          "Type": "varchar" },
+            { "Name": "ApplicationName",   "Writer": "Single",     "Property": "ApplicationName", "Type": "varchar" },
+            { "Name": "Username",          "Writer": "Single",     "Property": "Username",        "Type": "varchar" },
+            { "Name": "IpAddress",         "Writer": "Single",     "Property": "IpAddress",       "Type": "varchar" }
+          ]
+        },
+        "MSSqlServer": {
+          "connectionString": "your_connection",
+          "sinkOptionsSection": {
+            "tableName": "LogEntry",
+            "schemaName": "dbo",
+            "autoCreateSqlTable": true,
+            "batchPostingLimit": 100,
+            "period": "0.00:00:10"
+          },
+          "columnOptionsSection": {
+            "addStandardColumns": [
+              "LogEvent",
+              "Message",
+              "MessageTemplate",
+              "Level",
+              "Exception"
+            ],
+            "removeStandardColumns": [ "Properties" ]
+          },
+          "additionalColumns": [
+            "IdTransaction",
+            "Action",
+            "MachineName",
+            "ApplicationName",
+            "Username",
+            "IpAddress"
+          ]
+        },
+        "ElasticSearch": {
+          "nodeUris": "endpoint",
+          "indexFormat": "indexformat"
+        }
+      }
+    }
+  }
+}
+
 
 📁 [Demo Project](https://github.com/alexbypa/CSharp.Essentials/tree/main/LoggerHelperDemo)
