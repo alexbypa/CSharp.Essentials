@@ -10,6 +10,7 @@ namespace LoggerHelperDemo.Tests;
 
 using LoggerHelperDemo.Persistence;
 using LoggerHelperDemo.Repositories;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Moq.Protected;
@@ -124,60 +125,60 @@ public class UserServiceTests {
         repoMock.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
-
-    [Fact]
-    public async Task SyncUsersAsync_SalvaSuPostgresDiTest() {
+    //[Fact]
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public async Task SyncUsersAsync_SalvaSuPostgresDiTest(int page) {
         // 1) Definisci la connessione al tuo DB PostgreSQL di test
-        var testConn = "Data Source=10.0.1.111;Initial Catalog=PragmaticCasino;Persist Security Info=True;User ID=sa;Password=demo!100;Encrypt=False;";
 
         // 2) Crea il service con il DB di test
-        var service = TestServiceFactory.CreateUserServiceWithPostgres(testConn);
+
+        var factory = TestServiceFactory.CreateUserServiceWithPostgres();
 
         // 3) Esegui la sincronizzazione (la HttpClient interna può essere mockata se vuoi)
-        var users = (await service.SyncUsersAsync(1)).ToList();
+        UserService userService = new UserService(factory.httpclient, factory.userRepository);
+        var users = (await userService.SyncUsersAsync(page)).ToList();
 
         // 4) Asserisci sul risultato
         Assert.NotEmpty(users);
         Assert.All(users, u => Assert.True(u.ExternalId > 0));
 
-        // 5) Verifica direttamente sul database
-        using var verifyCtx = new AppDbContext(
-            new DbContextOptionsBuilder<AppDbContext>()
-                .UseNpgsql(testConn)
-                .Options);
-        var saved = await verifyCtx.Users.ToListAsync();
+        var saved = await factory.userRepository.getUserSavedOnLastMinutes(-2);
+
         Assert.Equal(users.Count, saved.Count);
     }
-}
-
-
-public static class TestServiceFactory {
-    /// <summary>
-    /// Crea un UserService con:
-    ///  - un DbContext EF Core con provider Npgsql (PostgreSQL)
-    ///  - il repository concreto UserRepository
-    ///  - un HttpClient reale (o mockabile) per chiamate esterne
-    /// </summary>
-    public static UserService CreateUserServiceWithPostgres(string connectionString) {
-        // 1) Costruisci le opzioni per il DbContext su PostgreSQL
-        var options = new DbContextOptionsBuilder<AppDbContext>()
+    public static class TestServiceFactory {
+        /// <summary>
+        /// Crea un UserService con:
+        ///  - un DbContext EF Core con provider Npgsql (PostgreSQL)
+        ///  - il repository concreto UserRepository
+        ///  - un HttpClient reale (o mockabile) per chiamate esterne
+        /// </summary>
+        public static (HttpClient httpclient, UserRepository userRepository) CreateUserServiceWithPostgres() {
+            string connectionString = "Host=51.178.131.166:1433;Username=postgres;Password=PixPstG!!;Database=HubGamePragmaticCasino;Search Path=dbo,public;ConnectionLifetime=30;";
+            // 1) Costruisci le opzioni per il DbContext su PostgreSQL
+            var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseNpgsql(connectionString, npgsql => {
                 // se hai bisogno di specificare la versione di PostgreSQL
-                npgsql.SetPostgresVersion(new Version(12, 3));
+                //npgsql.SetPostgresVersion(new Version(12, 3));
             })
             .Options;
 
 
-        // 3) Istanzia il DbContext “vero” e il repository concreto
-        var dbContext = new AppDbContext(options);
-        var userRepo = new UserRepository(dbContext);
+            // 3) Istanzia il DbContext “vero” e il repository concreto
+            var dbContext = new AppDbContext(options);
+            var userRepo = new UserRepository(dbContext);
 
-        // 4) Prepara un HttpClient “reale” (o sostituiscilo in test con un mock)
-        var httpClient = new HttpClient {
-            BaseAddress = new Uri("https://reqres.in/api")
-        };
+            // 4) Prepara un HttpClient “reale” (o sostituiscilo in test con un mock)
+            var httpClient = new HttpClient {
+                BaseAddress = new Uri("https://reqres.in/api")
+            };
+            httpClient.DefaultRequestHeaders.Add("x-api-key", "reqres-free-v1");
 
-        // 5) Ritorna il service pronto all’uso
-        return new UserService(httpClient, userRepo);
+            // 5) Ritorna il service pronto all’uso
+            return (httpClient, userRepo);
+        }
     }
 }

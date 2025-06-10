@@ -1,5 +1,6 @@
 ﻿using LoggerHelperDemo.Entities;
 using LoggerHelperDemo.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace LoggerHelperDemo.Repositories;
 
@@ -17,4 +18,6 @@ public class UserRepository : IUserRepository {
 
     public async Task SaveChangesAsync()
         => await _db.SaveChangesAsync();
+
+    public async Task<List<User>> getUserSavedOnLastMinutes(int minutes) => await _db.Users.Where(a => a.CreatedAt >= DateTime.UtcNow.Date.AddMinutes(-1)).ToListAsync();
 }

@@ -28,7 +28,8 @@ public class UserService : IUserService {
                 Email = dto.Email,
                 FirstName = dto.First_name,
                 LastName = dto.Last_name,
-                Avatar = dto.Avatar
+                Avatar = dto.Avatar, 
+                CreatedAt = DateTime.UtcNow
             };
             await _repo.AddAsync(user);
             saved.Add(user);
