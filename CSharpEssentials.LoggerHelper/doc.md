@@ -43,8 +43,8 @@
 * **MSSqlServer**: `CSharpEssentials.LoggerHelper.Sink.MSSqlServer`
 * **PostgreSQL**: `CSharpEssentials.LoggerHelper.Sink.PostgreSql`
 * **ElasticSearch**: `CSharpEssentials.LoggerHelper.Sink.Elasticsearch`
-* **Telegram**: *Used via `HttpClient`*
-* **Email**: *Used via `System.Net.Mail`*
+* **Telegram**: `CSharpEssentials.LoggerHelper.Sink.Telegram` *Used via `HttpClient`*
+* **Email**: `CSharpEssentials.LoggerHelper.Sink.Email` *Used via `System.Net.Mail`*
 
 ---
 
