@@ -43,8 +43,8 @@
 * **MSSqlServer**: `CSharpEssentials.LoggerHelper.Sink.MSSqlServer`
 * **PostgreSQL**: `CSharpEssentials.LoggerHelper.Sink.PostgreSql`
 * **ElasticSearch**: `CSharpEssentials.LoggerHelper.Sink.Elasticsearch`
-* **Telegram**: *Used via `HttpClient`*
-* **Email**: *Used via `System.Net.Mail`*
+* **Telegram**: `CSharpEssentials.LoggerHelper.Sink.Telegram` *Used via `HttpClient`*
+* **Email**: `CSharpEssentials.LoggerHelper.Sink.Email` *Used via `System.Net.Mail`*
 
 ---
 
@@ -85,7 +85,8 @@ After registering LoggerHelper in your pipeline, you can trigger sink loading an
 > - `Action`  
 > - `ApplicationName`  
 >
-> You can extend it with any additional fields you need, e.g. `UserLogged`, `IpAddress`, etc.
+> You can extend it with any additional fields you need, e.g. `UserLogged`,`IpAddress`, etc. see : [✨<strong>Extending LogEvent Properties</strong>✨](#customprop)
+
 ```csharp
 app.MapGet("/users/sync", async ([FromQuery] int page, IUserService service) =>
 {
@@ -116,6 +117,7 @@ app.MapGet("/users/sync", async ([FromQuery] int page, IUserService service) =>
 
 Here’s a **Minimal Configuration Example** that uses **only** the File sink and writes **all** log levels (`Information`, `Warning`, `Error`, `Fatal`):
 
+you need to create **appsettings.LoggerHelper.json** in your project ( on development environment create with the name **appsettings.LoggerHelper.debug.json** )
 ```json
 {
   "Serilog": {
