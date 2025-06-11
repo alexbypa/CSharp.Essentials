@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
-    <Version>3.1.2</Version>
+    <Version>3.1.3</Version>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
   </PropertyGroup>
 
