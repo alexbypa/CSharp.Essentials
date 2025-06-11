@@ -85,7 +85,8 @@ After registering LoggerHelper in your pipeline, you can trigger sink loading an
 > - `Action`  
 > - `ApplicationName`  
 >
-> You can extend it with any additional fields you need, e.g. `UserLogged`, `IpAddress`, etc.
+> You can extend it with any additional fields you need, e.g. `UserLogged`,`IpAddress`, etc. see : [✨<strong>Extending LogEvent Properties</strong>✨](#customprop)
+
 ```csharp
 app.MapGet("/users/sync", async ([FromQuery] int page, IUserService service) =>
 {
