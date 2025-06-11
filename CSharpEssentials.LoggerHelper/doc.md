@@ -117,6 +117,7 @@ app.MapGet("/users/sync", async ([FromQuery] int page, IUserService service) =>
 
 Here’s a **Minimal Configuration Example** that uses **only** the File sink and writes **all** log levels (`Information`, `Warning`, `Error`, `Fatal`):
 
+you need to create **appsettings.LoggerHelper.json** in your project ( on development environment create with the name **appsettings.LoggerHelper.debug.json** )
 ```json
 {
   "Serilog": {
