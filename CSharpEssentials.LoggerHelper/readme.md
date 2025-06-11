@@ -6,6 +6,11 @@
 
 # 📦 CSharpEssentials.LoggerHelper
 
+## 📦 What’s New in **v3.1.3**
+
+- 🐞 **Fixed** option‐verification bug: due to a distraction the default sink was set to **PostgreSQL** instead of **MSSQLServer**. Now the check correctly targets MSSQLServer.
+---
+
 ## 🚀 Why CSharpEssentials.LoggerHelper?
 
 - **🔌 Modular Architecture**  

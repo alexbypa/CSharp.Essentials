@@ -10,7 +10,7 @@ public class MSSqlServerSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) => sinkName == "MSSqlServer";
     // Applies the MSSqlServer sink configuration to the LoggerConfiguration
     public void HandleSink(LoggerConfiguration loggerConfig, SerilogCondition condition, SerilogConfiguration serilogConfig) {
-        if (serilogConfig.SerilogOption == null || serilogConfig.SerilogOption.PostgreSQL == null) {
+        if (serilogConfig.SerilogOption == null || serilogConfig.SerilogOption.MSSqlServer == null) {
             SelfLog.WriteLine($"Configuration exception : section MSSqlServer missing on Serilog:SerilogConfiguration:SerilogOption https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
             return;
         }
