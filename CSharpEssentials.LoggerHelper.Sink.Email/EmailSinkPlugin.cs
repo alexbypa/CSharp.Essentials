@@ -18,6 +18,7 @@ internal class EmailSinkPlugin : ISinkPlugin {
                                     toEmail: string.Join(",", serilogConfig.SerilogOption?.Email.To),
                                     username: serilogConfig.SerilogOption?.Email.username,
                                     password: serilogConfig.SerilogOption?.Email.password,
+                                    serilogConfig.SerilogOption.Email?.ThrottleInterval ?? TimeSpan.FromSeconds(0),
                                     subjectPrefix: "[LoggerHelper]",
                                     enableSsl: (bool)serilogConfig.SerilogOption?.Email.EnableSsl,
                                     templatePath: serilogConfig.SerilogOption?.Email.TemplatePath

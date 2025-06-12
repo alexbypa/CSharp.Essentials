@@ -1,4 +1,5 @@
 ﻿using Serilog.Core;
+using Serilog.Debugging;
 using Serilog.Events;
 using System.Net;
 using System.Net.Mail;
@@ -14,6 +15,7 @@ internal class CustomEmailSink : ILogEventSink {
     private readonly bool _enableSsl;
     private readonly string _templatePath;
     private readonly string _defaultTemplate;
+    private readonly TimeSpan _ThrottleInterval;
     /// <summary>
     /// Initializes a new instance of the <see cref="CustomEmailSink"/> class.
     /// </summary>
@@ -33,9 +35,11 @@ internal class CustomEmailSink : ILogEventSink {
         string toEmail,
         string username,
         string password,
+        TimeSpan ThrottleInterval,
         string subjectPrefix = "[LoggerHelper]",
         bool enableSsl = true,
-        string templatePath = "email-template-default.html") {
+        string templatePath = "email-template-default.html"
+        ) {
         _smtpServer = smtpServer;
         _smtpPort = smtpPort;
         _fromEmail = fromEmail;
@@ -44,6 +48,7 @@ internal class CustomEmailSink : ILogEventSink {
         _subjectPrefix = subjectPrefix;
         _enableSsl = enableSsl;
         _templatePath = templatePath;
+        _ThrottleInterval = ThrottleInterval;
         _defaultTemplate = LoadDefaultTemplate(); // embedded di backup
     }
     /// <summary>
@@ -54,6 +59,11 @@ internal class CustomEmailSink : ILogEventSink {
         try {
             var rawMessage = logEvent.RenderMessage();
             var htmlBody = GenerateHtmlBody(logEvent);
+
+            if (!SinkThrottlingManager.CanSend("Email", _ThrottleInterval)) {
+                SelfLog.WriteLine($"Throttle exceeded on sink Email. Message : {rawMessage}");
+                return;
+            }
 
             var subject = $"{_subjectPrefix} [{logEvent.Level}]";
 
@@ -68,7 +78,7 @@ internal class CustomEmailSink : ILogEventSink {
             smtpClient.Send(message);
         } catch (Exception ex) {
             // Qui puoi decidere se loggare errori di invio o ignorarli
-            Serilog.Debugging.SelfLog.WriteLine($"Error sending email: {ex}");
+            SelfLog.WriteLine($"Error sending email: {ex}");
         }
     }
     /// <summary>

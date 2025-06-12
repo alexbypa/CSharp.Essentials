@@ -1,4 +1,5 @@
-﻿using LoggerHelperDemo.Entities;
+﻿using CSharpEssentials.LoggerHelper;
+using LoggerHelperDemo.Entities;
 using LoggerHelperDemo.Models;
 using LoggerHelperDemo.Repositories;
 
@@ -17,25 +18,28 @@ public class UserService : IUserService {
     }
 
     public async Task<IEnumerable<User>> SyncUsersAsync(int page) {
-        var resp = await _http.GetFromJsonAsync<ReqResResponse>($"{_http.BaseAddress}/users?page={page}");
-        if (resp?.Data == null)
-            return Enumerable.Empty<User>();
+            var saved = new List<User>();
+        try {
+            var resp = await _http.GetFromJsonAsync<ReqResResponse>($"{_http.BaseAddress}/users?page={page}");
+            if (resp?.Data == null)
+                return Enumerable.Empty<User>();
 
-        var saved = new List<User>();
-        foreach (var dto in resp.Data) {
-            var user = new User {
-                ExternalId = dto.Id,
-                Email = dto.Email,
-                FirstName = dto.First_name,
-                LastName = dto.Last_name,
-                Avatar = dto.Avatar, 
-                CreatedAt = DateTime.UtcNow
-            };
-            await _repo.AddAsync(user);
-            saved.Add(user);
+            foreach (var dto in resp.Data) {
+                var user = new User {
+                    ExternalId = dto.Id,
+                    Email = dto.Email,
+                    FirstName = dto.First_name,
+                    LastName = dto.Last_name,
+                    Avatar = dto.Avatar,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _repo.AddAsync(user);
+                saved.Add(user);
+            }
+            await _repo.SaveChangesAsync();
+        } catch (Exception ex) {
+            loggerExtension<IRequest>.TraceAsync(new LoggerRequest(), Serilog.Events.LogEventLevel.Error, ex, "Eccezione su SyncUsersAsync");
         }
-        await _repo.SaveChangesAsync();
         return saved;
     }
 }
-
