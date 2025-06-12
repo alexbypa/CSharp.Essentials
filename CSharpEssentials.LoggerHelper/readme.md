@@ -3,6 +3,8 @@
 [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 [![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 ![Last Commit](https://img.shields.io/github/last-commit/alexbypa/CSharp.Essentials?style=flat-square)
+[![Discussions](https://img.shields.io/badge/Discussions-Chat-blue)](https://github.com/alexbypa/CSharp.Essentials/discussions/)
+[![Issues](https://img.shields.io/github/issues/tuo-utente/LoggerHelper)](https://github.com/alexbypa/CSharp.Essentials/issues)
 
 # 📦 CSharpEssentials.LoggerHelper
 
