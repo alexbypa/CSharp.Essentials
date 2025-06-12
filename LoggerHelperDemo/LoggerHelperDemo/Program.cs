@@ -30,7 +30,7 @@ builder.Services.AddHttpClient<IUserService, UserService>(client => {
 
 var app = builder.Build();
 
-app.UseMiddleware<RequestResponseLoggingMiddleware>();
+//app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 app.UseEndpointDefinitions();
 

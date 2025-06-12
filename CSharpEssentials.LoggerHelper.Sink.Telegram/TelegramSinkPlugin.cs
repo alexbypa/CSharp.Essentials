@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using Serilog.Debugging;
 using System.Runtime.CompilerServices;
 
 namespace CSharpEssentials.LoggerHelper.Sink.Telegram;
@@ -11,15 +12,18 @@ internal class TelegramSinkPlugin : ISinkPlugin {
             Serilog.Debugging.SelfLog.WriteLine($"Configuration exception : section TelegramOption missing on Serilog:SerilogConfiguration:SerilogOption https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
             return;
         }
-        var opts = serilogConfig.SerilogOption.MSSqlServer;
-
+        try { 
         loggerConfig.WriteTo.Conditional(
                             evt => serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
                             wt => wt.Sink(new CustomTelegramSink(
                                 serilogConfig?.SerilogOption?.TelegramOption?.Api_Key,
                                 serilogConfig?.SerilogOption?.TelegramOption?.chatId,
-                                new CustomTelegramSinkFormatter()
+                                new CustomTelegramSinkFormatter(),
+                                serilogConfig?.SerilogOption?.TelegramOption?.ThrottleInterval ?? TimeSpan.FromSeconds(0)
                             )));
+        } catch (Exception ex) {
+            SelfLog.WriteLine($"Error HandleSink on Telegram: {ex.Message}");
+        }
     }
 }
 // Static initializer to auto-register the plugin when the assembly is loaded

@@ -88,7 +88,6 @@ class ErrorListTextWriter : TextWriter {
             ContextInfo = AppContext.BaseDirectory
         });
     }
-
     // You can optionally override Write(char) if you need to
 }
 /// <summary>

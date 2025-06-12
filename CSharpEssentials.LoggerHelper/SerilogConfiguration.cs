@@ -26,6 +26,7 @@ public class Email {
     public string? username { get; set; }
     public bool EnableSsl { get; set; }
     public string? TemplatePath { get; set; }
+    public TimeSpan? ThrottleInterval { get; set; }
 }
 public class PostgreSQL {
     public string? connectionstring { get; set; }
@@ -71,4 +72,5 @@ public class SinkFileOptions {
 public class TelegramOption {
     public string? Api_Key { get; set; }
     public string? chatId { get; set; }
+    public TimeSpan? ThrottleInterval { get; set; }
 }
