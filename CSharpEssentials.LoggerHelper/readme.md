@@ -4,16 +4,23 @@
 [![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 ![Last Commit](https://img.shields.io/github/last-commit/alexbypa/CSharp.Essentials?style=flat-square)
 [![Discussions](https://img.shields.io/badge/Discussions-Chat-blue)](https://github.com/alexbypa/CSharp.Essentials/discussions/)
-[![Issues](https://img.shields.io/github/issues/tuo-utente/LoggerHelper)](https://github.com/alexbypa/CSharp.Essentials/issues)
+[![Issues](https://img.shields.io/github/issues/alexbypa/CSharp.Essentials)(https://github.com/alexbypa/CSharp.Essentials/issues)
 
 # 📦 CSharpEssentials.LoggerHelper
 
-## 📦 What’s New in **v3.1.3**
+##  What’s New in **v3.1.4**
 
-- 🐞 **Fixed** option‐verification bug: due to a distraction the default sink was set to **PostgreSQL** instead of **MSSQLServer**. Now the check correctly targets MSSQLServer.
----
+### 🚦 ThrottleInterval Support (Telegram & Email Sinks)
 
-## 🚀 Why CSharpEssentials.LoggerHelper?
+Avoid flooding your notification channels!  
+The `CSharpEssentials.LoggerHelper` sinks for **Telegram** and **Email** now support a brand new feature: **ThrottleInterval**.
+
+#### ✨ What is it?
+
+`ThrottleInterval` is a simple but powerful mechanism that prevents the same sink from sending messages too frequently.  
+It’s ideal for external services like **Telegram bots** or **SMTP servers**, which often have **rate limits** (e.g., HTTP 429 Too Many Requests).
+
+#### 🚀 Why CSharpEssentials.LoggerHelper?
 
 - **🔌 Modular Architecture**  
   Instead of bundling dozens of sinks into one monolithic library, each sink lives in its own NuGet sub‐package (e.g., `CSharpEssentials.LoggerHelper.Sink.File`, `...Sink.MSSqlServer`, and so on). You install only what you need.
@@ -41,7 +48,7 @@
 
 ---
 
-## 🆕 What’s New in **v3.1.1**
+#### 🆕 What’s New in **v3.1.1**
 
 Version **3.1.1** is a major milestone! Highlights:
 

@@ -17,6 +17,7 @@
 * [🔍 ElasticSearch Sink](#elasticsearch)
 * [🔍 Extending LogEvent Properties](#customprop)
 * [🧪 Demo API](#demo-api)
+* [📜 Version History](#versions)
 
 ## 📘 Introduction<a id='introduction'></a>   [🔝](#table-of-contents)
 
@@ -184,9 +185,19 @@ New (since 2.0.0):
   "To": "...",
   "username": "...",
   "password": "...",
-  "EnableSsl": true
+  "EnableSsl": true,
+  "TemplatePath": "Templates/email-template-default.html",
+  "ThrottleInterval": "00:01:00"
 }
 ```
+
+`ThrottleInterval` is a simple but powerful mechanism that prevents the same sink from sending messages too frequently.  
+It’s ideal for external services like **Telegram bots** or **SMTP servers**, which often have **rate limits** (e.g., HTTP 429 Too Many Requests).
+### ✅ How it works
+
+- Define a time interval (e.g., 10 seconds)
+- The sink will **skip** any log messages emitted within that time frame
+- Clean, configurable, and fully automatic
 
 ## 🚨 Why Email Handling Changed
 
@@ -307,9 +318,17 @@ LoggerHelper supports Telegram notifications to alert on critical events.
 ```json
 "TelegramOption": {
   "chatId": "<YOUR_CHAT_ID>",
-  "Api_Key": "<YOUR_BOT_API_KEY>"
+  "Api_Key": "<YOUR_BOT_API_KEY>",
+  "ThrottleInterval":"00:00:45"
 }
 ```
+`ThrottleInterval` is a simple but powerful mechanism that prevents the same sink from sending messages too frequently.  
+It’s ideal for external services like **Telegram bots** or **SMTP servers**, which often have **rate limits** (e.g., HTTP 429 Too Many Requests).
+### ✅ How it works
+
+- Define a time interval (e.g., 10 seconds)
+- The sink will **skip** any log messages emitted within that time frame
+- Clean, configurable, and fully automatic
 
 To configure a Telegram Bot:
 
@@ -678,11 +697,13 @@ This is the full `appsettings.LoggerHelper.json` used in the demo Minimal API (r
           "username": "username_smtp",
           "password": "password_smtp",
           "EnableSsl": true,
-          "TemplatePath": "Templates/email-template-default.html"
+          "TemplatePath": "Templates/email-template-default.html",
+          "ThrottleInterval": "00:00:20"
         },
         "TelegramOption": {
           "chatId": "chatid",
-          "Api_Key": "api_key"
+          "Api_Key": "api_key",
+          "ThrottleInterval": "00:00:20"
         },
         "PostgreSQL": {
           "connectionString": "your_connection",
@@ -744,3 +765,25 @@ This is the full `appsettings.LoggerHelper.json` used in the demo Minimal API (r
 }
 ```
 
+## 📜 Version History<a id='versions'></a>   [🔝](#table-of-contents)
+
+* **1.1.2** – Added Middleware
+* **1.1.4** – Removed `TraceAsync` on `finally` block of `RequestResponseLoggingMiddleware`
+* **1.1.6** – Fixed issues detected by CodeQL
+* **1.2.1** – Optimized with test Web API
+* **1.2.2** – Optimized `Properties` handling and Email sink
+* **1.3.1** – Added compatibility with .NET 6.0
+* **2.0.0** – Fixed Email configuration and sink behavior
+* **2.0.2** – Optimized HTML template for middleware
+* **2.0.4** – Rollback: removed .NET 7.0 support
+* **2.0.5** – Fixed `IRequest` interface
+* **2.0.6** – Added external email template support
+* **2.0.7** - Added addAutoIncrementColumn and ColumnsPostGreSQL on sink postgresQL
+* **2.0.8** - Enhanced MSSQL Sink Configuration : Introduced comprehensive management of custom columns for the MSSQL sink.
+* **2.0.9** - Breaking Change: Added support for extending log context with custom fields (IRequest extensions)
+* **3.0.1** - Moved all built-in sinks into separate NuGet packages; updated documentation to highlight explicit sink installation and aligned sink package versions
+* **3.0.2** - Duplicate registration and build errors in some Sinks
+* **3.0.3** - Added workaround for Path wrong on sink file and fixed Environment development toload appSettings.LoggerHelper.Debug.json
+* **3.1.0** - Added workaround for Path wrong on sink file and fixed Environment development toload appSettings.LoggerHelper.Debug.json
+* **3.1.3** - Fixed Skin MSSQL 
+* **3.1.4** - Added ThrottleInterval
