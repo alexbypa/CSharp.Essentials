@@ -15,6 +15,7 @@
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
     <FileVersion>1.2.4</FileVersion>
     <Version>1.2.4</Version>
+    <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <Description>package to help manage of httpHelper</Description>
     <Company>Alessandro Chiodo</Company>
     <PackageTags>HttpClient, Resiliency, RateLimiting, ASP.NET Core, HTTP, Retry, TransientFaultHandling, Logger, Serilog, Custom Handler, .http Test</PackageTags>

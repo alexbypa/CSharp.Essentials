@@ -19,9 +19,18 @@ public static class httpExtension {
         List<httpClientOptions>? options = getOptions(httpclientoptions);
         if (options != null)
             foreach (var option in options) {
-                services.AddHttpClient<httpsClientHelper>(option.Name)
+                //services.AddHttpClient<httpsClientHelper>(option.Name)
+                services.AddHttpClient(option.Name)
                     .SetHandlerLifetime(TimeSpan.FromSeconds(30))
                     .AddHttpMessageHandler<HttpClientHandlerLogging>();
+
+                // poi registri l’interfaccia usando un factory delegate
+                services.AddScoped<IhttpsClientHelper>(sp =>
+                {
+                    var factory = sp.GetRequiredService<IHttpClientFactory>();
+                    var client = factory.CreateClient(option.Name);
+                    return new httpsClientHelper(factory, option.Name);
+                });
             }
 
         return services;

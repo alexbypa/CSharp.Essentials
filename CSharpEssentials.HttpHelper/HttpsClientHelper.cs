@@ -1,12 +1,8 @@
-﻿using System.Text.Json;
-using System.Text;
-using System.Threading.RateLimiting;
-using Polly;
+﻿using Polly;
 using Polly.Retry;
-using System.Reflection;
-using System;
-using System.Reflection.Metadata;
-using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.RateLimiting;
 
 namespace CSharpEssentials.HttpHelper;
 public class httpsClientHelper : IhttpsClientHelper {
@@ -108,7 +104,7 @@ public class httpsClientHelper : IhttpsClientHelper {
     /// </summary>
     /// <param name="BaseUrl"></param>
     /// <returns></returns>
-    private async Task<HttpResponseMessage> sendAsync(string BaseUrl) {
+    private async Task<HttpResponseMessage> sendAsync_old(string BaseUrl) {
         if (rateLimiter != null) {
             RateLimitLease lease = await rateLimiter.AcquireAsync();
         }
@@ -156,4 +152,10 @@ public class httpsClientHelper : IhttpsClientHelper {
         throw new NotImplementedException();
     }
 }
-public interface IhttpsClientHelper { }
+public interface IhttpsClientHelper {
+    Task<HttpResponseMessage> SendAsync(
+        string baseUrl,
+        HttpMethod httpMethod,
+        object body,
+        IContentBuilder contentBuilder);
+    }
