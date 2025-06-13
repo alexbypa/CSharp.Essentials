@@ -12,20 +12,28 @@ public static class httpExtension {
         }
         IConfiguration finalConfiguration = configurationBuilder.Build();
 
-        services.AddScoped<HttpClientHandlerLogging>();
+        services.AddSingleton<IHttpRequestEvents, HttpRequestEvents>();
+        services.AddTransient<HttpClientHandlerLogging>();
+
         var httpclientoptions = finalConfiguration.GetSection("HttpClientOptions");
 
         services.Configure<List<httpClientOptions>>(httpclientoptions);
         List<httpClientOptions>? options = getOptions(httpclientoptions);
         if (options != null)
             foreach (var option in options) {
-                services.AddHttpClient<httpsClientHelper>(option.Name);
+                services
+                    .AddHttpClient<IhttpsClientHelper, httpsClientHelper>(option.Name)
+                    .SetHandlerLifetime(TimeSpan.FromSeconds(30))
+                    .AddHttpMessageHandler<HttpClientHandlerLogging>();
 
-                services.AddScoped<IhttpsClientHelper>(sp => {
-                    var factory = sp.GetRequiredService<IHttpClientFactory>();
-                    //var client = factory.CreateClient(option.Name);
-                    return new httpsClientHelper(factory, option.Name);
-                });
+                //services.AddHttpClient(option.Name)
+                //    .SetHandlerLifetime(TimeSpan.FromSeconds(30))
+                //    .AddHttpMessageHandler<HttpClientHandlerLogging>();
+
+                //services.AddScoped<IhttpsClientHelper>(sp => {
+                //    var factory = sp.GetRequiredService<IHttpClientFactory>();
+                //    return new httpsClientHelper(factory, option.Name);
+                //});
             }
 
         return services;
