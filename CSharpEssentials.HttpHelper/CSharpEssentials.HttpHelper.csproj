@@ -13,7 +13,7 @@
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
     <FileVersion>1.2.4</FileVersion>
-    <Version>1.2.4</Version>
+    <Version>2.0.0</Version>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <Description>package to help manage of httpHelper</Description>
     <Company>Alessandro Chiodo</Company>
