@@ -140,5 +140,8 @@ public interface IhttpsClientHelper {
         object body,
         IContentBuilder contentBuilder);
     httpsClientHelper AddRequestAction(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> action);
-
+    httpsClientHelper addFormData(List<KeyValuePair<string, string>> keyValuePairs);
+    httpsClientHelper addRetryCondition(Func<HttpResponseMessage, bool> RetryCondition, int retryCount, double backoffFactor);
+    httpsClientHelper addTimeout(TimeSpan timeSpan);
+    httpsClientHelper addHeaders(string KeyName, string KeyValue);
 }
