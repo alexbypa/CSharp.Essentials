@@ -1,206 +1,127 @@
-# CSharpEssentials Library
+# 🔗 CSharpEssentials.HttpHelper
 
-CSharpEssentials is a collection of NuGet packages that provide a range of helpers and utilities for .NET development. This library includes various packages designed to simplify tasks such as HTTP operations, background job scheduling, logging, and more.
+A powerful and fluent **HTTP helper for .NET** built on top of `HttpClientFactory`, designed to simplify REST API calls with built-in support for **retry policies, rate limiting, logging, timeouts**, and dynamic configuration from `appsettings`.
 
-## Package Index
+---
 
-Below is a table listing all the current packages available in the CSharpEssentials library:
+## 🚀 Features
 
-| **Package Name**                         | **Description**                                                                              | **NuGet Link**                                                        |
-|------------------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
-| [CSharpEssentials.HttpHelper](#csharpessentialshttphelper)          | Provides helper methods and extensions for simplified HTTP client operations.               | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HttpHelper)    |
-| **CSharpEssentials.HangFireHelper** (#csharpessentialshangfirehelper)      | Contains utilities and extensions for integrating Hangfire background job processing.         | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HangFireHelper)|
-| **CSharpEssentials.LoggerHelper** (#csharpessentialsloggerhelper)       | Offers logging helpers to trace requests using various Serilog sinks and logging strategies. | [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)  |
-| **...**                                  | ... (more packages coming soon)                                                              | ...                                                                   |
+✅ Fully configurable via `appsettings.httpHelper.json`  
+✅ Integrated with `HttpClientFactory`  
+✅ Automatic retry with [Polly](https://github.com/App-vNext/Polly)  
+✅ Rate Limiting using `SlidingWindowRateLimiter`  
+✅ Support for `FormUrlEncodedContent` and JSON  
+✅ Custom event-based logging  
+✅ Fluent API: `.addTimeout()`, `.addRetryCondition()`, `.addHeaders()`, etc.
 
-## Overview
+---
 
-The CSharpEssentials library is designed to be modular, offering dedicated packages for distinct aspects of .NET development:
+## 🛠️ Setup
 
-- **HttpHelper:** Simplifies HTTP client usage with additional resiliency features.
-- **HangFireHelper:** Streamlines the integration and management of background jobs using Hangfire.
-- **LoggerHelper:** Enhances logging capabilities by leveraging various logging sinks (e.g., Serilog).
-
-Each package is intended to be used independently or in combination, depending on your project's needs.
-
-## Getting Started
-
-To install any of the packages, use the NuGet Package Manager or the .NET CLI. For example, to install the HttpHelper package:
-
-```bash
-dotnet add package CSharpEssentials.HttpHelper --version 1.2.2
-```
-## [CSharpEssentials.HttpHelper](#csharpessentialshttphelper)
-
-CSharpEssentials.HttpHelper is a NuGet package that extends HttpClient functionalities by integrating resiliency and rate limiting strategies. 
-With this package, HTTP calls in your .NET applications become more robust, handling transient errors and request limitations gracefully.
-
-### Features
-
-- **Resiliency:** Implements retry and fallback policies to manage transient errors.
-- **Rate Limiting:** Controls the frequency of HTTP requests to prevent overloads and adhere to API limits.
-- **Logging:** Leverages [CSharpEssentials.LoggerHelper](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) to trace requests using various Serilog sinks.
-- **Custom Delegates:** Utilizes a custom handler to attach multiple delegates during the HTTP call for additional processing and customization.
-- **Easy Integration:** Seamlessly integrates with ASP.NET Core applications.
-- **Tested & Validated:** Verified using both an ASP.NET Core controller and `.http` file examples.
-
-### Installation
-
-Install the package via the NuGet Package Manager:
-
-```bash
-dotnet add package CSharpEssentials.HttpHelper --version 1.2.2
-```
-
-### Create controller like below (This controller is a complete example that contains all the various types of requests.)
+### 1. In `Program.cs`:
 
 ```csharp
-using CSharpEssentials.HttpHelper;
-using CSharpEssentials.LoggerHelper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
+builder.Services.AddHttpClients(builder.Configuration);
+````
 
-namespace Test.Controllers.httphelper;
-[ApiController]
-[Route("httpHelper")]
-public class httphelperController : Controller {
-    private readonly List<httpClientOptions> httpClientOptions;
-    public httphelperController(IOptions<List<httpClientOptions>> httpClientOptions) {
-        this.httpClientOptions = httpClientOptions.Value;
+### 2. Create or extend `appsettings.httpHelper.json`:
+
+```json
+{
+  "HttpClientOptions": [
+    {
+      "Name": "Test1",
+      "RateLimitOptions": {
+        "AutoReplenishment": true,
+        "PermitLimit": 1,
+        "QueueLimit": 0,
+        "Window": "00:00:15",
+        "SegmentsPerWindow": 1
+      }
     }
-
-    [HttpPost("httptest")]
-    public async Task<IActionResult> httptest([FromBody] HttpTestRequest testRequest) {
-        string url = testRequest.Url;
-        object contentBody = testRequest.contentBody;
-        string httpmethod = testRequest.HttpMethod;
-        string contentType = testRequest.ContentType;
-        int httpStatusForRetry = testRequest.httpStatusForRetry;
-        int numberRetries = testRequest.numberRetries;
-        int secondsDelayEspOnRetry = testRequest.secondsDelayEspOnRetry;
-
-        List<object> responses = new List<object>();
-        List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>> actionsHttp = new List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>>();
-        Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> traceRetry = (httpreq, httpres, totRetry, timeSpanRateLimit) => {
-            loggerExtension<MiaRichiesta>.TraceAsync(
-                new MiaRichiesta { Action = "Test Http", IdTransaction = "Alex" },
-                Serilog.Events.LogEventLevel.Information,
-                null,
-                "HTTP LOG: {totRetry} {timeSpanRateLimit} {Url}, {request} {httpStatus} {BodyResponse}",
-                totRetry, timeSpanRateLimit, url, httpreq, httpres.StatusCode.ToString(), httpres.Content.ReadAsStringAsync().GetAwaiter().GetResult()
-                );
-            responses.Add(new { httpStatus = httpres.StatusCode.ToString(), NumberRetry = totRetry, timeSpanRateLimit = timeSpanRateLimit });
-            return Task.CompletedTask;
-        };
-        actionsHttp.Add(traceRetry);
-        var httpsClientHelper = new httpsClientHelper(actionsHttp);
-        if (contentType.Equals("application/x-www-form-urlencoded", StringComparison.InvariantCultureIgnoreCase)) {
-            contentBody = contentBody.ToString().TrimStart('?');
-            contentBody = contentBody.ToString().Split("&").Select(x => x.Split("=")).ToDictionary(x => x[0], x => x[1]);
-        }
-        // 2) Seleziona l’IContentBuilder in modo fluente
-        IContentBuilder contentBuilder = (contentBody, contentType) switch {
-            (null or "", _) => new NoBodyContentBuilder(),
-            (_, "application/json") => new JsonContentBuilder(),
-            (_, "application/x-www-form-urlencoded") => new FormUrlEncodedContentBuilder(),
-            (_, "application/xml") => new XmlContentBuilder(),
-            _ => new NoBodyContentBuilder()
-        };
-
-        httpsClientHelper
-            .addTimeout(TimeSpan.FromSeconds(30))
-            .addRetryCondition((httpRes) => (int)httpRes.StatusCode == httpStatusForRetry, numberRetries, secondsDelayEspOnRetry)
-            .addRateLimitOnMoreRequests(httpClientOptions.FirstOrDefault()?.RateLimitOptions);
-
-        //Task<HttpResponseMessage> responseMessage = httpsClientHelper.sendAsync(url);
-        for (int i = 0; i < testRequest.totIterations; i++) {
-            Task<HttpResponseMessage> responseMessage = httpsClientHelper.SendAsync(
-                url,
-                httpmethod switch{
-                    "POST" => HttpMethod.Post,
-                    "post" => HttpMethod.Post,
-                    "get" => HttpMethod.Get,
-                    _ => HttpMethod.Get
-                },
-                contentBody,
-                contentBuilder
-                );
-            var responseHttp = responseMessage.GetAwaiter().GetResult();
-            string content = $"{responseHttp.StatusCode}: {responseHttp.Content.ReadAsStringAsync().GetAwaiter().GetResult()}";
-        }
-
-        return Ok(responses);
-    }
-    public class MiaRichiesta : IRequest {
-        public string IdTransaction { get; set; }
-
-        public string Action { get; set; }
-    }
-    public class HttpTestRequest {
-        public string Url { get; set; }
-        public object contentBody { get; set; }
-        public string ContentType { get; set; }
-        public string HttpMethod { get; set; }
-        public int totIterations{ get; set; }
-        public int httpStatusForRetry { get; set; }
-        public int numberRetries { get; set; }
-        public int secondsDelayEspOnRetry { get; set; }
-    }
+  ]
 }
 ```
 
-### Use cases
-```http
-@Test_HostAddress = http://localhost:5133
-@Test_ExternalCall = https://webhook.site/<YOURGUID>
+---
 
-### 1) POST body json with ratelimit
-POST {{Test_HostAddress}}/httpHelper/httptest
-Accept: application/json
-Content-Type: application/json
+## 🧩 Usage Example
 
-{
-  "url": "{{Test_ExternalCall}}",
-  "contentBody": "{\"nome\":\"Mario\"}",
-  "contentType": "application/json",
-  "HttpMethod": "POST",
-  "totIterations":4,
-  "httpStatusForRetry": 500,
-  "numberRetries":4,
-  "secondsDelayEspOnRetry": 2
-}
+```csharp
+var httpsClientHelper = (httpsClientHelper)factory.CreateOrGet("Test1");
 
-### 2) POST body XML with retry
-POST {{Test_HostAddress}}/httpHelper/httptest
-Accept: application/json
-Content-Type: application/json
+var response = await httpsClientHelper
+    .addTimeout(TimeSpan.FromSeconds(30))
+    .AddRequestAction(async (req, res, retry, ts) => {
+        Console.WriteLine($"[{req.Method}] {req.RequestUri} → {(int)res.StatusCode} | RETRY: {retry} | RL Wait: {ts}");
+    })
+    .addRetryCondition(
+        res => res.StatusCode != HttpStatusCode.OK,
+        retryCount: 3,
+        backoffFactor: 2
+    )
+    .SendAsync(
+        "https://example.com/api",
+        HttpMethod.Get,
+        null,
+        new NoBodyContentBuilder()
+    );
 
-{
-  "url": "{{Test_ExternalCall}}",
-  "contentBody": "<radice><figlio>ciccio</figlio></radice>",
-  "contentType": "application/xml",
-  "HttpMethod": "POST",
-  "totIterations":1,
-  "httpStatusForRetry": 200,
-  "numberRetries":4,
-  "secondsDelayEspOnRetry": 2
-}
+string body = await response.Content.ReadAsStringAsync();
+```
 
-### 2) POST FORM x-www-form-urlencoded
-POST {{Test_HostAddress}}/httpHelper/httptest
-Accept: application/json
-Content-Type: application/json
+---
 
-{
-  "url": "{{Test_ExternalCall}}",
-  "contentBody": "nome1=ciccio&nome2=frank",
-  "contentType": "application/x-www-form-urlencoded",
-  "HttpMethod": "POST",
-  "totIterations":1,
-  "httpStatusForRetry": 500,
-  "numberRetries":4,
-  "secondsDelayEspOnRetry": 2
-}
+## 📡 Auto-generated Headers
+
+| Header                        | Description                                    |
+| ----------------------------- | ---------------------------------------------- |
+| `X-Retry-Attempt`             | Number of retries attempted                    |
+| `X-RateLimit-TimeSpanElapsed` | Elapsed wait time due to rate limiter (if any) |
+
+---
+
+## ⚙️ Fluent Extensions
+
+```csharp
+httpsClientHelper
+    .addTimeout(TimeSpan.FromSeconds(15))
+    .addHeaders("Authorization", "Bearer your-token")
+    .addFormData(new List<KeyValuePair<string, string>> { ... })
+    .addRetryCondition(...)
+    .AddRequestAction(...);
+```
+
+---
+
+## 🧪 Rate Limit Testing
+
+To test rate limiting, trigger multiple concurrent calls using the same configured client (e.g., `"Test1"`) and observe how the helper handles the cooldown period automatically using `SlidingWindowRateLimiter`.
+
+---
+
+## 🧰 Dynamic Registration
+
+All HTTP clients are dynamically registered based on your `appsettings.httpHelper.json` configuration — no code changes required to add more.
+
+---
+
+## 🤝 Contributing
+
+Pull requests, feedback, and improvements are welcome.
+This package is part of the **CSharpEssentials** ecosystem.
+
+---
+
+## 📦 Requirements
+
+* .NET 7.0 or higher
+* NuGet Packages: `Polly`, `Microsoft.Extensions.Http`, `Microsoft.Extensions.Options`
+
+---
+
+## 📄 License
+
+MIT
 
 ```
