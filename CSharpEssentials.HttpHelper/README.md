@@ -115,7 +115,7 @@ This package is part of the **CSharpEssentials** ecosystem.
 
 ## 📦 Requirements
 
-* .NET 7.0 or higher
+* .NET 8.0 or higher
 * NuGet Packages: `Polly`, `Microsoft.Extensions.Http`, `Microsoft.Extensions.Options`
 
 ---
