@@ -15,10 +15,14 @@ public static class httpExtension {
         services.AddSingleton<IHttpRequestEvents, HttpRequestEvents>();
         services.AddTransient<HttpClientHandlerLogging>();
 
+
         var httpclientoptions = finalConfiguration.GetSection("HttpClientOptions");
 
         services.Configure<List<httpClientOptions>>(httpclientoptions);
         List<httpClientOptions>? options = getOptions(httpclientoptions);
+        
+        services.AddSingleton<IhttpsClientHelperFactory, httpsClientHelperFactory>();
+        
         if (options != null)
             foreach (var option in options) {
                 services
@@ -26,14 +30,11 @@ public static class httpExtension {
                     .SetHandlerLifetime(TimeSpan.FromSeconds(30))
                     .AddHttpMessageHandler<HttpClientHandlerLogging>();
 
-                //services.AddHttpClient(option.Name)
-                //    .SetHandlerLifetime(TimeSpan.FromSeconds(30))
-                //    .AddHttpMessageHandler<HttpClientHandlerLogging>();
-
-                //services.AddScoped<IhttpsClientHelper>(sp => {
-                //    var factory = sp.GetRequiredService<IHttpClientFactory>();
-                //    return new httpsClientHelper(factory, option.Name);
-                //});
+                services.AddSingleton<IhttpsClientHelper>(sp => {
+                    var factory = sp.GetRequiredService<IHttpClientFactory>();
+                    var client = factory.CreateClient(option.Name);
+                    return new httpsClientHelper(client, sp.GetRequiredService<IHttpRequestEvents>(), option.RateLimitOptions);
+                });
             }
 
         return services;

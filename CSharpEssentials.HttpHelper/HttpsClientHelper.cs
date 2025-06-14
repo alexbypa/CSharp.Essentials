@@ -13,20 +13,19 @@ public class httpsClientHelper : IhttpsClientHelper {
     public FormUrlEncodedContent formUrlEncodedContent { get; set; }
     private AsyncRetryPolicy<HttpResponseMessage> _retryPolicy = null;
     private readonly IHttpRequestEvents _events;
-
-    //public httpsClientHelper(List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>> actions) {
-    //    httpClient = new HttpClient(new HttpClientHandlerLogging() {
-    //        _RequestActions = actions,
-    //        InnerHandler = new HttpClientHandler()
-    //    });
-    //}
-    //public httpsClientHelper(IHttpClientFactory clientFactory, string clientName) {
-    //    this.clientFactory = clientFactory;
-    //    httpClient = this.clientFactory.CreateClient(clientName);
-    //}
-    public httpsClientHelper(HttpClient httpClient, IHttpRequestEvents events) {
+    private bool TimeoutSettled = false;
+    public httpsClientHelper(HttpClient httpClient, IHttpRequestEvents events, httpClientRateLimitOptions rateLimitOptions) {
         this.httpClient = httpClient;
         _events = events;
+
+        if (rateLimitOptions != null)
+        rateLimiter = new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions {
+            AutoReplenishment = rateLimitOptions.AutoReplenishment,
+            PermitLimit = rateLimitOptions.PermitLimit,
+            QueueLimit = rateLimitOptions.QueueLimit,
+            SegmentsPerWindow = rateLimitOptions.SegmentsPerWindow,
+            Window = rateLimitOptions.Window
+        });
     }
     public httpsClientHelper AddRequestAction(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> action) {
         _events.Add(action);
@@ -65,7 +64,13 @@ public class httpsClientHelper : IhttpsClientHelper {
         DateTime dtStartRequest = DateTime.Now;
         TimeSpan timeSpanRateLimit = TimeSpan.Zero;
         if (rateLimiter != null) {
-            await rateLimiter.AcquireAsync();
+            var lease = await rateLimiter.AcquireAsync(1);
+            if (!lease.IsAcquired) {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[RateLimit] BLOCCATA la richiesta.");
+                Console.ResetColor();
+                throw new InvalidOperationException("Rate limit exceeded");
+            }
             if (request.Headers.Contains("X-RateLimit-TimeSpanElapsed"))
                 request.Headers.Remove("X-RateLimit-TimeSpanElapsed");
             request.Headers.Add("X-RateLimit-TimeSpanElapsed", (DateTime.Now - dtStartRequest).ToString());
@@ -107,28 +112,26 @@ public class httpsClientHelper : IhttpsClientHelper {
         return clone;
     }
     public httpsClientHelper addTimeout(TimeSpan timeSpan) {
-        httpClient.Timeout = timeSpan;
+        if (!TimeoutSettled)
+            httpClient.Timeout = timeSpan;
+        TimeoutSettled = true;
         return this;
     }
     public httpsClientHelper addHeaders(string KeyName, string KeyValue) {
         httpClient.DefaultRequestHeaders.Add(KeyName, KeyValue);
         return this;
     }
-    public httpsClientHelper addRateLimitOnMoreRequests(httpClientRateLimitOptions rateLimitOptions) {
-        if (rateLimitOptions != null)
-            rateLimiter = new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions {
-                AutoReplenishment = rateLimitOptions.AutoReplenishment,
-                PermitLimit = rateLimitOptions.PermitLimit,
-                QueueLimit = rateLimitOptions.QueueLimit,
-                SegmentsPerWindow = rateLimitOptions.SegmentsPerWindow,
-                Window = rateLimitOptions.Window
-            });
-        return this;
-    }
-
-    public object addRateLimit(httpClientOptions httpClientOptions) {
-        throw new NotImplementedException();
-    }
+    //public httpsClientHelper addRateLimit(httpClientRateLimitOptions rateLimitOptions) {
+    //    if (rateLimitOptions != null)
+    //        rateLimiter = new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions {
+    //            AutoReplenishment = rateLimitOptions.AutoReplenishment,
+    //            PermitLimit = rateLimitOptions.PermitLimit,
+    //            QueueLimit = rateLimitOptions.QueueLimit,
+    //            SegmentsPerWindow = rateLimitOptions.SegmentsPerWindow,
+    //            Window = rateLimitOptions.Window
+    //        });
+    //    return this;
+    //}
 }
 public interface IhttpsClientHelper {
     Task<HttpResponseMessage> SendAsync(

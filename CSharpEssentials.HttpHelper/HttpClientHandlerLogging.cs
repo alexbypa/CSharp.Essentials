@@ -8,14 +8,7 @@ public class HttpClientHandlerLogging : DelegatingHandler {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
         string pageCalled = GetPageName(request);
 
-        //bool IsAcquired = true;
-        //if (_rateLimiter != null) {
-        //    using RateLimitLease lease = await _rateLimiter.AcquireAsync(permitCount: 1, cancellationToken);
-        //    IsAcquired = lease.IsAcquired;
-        //}
-
         HttpResponseMessage response = null;
-        //if (IsAcquired) {
         DateTime timeRequest = DateTime.Now;
         StringBuilder requestLog = new StringBuilder();
         DateTime dtStartRequest = DateTime.Now;
