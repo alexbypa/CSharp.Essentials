@@ -6,7 +6,7 @@
 
 # 📦 CSharpEssentials.LoggerHelper
 
-## 📑 Table of Contents
+## 📑 Table of Contents <a id='table-of-contents'></a>
 * 📘[Introduction](#introduction)
 * 🚀[Installation](#installation)
 * 🔧[Configuration](#configuration)
