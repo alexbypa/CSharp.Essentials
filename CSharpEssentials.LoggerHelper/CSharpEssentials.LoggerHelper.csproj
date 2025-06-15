@@ -37,8 +37,10 @@
       3.1.1 - Exposed the `SinkPluginRegistry.PluginError` event for centralized plugin‐error handling; improved error diagnostics in the README and prepared the Dashboard package layout
       3.1.2 - Readme.md
       3.1.3 - Fixed MSSQL Server Sink !
+      3.1.4 - Added throttling on Email and Telegram !
+      3.1.5 - Added sink xUnit !
     </Description>
-    <Version>3.1.4</Version>
+    <Version>3.1.5</Version>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>

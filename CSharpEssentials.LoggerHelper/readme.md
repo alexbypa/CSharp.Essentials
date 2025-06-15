@@ -1,85 +1,59 @@
-﻿[![Frameworks](https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0-blue)](https://dotnet.microsoft.com/en-us/download)
-[![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml)
-[![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
-[![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
+﻿![Frameworks](https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0-blue)
+![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)
+![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)
+![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)
 ![Last Commit](https://img.shields.io/github/last-commit/alexbypa/CSharp.Essentials?style=flat-square)
-[![Discussions](https://img.shields.io/badge/Discussions-Chat-blue)](https://github.com/alexbypa/CSharp.Essentials/discussions/)
-[![Issues](https://img.shields.io/github/issues/alexbypa/CSharp.Essentials)(https://github.com/alexbypa/CSharp.Essentials/issues)
+![GitHub Discussions](https://img.shields.io/github/discussions/alexbypa/CSharp.Essentials)
+![Issues](https://img.shields.io/github/issues/alexbypa/CSharp.Essentials)
 
 # 📦 CSharpEssentials.LoggerHelper
 
-##  What’s New in **v3.1.4**
-
-### 🚦 ThrottleInterval Support (Telegram & Email Sinks)
-
-Avoid flooding your notification channels!  
-The `CSharpEssentials.LoggerHelper` sinks for **Telegram** and **Email** now support a brand new feature: **ThrottleInterval**.
-
-#### ✨ What is it?
-
-`ThrottleInterval` is a simple but powerful mechanism that prevents the same sink from sending messages too frequently.  
-It’s ideal for external services like **Telegram bots** or **SMTP servers**, which often have **rate limits** (e.g., HTTP 429 Too Many Requests).
-
-#### 🚀 Why CSharpEssentials.LoggerHelper?
-
-- **🔌 Modular Architecture**  
-  Instead of bundling dozens of sinks into one monolithic library, each sink lives in its own NuGet sub‐package (e.g., `CSharpEssentials.LoggerHelper.Sink.File`, `...Sink.MSSqlServer`, and so on). You install only what you need.
-
-- **⚡️ Dynamic Sink Loading**  
-  Our **`TolerantPluginLoadContext`** ensures that sinks load “on the fly” at runtime without crashing your app—missing dependencies or version mismatches? No worries. Other sinks continue to work flawlessly.
-
-- **📄 Centralized Configuration**  
-  Manage all your sinks and log‐levels in a single JSON file (`appsettings.LoggerHelper.json`). Clean, intuitive, and flexible.
-
-- **🛠️ “CurrentError” Error Tracking**  
-  A brand‐new `CurrentError` static property captures the last exception thrown inside the library. Perfect for production scenarios where you want to expose the most recent failure (for example, inserting it into an HTTP header) :
-```cs
-          if (!string.IsNullOrEmpty(loggerExtension<ProviderRequest>.CurrentError))
-            HttpContext.Response.Headers["loggerExtension.CurrentError"] = loggerExtension<ProviderRequest>.CurrentError;
-```
-- **📈 Structured, Level‐Based Routing**  
-  Direct logs to one or many sinks based on level (`Information`, `Warning`, `Error`, etc.). You decide what goes where—and it’s easy to change on the fly.
-
-- **🔀 Infinite Extensibility**  
-  Write your own `ISinkPlugin` implementations, drop them in a folder, and CSharpEssentials.LoggerHelper will discover and register them automatically.
-
-- **💡 SelfLog Support**  
-  Serilog’s internal SelfLog writes to a file you specify so you never miss a diagnostic message if something goes wrong in your logging pipeline.
+**The ultimate Serilog sink hub — extensible, modular, centralized.**
 
 ---
 
-#### 🆕 What’s New in **v3.1.1**
+## 💡 Why CSharpEssentials.LoggerHelper?
 
-Version **3.1.1** is a major milestone! Highlights:
+**CSharpEssentials.LoggerHelper** is not just another logging library — it’s a **smart hub** for Serilog sinks.  
+Thanks to its **modular architecture**, you can plug in only the sinks you need.
 
-1. **Dynamic Loading Revamped**  
-   - Introduces `TolerantPluginLoadContext`—a custom `AssemblyLoadContext` that quietly ignores missing dependencies.  
-   - No more “Could not load assembly” exceptions when a plugin references a missing formatter or helper library. Other sinks keep on working smoothly.
+🔥 But there's more:  
+For **Telegram** and **Email**, we bypass Serilog's limitations with native implementations via `HttpClient` and `System.Net.Mail`, unlocking **advanced formatting** and a built-in **ThrottleInterval** to prevent flooding your channels.
 
-2. **`CurrentError` & Full Error List**  
-   - Capture and store the last exception message (`Exception.Message`) that occurred inside LoggerHelper via `LoggerExtension<YourContext>.CurrentError`.  
-   - **Roadmap:** we will surface **all** initialization errors in a dedicated dashboard (`CSharpEssentials.LoggerHelper.Dashboard`), so you can see both the single “last” failure and the complete list of errors in one place.
+🔧 Configuration is centralized in a single file (`appsettings.LoggerHelper.json`), giving you full control over log levels and sink selection — no code changes required!
 
-3. **Quality‐of‐Life Improvements**  
-   - Updated to support .NET 8.0 (and .NET 6.0).  
-   - Minor bug fixes, performance optimizations, and improved documentation links.
+🧠 Error Insight Built-In:  
+When something goes wrong, you can inspect:
+- `CurrentError`: the last exception message
+- `Errors`: the complete in-memory queue of failures  
+Perfect for debugging deployment or configuration issues.
+---
 
-> **NOTE:** If you currently reference older versions of Serilog sinks in your project, double‐check the [Known Issues](#known‐issues) section below before upgrading.
+## 🆕 What’s New in 3.1.5?
+
+### ✨ Added Sink: xUnit
+
+When running tests in environments like DevOps pipelines, DBs and external endpoints may not always be accessible.  
+No worries — with the **xUnit sink**, you get a full trace of failed tests directly inside your test output.  
+Just install the package and define your desired levels (`Information`, `Warning`, `Error`, etc.).
+
+> Perfect for debugging flaky tests or disconnected environments.
 
 ---
-## Available Sink Packages
+
+## 🔌 Available Sink Packages
 
 - **Console**: `CSharpEssentials.LoggerHelper.Sink.Console`  
 - **File**: `CSharpEssentials.LoggerHelper.Sink.File`  
 - **MSSqlServer**: `CSharpEssentials.LoggerHelper.Sink.MSSqlServer`  
 - **PostgreSQL**: `CSharpEssentials.LoggerHelper.Sink.PostgreSql`  
 - **ElasticSearch**: `CSharpEssentials.LoggerHelper.Sink.Elasticsearch`  
-- **Telegram**: `Used via HttpClient`  
-- **Email**: `Used via System.Net.Mail`  
+- **Telegram**: `CSharpEssentials.LoggerHelper.Sink.Telegram` _Used via `HttpClient`_  
+- **Email**: `CSharpEssentials.LoggerHelper.Sink.Email`_Used via `System.Net.Mail`_  
+- **xUnit**: `CSharpEssentials.LoggerHelper.Sink.xUnit` ✅ ( new from 3.1.5 )
 
 ---
 
-## 🚀 Basic Usage
-
 👉 **Check out how to use the package in the documentation**  
 📖 [View the usage guide here!](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
+
