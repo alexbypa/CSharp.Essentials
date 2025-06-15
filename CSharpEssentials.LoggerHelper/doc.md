@@ -194,7 +194,9 @@ In your `appsettings.loggerhelper.json`, add the following to enable log forward
 
 #### 3️⃣ Register the xUnit output inside your test
 
-In your test class (e.g. integration or endpoint tests), register the test output helper:
+In your test class (e.g. integration or endpoint tests), you **must** register the xUnit output sink **explicitly**:
+
+> ⚠️ Without calling `XUnitTestOutputHelperStore.SetOutput(...)`, no log will appear in the test output — even if everything else is configured correctly.
 
 ```csharp
 public class MinimalEndpointTests : IClassFixture<WebApplicationFactory<Program>>
@@ -206,6 +208,8 @@ public class MinimalEndpointTests : IClassFixture<WebApplicationFactory<Program>
     {
         _factory = factory;
         _output = output;
+
+        // 🚨 REQUIRED: This links the logger to xUnit's output stream
         XUnitTestOutputHelperStore.SetOutput(output);
     }
 
