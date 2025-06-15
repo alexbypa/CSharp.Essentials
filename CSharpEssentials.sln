@@ -69,6 +69,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.LoggerHelp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggerHelperDemo.Tests", "LoggerHelperDemo.Tests\LoggerHelperDemo.Tests.csproj", "{8FA03182-9783-4425-8E6A-A53A1C03E578}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpEssentials.LoggerHelper.xUnit", "CSharpEssentials.LoggerHelper.xUnit\CSharpEssentials.LoggerHelper.xUnit.csproj", "{37F0BFA4-C5C9-441E-8C4F-010324A31D57}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -155,6 +157,10 @@ Global
 		{8FA03182-9783-4425-8E6A-A53A1C03E578}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FA03182-9783-4425-8E6A-A53A1C03E578}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FA03182-9783-4425-8E6A-A53A1C03E578}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37F0BFA4-C5C9-441E-8C4F-010324A31D57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37F0BFA4-C5C9-441E-8C4F-010324A31D57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37F0BFA4-C5C9-441E-8C4F-010324A31D57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37F0BFA4-C5C9-441E-8C4F-010324A31D57}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

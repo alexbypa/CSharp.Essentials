@@ -27,15 +27,15 @@ public class httpsClientHelper : IhttpsClientHelper {
             Window = rateLimitOptions.Window
         });
     }
-    public httpsClientHelper AddRequestAction(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> action) {
+    public IhttpsClientHelper AddRequestAction(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> action) {
         _events.Add(action);
         return this;
     }
-    public httpsClientHelper addFormData(List<KeyValuePair<string, string>> keyValuePairs) {
+    public IhttpsClientHelper addFormData(List<KeyValuePair<string, string>> keyValuePairs) {
         formUrlEncodedContent = new FormUrlEncodedContent(keyValuePairs);
         return this;
     }
-    public httpsClientHelper addRetryCondition(Func<HttpResponseMessage, bool> RetryCondition, int retryCount, double backoffFactor) {
+    public IhttpsClientHelper addRetryCondition(Func<HttpResponseMessage, bool> RetryCondition, int retryCount, double backoffFactor) {
         _retryPolicy = Policy
                     .Handle<HttpRequestException>()
                     .OrResult<HttpResponseMessage>(RetryCondition)
@@ -111,27 +111,16 @@ public class httpsClientHelper : IhttpsClientHelper {
         }
         return clone;
     }
-    public httpsClientHelper addTimeout(TimeSpan timeSpan) {
+    public IhttpsClientHelper addTimeout(TimeSpan timeSpan) {
         if (!TimeoutSettled)
             httpClient.Timeout = timeSpan;
         TimeoutSettled = true;
         return this;
     }
-    public httpsClientHelper addHeaders(string KeyName, string KeyValue) {
+    public IhttpsClientHelper addHeaders(string KeyName, string KeyValue) {
         httpClient.DefaultRequestHeaders.Add(KeyName, KeyValue);
         return this;
     }
-    //public httpsClientHelper addRateLimit(httpClientRateLimitOptions rateLimitOptions) {
-    //    if (rateLimitOptions != null)
-    //        rateLimiter = new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions {
-    //            AutoReplenishment = rateLimitOptions.AutoReplenishment,
-    //            PermitLimit = rateLimitOptions.PermitLimit,
-    //            QueueLimit = rateLimitOptions.QueueLimit,
-    //            SegmentsPerWindow = rateLimitOptions.SegmentsPerWindow,
-    //            Window = rateLimitOptions.Window
-    //        });
-    //    return this;
-    //}
 }
 public interface IhttpsClientHelper {
     Task<HttpResponseMessage> SendAsync(
@@ -139,9 +128,9 @@ public interface IhttpsClientHelper {
         HttpMethod httpMethod,
         object body,
         IContentBuilder contentBuilder);
-    httpsClientHelper AddRequestAction(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> action);
-    httpsClientHelper addFormData(List<KeyValuePair<string, string>> keyValuePairs);
-    httpsClientHelper addRetryCondition(Func<HttpResponseMessage, bool> RetryCondition, int retryCount, double backoffFactor);
-    httpsClientHelper addTimeout(TimeSpan timeSpan);
-    httpsClientHelper addHeaders(string KeyName, string KeyValue);
+    IhttpsClientHelper AddRequestAction(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> action);
+    IhttpsClientHelper addFormData(List<KeyValuePair<string, string>> keyValuePairs);
+    IhttpsClientHelper addRetryCondition(Func<HttpResponseMessage, bool> RetryCondition, int retryCount, double backoffFactor);
+    IhttpsClientHelper addTimeout(TimeSpan timeSpan);
+    IhttpsClientHelper addHeaders(string KeyName, string KeyValue);
 }
