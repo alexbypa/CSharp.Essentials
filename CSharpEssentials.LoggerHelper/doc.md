@@ -240,9 +240,6 @@ public async Task<bool> AuthenticateUserAsync(string username)
 
 Thanks to the configuration, **if a test triggers this business logic**, the logs will automatically appear in the **test output**, making debugging much easier — even when external sinks are not available.
 
----
-
-
 ## 📨 HTML Email Sink<a id='html-email-sink'></a>   [🔝](#table-of-contents)
 ---
 
