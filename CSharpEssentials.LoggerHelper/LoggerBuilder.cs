@@ -35,9 +35,8 @@ internal class LoggerBuilder {
                    ? "appsettings.LoggerHelper.debug.json"
                    : "appsettings.LoggerHelper.json";
 
-        if (string.Equals(envName, "Development", StringComparison.OrdinalIgnoreCase)) {
-            builder.AddJsonFile("appsettings.LoggerHelper.debug.json", optional: false, reloadOnChange: true);
-        }
+        builder.AddJsonFile(fileNameSettings, optional: false, reloadOnChange: true);
+
         try {
             return builder.Build();
         } catch (FileNotFoundException fnf) {
@@ -182,7 +181,7 @@ internal class LoggerBuilder {
 
                 try {
                     plugin.HandleSink(_config, condition, _serilogConfig);
-                }catch (Exception ex) {
+                } catch (Exception ex) {
                     SelfLog.WriteLine($"Exception {ex.Message} on sink {condition.Sink}");
                 }
             }
