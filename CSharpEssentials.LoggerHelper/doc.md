@@ -6,11 +6,12 @@
 
 # 📦 CSharpEssentials.LoggerHelper
 
-## 📑 Table of Contents
+## 📑 Table of Contents <a id='table-of-contents'></a>
 * 📘[Introduction](#introduction)
 * 🚀[Installation](#installation)
 * 🔧[Configuration](#configuration)
 * [📨 HTML Email Sink (used with System.Net.smtp)](#html-email-sink)
+* [🧪 xUnit Sink](#xunit-sink)
 * [📣 Telegram Sink (used with HttpClient)](#telegram-sink)
 * 🐘[PostgreSQL Sink](#postgresql-sink)
 * [💾 MS SQL Sink](#ms-sql-sink)
@@ -152,6 +153,92 @@ you need to create **appsettings.LoggerHelper.json** in your project ( on develo
 * **SerilogCondition**: a list of sink-level mappings; here we map **all** levels to the `"File"` sink.
 * **SerilogOption.File**: settings specific to the File sink (output folder, rolling interval, retention, etc.).
 
+---
+
+## 🧪 xUnit Sink <a id='xunit-sink'></a>   [🔝](#table-of-contents)
+
+This sink is useful when running integration tests, especially in CI/CD pipelines like Azure DevOps, where access to external sinks (e.g., databases, emails) might be restricted or blocked.
+
+#### 1️⃣ Add Packages
+
+Install the core logger and the specific xUnit sink package:
+
+```bash
+dotnet add package CSharpEssentials.LoggerHelper
+dotnet add package CSharpEssentials.LoggerHelper.Sink.xUnit
+```
+
+#### 2️⃣ Configure Serilog for xUnit output
+
+In your `appsettings.loggerhelper.json`, add the following to enable log forwarding to the xUnit output stream:
+
+```json
+{
+  "Serilog": {
+    "SerilogConfiguration": {
+      "SerilogCondition": [
+        {
+          "Sink": "xUnit",
+          "Level": [
+            "Information",
+            "Warning",
+            "Error",
+            "Fatal"
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+#### 3️⃣ Register the xUnit output inside your test
+
+In your test class (e.g. integration or endpoint tests), you **must** register the xUnit output sink **explicitly**:
+
+> ⚠️ Without calling `XUnitTestOutputHelperStore.SetOutput(...)`, no log will appear in the test output — even if everything else is configured correctly.
+
+```csharp
+public class MinimalEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+{
+    private readonly WebApplicationFactory<Program> _factory;
+    private readonly ITestOutputHelper _output;
+
+    public MinimalEndpointTests(WebApplicationFactory<Program> factory, ITestOutputHelper output)
+    {
+        _factory = factory;
+        _output = output;
+
+        // 🚨 REQUIRED: This links the logger to xUnit's output stream
+        XUnitTestOutputHelperStore.SetOutput(output);
+    }
+
+    [Fact]
+    public async Task login_timeout()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync("/your-api-endpoint");
+        response.EnsureSuccessStatusCode();
+    }
+}
+```
+
+#### ✅ Where to use `loggerExtension<T>`?
+
+You **do not need to call `loggerExtension<T>` inside the test**.
+
+Instead, you call it **inside your Web API project or any class library it uses** — for example, in a service class or middleware:
+
+```csharp
+public async Task<bool> AuthenticateUserAsync(string username)
+{
+    var request = new ProviderRequest { Step = "AuthenticateUser" };
+    await loggerExtension<ProviderRequest>.LogInformationAsync(request, $"Authenticating {username}");
+    ...
+}
+```
+
+Thanks to the configuration, **if a test triggers this business logic**, the logs will automatically appear in the **test output**, making debugging much easier — even when external sinks are not available.
 
 ## 📨 HTML Email Sink<a id='html-email-sink'></a>   [🔝](#table-of-contents)
 ---
