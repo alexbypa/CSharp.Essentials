@@ -4,13 +4,21 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <Version></Version>
-    <PackageIcon>CSharpEssentials.png</PackageIcon>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <Version>3.1.5</Version>
+    <PackageIcon>./CSharpEssentials.png</PackageIcon>
+    <Title>Package to manage openTelemetry</Title>
+    <Description>Package to manage openTelemetry</Description>
+    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Telemetry</PackageProjectUrl>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Telemetry</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>opentelemetry</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="3.0.6" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="3.1.5" />
     <PackageReference Include="Google.Protobuf" Version="3.31.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
@@ -30,6 +38,17 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

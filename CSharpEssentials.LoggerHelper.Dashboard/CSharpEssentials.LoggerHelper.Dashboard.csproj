@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GenerateEmbeddedFilesManifest>false</GenerateEmbeddedFilesManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot/dashboard/index.html" LogicalName="wwwroot.dashboard.index.html" />
+    <EmbeddedResource Include="wwwroot/dashboard/**/*.css" />
+    <EmbeddedResource Include="wwwroot/dashboard/**/*.js" />
+    <!--<LogicalName>wwwroot/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Telemetry\CSharpEssentials.LoggerHelper.Telemetry.csproj" />
+  </ItemGroup>
+
+</Project>

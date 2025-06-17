@@ -400,3 +400,29 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+
+# Dipendenze
+/node_modules
+
+# Variabili d'ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build artifacts
+/build
+/dist
+/out
+
+# Log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.log
+
+# Altri file temporanei o di sistema
+.DS_Store
+Thumbs.db
