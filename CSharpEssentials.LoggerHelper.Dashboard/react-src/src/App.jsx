@@ -1,13 +1,8 @@
 import React from 'react'
-import DashboardOverview from './components/DashboardOverview'
+import Overview from './components/Overview'
 
 function App() {
-  return (
-    <div style={{ padding: '2em', fontFamily: 'Arial' }}>
-      <h1 style={{ textAlign: 'center' }}>📊 LoggerHelper Dashboard</h1>
-      <DashboardOverview />
-    </div>
-  )
+  return <Overview />
 }
 
 export default App

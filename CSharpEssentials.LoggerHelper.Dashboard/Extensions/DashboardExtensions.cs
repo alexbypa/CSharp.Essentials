@@ -1,13 +1,52 @@
-﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
-using System.Reflection;
 
 namespace CSharpEssentials.LoggerHelper.Dashboard.Extensions;
+using System.IO;
+using System.Reflection;
 
+public class ResourceManager {
+    public string GetEmbeddedTextFile(string relativePath) {
+        var assembly = Assembly.GetExecutingAssembly(); // O l'assembly dove sono incorporate le risorse
+
+        // Il nome della risorsa segue una convenzione:
+        // NamespaceDiDefault.Cartella.SottoCartella.NomeFile.Estensione
+        // Esempio: Se il tuo namespace di default è "MyProject" e il file è MyResources\data.txt
+        // il nome della risorsa sarà "MyProject.MyResources.data.txt"
+        string resourceName = $"{assembly.GetName().Name}.{relativePath.Replace("/", ".").Replace("\\", ".")}";
+
+        // Se non hai un namespace di default o vuoi essere più specifico
+        // puoi elencare tutti i nomi delle risorse per trovarlo:
+        // var allResourceNames = assembly.GetManifestResourceNames();
+        // foreach (var name in allResourceNames) { Console.WriteLine(name); }
+
+        using (Stream stream = assembly.GetManifestResourceStream(resourceName)) {
+            if (stream == null) {
+                Console.WriteLine($"Errore: Risorsa '{resourceName}' non trovata.");
+                return null;
+            }
+            using (StreamReader reader = new StreamReader(stream)) {
+                return reader.ReadToEnd();
+            }
+        }
+    }
+
+    public byte[] GetEmbeddedBinaryFile(string relativePath) {
+        var assembly = Assembly.GetExecutingAssembly();
+        string resourceName = $"{assembly.GetName().Name}.{relativePath.Replace("/", ".").Replace("\\", ".")}";
+
+        using (Stream stream = assembly.GetManifestResourceStream(resourceName)) {
+            if (stream == null) {
+                Console.WriteLine($"Errore: Risorsa '{resourceName}' non trovata.");
+                return null;
+            }
+            using (MemoryStream ms = new MemoryStream()) {
+                stream.CopyTo(ms);
+                return ms.ToArray();
+            }
+        }
+    }
+}
 public static class DashboardExtensions {
     public static void UseLoggerHelperDashboard(this WebApplication app, string path = "/loggerdashboard") {
         // Ottieni il nome completo della risorsa incorporata.
@@ -23,7 +62,6 @@ public static class DashboardExtensions {
         // {
         //     Console.WriteLine($"- {res}");
         // }
-
         // Mappatura per servire l'index.html
         app.MapGet(path, async context => {
             // Seleziona il nome della risorsa in base a ciò che hai trovato nel passo 1.
@@ -32,13 +70,11 @@ public static class DashboardExtensions {
             // Altrimenti, usa il formato dedotto dal .NET SDK (RootNamespace + path).
             var actualResourceName = assembly.GetManifestResourceNames()
                                             .FirstOrDefault(r => r.EndsWith(".wwwroot.dashboard.index.html") || r.Equals("wwwroot.dashboard.index.html"));
-
             if (string.IsNullOrEmpty(actualResourceName)) {
                 context.Response.StatusCode = 404;
                 await context.Response.WriteAsync($"Resource not found: {resourceName}. Please check if it's embedded correctly.");
                 return;
             }
-
             using var stream = assembly.GetManifestResourceStream(actualResourceName);
             if (stream == null) {
                 // Questo caso dovrebbe essere raro se actualResourceName è stato trovato,
@@ -47,92 +83,8 @@ public static class DashboardExtensions {
                 await context.Response.WriteAsync($"Resource not found (stream null): {actualResourceName}");
                 return;
             }
-
             context.Response.ContentType = "text/html";
             await stream.CopyToAsync(context.Response.Body);
         });
-
-        // Questo MapFallbackToFile potrebbe essere problematico o ridondante se MapGet gestisce già la rotta principale.
-        // Se la tua dashboard React ha routing lato client, potresti volerlo solo
-        // se /loggerdashboard è la base e tutte le altre rotte interne
-        // (es. /loggerdashboard/details) dovrebbero servire index.html.
-        // Per ora, concentriamoci sulla rotta principale.
-        // app.MapFallbackToFile("index.html"); // Considera di commentarlo o spostarlo
     }
 }
-//public static class DashboardExtensions {
-//    public static void UseLoggerHelperDashboard(this WebApplication app, string path = "/loggerdashboard") {
-//        var resourceName = "wwwroot.dashboard.index.html";
-//        var assembly = typeof(DashboardExtensions).Assembly;
-
-
-//        app.MapFallbackToFile("index.html");
-
-//        app.MapGet(path, async context => {
-//            using var stream = assembly.GetManifestResourceStream(resourceName);
-//            if (stream == null) {
-//                context.Response.StatusCode = 404;
-//                await context.Response.WriteAsync($"❌ Resource not found: {resourceName}");
-//                return;
-//            }
-
-//            context.Response.ContentType = "text/html";
-//            await stream.CopyToAsync(context.Response.Body);
-//        });
-
-//    }
-//    //public static void UseLoggerHelperDashboard(this WebApplication app, string path = "/loggerdashboard") {
-
-//    //    var embeddedProvider = new EmbeddedFileProvider(typeof(DashboardExtensions).Assembly);
-
-//    //    app.UseFileServer(new FileServerOptions {
-//    //        RequestPath = path,
-//    //        FileProvider = embeddedProvider,
-//    //        EnableDefaultFiles = true
-//    //    });
-
-//    //    var res = typeof(DashboardExtensions).Assembly.GetManifestResourceNames();
-//    //    foreach (var name in res)
-//    //        Console.WriteLine($"MANIFEST NAME: {name}");
-
-//    //    var files = typeof(DashboardExtensions).Assembly.GetFiles();
-//    //    foreach (var file in files)
-//    //        Console.WriteLine($"FILE: {file.Name}. Length: {file.Length} ");
-
-//    //    app.MapGet("/loggerdashboard", async context =>
-//    //    {
-//    //        var resourceName = "wwwroot.dashboard.index.html";
-//    //        var stream = typeof(DashboardExtensions).Assembly.GetManifestResourceStream(resourceName);
-
-//    //        if (stream == null) {
-//    //            context.Response.StatusCode = 404;
-//    //            await context.Response.WriteAsync($"❌ Resource not found: {resourceName}");
-//    //            return;
-//    //        }
-
-//    //        context.Response.ContentType = "text/html";
-//    //        await stream.CopyToAsync(context.Response.Body);
-//    //    });
-//    //    // Serve tutte le sotto-route
-//    //    app.MapFallback($"{path}/{{*path}}", async context => {
-//    //        var file = embeddedProvider.GetFileInfo("wwwroot/dashboard/index.html");
-//    //        if (!file.Exists) {
-//    //            await context.Response.WriteAsync("❌ embeddedProvider: file does NOT exist");
-//    //            return;
-//    //        }
-
-//    //        await context.Response.WriteAsync("❌ embeddedProvider: file does NOT exist");
-//    //        context.Response.ContentType = "text/html";
-//    //        await context.Response.SendFileAsync(file); 
-//    //    });
-
-
-//    //    // questi verranno recuperati dagli altri packages ( telemetry e loggerHelper.Errors )
-//    //    // Endpoint API dashboard
-//    //    app.MapGet($"{path}/api/logs", async ([FromServices] TelemetriesDbContext db) =>
-//    //        await db.LogEntry.OrderByDescending(l => l.raise_date).Take(50).ToListAsync());
-
-//    //    app.MapGet($"{path}/api/metrics", async ([FromServices] TelemetriesDbContext db) =>
-//    //        await db.Metrics.OrderByDescending(m => m.Timestamp).Take(100).ToListAsync());
-//    //}
-//}
