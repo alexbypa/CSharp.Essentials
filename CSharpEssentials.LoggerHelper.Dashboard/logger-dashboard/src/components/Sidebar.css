@@ -1,0 +1,19 @@
+.sidebar {
+  width: 220px;
+  background: #f5f5f5;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  margin-top: 0;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  margin: 10px 0;
+  cursor: pointer;
+}

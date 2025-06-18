@@ -6,38 +6,9 @@
     <Nullable>enable</Nullable>
     <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
   </PropertyGroup>
-
   <ItemGroup>
-    <EmbeddedResource Include="Assets\**\*" />
-
-    <!--<EmbeddedResource Include="wwwroot/dashboard/**/*.*">
-        <LogicalName>$(RootNamespace).$([System.String]::Copy('%(Identity)').Replace('\', '/').Replace('wwwroot/dashboard/', '').Replace('/', '.'))</LogicalName>
-    </EmbeddedResource>-->
-    <!--<EmbeddedResource Include="wwwroot/dashboard/**/*.*" Exclude="wwwroot/dashboard/index.html;wwwroot/dashboard/asset-manifest.json">
-        <LogicalName>$(RootNamespace).%(Identity).Replace('/', '.')</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="wwwroot/dashboard/index.html">
-        <LogicalName>$(RootNamespace).wwwroot.dashboard.index.html</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="wwwroot/dashboard/asset-manifest.json">
-        <LogicalName>$(RootNamespace).wwwroot.dashboard.asset-manifest.json</LogicalName>
-    </EmbeddedResource>
-        -->
-
-
-
-
-    <!--<EmbeddedResource Include="wwwroot/dashboard/**/*.*">
-      <LogicalName>wwwroot.dashboard.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
-    </EmbeddedResource>-->
+      <EmbeddedResource Include="Assets\**\*" />
   </ItemGroup>
-
-  <!--<ItemGroup>
-    <EmbeddedResource Include="Assets\css\styles.css">
-      <LogicalName>$(RootNamespace).$([System.String]::Copy('%(Identity)').Replace('\', '/').Replace('wwwroot/dashboard/', '').Replace('/', '.'))</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>-->
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.6" />
   </ItemGroup>
