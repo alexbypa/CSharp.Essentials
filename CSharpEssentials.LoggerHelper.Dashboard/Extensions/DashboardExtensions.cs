@@ -1,90 +1,74 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using System.Reflection;
+using System.IO;
 
 namespace CSharpEssentials.LoggerHelper.Dashboard.Extensions;
-using System.IO;
-using System.Reflection;
 
-public class ResourceManager {
-    public string GetEmbeddedTextFile(string relativePath) {
-        var assembly = Assembly.GetExecutingAssembly(); // O l'assembly dove sono incorporate le risorse
 
-        // Il nome della risorsa segue una convenzione:
-        // NamespaceDiDefault.Cartella.SottoCartella.NomeFile.Estensione
-        // Esempio: Se il tuo namespace di default è "MyProject" e il file è MyResources\data.txt
-        // il nome della risorsa sarà "MyProject.MyResources.data.txt"
-        string resourceName = $"{assembly.GetName().Name}.{relativePath.Replace("/", ".").Replace("\\", ".")}";
-
-        // Se non hai un namespace di default o vuoi essere più specifico
-        // puoi elencare tutti i nomi delle risorse per trovarlo:
-        // var allResourceNames = assembly.GetManifestResourceNames();
-        // foreach (var name in allResourceNames) { Console.WriteLine(name); }
-
-        using (Stream stream = assembly.GetManifestResourceStream(resourceName)) {
-            if (stream == null) {
-                Console.WriteLine($"Errore: Risorsa '{resourceName}' non trovata.");
-                return null;
-            }
-            using (StreamReader reader = new StreamReader(stream)) {
-                return reader.ReadToEnd();
-            }
-        }
+public static class ResourceHelper {
+    public static Stream GetResourceStream(string resourceName) {
+        var assembly = Assembly.GetExecutingAssembly();
+        return assembly.GetManifestResourceStream($"{assembly.GetName().Name}.{resourceName}");
     }
 
-    public byte[] GetEmbeddedBinaryFile(string relativePath) {
-        var assembly = Assembly.GetExecutingAssembly();
-        string resourceName = $"{assembly.GetName().Name}.{relativePath.Replace("/", ".").Replace("\\", ".")}";
-
-        using (Stream stream = assembly.GetManifestResourceStream(resourceName)) {
-            if (stream == null) {
-                Console.WriteLine($"Errore: Risorsa '{resourceName}' non trovata.");
-                return null;
-            }
-            using (MemoryStream ms = new MemoryStream()) {
-                stream.CopyTo(ms);
-                return ms.ToArray();
-            }
-        }
+    public static string[] GetResourceNames() {
+        return Assembly.GetExecutingAssembly().GetManifestResourceNames();
     }
 }
+
+
 public static class DashboardExtensions {
+    // Metodo di estensione per registrare la dashboard embedded
     public static void UseLoggerHelperDashboard(this WebApplication app, string path = "/loggerdashboard") {
-        // Ottieni il nome completo della risorsa incorporata.
-        // Questo dovrebbe includere il namespace radice del tuo progetto,
-        // ad esempio "YourProjectNamespace.wwwroot.dashboard.index.html"
-        // Assicurati che 'resourceName' corrisponda esattamente all'output di GetManifestResourceNames()
-        var resourceName = "wwwroot.dashboard.index.html"; // <--- POTENZIALE PUNTO DI ERRORE
+        // Ottiene il riferimento all'assembly dove sono incluse le risorse embed (es. index.html)
         var assembly = typeof(DashboardExtensions).Assembly;
 
-        // Debug: Stampa tutti i nomi delle risorse incorporate per verificare
-        // Console.WriteLine("Available resources in assembly:");
-        // foreach (var res in assembly.GetManifestResourceNames())
-        // {
-        //     Console.WriteLine($"- {res}");
-        // }
-        // Mappatura per servire l'index.html
+        // Cerca tra tutte le risorse embedded quella che termina con 'wwwroot.dashboard.index.html'
+        // Il nome deve combaciare con il LogicalName definito nel .csproj
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(r => r.EndsWith("wwwroot.dashboard.index.html"));
+
+        // Gestisce il path principale (es. /loggerdashboard)
         app.MapGet(path, async context => {
-            // Seleziona il nome della risorsa in base a ciò che hai trovato nel passo 1.
-            // Esempio: "YourProjectNamespace.wwwroot.dashboard.index.html"
-            // Se il nome nel file csproj è impostato tramite LogicalName, allora userai quello.
-            // Altrimenti, usa il formato dedotto dal .NET SDK (RootNamespace + path).
-            var actualResourceName = assembly.GetManifestResourceNames()
-                                            .FirstOrDefault(r => r.EndsWith(".wwwroot.dashboard.index.html") || r.Equals("wwwroot.dashboard.index.html"));
-            if (string.IsNullOrEmpty(actualResourceName)) {
+            // Se la risorsa embedded non è trovata, restituisce 404 con messaggio d'errore
+            if (string.IsNullOrEmpty(resourceName)) {
                 context.Response.StatusCode = 404;
-                await context.Response.WriteAsync($"Resource not found: {resourceName}. Please check if it's embedded correctly.");
+                await context.Response.WriteAsync("❌ index.html not found!");
                 return;
             }
-            using var stream = assembly.GetManifestResourceStream(actualResourceName);
-            if (stream == null) {
-                // Questo caso dovrebbe essere raro se actualResourceName è stato trovato,
-                // ma è una buona safety net.
-                context.Response.StatusCode = 404;
-                await context.Response.WriteAsync($"Resource not found (stream null): {actualResourceName}");
-                return;
-            }
+
+            // Apre lo stream del file index.html dalla risorsa embedded
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+
+            // Imposta il Content-Type della risposta HTTP su "text/html"
             context.Response.ContentType = "text/html";
+
+            // Copia il contenuto della risorsa nel corpo della risposta (restituisce index.html)
             await stream.CopyToAsync(context.Response.Body);
+        });
+
+        app.MapFallback(context =>
+        {
+            var path = context.Request.Path.Value;
+            //if (path != null && (path.EndsWith(".js") || path.EndsWith(".css") || path.Contains("/static/"))) {
+            //    // Non fare fallback! lascia che UseStaticFiles gestisca
+            //    context.Response.StatusCode = 404;
+            //    return context.Response.WriteAsync($"Static file not found: {path}");
+            //}
+
+            context.Response.ContentType = "text/html";
+            var assembly = typeof(DashboardExtensions).Assembly;
+            var resourceName = assembly.GetManifestResourceNames()
+                .FirstOrDefault(r => r.EndsWith("wwwroot.dashboard.index.html"));
+
+            if (string.IsNullOrEmpty(resourceName)) {
+                context.Response.StatusCode = 404;
+                return context.Response.WriteAsync("index.html not found");
+            }
+
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            return stream.CopyToAsync(context.Response.Body);
         });
     }
 }
