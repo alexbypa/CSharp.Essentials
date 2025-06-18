@@ -7,7 +7,10 @@
     <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
   </PropertyGroup>
   <ItemGroup>
-      <EmbeddedResource Include="Assets\**\*" />
+    <EmbeddedResource Include="ui\**\*.*">
+      <LogicalName>$(RootNamespace).$([System.String]::Copy('%(RecursiveDir)').Replace('ui\\', '').Replace('ui/', '').TrimEnd('\\').Replace('\', '.')).%(Filename)%(Extension)</LogicalName>
+      <!--<LogicalName>$(RootNamespace).$([System.String]::Copy('%(RecursiveDir)').Replace('ui\\', '').Replace('ui/', '').Replace('\', '')).%(Filename)%(Extension)</LogicalName>-->
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.6" />
@@ -15,6 +18,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Telemetry\CSharpEssentials.LoggerHelper.Telemetry.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ui\assets\css\" />
+    <Folder Include="ui\assets\js\" />
   </ItemGroup>
 
 </Project>
