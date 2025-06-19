@@ -39,7 +39,7 @@ internal class CustomTelegramSink : ILogEventSink {
     /// <param name="logEvent">The log event to send.</param>
     internal async Task SendMessageAsync(string message) {
         var url = $"https://api.telegram.org/bot{_botToken}/sendMessage";
-
+        
         var data = new Dictionary<string, string>
         {
             { "chat_id", _chatId },
@@ -47,6 +47,10 @@ internal class CustomTelegramSink : ILogEventSink {
             { "parse_mode", "MarkdownV2" }
         };
 
-        await _client.PostAsync(url, new FormUrlEncodedContent(data));
+        var TelegramResponse = await _client.PostAsync(url, new FormUrlEncodedContent(data));
+        if (TelegramResponse.StatusCode != System.Net.HttpStatusCode.OK) {
+            var errorTlg = await TelegramResponse.Content.ReadAsStringAsync();
+            SelfLog.WriteLine($"Error on sink Telegram. Message : {errorTlg}");
+        }
     }
 }

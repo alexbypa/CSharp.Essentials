@@ -36,14 +36,12 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
     .AddJsonFile("appsettings.LoggerHelper.json")
 #endif
         .Build();
-            LoggerTelemetryOptions loggerTelemetryOptions = configuration.GetSection("Serilog:SerilogConfiguration:LoggerTelemetryOptions").Get<LoggerTelemetryOptions>();
-            if (!loggerTelemetryOptions?.IsEnabled ?? true)
-                return services;
 
 
             //services.AddDbContext<TelemetriesDbContext>(options =>
             //    options.UseNpgsql(loggerTelemetryOptions.ConnectionString));
 
+            LoggerTelemetryOptions loggerTelemetryOptions = configuration.GetSection("Serilog:SerilogConfiguration:LoggerTelemetryOptions").Get<LoggerTelemetryOptions>();
             //TODO:
             services.AddDbContext<TelemetriesDbContext>(options =>
                 options.UseNpgsql(loggerTelemetryOptions.ConnectionString)
@@ -55,6 +53,9 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
                 var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
                 db.Database.Migrate();
             }
+
+            if (!loggerTelemetryOptions?.IsEnabled ?? true)
+                return services;
 
             //TODO:
             // Dovremmo aggiungere queste metriche custom su metric listener o no !
