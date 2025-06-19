@@ -13,16 +13,16 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="ui\assets\css\**" />
+    <EmbeddedResource Remove="ui\assets\css\**" />
+    <None Remove="ui\assets\css\**" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.6" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Telemetry\CSharpEssentials.LoggerHelper.Telemetry.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ui\assets\css\" />
-    <Folder Include="ui\assets\js\" />
   </ItemGroup>
 
 </Project>
