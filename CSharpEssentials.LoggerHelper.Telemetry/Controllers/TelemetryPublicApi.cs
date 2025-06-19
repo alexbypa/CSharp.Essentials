@@ -28,6 +28,15 @@ public class TelemetryPublicApiController : ControllerBase {
             .ToListAsync();
         return Ok(result);
     }
+    [HttpGet("metrics/dns")]
+    public async Task<IActionResult> GetDnsMetrics() {
+        var result = await _db.Metrics
+            .Where(m => m.Name == "dns.lookup.duration")
+            .OrderByDescending(m => m.Timestamp)
+            .ToListAsync();
+
+        return Ok(result);
+    }
 
     [HttpGet("traces/{traceId}")]
     public async Task<IActionResult> GetTraces(string traceId) {
