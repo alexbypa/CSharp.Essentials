@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 
-
 namespace CSharpEssentials.LoggerHelper.Telemetry.middleware;
 /// <summary>
 /// Questo startup filter si occupa di inserire TraceIdPropagationMiddleware

@@ -37,7 +37,6 @@ public class TelemetryPublicApiController : ControllerBase {
 
         return Ok(result);
     }
-
     [HttpGet("traces/{traceId}")]
     public async Task<IActionResult> GetTraces(string traceId) {
         var traces = await _db.TraceEntry

@@ -67,11 +67,17 @@ public class PostgreSqlMetricExporter : BaseExporter<Metric> {
 
                     // raccolta tag
                     var tags = new Dictionary<string, object>();
-                    foreach (var tag in point.Tags)
+                    foreach (var tag in point.Tags) {
+                        Console.WriteLine($"📌 TAG: {tag.Key} = {tag.Value}");
                         tags[tag.Key] = tag.Value!;
+                    }
 
                     //TODO: verificare che trace_id sia sempre presente
-                    tags.TryGetValue("trace_id", out var traceValue);
+                    if (tags.TryGetValue("trace_id", out var traceValue)) {
+                        Console.WriteLine($"✅ trace_id found: {traceValue}");
+                    } else {
+                        Console.WriteLine($"❌ NO trace_id found for metric: {metric.Name}");
+                    }
 
                     // popoliamo l'entità EF
                     var entry = new MetricEntry {

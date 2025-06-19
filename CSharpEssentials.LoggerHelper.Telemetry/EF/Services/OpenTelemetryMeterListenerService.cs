@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Storage.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Text.Json;
@@ -48,7 +49,6 @@ public class OpenTelemetryMeterListenerService : BackgroundService {
                     }
                 }
 
-                /*
                 await db.Metrics.AddAsync(new MetricEntry {
                     Name = $"Listener: {instrument.Name}",
                     Value = measurement,
@@ -57,7 +57,7 @@ public class OpenTelemetryMeterListenerService : BackgroundService {
                     TraceId = traceId
                 });
                 await db.SaveChangesAsync();
-            */
+
             });
         });
         listener.Start();

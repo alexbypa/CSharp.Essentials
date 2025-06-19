@@ -37,10 +37,6 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
 #endif
         .Build();
 
-
-            //services.AddDbContext<TelemetriesDbContext>(options =>
-            //    options.UseNpgsql(loggerTelemetryOptions.ConnectionString));
-
             LoggerTelemetryOptions loggerTelemetryOptions = configuration.GetSection("Serilog:SerilogConfiguration:LoggerTelemetryOptions").Get<LoggerTelemetryOptions>();
             //TODO:
             services.AddDbContext<TelemetriesDbContext>(options =>
@@ -57,17 +53,17 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
             if (!loggerTelemetryOptions?.IsEnabled ?? true)
                 return services;
 
+            services.AddSingleton<IStartupFilter, TraceIdPropagationStartupFilter>();
+
             //TODO:
             // Dovremmo aggiungere queste metriche custom su metric listener o no !
             // Initialize any custom metrics (e.g., static meters)
             CustomMetrics.Initialize(builder.Configuration);
 
-            if (loggerTelemetryOptions?.MeterListenerServiceIsEnabled ?? false)
+            if (loggerTelemetryOptions?.MeterListenerIsEnabled ?? false)
                 builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
 
             services.AddControllers();
-
-            services.AddSingleton<IStartupFilter, TraceIdPropagationStartupFilter>();
 
             services.AddOpenTelemetry()
                 .WithMetrics(metricProvider => {
