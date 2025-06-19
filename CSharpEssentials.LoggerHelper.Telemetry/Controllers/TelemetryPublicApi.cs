@@ -21,6 +21,13 @@ public class TelemetryPublicApiController : ControllerBase {
             .ToListAsync();
         return Ok(metrics);
     }
+    [HttpGet("metrics/http")]
+    public async Task<IActionResult> GetHttpMetrics() {
+        var result = await _db.ViewHttpMetrics
+            .OrderByDescending(m => m.Timestamp)
+            .ToListAsync();
+        return Ok(result);
+    }
 
     [HttpGet("traces/{traceId}")]
     public async Task<IActionResult> GetTraces(string traceId) {

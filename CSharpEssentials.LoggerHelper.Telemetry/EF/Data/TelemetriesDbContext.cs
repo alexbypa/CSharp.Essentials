@@ -7,6 +7,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 /// Exposes DbSet properties for metrics, traces, and log entries.
 /// </summary>
 public class TelemetriesDbContext : DbContext {
+    public DbSet<ViewHttpMetrics> ViewHttpMetrics => Set<ViewHttpMetrics>();
     /// <summary>
     /// Represents the collection of metric entries in the database.
     /// </summary>
@@ -39,5 +40,6 @@ public class TelemetriesDbContext : DbContext {
         new MetricEntryConfiguration().Configure(modelBuilder.Entity<MetricEntry>());
         new TraceEntryConfiguration().Configure(modelBuilder.Entity<TraceEntry>());
         new LogEntryConfiguration().Configure(modelBuilder.Entity<LogEntry>());
+        new ViewHttpMetricsConfiguration().Configure(modelBuilder.Entity<ViewHttpMetrics>());
     }
 }
