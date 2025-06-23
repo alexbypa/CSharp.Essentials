@@ -1,4 +1,5 @@
 ﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
+using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -60,13 +61,48 @@ public class TelemetryPublicApiController : ControllerBase {
     /// <param name="traceId"></param>
     /// <returns></returns>
     [HttpGet("traces")]
-    public async Task<IActionResult> GetTraces() {
-        var traces = Enumerable.Range(1, 10).Select(i => new {
-            traceId = Guid.NewGuid().ToString(),
-            operation = "POST /users/register",
-            timestamp = DateTime.UtcNow.AddMinutes(-i)
-        });
+    public async Task<IActionResult> GetTracesAsync() {
+        var now = DateTime.UtcNow;
+        var MinutesAgo = now.AddMinutes(-60);
+
+        var traces = await _db.Set<TraceEntry>()
+            .Where(t => t.StartTime >= MinutesAgo)
+            .Select(t => new {
+                traceId = t.TraceId,
+                operation = t.Name,
+                timestamp = t.StartTime,
+                durationMs = t.DurationMs
+            })
+            .OrderByDescending(t => t.timestamp)
+            .ToListAsync();
+
         return Ok(traces);
+    }
+    [HttpGet("traces/{traceId}")]
+    public async Task<IActionResult> GetTraceById(string traceId) {
+        try {
+            var traceDb = await _db.Set<TraceEntry>()
+                .Where(t => t.TraceId == traceId)
+                .FirstOrDefaultAsync();
+
+            if (traceDb == null)
+                return NotFound();
+
+            // parsing lato C#, non in LINQ-to-SQL
+            var trace = new {
+                traceDb.TraceId,
+                traceDb.Name,
+                traceDb.StartTime,
+                traceDb.EndTime,
+                traceDb.DurationMs,
+                Tags = string.IsNullOrEmpty(traceDb.TagsJson) ? "{}" : traceDb.TagsJson
+            };
+
+            return Ok(trace);
+        } catch (Exception ex) {
+            Console.WriteLine(ex.ToString());
+        }
+        return Ok("");
     }
     /// <summary>
     /// return data for logs
