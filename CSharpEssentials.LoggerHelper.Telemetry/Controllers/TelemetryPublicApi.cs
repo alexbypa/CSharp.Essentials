@@ -104,6 +104,29 @@ public class TelemetryPublicApiController : ControllerBase {
         }
         return Ok("");
     }
+    [HttpGet("traces/{traceId}/spans")]
+    public async Task<IActionResult> GetSpansByTraceId(string traceId) {
+        try {
+            var spansDb = await _db.Set<TraceEntry>()
+                .Where(t => t.TraceId == traceId)
+                .ToListAsync();
+
+            var spans = spansDb.Select(t => new
+            {
+                t.TraceId,
+                t.Name,
+                t.StartTime,
+                t.EndTime,
+                t.DurationMs,
+                Tags = string.IsNullOrEmpty(t.TagsJson) ? "{}" : t.TagsJson
+            });
+
+            return Ok(spans);
+        } catch (Exception ex) {
+            Console.WriteLine(ex.ToString());
+            return Problem("Errore durante il recupero degli span.");
+        }
+    }
     /// <summary>
     /// return data for logs
     /// </summary>
