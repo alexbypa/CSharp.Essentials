@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Controllers;
 

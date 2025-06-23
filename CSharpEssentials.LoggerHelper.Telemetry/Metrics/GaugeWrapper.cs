@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.Metrics;
 
-namespace CSharpEssentials.LoggerHelper.Telemetry.Custom;
+namespace CSharpEssentials.LoggerHelper.Telemetry.Metrics;
 /// <summary>
 /// A wrapper around <see cref="ObservableGauge{T}"/> that simplifies
 /// creating an observable gauge instrument from a <see cref="Func{T}"/> provider.

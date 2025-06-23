@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
-[Table("LogEntry", Schema ="public")]
+[Table("LogEntry", Schema = "public")]
 public class LogEntry {
     public long Id { get; set; }
     public string ApplicationName { get; set; }

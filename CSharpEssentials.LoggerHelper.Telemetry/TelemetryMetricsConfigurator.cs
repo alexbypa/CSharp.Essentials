@@ -1,5 +1,5 @@
-﻿using CSharpEssentials.LoggerHelper.Telemetry.Custom;
-using CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.Configuration;
+using CSharpEssentials.LoggerHelper.Telemetry.Metrics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Metrics;

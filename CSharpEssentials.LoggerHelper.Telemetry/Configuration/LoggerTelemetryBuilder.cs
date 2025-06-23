@@ -1,11 +1,10 @@
-﻿using CSharpEssentials.LoggerHelper.Telemetry.Custom;
-using CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.Metrics;
 using CSharpEssentials.LoggerHelper.Telemetry.middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CSharpEssentials.LoggerHelper.Telemetry {
+namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
     /// <summary>
     /// Extension methods to configure OpenTelemetry tracing and metrics
     /// for the LoggerHelper package, including DB context, custom metrics,
@@ -48,7 +47,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry {
 
             TelemetryMetricsConfigurator.Configure(services, options, builder);
             TelemetryTracingConfigurator.Configure(services);
-            
+
 
             return services;
         }

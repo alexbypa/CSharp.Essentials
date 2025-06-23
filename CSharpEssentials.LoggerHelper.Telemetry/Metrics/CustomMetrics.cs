@@ -2,7 +2,7 @@
 using Npgsql;
 using System.Diagnostics.Metrics;
 
-namespace CSharpEssentials.LoggerHelper.Telemetry.Custom;
+namespace CSharpEssentials.LoggerHelper.Telemetry.Metrics;
 /// <summary>
 /// Defines and registers custom metrics (observable gauges) for the application.
 /// This static class exposes a Meter and two ObservableGauge instruments:
@@ -69,7 +69,7 @@ public static class CustomMetrics {
 
             return result is long l ? l : Convert.ToInt64(result);
         } catch {
-            return -1; 
+            return -1;
         }
     }
 }

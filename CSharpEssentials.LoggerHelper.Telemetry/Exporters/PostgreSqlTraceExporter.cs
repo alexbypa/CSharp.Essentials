@@ -2,7 +2,7 @@
 using OpenTelemetry;
 using System.Diagnostics;
 
-namespace CSharpEssentials.LoggerHelper.Telemetry;
+namespace CSharpEssentials.LoggerHelper.Telemetry.Exporters;
 /// <summary>
 /// Exports completed OpenTelemetry Activities (spans) to a PostgreSQL database.
 /// Creates TraceEntry records for each Activity with properties like TraceId, SpanId, timestamps, and tags.

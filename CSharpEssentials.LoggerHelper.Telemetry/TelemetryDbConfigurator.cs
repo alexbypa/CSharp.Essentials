@@ -1,4 +1,5 @@
-﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.Configuration;
+using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;

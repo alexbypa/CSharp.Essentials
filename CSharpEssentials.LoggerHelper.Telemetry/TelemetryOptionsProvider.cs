@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.Configuration;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry;

@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 /// <summary>

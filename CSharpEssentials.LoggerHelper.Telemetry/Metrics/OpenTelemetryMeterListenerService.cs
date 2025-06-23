@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics.Metrics;
 
-namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
+namespace CSharpEssentials.LoggerHelper.Telemetry.Metrics;
 
 public class OpenTelemetryMeterListenerService : BackgroundService {
     private readonly IMetricEntryFactory _factory;
