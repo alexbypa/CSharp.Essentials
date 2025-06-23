@@ -3,6 +3,7 @@ using CSharpEssentials.LoggerHelper.Telemetry.middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
     /// <summary>
@@ -28,6 +29,9 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
             services.AddSingleton<ITraceEntryFactory, TraceEntryFactory>();
             services.AddSingleton<ITraceEntryRepository, TraceEntryRepository>();
 
+            // Registers a startup filter that ensures the TraceIdPropagationMiddleware is injected
+            // at the beginning of the request pipeline, before any telemetry is collected.
+            // This guarantees that all logs, metrics, and traces will carry the trace_id from the start.
             services.AddSingleton<IStartupFilter, TraceIdPropagationStartupFilter>();
 
             //TODO:

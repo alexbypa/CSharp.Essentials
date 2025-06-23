@@ -1,22 +1,25 @@
 # CSharpEssentials.LoggerHelper.Sink.Telemetry
 
-Plug-and-play extension that integrates **Serilog** and **OpenTelemetry** with direct **PostgreSQL export** of:
-
-- 📊 Metrics (HTTP, GC, ASP.NET, custom)
-- 🧵 Traces (activities, spans)
-- 🪵 Logs (linked by `trace_id`)
+## 📑 Table of Contents <a id='table-of-contents'></a>
+* 🚀[Installation](#installation)
+* 🔧[Configuration](#configuration)
+* 📊 What It Does(#whatitdoes)
+* 📊 Custom Metrics(#custommetrics)
+* 🧵 Traces (activities, spans)
+* 📘 Logs (linked by `trace_id`)
 
 ---
 
-## 📦 Installation
+Plug-and-play extension that integrates **Serilog** and **OpenTelemetry** with direct **PostgreSQL export** of:
 
+## 📦 Installation<a id='installation'></a>   [🔝](#table-of-contents)
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper.Sink.Telemetry
 ```
 
 ---
 
-## ⚙️ Configuration
+## ⚙️ Configuration<a id='configuration'></a>   [🔝](#table-of-contents)
 
 In your `Program.cs` (or `Startup.cs` for older .NET versions), register the telemetry system:
 
@@ -39,7 +42,7 @@ Then add the following configuration file `appsettings.LoggerHelper.json`:
 
 ---
 
-## 🚀 What It Does
+## 🚀 What It Does<a id='whatitdoes'></a>   [🔝](#table-of-contents)
 
 ### 🔧 LoggerTelemetryBuilder
 
@@ -67,7 +70,7 @@ Captures every `Activity` and saves it as a `TraceEntry`.
 
 ---
 
-## ✨ Custom Metrics
+## ✨ Custom Metrics<a id='custommetrics'></a>   [🔝](#table-of-contents)
 
 The package includes:
 
@@ -99,13 +102,36 @@ app.MapGet("/", () => "Hello LoggerHelper!");
 
 ---
 
-## 🔗 Full Correlation
+## 🧠 Internals Explained – Trace Correlation Middleware
 
-Every request automatically links:
+### 🔗 TraceIdPropagationMiddleware
+
+This middleware is the **core of trace correlation** within the `LoggerHelper.Telemetry` package.  
+It ensures every incoming HTTP request has its `TraceId` consistently injected into:
+
+- **Traces** (`Activity`) via `SetTag("trace_id", ...)`
+- **Metrics** via OpenTelemetry `Baggage.SetBaggage(...)`
+- **Logs** (if using the `ILogTraceContext<T>` implementation)
+
+```csharp
+var traceId = Activity.Current?.TraceId.ToString();
+activity.SetTag("trace_id", traceId);
+Baggage.SetBaggage("trace_id", traceId);
 ```
-Request → Trace → Metric → Log
-```
-via shared `trace_id`.
+
+### ✅ Why it matters
+
+- Makes **traces** easily searchable by `trace_id`
+- Allows **metrics** to be filtered or grouped by `trace_id` (e.g. `request duration`, `memory usage`)
+- Enables **logs** to be enriched with trace context, allowing full end-to-end observability
+
+### 📈 Result
+
+> All telemetry signals – logs, metrics, traces – share a common `trace_id`.  
+This makes it easy to:
+- Debug distributed flows
+- Visualize latency and performance breakdowns
+- Cross-navigate from a log to its metric to its trace
 
 ---
 

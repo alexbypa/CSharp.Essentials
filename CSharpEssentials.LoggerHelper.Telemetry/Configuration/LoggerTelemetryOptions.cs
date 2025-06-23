@@ -1,4 +1,5 @@
 ﻿namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration;
+
 public class LoggerTelemetryOptions {
     public string ConnectionString { get; set; }
     public bool? IsEnabled { get; set; }

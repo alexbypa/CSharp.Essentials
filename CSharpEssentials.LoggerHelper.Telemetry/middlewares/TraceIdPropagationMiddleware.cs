@@ -10,11 +10,23 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.middlewares;
 /// </summary>
 public class TraceIdPropagationMiddleware {
     private readonly RequestDelegate _next;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TraceIdPropagationMiddleware"/> class.
+    /// </summary>
+    /// <param name="next">The next middleware component in the pipeline.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="next"/> is null.</exception>
     public TraceIdPropagationMiddleware(RequestDelegate next) {
         _next = next ?? throw new ArgumentNullException(nameof(next));
     }
+    /// <summary>
+    /// Middleware execution logic that extracts the current Activity TraceId, 
+    /// adds it to both the Activity's tags and the OpenTelemetry Baggage, 
+    /// and calls the next middleware in the pipeline.
+    /// </summary>
+    /// <param name="context">The HTTP context for the current request.</param>
+    /// <returns>A task that represents the completion of request processing.</returns>
     public async Task InvokeAsync(HttpContext context) {
-        var activity = Activity.Current;
+    var activity = Activity.Current;
         if (activity is not null) {
             // Extract the TraceId
             var traceId = activity.TraceId.ToString();
