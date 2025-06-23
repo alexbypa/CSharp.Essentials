@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 
-namespace CSharpEssentials.LoggerHelper.Telemetry.middleware;
+namespace CSharpEssentials.LoggerHelper.Telemetry.middlewares;
 /// <summary>
 /// Questo startup filter si occupa di inserire TraceIdPropagationMiddleware
 /// all'inizio della pipeline HTTP, in modo che venga eseguito per ogni richiesta.

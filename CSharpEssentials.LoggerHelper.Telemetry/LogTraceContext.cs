@@ -24,7 +24,6 @@ public class LogTraceContext<T> : ILogTraceContext<T> {
 
     public ILogTraceContext<T> StartActivity(string Name) {
         var activity = LoggerTelemetryActivitySource.Instance.StartActivity(Name);
-        activity.Start();
         return this;
     }
 }

@@ -1,12 +1,19 @@
-﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
+﻿/*
+using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using System.Diagnostics;
 using System.Text.Json;
+*/
 
-namespace CSharpEssentials.LoggerHelper.Telemetry;
+namespace CSharpEssentials.LoggerHelper.Telemetry.Depreceted;
+
+// Questo exporter è stato deprecato in favore di OpenTelemetryMeterListenerService
+// perché non riusciva a leggere il trace_id direttamente (salvo workaround complicati).
+
+/*
 /// <summary>
 /// Exports OpenTelemetry metrics to a PostgreSQL database.
 /// Iterates over each MetricPoint in the batch, extracts the value and tags,
@@ -102,3 +109,4 @@ public class PostgreSqlMetricExporter : BaseExporter<Metric> {
         return ExportResult.Success;
     }
 }
+*/

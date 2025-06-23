@@ -1,74 +1,71 @@
-﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
-using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
-using Google.Protobuf.WellKnownTypes;
-using Microsoft.EntityFrameworkCore.Storage.Json;
-using Microsoft.Extensions.DependencyInjection;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using OpenTelemetry;
-using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using System.Text.Json;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Services;
+
 public class OpenTelemetryMeterListenerService : BackgroundService {
-    private readonly IServiceProvider _provider;
-    private DateTime LastAlert = DateTime.Now;
-    public OpenTelemetryMeterListenerService(IServiceProvider provider) {
-        _provider = provider;
+    private readonly IMetricEntryFactory _factory;
+    private readonly IMetricEntryRepository _repository;
+    private readonly List<MetricEntry> _buffer = new();
+    private readonly object _lock = new();
+    private MeterListener? _listener;
+
+    public OpenTelemetryMeterListenerService(
+        IMetricEntryFactory factory,
+        IMetricEntryRepository repository
+    ) {
+        _factory = factory;
+        _repository = repository;
     }
+
     protected override Task ExecuteAsync(CancellationToken stoppingToken) {
-        var listener = new MeterListener();
-
-        listener.InstrumentPublished = (instrument, listener) => {
-            listener.EnableMeasurementEvents(instrument);
-        };
-        listener.SetMeasurementEventCallback<double>((instrument, measurement, tags, _) => {
-            var tagArray = tags.ToArray();
-            var traceId = Activity.Current?.TraceId.ToString();
-
-            _ = Task.Run(async () => {
-                using var scope = _provider.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
-
-                var tagDict = new Dictionary<string, object>();
-                foreach (var tag in tagArray)
-                    tagDict[tag.Key] = tag.Value!;
-
-                if (!string.IsNullOrWhiteSpace(traceId))
-                    tagDict["trace_id"] = traceId;
-
-                //TO HACK !!!
-                //TODO: inserire options per customizzare gli alert !
-                if (instrument.Name.Contains("db", StringComparison.InvariantCultureIgnoreCase)) {
-                    TimeSpan diff = DateTime.Now - LastAlert;
-                    if (diff.TotalSeconds > 100) {
-                        LastAlert = DateTime.Now;
-                        loggerExtension<MetricRequest>.TraceAsync(new MetricRequest { Action = "metric" }, Serilog.Events.LogEventLevel.Error, null, "Attention please {Metric}, {measurement} {tagsJson}", instrument.Name, measurement, JsonSerializer.Serialize(tagDict));
-                        Debug.Print(loggerExtension<MetricRequest>.CurrentError);
-                    }
+        _listener = new MeterListener {
+            //TOHACK: passare i parametri esternamente tramite IOptions !
+            InstrumentPublished = (instrument, listener) => {
+                if (instrument.Meter.Name == "LoggerHelper.Metrics"
+                    || instrument.Name.StartsWith("db.client")
+                    || instrument.Name.StartsWith("http.server")) {
+                    listener.EnableMeasurementEvents(instrument);
                 }
+            }
+        };
 
-                await db.Metrics.AddAsync(new MetricEntry {
-                    Name = $"Listener: {instrument.Name}",
-                    Value = measurement,
-                    Timestamp = DateTime.UtcNow,
-                    TagsJson = JsonSerializer.Serialize(tagDict),
-                    TraceId = traceId
-                });
-                await db.SaveChangesAsync();
+        _listener.SetMeasurementEventCallback<double>(OnMeasurement);
+        _listener.Start();
 
-            });
-        });
-        listener.Start();
+        _ = Task.Run(async () => {
+            while (!stoppingToken.IsCancellationRequested) {
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                await FlushBufferAsync(stoppingToken);
+            }
+            await FlushBufferAsync(stoppingToken);
+        }, stoppingToken);
+
         return Task.CompletedTask;
     }
 
-    public class MetricRequest : IRequest {
-        public string IdTransaction { get; set; }
+    private void OnMeasurement(Instrument instrument, double measurement, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state) {
+        var entry = _factory.Create(instrument, measurement, tags);
+        lock (_lock) {
+            _buffer.Add(entry);
+        }
+    }
 
-        public string Action { get; set; }
+    private async Task FlushBufferAsync(CancellationToken token) {
+        List<MetricEntry> toWrite;
+        lock (_lock) {
+            if (_buffer.Count == 0)
+                return;
+            toWrite = new List<MetricEntry>(_buffer);
+            _buffer.Clear();
+        }
 
-        public string ApplicationName { get; set; }
+        await _repository.SaveAsync(toWrite, token);
+    }
+
+    public override void Dispose() {
+        _listener?.Dispose();
+        base.Dispose();
     }
 }

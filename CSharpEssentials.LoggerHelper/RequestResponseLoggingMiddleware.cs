@@ -51,7 +51,7 @@ BODY REQUEST : {(string.IsNullOrWhiteSpace(body) ? "(empty)" : body)}
 BODY RESPONSE: {(string.IsNullOrWhiteSpace(responseBody) ? "(empty)" : responseBody)}
 HTTP STATUS  : {(context.Response.StatusCode)}
 ";
-            loggerExtension<RequestInfo>.TraceAsync(
+            loggerExtensionCore<RequestInfo>.TraceAsync(
                 requestInfo,
                 logLevel,
                 null,
@@ -59,7 +59,7 @@ HTTP STATUS  : {(context.Response.StatusCode)}
             );
         } catch (Exception ex) {
             // Log dell'eccezione
-            loggerExtension<RequestInfo>.TraceAsync(
+            loggerExtensionCore<RequestInfo>.TraceAsync(
                 requestInfo,
                 LogEventLevel.Error,
                 ex,

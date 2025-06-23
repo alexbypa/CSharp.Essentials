@@ -94,12 +94,12 @@ class ErrorListTextWriter : TextWriter {
 /// Static logger extension for writing log entries enriched with transaction context.
 /// </summary>
 /// <typeparam name="T">The request type implementing IRequest.</typeparam>
-public class loggerExtension<T> where T : IRequest {
+public class loggerExtensionCore<T> where T : IRequest {
     protected static readonly ILogger log;
     public static string CurrentError { get; set; }
     public static readonly List<LogErrorEntry> Errors = new();
     public static List<string> SinksLoaded = new List<string>();
-    static loggerExtension() {
+    static loggerExtensionCore() {
         string step = "Init";
         string SinkNameInError = "";
         try {

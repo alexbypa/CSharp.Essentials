@@ -2,7 +2,7 @@
 using OpenTelemetry;
 using System.Diagnostics;
 
-namespace CSharpEssentials.LoggerHelper.Telemetry.middleware;
+namespace CSharpEssentials.LoggerHelper.Telemetry.middlewares;
 /// <summary>
 /// Middleware to propagate the current Activity's TraceId into
 /// both the Activity.Tags and the OpenTelemetry Baggage, ensuring
