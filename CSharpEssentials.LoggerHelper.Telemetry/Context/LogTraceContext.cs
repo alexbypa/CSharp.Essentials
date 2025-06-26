@@ -9,6 +9,16 @@ public class LogTraceContext<T> : ILogTraceContext<T> {
     private Activity? _activity;
     public LogTraceContext(T request) {
         _request = request;
+
+        ActivitySource.AddActivityListener(new ActivityListener {
+            ShouldListenTo = source => true,
+            Sample = (ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllData,
+            ActivityStarted = activity => Console.WriteLine($"[LISTENER] START: {activity.DisplayName}"),
+            ActivityStopped = activity => {
+                if (activity.DisplayName == "VerifyToken")
+                Console.WriteLine($"[LISTENER] STOP: {activity.DisplayName}");
+            }
+        });
     }
     public ILogTraceContext<T> AddBaggage(string key, string value) {
         Baggage.SetBaggage(key, value);
@@ -19,8 +29,22 @@ public class LogTraceContext<T> : ILogTraceContext<T> {
             _activity.SetTag(key, value);
         return this;
     }
-    public ILogTraceContext<T> StartActivity(string Name) {
-        var activity = LoggerTelemetryActivitySource.Instance.StartActivity(Name);
+    public ILogTraceContext<T> StartActivity(string Name) { 
+        _activity = LoggerTelemetryActivitySource.Instance.StartActivity(
+            Name, 
+            ActivityKind.Internal,
+            Activity.Current?.Context ?? default
+        );
+        if (_activity != null) {
+            _activity.IsAllDataRequested = true;
+            _activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
+            Console.WriteLine($"[TRACE] Started Activity: {_activity.DisplayName}");
+        }
+        Console.WriteLine($"[TRACE DEBUG] Activity created? {_activity != null}, name: {_activity?.DisplayName}");
         return this;
+    }
+
+    public void StopActivity() {
+        _activity?.Stop();
     }
 }
