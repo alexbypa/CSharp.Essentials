@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Context;
 // Implementazione concreta del contesto
-public class LogTraceContext<T> : ILogTraceContext<T> {
+public class LogTraceContext<T> : ILogTraceContext<T>, IDisposable {
     private readonly T _request;
     private Activity? _activity;
     public LogTraceContext(T request) {
@@ -29,6 +29,11 @@ public class LogTraceContext<T> : ILogTraceContext<T> {
             _activity.SetTag(key, value);
         return this;
     }
+
+    public void Dispose() {
+        StopActivity();
+    }
+
     public ILogTraceContext<T> StartActivity(string Name) { 
         _activity = LoggerTelemetryActivitySource.Instance.StartActivity(
             Name, 
@@ -44,7 +49,7 @@ public class LogTraceContext<T> : ILogTraceContext<T> {
         return this;
     }
 
-    public void StopActivity() {
+    private void StopActivity() {
         _activity?.Stop();
     }
 }
