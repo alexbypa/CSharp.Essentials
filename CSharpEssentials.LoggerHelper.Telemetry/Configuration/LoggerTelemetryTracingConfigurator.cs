@@ -8,8 +8,8 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration;
 public static class LoggerTelemetryTracingConfigurator {
     public static void Configure(IServiceCollection services) {
         var provider = services.BuildServiceProvider();
-        var factory = provider.GetRequiredService<ITraceEntryFactory>();
-        var repository = provider.GetRequiredService<ITraceEntryRepository>();
+        var factory = provider.GetRequiredService<ILoggerTelemetryTraceEntryFactory>();
+        var repository = provider.GetRequiredService<ILoggerTelemetryTraceEntryRepository>();
         services.AddOpenTelemetry()
             .WithTracing(tracer => {
                 tracer

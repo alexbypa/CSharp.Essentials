@@ -8,9 +8,9 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Exporters;
 /// Creates TraceEntry records for each Activity with properties like TraceId, SpanId, timestamps, and tags.
 /// </summary>
 public class LoggerTelemetryPostgreSqlTraceExporter : BaseExporter<Activity> {
-    private readonly ITraceEntryFactory _factory;
-    private readonly ITraceEntryRepository _repository;
-    public LoggerTelemetryPostgreSqlTraceExporter(ITraceEntryFactory factory, ITraceEntryRepository repository) {
+    private readonly ILoggerTelemetryTraceEntryFactory _factory;
+    private readonly ILoggerTelemetryTraceEntryRepository _repository;
+    public LoggerTelemetryPostgreSqlTraceExporter(ILoggerTelemetryTraceEntryFactory factory, ILoggerTelemetryTraceEntryRepository repository) {
         _factory = factory;
         _repository = repository;
     }

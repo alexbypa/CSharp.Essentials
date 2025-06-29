@@ -1,4 +1,5 @@
-﻿using CSharpEssentials.LoggerHelper.Telemetry.Metrics;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.Exporters;
+using CSharpEssentials.LoggerHelper.Telemetry.Metrics;
 using CSharpEssentials.LoggerHelper.Telemetry.middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,8 +29,8 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
             if (!options?.IsEnabled ?? true)
                 return services;
 
-            services.AddSingleton<ITraceEntryFactory, TraceEntryFactory>();
-            services.AddSingleton<ITraceEntryRepository, TraceEntryRepository>();
+            services.AddSingleton<ILoggerTelemetryTraceEntryFactory, LoggerTelemetryTraceEntryFactory>();
+            services.AddSingleton<ILoggerTelemetryTraceEntryRepository, LoggerTelemetryTraceEntryRepository>();
 
             // Registers a startup filter that ensures the TraceIdPropagationMiddleware is injected
             // at the beginning of the request pipeline, before any telemetry is collected.
