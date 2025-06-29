@@ -20,10 +20,6 @@ public class LogTraceContext<T> : ILogTraceContext<T>, IDisposable {
             }
         });
     }
-    public ILogTraceContext<T> AddBaggage(string key, string value) {
-        Baggage.SetBaggage(key, value);
-        return this;
-    }
     public ILogTraceContext<T> AddTag(string key, object value) {
         if (_activity is not null)
             _activity.SetTag(key, value);
