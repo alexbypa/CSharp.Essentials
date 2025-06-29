@@ -1,11 +1,10 @@
-﻿using CSharpEssentials.LoggerHelper.Telemetry.Configuration;
-using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CSharpEssentials.LoggerHelper.Telemetry;
-public static class TelemetryDbConfigurator {
+namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration;
+public static class LoggerTelemetryDbConfigurator {
     public static void Configure(IServiceCollection services, LoggerTelemetryOptions options) {
         services.AddDbContext<TelemetriesDbContext>(cfg =>
             cfg.UseNpgsql(options.ConnectionString)

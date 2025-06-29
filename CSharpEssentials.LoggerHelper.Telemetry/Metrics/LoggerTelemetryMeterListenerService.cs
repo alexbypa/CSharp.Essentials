@@ -4,14 +4,14 @@ using System.Diagnostics.Metrics;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Metrics;
 
-public class OpenTelemetryMeterListenerService : BackgroundService {
+public class LoggerTelemetryMeterListenerService : BackgroundService {
     private readonly IMetricEntryFactory _factory;
     private readonly IMetricEntryRepository _repository;
     private readonly List<MetricEntry> _buffer = new();
     private readonly object _lock = new();
     private MeterListener? _listener;
 
-    public OpenTelemetryMeterListenerService(
+    public LoggerTelemetryMeterListenerService(
         IMetricEntryFactory factory,
         IMetricEntryRepository repository
     ) {

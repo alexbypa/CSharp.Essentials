@@ -1,5 +1,6 @@
 ﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 /// <summary>
@@ -36,10 +37,6 @@ public class TelemetriesDbContext : DbContext {
     /// The <see cref="ModelBuilder"/> used to construct the EF model.
     /// </param>
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
-        modelBuilder.ApplyConfiguration(new TraceEntryConfiguration());
-        new MetricEntryConfiguration().Configure(modelBuilder.Entity<MetricEntry>());
-        new TraceEntryConfiguration().Configure(modelBuilder.Entity<TraceEntry>());
-        new LogEntryConfiguration().Configure(modelBuilder.Entity<LogEntry>());
-        new ViewHttpMetricsConfiguration().Configure(modelBuilder.Entity<ViewHttpMetrics>());
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }

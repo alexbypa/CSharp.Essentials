@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry;
 public interface ITraceEntryRepository {
-    void Save(IEnumerable<TraceEntry> entries);
+    Task SaveAsync(IEnumerable<TraceEntry> entries);
 }
 
 public class TraceEntryRepository : ITraceEntryRepository {
@@ -14,10 +14,10 @@ public class TraceEntryRepository : ITraceEntryRepository {
         _provider = provider;
     }
 
-    public void Save(IEnumerable<TraceEntry> entries) {
+    public async Task SaveAsync(IEnumerable<TraceEntry> entries) {
         using var scope = _provider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
-        db.TraceEntry.AddRange(entries);
-        db.SaveChanges();
+        await db.TraceEntry.AddRangeAsync(entries);
+        await db.SaveChangesAsync();
     }
 }

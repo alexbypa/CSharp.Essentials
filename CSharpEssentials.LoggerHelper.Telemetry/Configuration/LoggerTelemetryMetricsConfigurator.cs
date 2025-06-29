@@ -1,16 +1,15 @@
-﻿using CSharpEssentials.LoggerHelper.Telemetry.Configuration;
-using CSharpEssentials.LoggerHelper.Telemetry.Metrics;
-using Microsoft.AspNetCore.Builder;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.Metrics;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Metrics;
 
-namespace CSharpEssentials.LoggerHelper.Telemetry;
-public static class TelemetryMetricsConfigurator {
-    public static void Configure(IServiceCollection services, LoggerTelemetryOptions options, WebApplicationBuilder builder) {
-        CustomMetrics.Initialize(builder.Configuration);
+namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration;
+public static class LoggerTelemetryMetricsConfigurator {
+    public static void Configure(IServiceCollection services, LoggerTelemetryOptions options, IConfiguration configuration) {
+        CustomMetrics.Initialize(configuration);
 
         if (options.MeterListenerIsEnabled)
-            services.AddHostedService<OpenTelemetryMeterListenerService>();
+            services.AddHostedService<LoggerTelemetryMeterListenerService>();
 
         services.AddOpenTelemetry()
             .WithMetrics(metrics => {

@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Depreceted;
 
-// Questo exporter è stato deprecato in favore di OpenTelemetryMeterListenerService
+// Questo exporter è stato deprecato in favore di LoggerTelemetryMeterListenerService
 // perché non riusciva a leggere il trace_id direttamente (salvo workaround complicati).
 
 /*

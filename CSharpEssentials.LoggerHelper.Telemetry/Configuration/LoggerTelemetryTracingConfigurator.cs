@@ -4,8 +4,8 @@ using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace CSharpEssentials.LoggerHelper.Telemetry;
-public static class TelemetryTracingConfigurator {
+namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration;
+public static class LoggerTelemetryTracingConfigurator {
     public static void Configure(IServiceCollection services) {
         var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ITraceEntryFactory>();
@@ -18,7 +18,7 @@ public static class TelemetryTracingConfigurator {
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddProcessor(new BatchActivityExportProcessor(
-                        new PostgreSqlTraceExporter(factory, repository),
+                        new LoggerTelemetryPostgreSqlTraceExporter(factory, repository),
                         maxQueueSize: 2048,
                         scheduledDelayMilliseconds: 5000,
                         exporterTimeoutMilliseconds: 30000

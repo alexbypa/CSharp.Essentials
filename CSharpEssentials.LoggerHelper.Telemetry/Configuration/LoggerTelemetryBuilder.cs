@@ -2,6 +2,7 @@
 using CSharpEssentials.LoggerHelper.Telemetry.middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -20,8 +21,9 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
         /// <param name="builder">The WebApplicationBuilder containing app configuration.</param>
         /// <returns>The modified IServiceCollection.</returns>
         public static IServiceCollection AddLoggerTelemetry(this IServiceCollection services, WebApplicationBuilder builder) {
+        //public static IServiceCollection AddLoggerTelemetry<T>(this IServiceCollection services, WebApplicationBuilder builder) where T : class, IRequest {
             var options = TelemetryOptionsProvider.Load(builder);
-            TelemetryDbConfigurator.Configure(services, options);
+            LoggerTelemetryDbConfigurator.Configure(services, options);
 
             if (!options?.IsEnabled ?? true)
                 return services;
@@ -40,18 +42,17 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
             CustomMetrics.Initialize(builder.Configuration);
 
 
-            //✔ Esportazione metriche e traces tramite HostedService OpenTelemetryMeterListenerService
+            //✔ Esportazione metriche e traces tramite HostedService LoggerTelemetryMeterListenerService
             if (options?.MeterListenerIsEnabled ?? false) {
                 builder.Services.AddSingleton<IMetricEntryFactory, MetricEntryFactory>();
                 builder.Services.AddSingleton<IMetricEntryRepository, MetricEntryRepository>();
-                builder.Services.AddHostedService<OpenTelemetryMeterListenerService>();
+                builder.Services.AddHostedService<LoggerTelemetryMeterListenerService>();
             }
 
             services.AddControllers();
 
-            TelemetryMetricsConfigurator.Configure(services, options, builder);
-            TelemetryTracingConfigurator.Configure(services);
-
+            LoggerTelemetryMetricsConfigurator.Configure(services, options, builder.Configuration);
+            LoggerTelemetryTracingConfigurator.Configure(services);
 
             return services;
         }
