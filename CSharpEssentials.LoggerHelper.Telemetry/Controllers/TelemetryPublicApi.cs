@@ -78,6 +78,11 @@ public class TelemetryPublicApiController : ControllerBase {
 
         return Ok(traces);
     }
+    /// <summary>
+    /// Return traces by id
+    /// </summary>
+    /// <param name="traceId"></param>
+    /// <returns></returns>
     [HttpGet("traces/{traceId}")]
     public async Task<IActionResult> GetTraceById(string traceId) {
         try {
@@ -104,6 +109,11 @@ public class TelemetryPublicApiController : ControllerBase {
         }
         return Ok("");
     }
+    /// <summary>
+    /// get Spans by TraceId
+    /// </summary>
+    /// <param name="traceId"></param>
+    /// <returns></returns>
     [HttpGet("traces/{traceId}/spans")]
     public async Task<IActionResult> GetSpansByTraceId(string traceId) {
         try {
