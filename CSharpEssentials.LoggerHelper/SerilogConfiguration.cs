@@ -54,7 +54,18 @@ public class GeneralConfig {
 public class MSSqlServer {
     public string? connectionString { get; set; }
     public SinkMsSqlOptionsSection? sinkOptionsSection { get; set; }
-    public string[] additionalColumns { get; set; }
+    public List<AdditionalSqlColumnDto> additionalColumns { get; set; }
+    public columnOptionsSection columnOptionsSection { get; set; }
+}
+public class AdditionalSqlColumnDto {
+    public string ColumnName { get; set; }
+    public string DataType { get; set; } = "NVarChar";
+    public int DataLength { get; set; }
+    public bool AllowNull { get; set; } = true;
+}
+public class columnOptionsSection {
+    public string[] addStandardColumns { get; set; }
+    public string[] removeStandardColumns { get; set; }
 }
 public class SinkMsSqlOptionsSection {
     public string? tableName { get; set; }
