@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Text;
+using Microsoft.AspNetCore.Builder;
 
 
 #if NET6_0
@@ -56,12 +57,21 @@ public static class LoggerExtensionConfig {
     /// <summary>
     /// Adds external LoggerHelper configuration (e.g., appsettings.LoggerHelper.json) to a WebApplicationBuilder.
     /// </summary>
-    public static IServiceCollection AddloggerConfiguration(this IServiceCollection services, IHostApplicationBuilder builder) {
-        var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.LoggerHelper.json");
-        if (File.Exists(externalConfigPath)) {
-            builder.Configuration.AddJsonFile(externalConfigPath, optional: true, reloadOnChange: true);
-        }
-        builder.Services.AddSingleton<LoggerErrorStore>();
+    public static IServiceCollection AddloggerConfiguration(this IServiceCollection services, WebApplicationBuilder builder) {
+        //var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory());
+
+        // Leggi la variabile di ambiente
+        var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                       ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+
+        var fileNameSettings = envName?.Equals("Development", StringComparison.OrdinalIgnoreCase)
+                   == true
+                   ? "appsettings.LoggerHelper.debug.json"
+                   : "appsettings.LoggerHelper.json";
+
+        builder.Configuration.AddJsonFile(fileNameSettings, optional: false, reloadOnChange: true);
+        
+        services.AddSingleton<LoggerErrorStore>();
         return services;
     }
 #endif

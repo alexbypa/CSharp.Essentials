@@ -15,35 +15,7 @@ internal class LoggerBuilder {
     private readonly LoggerConfiguration _config;
     private readonly SerilogConfiguration _serilogConfig;
     private static string fileNameSettings = "";
-    /// <summary>
-    /// Dynamically loads and registers available sink plugins by scanning the current
-    /// application's base directory for assemblies matching the sink naming convention.
-    /// 
-    /// If the "_excludeSinkFile" flag is set to true (e.g., due to missing log file directory),
-    /// the "File" sink plugin will be excluded from registration.
-    /// </summary>
-    internal static IConfiguration BuildLoggerConfiguration() {
-        var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory());
-
-        // Leggi la variabile di ambiente
-        var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
-                       ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-
-        fileNameSettings = envName?.Equals("Development", StringComparison.OrdinalIgnoreCase)
-                   == true
-                   ? "appsettings.LoggerHelper.debug.json"
-                   : "appsettings.LoggerHelper.json";
-
-        builder.AddJsonFile(fileNameSettings, optional: false, reloadOnChange: true);
-
-        try {
-            return builder.Build();
-        } catch (FileNotFoundException fnf) {
-            throw new InvalidOperationException($"Configuration File '{fileNameSettings}' not found", fnf);
-        }
-    }
-
+   
     /// <summary>
     /// Builds and returns the configured Serilog logger instance.
     /// </summary>
@@ -61,7 +33,7 @@ internal class LoggerBuilder {
     /// See <see href="https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation">Configuration docs</see> for more info.
     /// </exception>
     internal LoggerBuilder() {
-        var configuration = BuildLoggerConfiguration();
+        var configuration = LoggerHelperServiceLocator.GetService<IConfiguration>();
         _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
         if (_serilogConfig == null)
             throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
