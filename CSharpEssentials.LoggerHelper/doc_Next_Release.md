@@ -527,6 +527,14 @@ If custom `ColumnsPostGreSQL` is defined, logs will include all specified fields
 ---
 ## 💾 MS SQL Sink<a id='ms-sql-sink'></a>    [🔝](#table-of-contents)
 This sink writes logs to a Microsoft SQL Server table and supports additional context properties out of the box.
+#### RenderedMessage enricher
+
+By default, the `LoggerHelper` package adds a custom enricher that injects the `RenderedMessage` property into all log events.
+
+This property contains the final log message with all placeholders resolved — for example:
+```csharp
+logger.LogInformation("User {UserId} logged in", userId);
+```
 
 ### 📦 Changes
 
@@ -544,22 +552,54 @@ This sink writes logs to a Microsoft SQL Server table and supports additional co
 
 ```json
 "MSSqlServer": {
-  "connectionString": "<YOUR CONNECTIONSTRING>",
-  "sinkOptionsSection": {
-    "tableName": "logs",
-    "schemaName": "dbo",
-    "autoCreateSqlTable": true,
-    "batchPostingLimit": 100,
-    "period": "0.00:00:10"
-  },
-  "columnOptionsSection": {
-    "addStandardColumns": [
-      "LogEvent"
-    ],
-    "removeStandardColumns": [
-      "Properties"
-    ]
-  }
+	"connectionString": "<YOUR CONNECTIONSTRING>",
+	"sinkOptionsSection": {
+		"tableName": "logs",
+		"schemaName": "dbo",
+		"autoCreateSqlTable": true,
+		"batchPostingLimit": 100,
+		"period": "0.00:00:10"
+	},
+	"columnOptionsSection": {
+		"addStandardColumns": [
+			"Id",
+			"Message",
+			"MessageTemplate",
+			"Level",
+			"Exception",
+			"LogEvent"
+		],
+		"removeStandardColumns": [
+			"Properties"
+		]
+	},
+	"additionalColumns": [
+		{
+			"ColumnName": "RenderedMessage",
+			"DataType": "NVarChar",
+			"DataLength": 4000
+		},
+		{
+			"ColumnName": "IdTransaction",
+			"DataType": "VarChar",
+			"DataLength": 50
+		},
+		{
+			"ColumnName": "Action",
+			"DataType": "VarChar",
+			"DataLength": 50
+		},
+		{
+			"ColumnName": "MachineName",
+			"DataType": "VarChar",
+			"DataLength": 50
+		},
+		{
+			"ColumnName": "ApplicationName",
+			"DataType": "VarChar",
+			"DataLength": 50
+		}
+	]
 }
 ```
 
