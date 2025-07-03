@@ -1,5 +1,6 @@
 ﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
+using CSharpEssentials.LoggerHelper.Telemetry.Proxy;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Exporters;
@@ -19,12 +20,15 @@ public interface ILoggerTelemetryTraceEntryRepository {
 /// </summary>
 public class LoggerTelemetryTraceEntryRepository : ILoggerTelemetryTraceEntryRepository {
     private readonly IServiceProvider _provider;
+    private readonly ITelemetryGatekeeper _telemetryGatekeeper;
     /// <summary>
     /// Constructor injecting IServiceProvider to resolve TelemetriesDbContext via scoped lifetime.
     /// </summary>
     /// <param name="provider">The application's dependency injection provider.</param>
-    public LoggerTelemetryTraceEntryRepository(IServiceProvider provider) {
+    /// <param name="telemetryGatekeeper">Read from IOptionsMonitor is isEnebled or not</param>
+    public LoggerTelemetryTraceEntryRepository(IServiceProvider provider, ITelemetryGatekeeper telemetryGatekeeper) {
         _provider = provider;
+        _telemetryGatekeeper = telemetryGatekeeper;
     }
     /// <summary>
     /// Persists the given trace entries to the Telemetries database context.
@@ -32,9 +36,12 @@ public class LoggerTelemetryTraceEntryRepository : ILoggerTelemetryTraceEntryRep
     /// </summary>
     /// <param name="entries">A list of trace entries to be added to the database.</param>
     public async Task SaveAsync(IEnumerable<TraceEntry> entries) {
-        using var scope = _provider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
-        await db.TraceEntry.AddRangeAsync(entries);
-        await db.SaveChangesAsync();
+        if (_telemetryGatekeeper.IsEnabled) {
+            using var scope = _provider.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
+            await db.TraceEntry.AddRangeAsync(entries);
+            await db.SaveChangesAsync();
+        }
+
     }
 }

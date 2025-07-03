@@ -1,4 +1,5 @@
 ﻿using CSharpEssentials.LoggerHelper.Telemetry.Metrics;
+using CSharpEssentials.LoggerHelper.Telemetry.Proxy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Metrics;
@@ -6,6 +7,12 @@ using OpenTelemetry.Metrics;
 namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration;
 public static class LoggerTelemetryMetricsConfigurator {
     public static void Configure(IServiceCollection services, LoggerTelemetryOptions options, IConfiguration configuration) {
+        var provider = services.BuildServiceProvider();
+        var telemetryGatekeeper = provider.GetRequiredService<ITelemetryGatekeeper>();
+        if (!telemetryGatekeeper.IsEnabled) {
+            return;
+        }
+
         CustomMetrics.Initialize(configuration);
 
         if (options.MeterListenerIsEnabled)

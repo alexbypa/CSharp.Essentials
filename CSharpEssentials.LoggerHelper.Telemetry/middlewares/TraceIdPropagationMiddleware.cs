@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CSharpEssentials.LoggerHelper.Configuration;
+using CSharpEssentials.LoggerHelper.Telemetry.Proxy;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using System.Diagnostics;
 
@@ -26,20 +29,23 @@ public class TraceIdPropagationMiddleware {
     /// <param name="context">The HTTP context for the current request.</param>
     /// <returns>A task that represents the completion of request processing.</returns>
     public async Task InvokeAsync(HttpContext context) {
-    var activity = Activity.Current;
-        if (activity is not null) {
-            // Extract the TraceId
-            var traceId = activity.TraceId.ToString();
-            // Add to Activity tags if not already present
-            if (!activity.Tags.Any(t => t.Key == "trace_id")) {
-                activity.SetTag("trace_id", traceId);
+        var config = context.RequestServices.GetService<ITelemetryGatekeeper>();
+        if (config?.IsEnabled ?? false) {
+            var activity = Activity.Current;
+            if (activity is not null) {
+                // Extract the TraceId
+                var traceId = activity.TraceId.ToString();
+                // Add to Activity tags if not already present
+                if (!activity.Tags.Any(t => t.Key == "trace_id")) {
+                    activity.SetTag("trace_id", traceId);
+                }
+                // Add to Baggage for propagation into metrics
+                if (string.IsNullOrEmpty(Baggage.GetBaggage("trace_id"))) {
+                    Baggage.SetBaggage("trace_id", traceId);
+                }
             }
-            // Add to Baggage for propagation into metrics
-            if (string.IsNullOrEmpty(Baggage.GetBaggage("trace_id"))) {
-                Baggage.SetBaggage("trace_id", traceId);
-            }
+            // Call the next middleware in the pipeline
         }
-        // Call the next middleware in the pipeline
         await _next(context);
     }
 }

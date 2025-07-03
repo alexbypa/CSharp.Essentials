@@ -1,14 +1,9 @@
 ﻿using CSharpEssentials.LoggerHelper.model;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
-using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 using System.Text;
-using Microsoft.AspNetCore.Builder;
+using System.Text.RegularExpressions;
 
 
 #if NET6_0
@@ -37,45 +32,6 @@ public interface ILoggerRequest {
 /// Marker interface extending ILoggerRequest for request-based logging.
 /// </summary>
 public interface IRequest : ILoggerRequest { }
-/// <summary>
-/// Helper class for configuring and writing logs with Serilog.
-/// </summary>
-public static class LoggerExtensionConfig {
-#if NET6_0
-    /// <summary>
-    /// Adds external LoggerHelper configuration (e.g., appsettings.LoggerHelper.json) to a WebApplicationBuilder.
-    /// </summary>
-    public static IServiceCollection AddLoggerConfiguration(this WebApplicationBuilder builder) {
-        var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.LoggerHelper.json");
-        if (File.Exists(externalConfigPath)) {
-            builder.Configuration.AddJsonFile(externalConfigPath, optional: true, reloadOnChange: true);
-        }
-        builder.Services.AddSingleton<LoggerErrorStore>();
-        return builder.Services;
-    }
-#else
-    /// <summary>
-    /// Adds external LoggerHelper configuration (e.g., appsettings.LoggerHelper.json) to a WebApplicationBuilder.
-    /// </summary>
-    public static IServiceCollection AddloggerConfiguration(this IServiceCollection services, WebApplicationBuilder builder) {
-        //var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory());
-
-        // Leggi la variabile di ambiente
-        var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
-                       ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-
-        var fileNameSettings = envName?.Equals("Development", StringComparison.OrdinalIgnoreCase)
-                   == true
-                   ? "appsettings.LoggerHelper.debug.json"
-                   : "appsettings.LoggerHelper.json";
-
-        builder.Configuration.AddJsonFile(fileNameSettings, optional: false, reloadOnChange: true);
-        
-        services.AddSingleton<LoggerErrorStore>();
-        return services;
-    }
-#endif
-}
 
 // 1) Define a TextWriter that pushes into your queue
 class ErrorListTextWriter : TextWriter {

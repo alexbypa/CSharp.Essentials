@@ -1,4 +1,5 @@
 ﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
+using CSharpEssentials.LoggerHelper.Telemetry.Proxy;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -19,6 +20,10 @@ public interface ILoggerTelemetryTraceEntryFactory {
 /// to a TraceEntry model for storage and correlation.
 /// </summary>
 public class LoggerTelemetryTraceEntryFactory : ILoggerTelemetryTraceEntryFactory {
+    ITelemetryGatekeeper _gatekeeper;
+    public LoggerTelemetryTraceEntryFactory(ITelemetryGatekeeper gatekeeper) {
+        _gatekeeper = gatekeeper;
+    }
     /// <summary>
     /// Converts an Activity instance into a TraceEntry, extracting timing,
     /// identifiers, tags, and any logged events.
@@ -26,6 +31,10 @@ public class LoggerTelemetryTraceEntryFactory : ILoggerTelemetryTraceEntryFactor
     /// <param name="activity">The span to convert.</param>
     /// <returns>A TraceEntry object ready for persistence.</returns>
     public TraceEntry Create(Activity activity) {
+        
+        if (!_gatekeeper.IsEnabled)
+            return null;
+
         var start = activity.StartTimeUtc;
         var end = start + activity.Duration;
 

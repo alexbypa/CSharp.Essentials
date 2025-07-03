@@ -1,11 +1,12 @@
-﻿using CSharpEssentials.LoggerHelper.Telemetry.Exporters;
+﻿using CSharpEssentials.LoggerHelper.Configuration;
+using CSharpEssentials.LoggerHelper.Telemetry.Exporters;
 using CSharpEssentials.LoggerHelper.Telemetry.Metrics;
 using CSharpEssentials.LoggerHelper.Telemetry.middlewares;
+using CSharpEssentials.LoggerHelper.Telemetry.Proxy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Options;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
     /// <summary>
@@ -22,14 +23,20 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
         /// <param name="builder">The WebApplicationBuilder containing app configuration.</param>
         /// <returns>The modified IServiceCollection.</returns>
         public static IServiceCollection AddLoggerTelemetry(this IServiceCollection services, WebApplicationBuilder builder) {
-        //public static IServiceCollection AddLoggerTelemetry<T>(this IServiceCollection services, WebApplicationBuilder builder) where T : class, IRequest {
             var options = TelemetryOptionsProvider.Load(builder);
+            
+
+            services.AddSingleton<ITelemetryGatekeeper, TelemetryGatekeeper>((sp) => {
+                var optionsMonitor = sp.GetRequiredService<IOptionsMonitor<LoggerTelemetryOptions>>();
+                var LoggerConfigInfo = sp.GetRequiredService<ILoggerConfigInfo>();
+                return new TelemetryGatekeeper(optionsMonitor, LoggerConfigInfo);
+            });
             LoggerTelemetryDbConfigurator.Configure(services, options);
 
-            if (!options?.IsEnabled ?? true)
-                return services;
-
-            services.AddSingleton<ILoggerTelemetryTraceEntryFactory, LoggerTelemetryTraceEntryFactory>();
+            services.AddSingleton<ILoggerTelemetryTraceEntryFactory, LoggerTelemetryTraceEntryFactory>(sp => {
+                var gatekeeper = sp.GetRequiredService<ITelemetryGatekeeper>();
+                return new LoggerTelemetryTraceEntryFactory(gatekeeper);
+            });
             services.AddSingleton<ILoggerTelemetryTraceEntryRepository, LoggerTelemetryTraceEntryRepository>();
 
             // Registers a startup filter that ensures the TraceIdPropagationMiddleware is injected

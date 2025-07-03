@@ -5,19 +5,15 @@ using System.IO;
 
 namespace CSharpEssentials.LoggerHelper.Dashboard.Extensions;
 
-
 public static class ResourceHelper {
     public static Stream GetResourceStream(string resourceName) {
         var assembly = Assembly.GetExecutingAssembly();
         return assembly.GetManifestResourceStream($"{assembly.GetName().Name}.{resourceName}");
     }
-
     public static string[] GetResourceNames() {
         return Assembly.GetExecutingAssembly().GetManifestResourceNames();
     }
 }
-
-
 public static class DashboardExtensions {
     // Metodo di estensione per registrare la dashboard embedded
     public static void UseLoggerHelperDashboard(this WebApplication app, string path = "/loggerdashboard") {

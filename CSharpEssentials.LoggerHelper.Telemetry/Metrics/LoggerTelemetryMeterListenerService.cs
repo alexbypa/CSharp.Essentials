@@ -1,4 +1,5 @@
 ﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
+using CSharpEssentials.LoggerHelper.Telemetry.Proxy;
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics.Metrics;
 
@@ -7,19 +8,28 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Metrics;
 public class LoggerTelemetryMeterListenerService : BackgroundService {
     private readonly IMetricEntryFactory _factory;
     private readonly IMetricEntryRepository _repository;
+    ITelemetryGatekeeper _gatekeeper;
     private readonly List<MetricEntry> _buffer = new();
     private readonly object _lock = new();
     private MeterListener? _listener;
 
     public LoggerTelemetryMeterListenerService(
         IMetricEntryFactory factory,
-        IMetricEntryRepository repository
+        IMetricEntryRepository repository,
+        ITelemetryGatekeeper gatekeeper
+
     ) {
         _factory = factory;
         _repository = repository;
+        _gatekeeper = gatekeeper;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken) {
+        if (!_gatekeeper.IsEnabled) {
+            return Task.CompletedTask;
+        }
+
+
         _listener = new MeterListener {
             //TOHACK: passare i parametri esternamente tramite IOptions !
             InstrumentPublished = (instrument, listener) => {
@@ -63,9 +73,10 @@ public class LoggerTelemetryMeterListenerService : BackgroundService {
 
         await _repository.SaveAsync(toWrite, token);
     }
-
     public override void Dispose() {
-        _listener?.Dispose();
-        base.Dispose();
+        if (_gatekeeper.IsEnabled) {
+            _listener?.Dispose();
+            base.Dispose();
+        }
     }
 }
