@@ -2,6 +2,7 @@
 using CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Controllers;
 /// <summary>
@@ -156,10 +157,11 @@ public class TelemetryPublicApiController : ControllerBase {
 
         var traceCount = await _db.TraceEntry.Where(a => a.StartTime >= since).CountAsync();
         var metricCount = await _db.Metrics.Where(a => a.Timestamp >= since).CountAsync();
-
+        var startTime = Process.GetCurrentProcess().StartTime;
         return Ok(new {
             traceCount,
-            metricCount
+            metricCount,
+            startTime
         });
     }
 }
