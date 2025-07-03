@@ -150,4 +150,16 @@ public class TelemetryPublicApiController : ControllerBase {
             .ToListAsync();
         return Ok(logs);
     }
+    [HttpGet("summary")]
+    public async Task<IActionResult> GetSummaryAsync() {
+        var since = DateTime.UtcNow.AddMinutes(-1);
+
+        var traceCount = await _db.TraceEntry.Where(a => a.StartTime >= since).CountAsync();
+        var metricCount = await _db.Metrics.Where(a => a.Timestamp >= since).CountAsync();
+
+        return Ok(new {
+            traceCount,
+            metricCount
+        });
+    }
 }
