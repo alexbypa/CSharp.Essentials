@@ -9,14 +9,12 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration;
 public static class LoggerTelemetryTracingConfigurator {
     public static void Configure(IServiceCollection services) {
         var provider = services.BuildServiceProvider();
-        var telemetryGatekeeper = provider.GetRequiredService<ITelemetryGatekeeper>();
-        if (!telemetryGatekeeper.IsEnabled) {
-            return;
-        }
         var factory = provider.GetRequiredService<ILoggerTelemetryTraceEntryFactory>();
         var repository = provider.GetRequiredService<ILoggerTelemetryTraceEntryRepository>();
+        var telemetryGatekeeper = provider.GetRequiredService<ITelemetryGatekeeper>();
         services.AddOpenTelemetry()
             .WithTracing(tracer => {
+                if (telemetryGatekeeper.IsEnabled)
                 tracer
                     .AddSource("LoggerHelper")
                     .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("LoggerHelper"))

@@ -28,8 +28,6 @@ public class LoggerTelemetryMeterListenerService : BackgroundService {
         if (!_gatekeeper.IsEnabled) {
             return Task.CompletedTask;
         }
-
-
         _listener = new MeterListener {
             //TOHACK: passare i parametri esternamente tramite IOptions !
             InstrumentPublished = (instrument, listener) => {
@@ -51,17 +49,14 @@ public class LoggerTelemetryMeterListenerService : BackgroundService {
             }
             await FlushBufferAsync(stoppingToken);
         }, stoppingToken);
-
         return Task.CompletedTask;
     }
-
     private void OnMeasurement(Instrument instrument, double measurement, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state) {
         var entry = _factory.Create(instrument, measurement, tags);
         lock (_lock) {
             _buffer.Add(entry);
         }
     }
-
     private async Task FlushBufferAsync(CancellationToken token) {
         List<MetricEntry> toWrite;
         lock (_lock) {
@@ -70,7 +65,6 @@ public class LoggerTelemetryMeterListenerService : BackgroundService {
             toWrite = new List<MetricEntry>(_buffer);
             _buffer.Clear();
         }
-
         await _repository.SaveAsync(toWrite, token);
     }
     public override void Dispose() {

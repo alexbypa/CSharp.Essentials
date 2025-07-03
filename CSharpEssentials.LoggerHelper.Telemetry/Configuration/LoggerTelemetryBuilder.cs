@@ -50,7 +50,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
             CustomMetrics.Initialize(builder.Configuration);
 
 
-            //✔ Esportazione metriche e traces tramite HostedService LoggerTelemetryMeterListenerService
+            // Esportazione metriche e traces tramite HostedService LoggerTelemetryMeterListenerService
             if (options?.MeterListenerIsEnabled ?? false) {
                 builder.Services.AddSingleton<IMetricEntryFactory, MetricEntryFactory>();
                 builder.Services.AddSingleton<IMetricEntryRepository, MetricEntryRepository>();

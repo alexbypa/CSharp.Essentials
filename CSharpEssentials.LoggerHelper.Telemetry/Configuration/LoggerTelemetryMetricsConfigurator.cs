@@ -9,10 +9,6 @@ public static class LoggerTelemetryMetricsConfigurator {
     public static void Configure(IServiceCollection services, LoggerTelemetryOptions options, IConfiguration configuration) {
         var provider = services.BuildServiceProvider();
         var telemetryGatekeeper = provider.GetRequiredService<ITelemetryGatekeeper>();
-        if (!telemetryGatekeeper.IsEnabled) {
-            return;
-        }
-
         CustomMetrics.Initialize(configuration);
 
         if (options.MeterListenerIsEnabled)
@@ -20,7 +16,8 @@ public static class LoggerTelemetryMetricsConfigurator {
 
         services.AddOpenTelemetry()
             .WithMetrics(metrics => {
-                metrics
+                if (telemetryGatekeeper.IsEnabled)
+                    metrics
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddSqlClientInstrumentation()
