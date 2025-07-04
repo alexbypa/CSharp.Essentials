@@ -13,8 +13,7 @@ private readonly IOptionsMonitor<LoggerTelemetryOptions> _options;
     /// Constructor that sets up the gatekeeper and listens for config changes.
     /// </summary>
     /// <param name="options">Options monitor for LoggerTelemetryOptions</param>
-    /// <param name="loggerConfigInfo">Injected but not used directly here (may be used elsewhere)</param>
-    public TelemetryGatekeeper(IOptionsMonitor<LoggerTelemetryOptions> options, ILoggerConfigInfo loggerConfigInfo) {
+    public TelemetryGatekeeper(IOptionsMonitor<LoggerTelemetryOptions> options) {
         _options = options;
         _options.OnChange(options => {
             Console.WriteLine($"[CHANGE DETECTED] IsEnabled = {options.IsEnabled}");

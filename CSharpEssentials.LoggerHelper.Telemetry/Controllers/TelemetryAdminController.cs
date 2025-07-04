@@ -1,8 +1,6 @@
-﻿using CSharpEssentials.LoggerHelper.Configuration;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Controllers;
 
@@ -10,28 +8,26 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Controllers;
 [Route("api/[controller]")]
 public class TelemetryAdminController : ControllerBase {
     private readonly IConfiguration _config;
-    private readonly ILoggerConfigInfo _loggerConfigInfo;
-    public TelemetryAdminController(IConfiguration config, ILoggerConfigInfo loggerConfigInfo) {
+    private readonly TelemetriesDbContext _telemetriesDbContext;
+    public TelemetryAdminController(IConfiguration config, TelemetriesDbContext telemetriesDbContext) {
         _config = config;
-        _loggerConfigInfo = loggerConfigInfo;
+        _telemetriesDbContext = telemetriesDbContext;
     }
     [HttpPost("setTelemetryEnabled")]
     public IActionResult SetTelemetryEnabled([FromQuery] bool isEnabled) {
-        var filePath = _loggerConfigInfo.fileNameSettings;
-
-        if (!System.IO.File.Exists(filePath))
-            return NotFound("Config file not found.");
-
-        var json = System.IO.File.ReadAllText(filePath);
-        var jdoc = JsonNode.Parse(json);
-
-        jdoc!["Serilog"]!["SerilogConfiguration"]!["LoggerTelemetryOptions"]!["IsEnabled"] = isEnabled;
-        System.IO.File.WriteAllText(filePath, jdoc.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+        var options = _telemetriesDbContext.LoggerTelemetryOptions.FirstOrDefault();
+        if (options == null)
+            return BadRequest();
+        options.LastUpdated = DateTime.UtcNow;
+        options.IsEnabled = isEnabled;
+        _telemetriesDbContext.LoggerTelemetryOptions.Update(options); // <--- forza tracking
+        _telemetriesDbContext.SaveChanges();
         return Ok(new { IsEnabled = isEnabled });
     }
     [HttpGet("getTelemetryStatus")]
     public IActionResult GetTelemetryStatus() {
-        var isEnabled = _config.GetValue<bool>("Serilog:SerilogConfiguration:LoggerTelemetryOptions:IsEnabled");
-        return Ok(new { IsEnabled = isEnabled });
+        return Ok(new {
+            IsEnabled = _telemetriesDbContext.LoggerTelemetryOptions.FirstOrDefault()?.IsEnabled ?? false
+        });
     }
 }

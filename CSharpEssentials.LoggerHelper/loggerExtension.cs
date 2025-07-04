@@ -1,4 +1,5 @@
 ﻿using CSharpEssentials.LoggerHelper.model;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Events;
 using System.Diagnostics;
@@ -69,24 +70,10 @@ public class loggerExtension<T> where T : IRequest {
         string step = "Init";
         string SinkNameInError = "";
         try {
-
-            Serilog.Debugging.SelfLog.Enable(
-                new ErrorListTextWriter(Errors)
-            );
-
-            //Serilog.Debugging.SelfLog.Enable(msg =>
-            //{
-            //    Errors.Add(new LogErrorEntry {
-            //        Timestamp = DateTime.UtcNow,
-            //        SinkName = "SelfLog",
-            //        ErrorMessage = msg,
-            //        ContextInfo = AppContext.BaseDirectory
-            //    });
-            //});
-
+            Serilog.Debugging.SelfLog.Enable(new ErrorListTextWriter(Errors));
             var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError, ref Errors, ref SinksLoaded);
             log = builder.Build();
-            var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
+            var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>(); 
             log = enricher != null
                    ? enricher.Enrich(log, context: null)
                    : log;

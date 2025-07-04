@@ -23,15 +23,16 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
         /// <param name="builder">The WebApplicationBuilder containing app configuration.</param>
         /// <returns>The modified IServiceCollection.</returns>
         public static IServiceCollection AddLoggerTelemetry(this IServiceCollection services, WebApplicationBuilder builder) {
+            LoggerTelemetryDbConfigurator.Configure(services);
             var options = TelemetryOptionsProvider.Load(builder);
             
 
             services.AddSingleton<ITelemetryGatekeeper, TelemetryGatekeeper>((sp) => {
                 var optionsMonitor = sp.GetRequiredService<IOptionsMonitor<LoggerTelemetryOptions>>();
-                var LoggerConfigInfo = sp.GetRequiredService<ILoggerConfigInfo>();
-                return new TelemetryGatekeeper(optionsMonitor, LoggerConfigInfo);
+                return new TelemetryGatekeeper(optionsMonitor);
             });
-            LoggerTelemetryDbConfigurator.Configure(services, options);
+
+            
 
             services.AddSingleton<ILoggerTelemetryTraceEntryFactory, LoggerTelemetryTraceEntryFactory>(sp => {
                 var gatekeeper = sp.GetRequiredService<ITelemetryGatekeeper>();

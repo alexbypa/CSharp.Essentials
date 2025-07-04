@@ -28,6 +28,7 @@ public class TelemetriesDbContext : DbContext {
     /// The <see cref="DbContextOptions{TelemetriesDbContext}"/> used to configure the context
     /// (e.g., the database provider and connection string).
     /// </param>
+    public DbSet<LoggerTelemetryOptions> LoggerTelemetryOptions => Set<LoggerTelemetryOptions>();
     public TelemetriesDbContext(DbContextOptions<TelemetriesDbContext> options)
         : base(options) { }
     /// <summary>

@@ -1,4 +1,5 @@
-﻿using CSharpEssentials.LoggerHelper.model;
+﻿using CSharpEssentials.LoggerHelper.Configuration;
+using CSharpEssentials.LoggerHelper.model;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Debugging;
@@ -12,10 +13,12 @@ namespace CSharpEssentials.LoggerHelper;
 /// Responsible for building the Serilog logger configuration dynamically based on the provided appsettings.json configuration.
 /// </summary>
 internal class LoggerBuilder {
-    private readonly LoggerConfiguration _config;
-    private readonly SerilogConfiguration _serilogConfig;
-    private static string fileNameSettings = "";
-   
+    private LoggerConfiguration _config;
+    private SerilogConfiguration _serilogConfig;
+   internal LoggerBuilder() {
+        _config = LoggerConfigHelper.LoggerConfig;
+        _serilogConfig = LoggerConfigHelper.SerilogConfig;
+    }
     /// <summary>
     /// Builds and returns the configured Serilog logger instance.
     /// </summary>
@@ -23,32 +26,9 @@ internal class LoggerBuilder {
     public ILogger Build() => _config.CreateLogger();
 
     internal ConcurrentQueue<LogErrorEntry> _initializationErrors = new ConcurrentQueue<LogErrorEntry>();
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LoggerBuilder"/> class.
-    /// Reads the Serilog configuration section and sets up basic enrichers and self-logging.
-    /// </summary>
-    /// <param name="configuration">Application configuration (e.g., appsettings.json).</param>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if the `Serilog:SerilogConfiguration` section is missing.  
-    /// See <see href="https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation">Configuration docs</see> for more info.
-    /// </exception>
-    internal LoggerBuilder() {
-        var configuration = LoggerHelperServiceLocator.GetService<IConfiguration>();
-        _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
-        if (_serilogConfig == null)
-            throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
-        if (_serilogConfig.SerilogOption == null)
-            throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration:SerilogOption' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
-        if (_serilogConfig.SerilogCondition == null)
-            throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration:SerilogCondition' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
-
-        var appName = _serilogConfig.ApplicationName;
-        _config = new LoggerConfiguration().ReadFrom.Configuration(configuration)
-            .WriteTo.Sink(new OpenTelemetryLogEventSink())//TODO: da configurare
-            .Enrich.WithProperty("ApplicationName", appName)
-            .Enrich.With<RenderedMessageEnricher>();
-    }
+    
     private bool _excludeSinkFile;
+
     /// <summary>
     /// Dynamically adds sinks to the LoggerConfiguration based on conditions specified in the Serilog configuration.
     /// </summary>

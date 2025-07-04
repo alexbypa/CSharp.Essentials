@@ -16,6 +16,7 @@ public static class LoggerHelperServiceLocator {
     /// <typeparam name="T">The type of service to resolve.</typeparam>
     /// <returns>An instance of the requested service type, or null if not registered.</returns>
     public static T? GetService<T>() where T : class {
+        //Play attention need to call after Build application or config
         return Instance?.GetService(typeof(T)) as T;
     }
 }

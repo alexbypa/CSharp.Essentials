@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Serilog;
+using System.Runtime.CompilerServices;
 
 namespace CSharpEssentials.LoggerHelper.Configuration;
 /// <summary>
@@ -39,18 +41,39 @@ public static class LoggerExtensionConfig {
 
         builder.Configuration.AddJsonFile(SettingsProvider, fileNameSettings, false, true);
 
-        services.AddSingleton<LoggerErrorStore>();
-        services.AddSingleton<ILoggerConfigInfo, LoggerConfigInfo>((sp) => {
-            return new LoggerConfigInfo { fileNameSettings = configPath };
-        });
 
+        //var configuration = LoggerHelperServiceLocator.GetService<IConfiguration>();
+        var configuration = builder.Configuration;
+        services.Configure<SerilogConfiguration>(configuration.GetSection("Serilog:SerilogConfiguration"));
+        var _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
+        if (_serilogConfig == null)
+            throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
+        if (_serilogConfig.SerilogOption == null)
+            throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration:SerilogOption' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
+        if (_serilogConfig.SerilogCondition == null)
+            throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration:SerilogCondition' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
+
+        var appName = _serilogConfig.ApplicationName;
+        var _config = new LoggerConfiguration().ReadFrom.Configuration(configuration)
+            .WriteTo.Sink(new OpenTelemetryLogEventSink())//TODO: da configurare
+            .Enrich.WithProperty("ApplicationName", appName)
+            .Enrich.With<RenderedMessageEnricher>();
+
+        services.AddSingleton<LoggerErrorStore>();
+
+        LoggerConfigHelper.Initialize(configPath, _serilogConfig, _config);
+        
         return services;
     }
 #endif
 }
-public class LoggerConfigInfo : ILoggerConfigInfo {
-    public string fileNameSettings { get; set; }
-}
-public interface ILoggerConfigInfo {
-    string fileNameSettings { get; set; }
+public static class LoggerConfigHelper {
+    public static string fileNameSettings { get; set; }
+    public static SerilogConfiguration SerilogConfig { get; set; } 
+    public static LoggerConfiguration LoggerConfig { get; set; }
+    public static void Initialize(string _fileNameSettings, SerilogConfiguration _SerilogConfig, LoggerConfiguration _LoggerConfig) {
+        fileNameSettings = _fileNameSettings;
+        SerilogConfig = _SerilogConfig;
+        LoggerConfig = _LoggerConfig;
+    }
 }
