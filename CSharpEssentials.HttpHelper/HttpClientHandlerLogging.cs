@@ -25,7 +25,7 @@ public class HttpClientHandlerLogging : DelegatingHandler {
         TimeSpan RateLimitTimeSpanElapsed = request.Headers.Contains("X-RateLimit-TimeSpanElapsed") ? TimeSpan.Parse(request.Headers.GetValues("X-RateLimit-TimeSpanElapsed").FirstOrDefault()) : TimeSpan.Zero;
         
         await _events.InvokeAll(request, response, totRetry, RateLimitTimeSpanElapsed);
-        _events.ClearAll();
+        //_events.ClearAll();
         return response;
     }
     public static string GetPageName(HttpRequestMessage request) {

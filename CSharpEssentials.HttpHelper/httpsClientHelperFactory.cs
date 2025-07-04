@@ -6,7 +6,7 @@ public class httpsClientHelperFactory : IhttpsClientHelperFactory {
     private readonly IEnumerable<httpClientOptions> _options;
     private readonly IHttpRequestEvents _events;
     private readonly Dictionary<string, IhttpsClientHelper> _cache = new();
-
+    private IhttpsClientHelper instance;
     public httpsClientHelperFactory(
         IHttpClientFactory httpClientFactory,
         IHttpRequestEvents events,
@@ -20,17 +20,21 @@ public class httpsClientHelperFactory : IhttpsClientHelperFactory {
         if (_cache.TryGetValue(name, out var cachedHelper))
             return cachedHelper;
 
-            var config = _options.FirstOrDefault(o => o.Name == name)
-            ?? throw new ArgumentException($"Client '{name}' not found");
+        var config = _options.FirstOrDefault(o => o.Name == name)
+        ?? throw new ArgumentException($"Client '{name}' not found");
 
         var client = _httpClientFactory.CreateClient(name);
-        var helper = new httpsClientHelper(client, new HttpRequestEvents(), config.RateLimitOptions); // sostituisci `HttpRequestEvents` se già registrato
-        _cache[name] = helper;
+        instance = new httpsClientHelper(client, _events, config.RateLimitOptions); // sostituisci `HttpRequestEvents` se già registrato
+        _cache[name] = instance;
 
-        return helper;
+        return instance;
+    }
+    public IhttpsClientHelper AddActionOnRequest(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> callback) {
+        instance.AddRequestAction(callback);
+        return instance;
     }
 }
-
 public interface IhttpsClientHelperFactory {
     IhttpsClientHelper CreateOrGet(string name);
+    IhttpsClientHelper AddActionOnRequest(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> callback);
 }
