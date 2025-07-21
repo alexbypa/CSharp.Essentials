@@ -72,7 +72,8 @@ public class TelemetryPublicApiController : ControllerBase {
                 traceId = t.TraceId,
                 operation = t.Name,
                 timestamp = t.StartTime,
-                durationMs = t.DurationMs
+                durationMs = t.DurationMs,
+                Anomaly = t.Anomaly
             })
             .OrderByDescending(t => t.timestamp)
             .ToListAsync();
@@ -101,6 +102,7 @@ public class TelemetryPublicApiController : ControllerBase {
                 traceDb.StartTime,
                 traceDb.EndTime,
                 traceDb.DurationMs,
+                traceDb.Anomaly,
                 Tags = string.IsNullOrEmpty(traceDb.TagsJson) ? "{}" : traceDb.TagsJson
             };
 
@@ -129,6 +131,7 @@ public class TelemetryPublicApiController : ControllerBase {
                 t.StartTime,
                 t.EndTime,
                 t.DurationMs,
+                t.Anomaly,
                 Tags = string.IsNullOrEmpty(t.TagsJson) ? "{}" : t.TagsJson
             });
 

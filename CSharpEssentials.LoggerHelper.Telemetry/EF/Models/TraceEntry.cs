@@ -44,6 +44,10 @@ public class TraceEntry {
     /// Tags
     /// </summary>
     public string TagsJson { get; set; } = "{}";
+    /// <summary>
+    /// Anomaly
+    /// </summary>
+    public string Anomaly { get; set; } = "Unknown";
 }
 /// <summary>
 /// Configuration
