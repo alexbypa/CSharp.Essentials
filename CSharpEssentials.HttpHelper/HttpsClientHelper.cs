@@ -1,7 +1,8 @@
 ﻿using Polly;
 using Polly.Retry;
-using System;
+using System.Text;
 using System.Threading.RateLimiting;
+using static CSharpEssentials.HttpHelper.httpsClientHelper;
 
 namespace CSharpEssentials.HttpHelper;
 public class httpsClientHelper : IhttpsClientHelper {
@@ -14,6 +15,8 @@ public class httpsClientHelper : IhttpsClientHelper {
     private AsyncRetryPolicy<HttpResponseMessage> _retryPolicy = null;
     private readonly IHttpRequestEvents _events;
     private bool TimeoutSettled = false;
+    public record httpClientAuthenticationBasic(string userName, string password);
+    public record httpClientAuthenticationBearer(string token); 
     public httpsClientHelper(HttpClient httpClient, IHttpRequestEvents events, httpClientRateLimitOptions rateLimitOptions) {
         this.httpClient = httpClient;
         _events = events;
@@ -47,6 +50,28 @@ public class httpsClientHelper : IhttpsClientHelper {
                      )
 
                     ;
+        return this;
+    }
+    private void _setHeaders(Dictionary<string, string> _HeaderValues) {
+        httpClient.DefaultRequestHeaders.Clear();
+        if (_HeaderValues != null)
+            foreach (var item in _HeaderValues) {
+                httpClient.DefaultRequestHeaders.Add(item.Key, item.Value);
+            }
+    }
+    public IhttpsClientHelper setHeadersWithoutAuthorization(Dictionary<string, string> _HeaderValues) {
+        _setHeaders(_HeaderValues);
+        return this;
+    }
+    public IhttpsClientHelper setHeadersAndBearerAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBearer httpClientAuthenticationBearer) {
+        _setHeaders(_HeaderValues);
+        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + httpClientAuthenticationBearer.token);
+        return this;
+    }
+    public IhttpsClientHelper setHeadersAndBasicAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBasic httpClientAuthenticationBasic) {
+        _setHeaders(_HeaderValues);
+        String encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(httpClientAuthenticationBasic.userName + ":" + httpClientAuthenticationBasic.password));
+        httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + encoded);
         return this;
     }
     public async Task<HttpResponseMessage> SendAsync(
@@ -133,4 +158,7 @@ public interface IhttpsClientHelper {
     IhttpsClientHelper addRetryCondition(Func<HttpResponseMessage, bool> RetryCondition, int retryCount, double backoffFactor);
     IhttpsClientHelper addTimeout(TimeSpan timeSpan);
     IhttpsClientHelper addHeaders(string KeyName, string KeyValue);
+    IhttpsClientHelper setHeadersWithoutAuthorization(Dictionary<string, string> _HeaderValues);
+    IhttpsClientHelper setHeadersAndBearerAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBearer httpClientAuthenticationBearer);
+    IhttpsClientHelper setHeadersAndBasicAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBasic httpClientAuthenticationBasic);
 }
