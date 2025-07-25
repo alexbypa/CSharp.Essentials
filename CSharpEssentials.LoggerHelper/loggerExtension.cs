@@ -57,27 +57,25 @@ class ErrorListTextWriter : TextWriter {
     }
     // You can optionally override Write(char) if you need to
 }
-/// <summary>
-/// Static logger extension for writing log entries enriched with transaction context.
-/// </summary>
-/// <typeparam name="T">The request type implementing IRequest.</typeparam>
-public class loggerExtension<T> where T : IRequest {
-    protected static readonly ILogger log;
-    public static string CurrentError { get; set; }
+
+public static class GlobalLogger {
+    public static readonly ILogger Instance;
     public static readonly List<LogErrorEntry> Errors = new();
     public static List<string> SinksLoaded = new List<string>();
-    static loggerExtension() {
+    public static string CurrentError { get; set; }
+
+    static GlobalLogger() {
         string step = "Init";
         string SinkNameInError = "";
-        try {
-            Serilog.Debugging.SelfLog.Enable(new ErrorListTextWriter(Errors));
-            var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError, ref Errors, ref SinksLoaded);
-            log = builder.Build();
-            var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>(); 
-            log = enricher != null
-                   ? enricher.Enrich(log, context: null)
-                   : log;
-            
+
+        try { 
+        var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError, ref Errors, ref SinksLoaded);
+        Instance = builder.Build();
+
+        var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
+        Instance = enricher != null
+                  ? enricher.Enrich(Instance, context: null)
+                  : Instance;
         } catch (Exception ex) {
             if (string.IsNullOrEmpty(CurrentError))
                 CurrentError = $"{step} [{AppContext.BaseDirectory}]: {ex.Message}";
@@ -90,6 +88,20 @@ public class loggerExtension<T> where T : IRequest {
             };
             Errors.Add(entry);
         }
+    }
+}
+/// <summary>
+/// Static logger extension for writing log entries enriched with transaction context.
+/// </summary>
+/// <typeparam name="T">The request type implementing IRequest.</typeparam>
+public class loggerExtension<T> where T : IRequest {
+    //protected static readonly ILogger log;
+    protected static readonly ILogger log;
+    public static string CurrentError { get; set; }
+    public static readonly List<LogErrorEntry> Errors = new();
+    public static List<string> SinksLoaded = new List<string>();
+    static loggerExtension() {
+        log = GlobalLogger.Instance;
     }
     /// <summary>
     /// method to write log Async

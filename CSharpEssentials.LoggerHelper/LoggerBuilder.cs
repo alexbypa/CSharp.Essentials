@@ -1,10 +1,8 @@
 ﻿using CSharpEssentials.LoggerHelper.Configuration;
 using CSharpEssentials.LoggerHelper.model;
-using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Debugging;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
 
