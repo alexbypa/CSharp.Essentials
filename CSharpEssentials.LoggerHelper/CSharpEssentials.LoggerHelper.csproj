@@ -40,7 +40,7 @@
       3.1.4 - Added throttling on Email and Telegram !
       3.1.5 - Added sink xUnit !
     </Description>
-    <Version>3.1.5</Version>
+    <Version>3.1.6</Version>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
