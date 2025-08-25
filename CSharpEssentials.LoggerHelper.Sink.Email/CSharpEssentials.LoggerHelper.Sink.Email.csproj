@@ -15,6 +15,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="3.1.5" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="4.0.0" />
   </ItemGroup>
 </Project>
