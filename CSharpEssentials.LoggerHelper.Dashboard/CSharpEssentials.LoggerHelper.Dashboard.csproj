@@ -5,6 +5,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Dashboard LoggerHelper</Title>
+    <PackageIcon>CSharpEssentials.png</PackageIcon>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Dashboard</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <AssemblyVersion>4.0.0</AssemblyVersion>
+    <FileVersion>4.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="ui\**\*.*">
@@ -13,10 +22,22 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.6" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Telemetry\CSharpEssentials.LoggerHelper.Telemetry.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
