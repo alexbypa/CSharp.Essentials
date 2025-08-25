@@ -17,10 +17,13 @@
 **CSharpEssentials.LoggerHelper** is not just another logging library — it’s a **smart hub** for Serilog sinks.  
 Thanks to its **modular architecture**, you can plug in only the sinks you need.
 
-🔥 But there's more:  
-For **Telegram** and **Email**, we bypass Serilog's limitations with native implementations via `HttpClient` and `System.Net.Mail`, unlocking **advanced formatting** and a built-in **ThrottleInterval** to prevent flooding your channels.
+**Key strengths include:**
 
-🔧 Configuration is centralized in a single file (`appsettings.LoggerHelper.json`), giving you full control over log levels and sink selection — no code changes required!
+- **Centralized & flexible configuration** – Choose which sinks receive which log levels using `appsettings.LoggerHelper.json`. For example, send only `Error` messages to Email while routing all logs to ElasticSearch. No code changes required.
+- *- **Unified observability & dashboard** – The `Sink.Telemetry` package integrates logs, metrics and traces via OpenTelemetry. Each log entry carries a `trace_id` so you can correlate distributed requests. An interactive dashboard lets you visualize traces, sink errors and telemetry, and configure alerts.
+
+- **Structured properties & enrichment** – Standard fields like `IdTransaction`, `ApplicationName`, `MachineName` and `Action` are included by default. You can add custom properties (e.g., username, IP) with enricher functions, and they'll appear across all sinks.
+- **Modular architecture & error inspection** – Each sink (Console, File, MSSQL, PostgreSQL, ElasticSearch, Email, Telegram, xUnit, Telemetry) is a separate NuGet package. Install only what you need; the core loads them dynamically. It also exposes `CurrentError` and an in-memory `Errors` queue to help debug initialization failures.
 
 🧠 Error Insight Built-In:  
 When something goes wrong, you can inspect:
@@ -51,6 +54,8 @@ Just install the package and define your desired levels (`Information`, `Warning
 - **Telegram**: `CSharpEssentials.LoggerHelper.Sink.Telegram` _Used via `HttpClient`_  
 - **Email**: `CSharpEssentials.LoggerHelper.Sink.Email`_Used via `System.Net.Mail`_  
 - **xUnit**: `CSharpEssentials.LoggerHelper.Sink.xUnit` ✅ ( new from 3.1.5 )
+- - **"Telemetry"**: `CSharpEssentials.LoggerHelper.Sink.Telemetry` – `CSharpEssentials.LoggerHelper.Sink.Telemetry` collects logs, metrics and traces using OpenTelemetry.
+
 
 ---
 
