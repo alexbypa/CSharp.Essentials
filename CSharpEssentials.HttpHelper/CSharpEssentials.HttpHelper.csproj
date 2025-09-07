@@ -1,20 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Title>Helper library to use HttpClient</Title>
     <Authors>Alessandro Chiodo</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.HttpHelper</RepositoryUrl>
-    <AssemblyVersion>1.2.4</AssemblyVersion>
+    <AssemblyVersion>2.0.4</AssemblyVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
-    <FileVersion>1.2.4</FileVersion>
-    <Version>1.2.4</Version>
+    <FileVersion>2.0.4</FileVersion>
+    <Version>2.0.4</Version>
     <Description>package to help manage of httpHelper</Description>
     <Company>Alessandro Chiodo</Company>
     <PackageTags>HttpClient, Resiliency, RateLimiting, ASP.NET Core, HTTP, Retry, TransientFaultHandling, Logger, Serilog, Custom Handler, .http Test</PackageTags>
@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="CSharpEssentials.png">
+    <None Include="CSharpEssentials.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
