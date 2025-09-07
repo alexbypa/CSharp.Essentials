@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Sink File for CSharpEssentials.LoggerHelper</Title>
-    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Version>4.0.0</Version>
     <Description>Sink File for package LoggerHelper</Description>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
