@@ -4,7 +4,7 @@ using System.Threading.RateLimiting;
 namespace CSharpEssentials.HttpHelper;
 public class HttpClientHandlerLogging : DelegatingHandler {
     private readonly IHttpRequestEvents _events;
-    public HttpClientHandlerLogging(IHttpRequestEvents events) => _events = events; 
+    public HttpClientHandlerLogging(IHttpRequestEvents events) => _events = events;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
         string pageCalled = GetPageName(request);
 
@@ -19,11 +19,11 @@ public class HttpClientHandlerLogging : DelegatingHandler {
         if (request.Content != null) {
             requestLog.Append(await request.Content.ReadAsStringAsync());
         }
-        response = await base.SendAsync(request, cancellationToken);
 
         int totRetry = request.Headers.Contains("X-Retry-Attempt") ? int.Parse(request.Headers.GetValues("X-Retry-Attempt").FirstOrDefault()) : 0;
         TimeSpan RateLimitTimeSpanElapsed = request.Headers.Contains("X-RateLimit-TimeSpanElapsed") ? TimeSpan.Parse(request.Headers.GetValues("X-RateLimit-TimeSpanElapsed").FirstOrDefault()) : TimeSpan.Zero;
-        
+
+        response = await base.SendAsync(request, cancellationToken);
         await _events.InvokeAll(request, response, totRetry, RateLimitTimeSpanElapsed);
         //_events.ClearAll();
         return response;
@@ -51,7 +51,7 @@ public class HttpRequestEvents : IHttpRequestEvents {
     public Task InvokeAll(HttpRequestMessage request, HttpResponseMessage response, int retryCount, TimeSpan rateLimitTimeSpanElapsed) {
         var tasks = _callbacks
             .Select(cb => cb(request, response, retryCount, rateLimitTimeSpanElapsed));
-        
+
         return Task.WhenAll(tasks);
     }
 }

@@ -16,19 +16,19 @@ public class httpsClientHelper : IhttpsClientHelper {
     private readonly IHttpRequestEvents _events;
     private bool TimeoutSettled = false;
     public record httpClientAuthenticationBasic(string userName, string password);
-    public record httpClientAuthenticationBearer(string token); 
+    public record httpClientAuthenticationBearer(string token);
     public httpsClientHelper(HttpClient httpClient, IHttpRequestEvents events, httpClientRateLimitOptions rateLimitOptions) {
         this.httpClient = httpClient;
         _events = events;
 
-        if (rateLimitOptions != null)
-        rateLimiter = new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions {
-            AutoReplenishment = rateLimitOptions.AutoReplenishment,
-            PermitLimit = rateLimitOptions.PermitLimit,
-            QueueLimit = rateLimitOptions.QueueLimit,
-            SegmentsPerWindow = rateLimitOptions.SegmentsPerWindow,
-            Window = rateLimitOptions.Window
-        });
+        if (rateLimitOptions != null && rateLimitOptions.IsEnabled)
+            rateLimiter = new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions {
+                AutoReplenishment = rateLimitOptions.AutoReplenishment,
+                PermitLimit = rateLimitOptions.PermitLimit,
+                QueueLimit = rateLimitOptions.QueueLimit,
+                SegmentsPerWindow = rateLimitOptions.SegmentsPerWindow,
+                Window = rateLimitOptions.Window
+            });
     }
     public IhttpsClientHelper AddRequestAction(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> action) {
         _events.Add(action);
@@ -101,20 +101,51 @@ public class httpsClientHelper : IhttpsClientHelper {
             request.Headers.Add("X-RateLimit-TimeSpanElapsed", (DateTime.Now - dtStartRequest).ToString());
         }
         var context = new Context();
-        Task<HttpResponseMessage> response = _retryPolicy == null ? httpClient.SendAsync(request) : _retryPolicy.ExecuteAsync(
-            async ctx => {
-                var attempt = ctx.ContainsKey("RetryAttempt") ? (int)ctx["RetryAttempt"] : 0;
 
+        Task<HttpResponseMessage> response = null;
+        if (_retryPolicy == null) {
+            response = _SendAsync(request);
+        } else {
+            response = _retryPolicy.ExecuteAsync(async ctx => {
+                var attempt = ctx.ContainsKey("RetryAttempt") ? (int)ctx["RetryAttempt"] : 0;
                 if (request.Headers.Contains("X-Retry-Attempt"))
                     request.Headers.Remove("X-Retry-Attempt");
-
                 request.Headers.Add("X-Retry-Attempt", attempt.ToString());
 
-                return await httpClient.SendAsync(CloneHttpRequestMessage(request));
-            }, context);
-        //HttpResponseMessage response = await httpClient.SendAsync(request);
+                return await _SendAsync(CloneHttpRequestMessage(request));
 
+            }, context);
+        }
         return await response;
+    }
+    private async Task<HttpResponseMessage> _SendAsync(HttpRequestMessage request) {
+        var startedAt = DateTime.UtcNow;
+        using var cts = TimeoutSettled
+            ? new CancellationTokenSource(httpClient.Timeout)
+            : new CancellationTokenSource();
+        try {
+            var response = await httpClient.SendAsync(request, cts.Token);
+            return response;
+        } catch (OperationCanceledException) when (cts.IsCancellationRequested) {
+            var elapsed = DateTime.UtcNow - startedAt;
+            return new HttpResponseMessage(System.Net.HttpStatusCode.RequestTimeout) {
+                ReasonPhrase = "Client timeout",
+                Content = new StringContent(
+                    $"{{\"error\":\"timeout\",\"elapsedSeconds\":{elapsed.TotalSeconds:F3}}}",
+                    Encoding.UTF8,
+                    "application/json"),
+                RequestMessage = request
+            };
+        } catch (HttpRequestException ex) {
+            return new HttpResponseMessage(System.Net.HttpStatusCode.BadGateway) {
+                ReasonPhrase = "Upstream error",
+                Content = new StringContent(
+                    $"{{\"error\":\"upstream\",\"message\":\"{ex.Message}\"}}",
+                    Encoding.UTF8,
+                    "application/json"),
+                RequestMessage = request
+            };
+        }
     }
     private static HttpRequestMessage CloneHttpRequestMessage(HttpRequestMessage request) {
         var clone = new HttpRequestMessage(request.Method, request.RequestUri);
@@ -146,6 +177,11 @@ public class httpsClientHelper : IhttpsClientHelper {
         httpClient.DefaultRequestHeaders.Add(KeyName, KeyValue);
         return this;
     }
+
+    public IhttpsClientHelper ClearRequestActions() {
+        _events.ClearAll();
+        return this;    
+    }
 }
 public interface IhttpsClientHelper {
     Task<HttpResponseMessage> SendAsync(
@@ -157,6 +193,7 @@ public interface IhttpsClientHelper {
     IhttpsClientHelper addFormData(List<KeyValuePair<string, string>> keyValuePairs);
     IhttpsClientHelper addRetryCondition(Func<HttpResponseMessage, bool> RetryCondition, int retryCount, double backoffFactor);
     IhttpsClientHelper addTimeout(TimeSpan timeSpan);
+    IhttpsClientHelper ClearRequestActions();
     IhttpsClientHelper addHeaders(string KeyName, string KeyValue);
     IhttpsClientHelper setHeadersWithoutAuthorization(Dictionary<string, string> _HeaderValues);
     IhttpsClientHelper setHeadersAndBearerAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBearer httpClientAuthenticationBearer);

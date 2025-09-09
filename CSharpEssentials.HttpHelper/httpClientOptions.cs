@@ -14,4 +14,5 @@ public class httpClientRateLimitOptions {
     public int QueueLimit { get; set; }
     public TimeSpan Window { get; set; }
     public int SegmentsPerWindow { get; set; }
+    public bool IsEnabled { get; set; }
 }
