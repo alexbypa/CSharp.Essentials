@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CSharpEssentials.HttpHelper;
 public static class httpExtension {
-    public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration) {
+    public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration, HttpMessageHandler PrimaryHandler) {
         var configurationBuilder = new ConfigurationBuilder().AddConfiguration(configuration);  // Usa la configurazione di partenza
 
         var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.httpHelper.json");
@@ -28,7 +28,8 @@ public static class httpExtension {
                 services
                     .AddHttpClient<IhttpsClientHelper, httpsClientHelper>(option.Name)
                     .SetHandlerLifetime(TimeSpan.FromSeconds(30))
-                    .AddHttpMessageHandler<HttpClientHandlerLogging>();
+                    .AddHttpMessageHandler<HttpClientHandlerLogging>()
+                    .ConfigurePrimaryHttpMessageHandler(() => PrimaryHandler ?? new SocketsHttpHandler());
 
                 services.AddSingleton<IhttpsClientHelper>(sp => {
                     var factory = sp.GetRequiredService<IHttpClientFactory>();
