@@ -5,6 +5,8 @@ using Serilog.Events;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
+using Serilog.Debugging;
+
 
 
 #if NET6_0
@@ -57,25 +59,50 @@ class ErrorListTextWriter : TextWriter {
     }
     // You can optionally override Write(char) if you need to
 }
+public static class SerilogSelfLogBridge {
+    private static readonly object _lock = new();
 
+    public static void Enable() {
+        SelfLog.Enable(msg => {
+            // mantieni l’output in Console
+            //Console.Error.WriteLine(msg);
+
+            // copia anche nella tua lista statica
+            var entry = new LogErrorEntry {
+                Timestamp = DateTime.UtcNow,
+                SinkName = "SelfLog",       // opzionale: puoi parsare il nome dal messaggio
+                ErrorMessage = msg,
+                ContextInfo = AppContext.BaseDirectory
+            };
+
+            lock (_lock) {
+                GlobalLogger.Errors.Add(entry); // List<T> non è thread-safe, quindi lock
+            }
+        });
+    }
+}
 public static class GlobalLogger {
     public static readonly ILogger Instance;
     public static readonly List<LogErrorEntry> Errors = new();
-    public static List<string> SinksLoaded = new List<string>();
+    public static List<LoadedSinkInfo> SinksLoaded = new List<LoadedSinkInfo>();
     public static string CurrentError { get; set; }
 
     static GlobalLogger() {
         string step = "Init";
         string SinkNameInError = "";
 
-        try { 
-        var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError, ref Errors, ref SinksLoaded);
-        Instance = builder.Build();
+        try {
+            SerilogSelfLogBridge.Enable();
 
-        var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
-        Instance = enricher != null
-                  ? enricher.Enrich(Instance, context: null)
-                  : Instance;
+            //Serilog.Debugging.SelfLog.Enable(Console.Error);
+
+            var builder = new LoggerBuilder().AddDynamicSinks(out step, out SinkNameInError, ref Errors, ref SinksLoaded);
+            Instance = builder.Build();
+
+            var enricher = LoggerHelperServiceLocator.GetService<IContextLogEnricher>();
+            Instance = enricher != null
+                      ? enricher.Enrich(Instance, context: null)
+                      : Instance;
         } catch (Exception ex) {
             if (string.IsNullOrEmpty(CurrentError))
                 CurrentError = $"{step} [{AppContext.BaseDirectory}]: {ex.Message}";
@@ -99,7 +126,7 @@ public class loggerExtension<T> where T : IRequest {
     protected static readonly ILogger log;
     public static string CurrentError { get; set; }
     public static readonly List<LogErrorEntry> Errors = new();
-    public static List<string> SinksLoaded = new List<string>();
+    public static List<LoadedSinkInfo> SinksLoaded = new List<LoadedSinkInfo>();
     static loggerExtension() {
         log = GlobalLogger.Instance;
     }
