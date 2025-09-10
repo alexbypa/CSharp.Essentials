@@ -1,178 +1,49 @@
-# 🔗 CSharpEssentials.HttpHelper
+# CSharpEssentials.HttpHelper
 
-A robust and extensible HTTP helper designed for modern .NET applications that require:
-
-- HTTP Client pooling (via `HttpClientFactory`)
-- Rate limiting
-- Retry with Polly
-- Fully testable, SOLID-friendly structure
-- Plug & play integration via `IhttpsClientHelperFactory`
+![Frameworks](https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0-blue)
+![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)
+![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)
+![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.HttpHelper.svg)
+![Last Commit](https://img.shields.io/github/last-commit/alexbypa/CSharp.Essentials?style=flat-square)
+![GitHub Discussions](https://img.shields.io/github/discussions/alexbypa/CSharp.Essentials)
+![Issues](https://img.shields.io/github/issues/alexbypa/CSharp.Essentials)
 
 ---
 
-## 🚀 Setup
+## 📦 Package
 
-Install the package and configure via:
+`CSharpEssentials.HttpHelper` is a lightweight helper to simplify the usage of `HttpClient` in .NET with a fluent, configurable API.  
+It provides convenient methods for request customization, retries, timeouts, authentication headers, and more.
 
-```csharp
-services.AddHttpClients(Configuration);
+You can install it via NuGet:
+
+```bash
+dotnet add package CSharpEssentials.HttpHelper
 ````
 
-Optionally provide an external configuration file:
-
-```
-appsettings.httpHelper.json
-```
-
-Sample:
-
-```json
-{
-  "HttpClientOptions": [
-    {
-      "Name": "GitHubClient",
-      "RateLimitOptions": {
-        "PermitLimit": 5,
-        "QueueLimit": 10,
-        "Window": "00:00:10",
-        "SegmentsPerWindow": 1,
-        "AutoReplenishment": true
-      }
-    }
-  ]
-}
-```
+NuGet Gallery: [CSharpEssentials.HttpHelper](https://www.nuget.org/packages/CSharpEssentials.HttpHelper/)
 
 ---
 
-## 🔧 Usage
+## 📖 Documentation & Demo
 
-### Initialize the client:
+The full documentation and usage examples (GET requests, retries, authentication, and more) are available here:
 
-```csharp
-var httpHelper = httpFactory
-    .CreateOrGet("GitHubClient")
-    .AddRequestAction((req, res, retry, ts) => {
-        Console.WriteLine($"[Retry: {retry}] {req.RequestUri}");
-        return Task.CompletedTask;
-    });
-```
-
-### Add headers and authentication:
-
-```csharp
-httpHelper.setHeadersAndBearerAuthentication(
-    new Dictionary<string, string> { { "User-Agent", "MyGitHubApp" } },
-    new httpsClientHelper.httpClientAuthenticationBearer("your_github_token"));
-```
-
-### Send request (GET / POST / PUT / DELETE):
-
-```csharp
-IContentBuilder contentBuilder = new NoBodyContentBuilder(); // or JsonContentBuilder
-HttpResponseMessage response = await httpHelper.SendAsync(
-    url: "https://api.github.com/search/repositories?q=recap+in:name",
-    httpMethod: HttpMethod.Get,
-    body: null,
-    contentBuilder: contentBuilder
-);
-```
-
----
-
-## 🔄 Retry Handling
-
-```csharp
-httpHelper.addRetryCondition(
-    response => !response.IsSuccessStatusCode, retryCount: 3, backoffFactor: 2.0
-);
-```
-
----
-
-## 🧪 GitHub API Usage Example
-
-### Minimal API Endpoint (search repos):
-
-```csharp
-app.MapGet("/repos/search", async (
-    [FromQuery] string Pattern,
-    [FromServices] IhttpsClientHelperFactory httpFactory) => {
-
-    var httpHelper = httpFactory.CreateOrGet("GitHubClient")
-        .AddRequestAction((req, res, retry, ts) => {
-            Console.WriteLine($"Executed request to {req.RequestUri}");
-            return Task.CompletedTask;
-        });
-
-    httpHelper.setHeadersAndBearerAuthentication(
-        new Dictionary<string, string> { { "User-Agent", "MyGitHubApp" } },
-        new httpsClientHelper.httpClientAuthenticationBearer("your_github_token"));
-
-    var url = $"https://api.github.com/search/repositories?q={Pattern}+in:name&per_page=10";
-
-    var response = await httpHelper.SendAsync(url, HttpMethod.Get, null, new NoBodyContentBuilder());
-    var json = await response.Content.ReadAsStringAsync();
-
-    using var doc = JsonDocument.Parse(json);
-    var repos = doc.RootElement
-        .GetProperty("items")
-        .EnumerateArray()
-        .Select(repo => new {
-            Name = repo.GetProperty("full_name").GetString(),
-            Url = repo.GetProperty("html_url").GetString(),
-            Description = repo.TryGetProperty("description", out var descProp) && descProp.ValueKind != JsonValueKind.Null
-                ? descProp.GetString()
-                : "(no description)"
-        })
-        .ToList();
-
-    return Results.Ok(repos);
-});
-```
-
----
-
-## 📦 Supported Content Builders
-
-* `JsonContentBuilder` → for `application/json`
-* `FormUrlEncodedContentBuilder` → for form data
-* `XmlContentBuilder` → for `application/xml`
-* `NoBodyContentBuilder` → for GET / DELETE
-
----
-
-## 📈 Built-in Features
-
-| Feature         | Description                                |
-| --------------- | ------------------------------------------ |
-| Retry           | Polly-based retry with exponential backoff |
-| Rate Limiting   | Sliding window limiter per client instance |
-| Headers/Auth    | Bearer / Basic / Custom headers            |
-| Logging Handler | Custom DelegatingHandler logs all requests |
-| Retry Info      | Injects `X-Retry-Attempt` and duration     |
-
----
-
-## 📁 Folder Structure
-
-* `httpsClientHelper.cs` – main engine
-* `httpsClientHelperFactory.cs` – factory + DI integration
-* `HttpRequestBuilder.cs` – fluent builder pattern
-* `IContentBuilder.cs` – pluggable request body strategies
-* `HttpClientHandlerLogging.cs` – optional delegating handler
-* `httpClientOptions.cs` – config-based client tuning
+👉 [Using HttpHelper – Examples & Demo](https://github.com/alexbypa/Csharp.Essentials.Extensions/blob/main/README.md#using-httphelper)
 
 ---
 
 ## 🤝 Contributing
 
-Pull requests are welcome. Please make sure to run unit tests and respect project structure before submitting.
+Contributions, issues, and feature requests are welcome!
+Feel free to open a [pull request](https://github.com/alexbypa/CSharp.Essentials/pulls) or [issue](https://github.com/alexbypa/CSharp.Essentials/issues).
 
 ---
 
 ## 📜 License
 
-MIT
+Distributed under the MIT License. See [LICENSE](../LICENSE) for more information.
 
 ```
+
+---
