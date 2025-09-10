@@ -1,6 +1,6 @@
 # CSharpEssentials.HttpHelper
 
-![Frameworks](https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0-blue)
+![Frameworks](https://img.shields.io/badge/.NET-8.0%20%7C%209.0-blue)
 ![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)
 ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)
 ![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.HttpHelper.svg)
