@@ -11,6 +11,17 @@
 **The ultimate Serilog sink hub — extensible, modular, centralized.**
 
 ---
+## 🚀 News: Embedded Dashboard
+
+A first version of the **LoggerHelper Dashboard** has been published!
+
+🔎 What it provides:
+- Complete overview of all loaded sinks (MSSqlServer, Console, Elasticsearch, …)
+- Current write levels (Information, Warning, Error, Fatal, …)
+- Real-time view of sink initialization and **any loading errors**
+
+📦 NuGet: [CSharpEssentials.LoggerHelper.Dashboard](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard)
+
 
 ## 💡 Why CSharpEssentials.LoggerHelper?
 
