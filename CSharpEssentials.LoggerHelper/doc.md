@@ -16,6 +16,7 @@
 * 🐘[PostgreSQL Sink](#postgresql-sink)
 * [💾 MS SQL Sink](#ms-sql-sink)
 * [🔍 ElasticSearch Sink](#elasticsearch)
+* [📘 Dashboard](#dashboard)
 * [🔍 Extending LogEvent Properties](#customprop)
 * [🧪 Demo API](#demo-api)
 * [📜 Version History](#versions)
