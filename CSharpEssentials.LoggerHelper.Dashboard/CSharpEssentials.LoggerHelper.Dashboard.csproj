@@ -29,9 +29,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="4.0.0" />
     <PackageReference Include="CSharpEssentials.LoggerHelper.Telemetry" Version="4.0.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.6" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="readme.md">
