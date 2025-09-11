@@ -608,6 +608,36 @@ ElasticSearch is ideal for indexing and searching logs at scale. When integrated
 
 ---
 
+## 🔍 Dashboard <a id='dashboard'></a>   [🔝](#table-of-contents)
+
+> NuGet: [CSharpEssentials.LoggerHelper.Dashboard](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard)
+
+The **embedded Dashboard** lets you quickly inspect the logging setup at runtime:
+- See all **registered sinks** (e.g., MSSqlServer, Console, Elasticsearch, …)
+- Check **enabled levels** per sink (Information, Warning, Error, Fatal, …)
+- Spot **initialization / load errors** for any sink at a glance
+
+#### Install
+```bash
+dotnet add package CSharpEssentials.LoggerHelper.Dashboard
+````
+
+#### Usage
+
+Register the embedded dashboard in your Web API:
+
+```csharp
+// Program.cs
+// ...
+app.UseLoggerHelperDashboard<RequestHelper>(); // registers the embedded dashboard
+// ...
+```
+
+Once enabled, the dashboard UI is served by the application and provides a live view of
+configured sinks, their write levels, and any sink-loading issues:
+
+
+```
 
 ## 🚀 Extending LogEvent Properties from Your Project<a id='customprop'></a>   [🔝](#table-of-contents)
 
