@@ -637,6 +637,7 @@ app.UseLoggerHelperDashboard<RequestHelper>(); // registers the embedded dashboa
 Once enabled, the dashboard UI is served by the application and provides a live view of
 configured sinks, their write levels, and any sink-loading issues:
 
+> ![Dashboard](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper/img/Dashboard.png)
 
 ## 🚀 Extending LogEvent Properties from Your Project<a id='customprop'></a>   [🔝](#table-of-contents)
 
