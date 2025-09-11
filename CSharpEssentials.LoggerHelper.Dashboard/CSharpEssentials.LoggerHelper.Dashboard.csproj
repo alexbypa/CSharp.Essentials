@@ -12,9 +12,9 @@
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Dashboard</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>4.0.1</AssemblyVersion>
-    <FileVersion>4.0.1</FileVersion>
-    <Version>4.0.1</Version>
+    <AssemblyVersion>4.0.2</AssemblyVersion>
+    <FileVersion>4.0.2</FileVersion>
+    <Version>4.0.2</Version>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="ui\**\*.*">
@@ -29,7 +29,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="4.0.1" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="4.0.2" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.6" />
   </ItemGroup>
   <ItemGroup>
