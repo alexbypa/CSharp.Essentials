@@ -5,11 +5,18 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>4.0.0</Version>
+    <Version>4.0.2.1</Version>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <Title>Streamlines integration testing by forwarding application logs directly into the xUnit test output, perfect for debugging in CI/CD pipelines.</Title>
+    <Authors>Alessandro Chiodo</Authors>
+    <Description>Streamlines integration testing by forwarding application logs directly into the xUnit test output, perfect for debugging in CI/CD pipelines.</Description>
+    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.xUnit</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.xUnit</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>dotnet logging serilog sink xunit testing integration-tests ci-cd devops structured-logging aspnetcore telemetry observability</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
