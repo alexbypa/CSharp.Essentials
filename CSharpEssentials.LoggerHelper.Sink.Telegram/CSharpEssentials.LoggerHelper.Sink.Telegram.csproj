@@ -6,8 +6,17 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
-    <Version>4.0.0</Version>
+    <Version>4.0.2</Version>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
+    <Title>Delivers instant log notifications to your Telegram chat or group using pure HTTP, with a clean and user-friendly message format for real-time monitoring of critical events.</Title>
+    <Authors>Alessandro Chiodo</Authors>
+    <Description>Delivers instant log notifications to your Telegram chat or group using pure HTTP, with a clean and user-friendly message format for real-time monitoring of critical events.</Description>
+    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Sink.Telegram</PackageProjectUrl>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Sink.Telegram</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,10 +24,19 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Include="..\CSharpEssentials.LoggerHelper\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="CSharpEssentials.LoggerHelper" Version="4.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
