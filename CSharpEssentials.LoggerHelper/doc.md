@@ -634,17 +634,21 @@ builder.Services.AddLoggerTelemetry(builder);
 
 This enables LoggerHelper to export logs, metrics, and traces via OpenTelemetry.
 
+When the package starts, the database will be **automatically configured** and the required tables will be created based on the provider defined in your `appsettings.json`.
+
+## Supported Providers
+
+* **SQL Server**
+* **PostgreSQL**
+
 ## Configuration
-
-The telemetry behavior is controlled via `appsettings.LoggerHelper.debug.json`.
-
-Example configuration:
 
 ```json
 "LoggerTelemetryOptions": {
+  "Provider": "SqlServer", // or "PostgreSQL"
   "IsEnabled": true,
-  "ConnectionString": "Host=...;Username=postgres;Password=...;Database=HubGamePragmaticCasino;Search Path=dbo,public;ConnectionLifetime=30;",
-  "MeterListenerServiceIsEnabled": true,
+  "ConnectionString": "YOUR CONNECTION STRING",
+  "MeterListenerIsEnabled": true,
   "CustomExporter": {
     "exportIntervalMilliseconds": 20000,
     "exportTimeoutMilliseconds": 30000
@@ -652,27 +656,120 @@ Example configuration:
 }
 ```
 
-### Options
+## Database Schema
 
-* **IsEnabled**: Enables/disables telemetry.
-* **ConnectionString**: PostgreSQL connection string for persisting telemetry data.
-* **MeterListenerServiceIsEnabled**: Enables internal .NET metrics collection.
-* **CustomExporter**: Allows customization of telemetry export intervals and timeouts.
+The following tables are automatically generated depending on the provider:
 
-### 🗄️ Database Schema
+* `MetricEntry` → stores metrics (Name, Value, Timestamp, TagsJson, TraceId).
+* `TraceEntry` → stores traces/spans (TraceId, SpanId, StartTime, EndTime, DurationMs, TagsJson, etc.).
+* `LogEntry` → stores log events (Message, Level, Exception, TraceId, Timestamp, etc.).
 
-When the package starts, it will automatically create the required tables on the PostgreSQL database configured in your `appsettings.json` files:
+> 📝 Note
+>
+> * Table names and schema are **static by design** and follow the **default schema of the provider** (e.g. `dbo` for SQL Server, `public` for PostgreSQL).
+> * Tables are automatically created the first time telemetry export starts.
+> * No manual migrations are required.
 
-* **appsettings.LoggerHelper.debug.json** → used when running locally/debug mode.
-* **appsettings.LoggerHelper.json** → used on the server/production.
+---
 
-The following tables are generated automatically:
+# 📈 Custom Metrics
 
-* `public."MetricEntry"` → stores metrics (Name, Value, Timestamp, TagsJson, TraceId).
-* `public."TraceEntry"` → stores traces/spans (TraceId, SpanId, StartTime, EndTime, AttributesJson, etc.).
-* `public."LogEntry"` → stores log events (Message, Level, Exception, TraceId, Timestamp, etc.).
+The package includes support for **custom and predefined metrics**.
 
-These table names and schema are **static by design** and cannot be changed via configuration. They are managed internally by the package and created automatically when telemetry export starts.
+* `GaugeWrapper` → create observable gauges easily
+* Predefined metrics:
+
+  * `memory_used_mb`
+  * `postgresql.connections.active`
+* Extendable via `CustomMetrics`
+
+```csharp
+// Example: create your own custom gauge
+GaugeWrapper.Create("custom.active_users", () => MyService.GetActiveUsersCount());
+```
+
+---
+
+# 🔗 Correlation between Logs and Traces
+
+Logs and traces are automatically correlated using a common `IdTransaction`.
+This makes it easy to navigate from a **trace span** to the corresponding **logs** and vice versa.
+
+```csharp
+using var trace = LoggerExtensionWithMetrics<RequestSample>.TraceAsync(
+    request,
+    Serilog.Events.LogEventLevel.Information,
+    null,
+    "Minimal API call"
+)
+.StartActivity("getUserInfo")
+.AddTag("Minimal API", "GV"); // span tagging
+```
+
+✅ Every log emitted inside this activity shares the same `IdTransaction`, enabling end-to-end correlation.
+
+---
+
+# ⚡ Usage Example with [CSharpEssentials.HttpHelper](https://www.nuget.org/packages/CSharpEssentials.HttpHelper)
+
+This example shows how to use telemetry with **HTTP calls**, correlated with traces and logs.
+
+```csharp
+public async Task<IResult> getUserInfo(
+    [FromQuery] string UserID,
+    [FromQuery] string Token,
+    [FromServices] IHttptsClientHelperFactory httpFactory)
+{
+    RequestSample request = new RequestSample
+    {
+        Action = "getUserInfo",
+        UserID = UserID,
+        Token = Token
+    };
+
+    using var trace = LoggerExtensionWithMetrics<RequestSample>.TraceAsync(
+        request,
+        Serilog.Events.LogEventLevel.Information,
+        null,
+        "Chiamata a minimal API"
+    )
+    .StartActivity("getUserInfo")
+    .AddTag("Minimal API", "GV");
+
+    var verifyTokenResponseHandler = new VerifyTokenResponseHandler<RequestSample>(request, httpFactory);
+    var userInfoResponseHandler = new UserInfoResponseHandler<RequestSample>(request, httpFactory);
+    await verifyTokenResponseHandler.SetNext(userInfoResponseHandler);
+
+    var result = await verifyTokenResponseHandler.HandleResponse(
+        "Test_No_RateLimit",
+        httpFactory,
+        new ResponseContext(request),
+        new BusinessLayerContext
+        {
+            Url = "http://www.yoursite.com/auth/check",
+            Method = "POST",
+            Body = "{'name':'Request','value':'Simple'}",
+            Timeout = TimeSpan.FromSeconds(30),
+            Headers = new Dictionary<string, string> { { "mode", "Test" } },
+            Auth = new HttpAuthSpec { BearerToken = Token }
+        });
+
+    loggerExtension<RequestSample>.TraceAsync(
+        request,
+        Serilog.Events.LogEventLevel.Information,
+        null,
+        "Esecuzione completata con risposta {res}"
+    );
+
+    return result.Success ? Results.Ok(result.Value) : Results.Problem(result.Error);
+}
+```
+
+✅ With this setup:
+
+* Each request starts a **trace activity**.
+* Tags enrich the span with context.
+* Logs and traces are automatically correlated through `IdTransaction`.
 
 ---
 
