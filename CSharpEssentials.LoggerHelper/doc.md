@@ -659,6 +659,21 @@ Example configuration:
 * **MeterListenerServiceIsEnabled**: Enables internal .NET metrics collection.
 * **CustomExporter**: Allows customization of telemetry export intervals and timeouts.
 
+### 🗄️ Database Schema
+
+When the package starts, it will automatically create the required tables on the PostgreSQL database configured in your `appsettings.json` files:
+
+* **appsettings.LoggerHelper.debug.json** → used when running locally/debug mode.
+* **appsettings.LoggerHelper.json** → used on the server/production.
+
+The following tables are generated automatically:
+
+* `public."MetricEntry"` → stores metrics (Name, Value, Timestamp, TagsJson, TraceId).
+* `public."TraceEntry"` → stores traces/spans (TraceId, SpanId, StartTime, EndTime, AttributesJson, etc.).
+* `public."LogEntry"` → stores log events (Message, Level, Exception, TraceId, Timestamp, etc.).
+
+These table names and schema are **static by design** and cannot be changed via configuration. They are managed internally by the package and created automatically when telemetry export starts.
+
 ---
 
 ## 🔍 Dashboard <a id='dashboard'></a>   [🔝](#table-of-contents)
