@@ -6,15 +6,20 @@
     <Nullable>enable</Nullable>
     <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>Dashboard LoggerHelper</Title>
+    <Title>An embedded dashboard for CSharpEssentials.LoggerHelper, giving you real-time visibility into how sinks are loaded, which log levels are enabled, and any initialization errors — all from inside your application. </Title>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Dashboard</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>4.0.2</AssemblyVersion>
-    <FileVersion>4.0.2</FileVersion>
-    <Version>4.0.2</Version>
+    <AssemblyVersion></AssemblyVersion>
+    <FileVersion></FileVersion>
+    <Version>4.0.3</Version>
+    <Authors>Alessandro Chiodo</Authors>
+    <Description>An embedded dashboard for CSharpEssentials.LoggerHelper, giving you real-time visibility into how sinks are loaded, which log levels are enabled, and any initialization errors — all from inside your application. </Description>
+    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Dashboard</PackageProjectUrl>
+    <PackageTags>dotnet logging serilog dashboard sinks monitoring observability metrics traces logs devops aspnetcore structured-logging realtime error-diagnostics</PackageTags>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="ui\**\*.*">
@@ -24,6 +29,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\CSharpEssentials.LoggerHelper\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
