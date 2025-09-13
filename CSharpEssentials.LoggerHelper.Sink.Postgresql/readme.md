@@ -1,21 +1,31 @@
-﻿## Introduction
+﻿# 🐘 CSharpEssentials.LoggerHelper.Sink.PostgreSQL
 
-The **PostgreSQL Sink** for **CSharpEssentials.LoggerHelper** lets you persist structured Serilog events into a PostgreSQL table.  
-It plugs into the LoggerHelper **HUB** core via the `ISinkPlugin` mechanism, so you can route log events to PostgreSQL based on your HUB configuration (e.g. per-level routing).
-
----
-
-## Key Features
-
-- 🗄️ **Auto-create table**: optionally create your log table if it doesn’t exist  
-- 🌐 **JSON/JSONB support**: store event properties in a JSON(B) column for flexible querying  
-- 🔀 **Level-based routing**: send Information, Warning, Error, etc. into different tables or schemas  
-- 🔧 **Batching & performance**: configure batch posting limit and period for efficient inserts  
-- 🔐 **Secure connection**: support for SSL and integrated authentication  
+[![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.PostgreSQL.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.PostgreSQL)
+A flexible **PostgreSQL sink** for [CSharpEssentials.LoggerHelper](https://github.com/alexbypa/CSharp.Essentials), designed to store **structured logs** directly in PostgreSQL with support for **custom schemas, JSON fields, and automatic table creation**.
 
 ---
 
-## 🚀 Basic Usage
+## 🔥 Key Features
 
-👉 **Check out how to use the package in the documentation**  
-📖 [View the usage guide here!](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
+* 🐘 Native PostgreSQL integration with **auto table creation**.
+* 📊 Support for **custom schemas and column mappings**.
+* 📦 Handles **JSON/JSONB fields** for structured data.
+* ⚡ Perfect for **analytics, dashboards, and long-term log storage**.
+* 🔧 Works seamlessly with LoggerHelper’s level-based sink routing.
+
+---
+
+## 📦 Installation
+
+```bash
+dotnet add package CSharpEssentials.LoggerHelper.Sink.PostgreSQL
+```
+
+---
+
+## 🚀 Demo Project
+
+A full working demo with PostgreSQL integration is available here:
+👉 [**CSharpEssentials.Extensions Demo**](https://github.com/alexbypa/Csharp.Essentials.Extensions/tree/main)
+
+---
