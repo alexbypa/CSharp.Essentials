@@ -3,7 +3,7 @@
   <PropertyGroup>
     <!--<WarningsAsErrors>CS1591</WarningsAsErrors>-->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -11,12 +11,15 @@
     <Version>4.0.2</Version>
     <PackageIcon>./CSharpEssentials.png</PackageIcon>
     <Title>Package to manage openTelemetry</Title>
-    <Description>Package to manage openTelemetry</Description>
+    <Description>A full OpenTelemetry sink for CSharpEssentials.LoggerHelper, enabling metrics, traces, and logs with automatic database storage for end-to-end observability. </Description>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Telemetry</PackageProjectUrl>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Telemetry</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>opentelemetry</PackageTags>
+    <PackageTags>dotnet logging serilog sink telemetry opentelemetry metrics traces logs monitoring observability devops aspnetcore structured-logging distributed-tracing</PackageTags>
+    <Authors>Alessandro Chiodo</Authors>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CSharpEssentials.LoggerHelper" Version="4.0.0" />
@@ -40,6 +43,10 @@
 
   <ItemGroup>
     <None Include="..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\CSharpEssentials.LoggerHelper\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
