@@ -45,9 +45,6 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
             // This guarantees that all logs, metrics, and traces will carry the trace_id from the start.
             services.AddSingleton<IStartupFilter, TraceIdPropagationStartupFilter>();
 
-            //TODO:
-            // Dovremmo aggiungere queste metriche custom su metric listener o no !
-            // Initialize any custom metrics (e.g., static meters)
             CustomMetrics.Initialize(builder.Configuration);
 
 
