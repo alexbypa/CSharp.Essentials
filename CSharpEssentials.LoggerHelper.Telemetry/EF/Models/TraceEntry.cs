@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
 /// <summary>
 /// model for traces
 /// </summary>
-[Table("TraceEntry", Schema = "public")]
+[Table("TraceEntry")]
 public class TraceEntry {
     /// <summary>
     /// Identity
@@ -65,6 +66,6 @@ public class TraceEntryConfiguration : IEntityTypeConfiguration<TraceEntry> {
         builder.Property(e => e.StartTime).IsRequired();
         builder.Property(e => e.EndTime).IsRequired();
         builder.Property(e => e.DurationMs).IsRequired();
-        builder.Property(e => e.TagsJson).HasColumnType("jsonb");
+        //builder.Property(e => e.TagsJson).HasColumnType("jsonb"); //moved on dbContxt to manage SQL or NPSQl
     }
 }

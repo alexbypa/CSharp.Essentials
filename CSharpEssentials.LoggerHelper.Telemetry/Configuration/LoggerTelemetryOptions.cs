@@ -5,6 +5,7 @@ public class LoggerTelemetryOptions {
     public bool? IsEnabled { get; set; }
     public bool MeterListenerIsEnabled { get; set; }
     public CustomExporter CustomExporter { get; set; }
+    public string Provider { get; set; }
 }
 public class CustomExporter {
     public int exportIntervalMilliseconds { get; set; }

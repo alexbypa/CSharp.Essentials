@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Models;
 
-[Table("MetricEntry", Schema = "public")]
+[Table("MetricEntry")]
 public class MetricEntry {
     public int Id { get; set; }
     public string Name { get; set; } = default!;

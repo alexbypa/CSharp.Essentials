@@ -1,0 +1,17 @@
+Con questa struttura:
+
+ogni anello apre un proprio span;
+
+l'endpoint crea lo span radice;
+
+i tag (es. Minimal API, Service) aiutano a filtrare e correlare nelle dashboard;
+
+la CoR separa responsabilità (autorizzazione vs. recupero dati) rispettando SRP e mantenendo l'orchestrazione aperta a estensioni (OCP).
+
+
+Cosa scrivere sul readme:
+1-> La tabella dei Logs deve corrispondere a quella confoigurata sul sink ( postgresql / msqsql )
+2-> Scrivere della migration ( all' inizio il db verrà convifuarato automaticamente )
+3-> Fare l'esempio del codice : 
+.StartActivity("getUserInfo") 		----> Avvia il trace !!!
+    .AddTag("Minimal API", "GV"); 	----> Inserisce gli span !!!

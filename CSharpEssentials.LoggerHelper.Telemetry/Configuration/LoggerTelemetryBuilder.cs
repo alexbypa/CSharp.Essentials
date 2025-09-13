@@ -23,16 +23,28 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
         /// <param name="builder">The WebApplicationBuilder containing app configuration.</param>
         /// <returns>The modified IServiceCollection.</returns>
         public static IServiceCollection AddLoggerTelemetry(this IServiceCollection services, WebApplicationBuilder builder) {
+
+            builder.Services
+                .AddOptions<LoggerTelemetryOptions>()
+                .Bind(builder.Configuration.GetSection("Serilog:SerilogConfiguration:LoggerTelemetryOptions"))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            var options = services.BuildServiceProvider()
+                          .GetRequiredService<IOptions<LoggerTelemetryOptions>>()
+                          .Value;
+
+
             LoggerTelemetryDbConfigurator.Configure(services);
-            var options = TelemetryOptionsProvider.Load(builder);
-            
+
+            //var options = TelemetryOptionsProvider.Load(builder);
 
             services.AddSingleton<ITelemetryGatekeeper, TelemetryGatekeeper>((sp) => {
                 var optionsMonitor = sp.GetRequiredService<IOptionsMonitor<LoggerTelemetryOptions>>();
                 return new TelemetryGatekeeper(optionsMonitor);
             });
 
-            
+
 
             services.AddSingleton<ILoggerTelemetryTraceEntryFactory, LoggerTelemetryTraceEntryFactory>(sp => {
                 var gatekeeper = sp.GetRequiredService<ITelemetryGatekeeper>();

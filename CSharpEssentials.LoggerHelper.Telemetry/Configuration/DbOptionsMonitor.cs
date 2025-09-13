@@ -1,65 +1,67 @@
-﻿using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
+﻿//TODO: implement authentication/authorization
 
-namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration;
-public class DbOptionsMonitor<T> : IOptionsMonitor<T> where T : class, new() {
-    private readonly IServiceProvider _sp;
-    private T _currentValue;
-    private readonly List<Action<T, string>> _listeners = new();
-    private CancellationTokenSource _cts = new();
-    private string _name;
+//using CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
+//using Microsoft.Extensions.DependencyInjection;
+//using Microsoft.Extensions.Options;
+//using System.Text.Json;
 
-    public DbOptionsMonitor(IServiceProvider sp, string name = "") {
-        _sp = sp;
-        _name = name;
-        _currentValue = LoadFromDb();
+//namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration;
+//public class DbOptionsMonitor<T> : IOptionsMonitor<T> where T : class, new() {
+//    private readonly IServiceProvider _sp;
+//    private T _currentValue;
+//    private readonly List<Action<T, string>> _listeners = new();
+//    private CancellationTokenSource _cts = new();
+//    private string _name;
 
-        StartPolling();
-    }
+//    public DbOptionsMonitor(IServiceProvider sp, string name = "") {
+//        _sp = sp;
+//        _name = name;
+//        _currentValue = LoadFromDb();
 
-    public T CurrentValue => _currentValue;
+//        StartPolling();
+//    }
 
-    public T Get(string name) => _currentValue;
+//    public T CurrentValue => _currentValue;
 
-    public IDisposable OnChange(Action<T, string> listener) {
-        _listeners.Add(listener);
-        return new ChangeTracker(() => _listeners.Remove(listener));
-    }
+//    public T Get(string name) => _currentValue;
 
-    private void StartPolling() {
-        _ = Task.Run(async () => {
-            while (!_cts.Token.IsCancellationRequested) {
-                await Task.Delay(TimeSpan.FromSeconds(20), _cts.Token);
+//    public IDisposable OnChange(Action<T, string> listener) {
+//        _listeners.Add(listener);
+//        return new ChangeTracker(() => _listeners.Remove(listener));
+//    }
 
-                var latest = LoadFromDb();
-                if (!JsonSerializer.Serialize(_currentValue).Equals(JsonSerializer.Serialize(latest))) {
-                    _currentValue = latest;
-                    foreach (var listener in _listeners)
-                        listener(_currentValue, _name);
-                }
-            }
-        });
-    }
-    private T LoadFromDb() {
-        using var scope = _sp.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
+//    private void StartPolling() {
+//        _ = Task.Run(async () => {
+//            while (!_cts.Token.IsCancellationRequested) {
+//                await Task.Delay(TimeSpan.FromSeconds(20), _cts.Token);
 
-        var config = db.LoggerTelemetryOptions.FirstOrDefault();
-        if (config == null)
-            return new T();
+//                var latest = LoadFromDb();
+//                if (!JsonSerializer.Serialize(_currentValue).Equals(JsonSerializer.Serialize(latest))) {
+//                    _currentValue = latest;
+//                    foreach (var listener in _listeners)
+//                        listener(_currentValue, _name);
+//                }
+//            }
+//        });
+//    }
+//    private T LoadFromDb() {
+//        using var scope = _sp.CreateScope();
+//        var db = scope.ServiceProvider.GetRequiredService<TelemetriesDbContext>();
 
-        return new LoggerTelemetryOptions {
-            IsEnabled = config.IsEnabled,
-            MeterListenerIsEnabled = config.MeterListenerIsEnabled,
-            ConnectionString = config.ConnectionString
-        } as T ?? new T();
-    }
+//        var config = db.LoggerTelemetryOptions.FirstOrDefault();
+//        if (config == null)
+//            return new T();
 
-    private class ChangeTracker : IDisposable {
-        private readonly Action _onDispose;
-        public ChangeTracker(Action onDispose) => _onDispose = onDispose;
-        public void Dispose() => _onDispose();
-    }
-}
+//        return new LoggerTelemetryOptions {
+//            IsEnabled = config.IsEnabled,
+//            MeterListenerIsEnabled = config.MeterListenerIsEnabled,
+//            ConnectionString = config.ConnectionString
+//        } as T ?? new T();
+//    }
+
+//    private class ChangeTracker : IDisposable {
+//        private readonly Action _onDispose;
+//        public ChangeTracker(Action onDispose) => _onDispose = onDispose;
+//        public void Dispose() => _onDispose();
+//    }
+//}

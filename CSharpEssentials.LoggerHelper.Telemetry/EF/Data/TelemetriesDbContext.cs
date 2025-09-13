@@ -8,7 +8,6 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.EF.Data;
 /// Exposes DbSet properties for metrics, traces, and log entries.
 /// </summary>
 public class TelemetriesDbContext : DbContext {
-    public DbSet<ViewHttpMetrics> ViewHttpMetrics => Set<ViewHttpMetrics>();
     /// <summary>
     /// Represents the collection of metric entries in the database.
     /// </summary>
@@ -21,15 +20,7 @@ public class TelemetriesDbContext : DbContext {
     /// Represents the collection of log entries in the database.
     /// </summary>
     public DbSet<LogEntry> LogEntry => Set<LogEntry>();
-    /// <summary>
-    /// Initializes a new instance of <see cref="TelemetriesDbContext"/> using the specified options.
-    /// </summary>
-    /// <param name="options">
-    /// The <see cref="DbContextOptions{TelemetriesDbContext}"/> used to configure the context
-    /// (e.g., the database provider and connection string).
-    /// </param>
-    public DbSet<LoggerTelemetryOptions> LoggerTelemetryOptions => Set<LoggerTelemetryOptions>();
-    public TelemetriesDbContext(DbContextOptions<TelemetriesDbContext> options)
+    public TelemetriesDbContext(DbContextOptions options)
         : base(options) { }
     /// <summary>
     /// Configures the EF model by applying entity configuration classes for metrics, traces, and logs.
@@ -39,5 +30,19 @@ public class TelemetriesDbContext : DbContext {
     /// </param>
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        if (Database.IsNpgsql()) {
+            modelBuilder.Entity<TraceEntry>()
+                .Property(e => e.TagsJson)
+                .HasColumnType("jsonb");
+        } else if (Database.IsSqlServer()) {
+            modelBuilder.Entity<TraceEntry>()
+                .Property(e => e.TagsJson)
+                .HasColumnType("nvarchar(max)");
+
+            modelBuilder.Entity<TraceEntry>()
+                .ToTable(t => t.HasCheckConstraint(
+                    "CK_TraceEntry_TagsJson_IsJson",
+                    "ISJSON([TagsJson]) = 1"));
+        }
     }
 }

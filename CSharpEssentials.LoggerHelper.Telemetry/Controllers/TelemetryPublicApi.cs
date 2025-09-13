@@ -33,17 +33,6 @@ public class TelemetryPublicApiController : ControllerBase {
         return Ok(metrics);
     }
     /// <summary>
-    /// return data for http metrics
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("metrics/http")]
-    public async Task<IActionResult> GetHttpMetrics() {
-        var result = await _db.ViewHttpMetrics
-            .OrderByDescending(m => m.Timestamp)
-            .ToListAsync();
-        return Ok(result);
-    }
-    /// <summary>
     /// return data for dns metrics
     /// </summary>
     /// <returns></returns>
