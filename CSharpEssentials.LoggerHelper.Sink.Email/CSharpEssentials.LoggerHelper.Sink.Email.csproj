@@ -4,9 +4,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>4.0.0</Version>
+    <Version>4.0.2</Version>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
+    <Title>perfect for real-time critical alerts, with full HTML template customization, configurable throttling, and secure SMTP (SSL/TLS) delivery.</Title>
+    <Authors>Alessandro Chiodo</Authors>
+    <Company>Alessandro Chiodo</Company>
+    <Description>Perfect for real-time critical alerts, with full HTML template customization, configurable throttling, and secure SMTP (SSL/TLS) delivery.</Description>
+    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Sink.Email</PackageProjectUrl>
+    <PackageTags>dotnet logging serilog sink email smtp html-template alerts monitoring observability structured-logging devops telemetry error-handling infrastructure csharp aspnetcore</PackageTags>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png">
@@ -16,5 +23,11 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CSharpEssentials.LoggerHelper" Version="4.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 </Project>
