@@ -642,9 +642,10 @@ Example configuration:
 
 ```json
 "LoggerTelemetryOptions": {
+  "Provider": "SqlServer", // or "PostgreSQL"
   "IsEnabled": true,
-  "ConnectionString": "Host=...;Username=postgres;Password=...;Database=HubGamePragmaticCasino;Search Path=dbo,public;ConnectionLifetime=30;",
-  "MeterListenerServiceIsEnabled": true,
+  "ConnectionString": "YOUR CONNECTION STRING",
+  "MeterListenerIsEnabled": true,
   "CustomExporter": {
     "exportIntervalMilliseconds": 20000,
     "exportTimeoutMilliseconds": 30000
@@ -654,6 +655,7 @@ Example configuration:
 
 ### Options
 
+* **Provider**: Choose between provider SqlServer or PostgreSQL.
 * **IsEnabled**: Enables/disables telemetry.
 * **ConnectionString**: PostgreSQL connection string for persisting telemetry data.
 * **MeterListenerServiceIsEnabled**: Enables internal .NET metrics collection.
@@ -673,6 +675,71 @@ The following tables are generated automatically:
 * `public."LogEntry"` → stores log events (Message, Level, Exception, TraceId, Timestamp, etc.).
 
 These table names and schema are **static by design** and cannot be changed via configuration. They are managed internally by the package and created automatically when telemetry export starts.
+
+## ⚡ Usage Example with `CSharpEssentials.HttpHelper`
+
+The following example shows how to use telemetry together with [CSharpEssentials.HttpHelper](https://www.nuget.org/packages/CSharpEssentials.HttpHelper).
+It demonstrates the use of `.StartActivity()` and `.AddTag()` to correlate **traces** and **logs** via a common `IdTransaction`.
+
+```csharp
+public async Task<IResult> getUserInfo(
+    [FromQuery] string UserID,
+    [FromQuery] string Token,
+    [FromServices] IHttptsClientHelperFactory httpFactory)
+{
+    RequestSample request = new RequestSample
+    {
+        Action = "getUserInfo",
+        UserID = UserID,
+        Token = Token
+    };
+
+    using var trace = LoggerExtensionWithMetrics<RequestSample>.TraceAsync(
+        request,
+        Serilog.Events.LogEventLevel.Information,
+        null,
+        "Chiamata a minimal API"
+    )
+    .StartActivity("getUserInfo")
+    .AddTag("Minimal API", "GV"); // span tagging
+
+    // chain of response handlers
+    var verifyTokenResponseHandler = new VerifyTokenResponseHandler<RequestSample>(request, httpFactory);
+    var userInfoResponseHandler = new UserInfoResponseHandler<RequestSample>(request, httpFactory);
+    await verifyTokenResponseHandler.SetNext(userInfoResponseHandler);
+
+    // external API call with correlation
+    var result = await verifyTokenResponseHandler.HandleResponse(
+        "Test_No_RateLimit",
+        httpFactory,
+        new ResponseContext(request),
+        new BusinessLayerContext
+        {
+            Url = "http://www.yoursite.com/auth/check",
+            Method = "POST",
+            Body = "{'name':'Request','value':'Simple'}",
+            Timeout = TimeSpan.FromSeconds(30),
+            Headers = new Dictionary<string, string> { { "mode", "Test" } },
+            Auth = new HttpAuthSpec { BearerToken = Token }
+        });
+
+    // correlated trace + log
+    loggerExtension<RequestSample>.TraceAsync(
+        request,
+        Serilog.Events.LogEventLevel.Information,
+        null,
+        "Esecuzione completata con risposta {res}"
+    );
+
+    return result.Success ? Results.Ok(result.Value) : Results.Problem(result.Error);
+}
+```
+
+✅ In this way:
+
+* Each request starts a **trace activity** (`StartActivity`).
+* Tags (e.g. `"Minimal API", "GV"`) enrich the span with context.
+* Logs and traces share the same `IdTransaction`, allowing correlation in the telemetry database.
 
 ---
 
