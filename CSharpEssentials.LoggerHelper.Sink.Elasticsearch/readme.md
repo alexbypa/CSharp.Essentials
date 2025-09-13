@@ -1,20 +1,40 @@
-﻿## Introduction
+﻿# 📊 CSharpEssentials.LoggerHelper.Telemetry
 
-The **Elasticsearch Sink** for **CSharpEssentials.LoggerHelper** lets you route structured Serilog events into an Elasticsearch cluster.  
-It plugs into the LoggerHelper **HUB** core via the `ISinkPlugin` mechanism, so logs will be sent to Elasticsearch based on your HUB configuration (e.g. per-level routing).
-
----
-
-## Key Features
-
-- 🔍 **Auto-indexing**: writes each log event as a JSON document in your index  
-- 📑 **Custom index templates**: control mappings, shard count, replicas  
-- 🔀 **Level-based routing**: use the HUB core to send only Error-level (or other) events here  
-- 🔧 **Full Serilog options**: buffer size, batch posting period, inline fields  
+[![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Telemetry.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper..Telemetry)
+A full **OpenTelemetry sink** for [CSharpEssentials.LoggerHelper](https://github.com/alexbypa/CSharp.Essentials), enabling **metrics, traces, and logs** with automatic database storage for end-to-end observability.
 
 ---
 
-## 🚀 Basic Usage
+## 🔥 Key Features
 
-👉 **Check out how to use the package in the documentation**  
-📖 [View the usage guide here!](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
+* 📊 Native integration with **OpenTelemetry**.
+* 🐘💾 Automatic persistence of **metrics, traces, and logs** into SQL Server or PostgreSQL.
+* ⚡ **Database auto-bootstrap**: tables are created automatically at startup (no migrations required).
+* 🔗 Built-in correlation via `IdTransaction` between **logs** and **traces**.
+* 🔧 Support for **custom metrics** (`GaugeWrapper`, `CustomMetrics`).
+
+---
+
+## 📦 Installation
+
+```bash
+dotnet add package CSharpEssentials.LoggerHelper.Sink.Telemetry
+```
+
+---
+
+## 🚀 Demo Project
+
+A full demo with Telemetry, metrics, and traces is available in the [**CSharpEssentials.Extensions**](https://github.com/alexbypa/Csharp.Essentials.Extensions/tree/main) repository.
+
+---
+
+## 🏷️ Tags
+
+```
+dotnet logging serilog sink telemetry opentelemetry metrics traces logs monitoring observability devops aspnetcore structured-logging distributed-tracing
+```
+
+---
+
+Vuoi che ti prepari anche i **README sintetici per Console e File Sink** così completiamo tutta la serie, o ti interessano solo i sink “avanzati” da pubblicare separatamente su NuGet?

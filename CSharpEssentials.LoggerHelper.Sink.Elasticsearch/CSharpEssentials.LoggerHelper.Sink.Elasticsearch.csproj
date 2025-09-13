@@ -1,27 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net6.0</TargetFrameworks>
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>4.0.0</Version>
-    <PackageOutputPath>C:\Nuget</PackageOutputPath>
-    <Title>Sink ElasticSearch for CSharpEssentials.LoggerHelper</Title>
+    <Version>4.0.2</Version>
+    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <Title>A high-performance Elasticsearch sink for CSharpEssentials.LoggerHelper, designed to index logs into Elasticsearch for fast search, advanced filtering, and real-time dashboards with Kibana. </Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Sink ElasticSearch for CSharpEssentials.LoggerHelper</Description>
+    <Description>A high-performance Elasticsearch sink for CSharpEssentials.LoggerHelper
+, designed to index logs into Elasticsearch for fast search, advanced filtering, and real-time dashboards with Kibana.</Description>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Sink.Elasticsearch</PackageProjectUrl>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Sink.Elasticsearch</RepositoryUrl>
-    <PackageTags>telemetries, loggerhelper, serilog, logger, structured-logging, email-sink, console-sink, database-logging, postgresql, elasticsearch, sink, logging-helper, dotnet-logging, aspnetcore-logging</PackageTags>
+    <PackageTags>dotnet logging serilog sink elasticsearch kibana elk-stack logs analytics monitoring observability devops aspnetcore structured-logging telemetry</PackageTags>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageId>CSharpEssentials.LoggerHelper.Sink.Elasticsearch</PackageId>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\CSharpEssentials.LoggerHelper\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
