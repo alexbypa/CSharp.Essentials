@@ -14,9 +14,15 @@
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Sink.Email</PackageProjectUrl>
     <PackageTags>dotnet logging serilog sink email smtp html-template alerts monitoring observability structured-logging devops telemetry error-handling infrastructure csharp aspnetcore</PackageTags>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\CSharpEssentials.LoggerHelper\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
@@ -25,7 +31,7 @@
     <PackageReference Include="CSharpEssentials.LoggerHelper" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="Readme.md">
+    <None Include="Readme.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
