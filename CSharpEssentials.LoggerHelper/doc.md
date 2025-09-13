@@ -16,6 +16,7 @@
 * 🐘[PostgreSQL Sink](#postgresql-sink)
 * [💾 MS SQL Sink](#ms-sql-sink)
 * [🔍 ElasticSearch Sink](#elasticsearch)
+* [🔍 Telemetry Sink](#telemetry)
 * [📘 Dashboard](#dashboard)
 * [🔍 Extending LogEvent Properties](#customprop)
 * [🧪 Demo API](#demo-api)
@@ -606,6 +607,57 @@ ElasticSearch is ideal for indexing and searching logs at scale. When integrated
 
 * `nodeUris`: The ElasticSearch node endpoint.
 * `indexFormat`: The format or name of the index that will store log entries.
+
+---
+
+## 📊 LoggerHelper.Telemetry <a id='telemetry'></a>   [🔝](#table-of-contents)
+
+The **CSharpEssentials.LoggerHelper.Telemetry** package extends LoggerHelper with full OpenTelemetry support for metrics and traces.
+
+## Installation
+
+You can install the package directly from NuGet:
+
+```bash
+PM> Install-Package CSharpEssentials.LoggerHelper.Telemetry
+```
+
+Or from the [NuGet Gallery](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Telemetry).
+
+## Usage
+
+In your `Program.cs`, register the telemetry service with:
+
+```csharp
+builder.Services.AddLoggerTelemetry(builder);
+```
+
+This enables LoggerHelper to export logs, metrics, and traces via OpenTelemetry.
+
+## Configuration
+
+The telemetry behavior is controlled via `appsettings.LoggerHelper.debug.json`.
+
+Example configuration:
+
+```json
+"LoggerTelemetryOptions": {
+  "IsEnabled": true,
+  "ConnectionString": "Host=...;Username=postgres;Password=...;Database=HubGamePragmaticCasino;Search Path=dbo,public;ConnectionLifetime=30;",
+  "MeterListenerServiceIsEnabled": true,
+  "CustomExporter": {
+    "exportIntervalMilliseconds": 20000,
+    "exportTimeoutMilliseconds": 30000
+  }
+}
+```
+
+### Options
+
+* **IsEnabled**: Enables/disables telemetry.
+* **ConnectionString**: PostgreSQL connection string for persisting telemetry data.
+* **MeterListenerServiceIsEnabled**: Enables internal .NET metrics collection.
+* **CustomExporter**: Allows customization of telemetry export intervals and timeouts.
 
 ---
 
