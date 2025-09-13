@@ -6,8 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>Sink MS SQL for CSharpEssentials.LoggerHelper</Title>
-    <Version>4.0.2</Version>
+    <Title>A powerful SQL Server sink for CSharpEssentials.LoggerHelper</Title>
+    <Version>4.0.2.1</Version>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
@@ -15,11 +15,19 @@
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Alessandro Chiodo</Authors>
+    <Description>A powerful SQL Server sink for CSharpEssentials.LoggerHelper
+, designed to log directly into Microsoft SQL Server with automatic table creation, custom columns, and structured context properties.</Description>
+    <PackageTags>dotnet logging serilog sink mssql sqlserver database structured-logging monitoring observability devops aspnetcore telemetry</PackageTags>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\CSharpEssentials.LoggerHelper.Sink.File\img\CSharpEssentials.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\CSharpEssentials.LoggerHelper\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

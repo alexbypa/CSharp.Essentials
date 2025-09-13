@@ -1,21 +1,22 @@
-﻿## Introduction
+﻿# 💾 CSharpEssentials.LoggerHelper.Sink.MSSqlServer
 
-The **MSSQL Server Sink** for **CSharpEssentials.LoggerHelper** lets you persist structured Serilog events into a Microsoft SQL Server database table.  
-It plugs into the LoggerHelper **HUB** core via the `ISinkPlugin` mechanism, so you can route log events to SQL Server based on your HUB configuration (e.g. per-level routing).
-
----
-
-## Key Features
-
-- 🗄️ **Auto-create table**: optionally create your log table if it doesn’t exist  
-- 🔢 **Custom column schema**: include or exclude columns, rename columns, use custom mappings  
-- 🔀 **Level-based routing**: send Error, Warning, Information, etc. into different tables or schemas  
-- 🔧 **Batching & performance**: configure batch size, period and retention options  
-- 🔐 **Secure connection**: support for encrypted connection strings and integrated authentication  
+[![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer)
+A powerful **SQL Server sink** for [CSharpEssentials.LoggerHelper](https://github.com/alexbypa/CSharp.Essentials), designed to log directly into Microsoft SQL Server with **automatic table creation, custom columns, and structured context properties**.
 
 ---
 
-## 🚀 Basic Usage
+## 🔥 Key Features
 
-👉 **Check out how to use the package in the documentation**  
-📖 [View the usage guide here!](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
+* 💾 Native **Microsoft SQL Server integration**.
+* ⚡ **Auto table creation** with customizable schema (`dbo` by default).
+* 🔧 Full support for **standard and additional columns** (`IdTransaction`, `Action`, `ApplicationName`, …).
+* 📊 Ideal for **auditing, reporting, and enterprise logging**.
+* 🚀 Seamless integration with LoggerHelper’s level-based routing.
+
+---
+
+## 🚀 Demo Project
+
+Try it live in the [**CSharpEssentials.Extensions Demo**](https://github.com/alexbypa/Csharp.Essentials.Extensions/tree/main), which includes examples with SQL Server, PostgreSQL, Email, Telegram, and more.
+
+---
