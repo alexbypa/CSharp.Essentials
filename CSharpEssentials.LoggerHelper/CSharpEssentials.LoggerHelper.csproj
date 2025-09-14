@@ -43,7 +43,7 @@
       4.0.1 - Added Checks for errors on Dashboard and LoggerHelper !
       4.0.1 - Update readme.md
     </Description>
-    <Version>4.0.2</Version>
+    <Version>4.0.3</Version>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>

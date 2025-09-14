@@ -71,5 +71,5 @@ Just install the package and define your desired levels (`Information`, `Warning
 ---
 
 👉 **Check out how to use the package in the documentation**  
-📖 [View the usage guide here!](https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper/doc.md)
+📖 [View the usage guide here!](https://github.com/alexbypa/Csharp.Essentials.Extensions)
 
