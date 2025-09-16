@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Metrics;
+﻿using System.Diagnostics;
+using System.Diagnostics.Metrics;
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Metrics;
 /// <summary>
@@ -14,6 +15,7 @@ public class GaugeWrapper<T> where T : struct {
     /// The delegate that provides the current value of the gauge when invoked.
     /// </summary>
     private readonly Func<T> _valueProvider;
+    private readonly Func<TagList>? _tagsProvider;
     /// <summary>
     /// Holds the last value returned by the <see cref="_valueProvider"/>.
     /// Exposed publicly so callers can read the most recent measurement without 
@@ -45,17 +47,30 @@ public class GaugeWrapper<T> where T : struct {
     /// <param name="description">
     /// A human-readable description of what this gauge measures. Optional; defaults to an empty string.
     /// </param>
-    public GaugeWrapper(Meter meter, string name, Func<T> valueProvider, string unit = "", string description = "") {
+    public GaugeWrapper(
+        Meter meter,
+        string name,
+        Func<T> valueProvider,
+        string unit = "",
+        string description = "",
+        Func<TagList>? tagsProvider = null) {
         _valueProvider = valueProvider;
+        _tagsProvider = tagsProvider;
+
         Gauge = meter.CreateObservableGauge(
             name,
-            () => {
-                _lastValue = _valueProvider();
-                return new Measurement<T>(_lastValue);
-            },
+            Observe,
             unit,
             description
         );
+    }
+        private IEnumerable<Measurement<T>> Observe() {
+        _lastValue = _valueProvider();
+        if (_tagsProvider is null)
+            return new[] { new Measurement<T>(_lastValue) };
+
+        var tags = _tagsProvider();
+        return new[] { new Measurement<T>(_lastValue, tags) };
     }
 }
 
