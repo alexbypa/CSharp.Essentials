@@ -1,4 +1,4 @@
-﻿namespace CSharpEssentials.LoggerHelper.AI.Doamin;
+﻿namespace CSharpEssentials.LoggerHelper.AI.Domain;
 public sealed record LogRecord(
     long Id, DateTimeOffset Ts, string Level, string Message,
     string? Exception, string? TraceId, string? Machine, string? App);

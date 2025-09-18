@@ -1,4 +1,4 @@
-﻿using CSharpEssentials.LoggerHelper.AI.Doamin;
+﻿using CSharpEssentials.LoggerHelper.AI.Domain;
 
 namespace CSharpEssentials.LoggerHelper.AI;
 public interface IActionOrchestrator {

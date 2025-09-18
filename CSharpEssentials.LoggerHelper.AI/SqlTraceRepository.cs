@@ -1,4 +1,4 @@
-﻿using CSharpEssentials.LoggerHelper.AI.Doamin;
+﻿using CSharpEssentials.LoggerHelper.AI.Domain;
 using CSharpEssentials.LoggerHelper.AI.Ports;
 using Dapper;
 using Microsoft.Data.SqlClient;
@@ -24,7 +24,7 @@ CASE WHEN Anomaly IN (1,'1','true') THEN 1 ELSE 0 END AS Anomaly";
                 TimeSpan.FromMilliseconds((long)r.DurationMs), r.TagsJson, (bool)r.Anomaly);
     }
 
-    public async Task<IReadOnlyList<TraceRecord>> GetRecentAsync(int limit) {
+    public async Task<IReadOnlyList<TraceRecord>> GetRecentAsync(int limit, CancellationToken ct = default) {
         var sql = $"SELECT TOP (@lim) {BaseCols} FROM dbo.TraceEntry ORDER BY StartTime DESC";
         var rows = await _db.QueryAsync(sql, new { lim = limit });
         return rows.Select(r => new TraceRecord(

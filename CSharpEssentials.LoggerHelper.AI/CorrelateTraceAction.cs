@@ -1,24 +1,31 @@
-﻿using CSharpEssentials.LoggerHelper.AI.Doamin;
+﻿using CSharpEssentials.LoggerHelper.AI.Domain;   // fix del typo
 using CSharpEssentials.LoggerHelper.AI.Ports;
 
-namespace CSharpEssentials.LoggerHelper.AI;
 public sealed class CorrelateTraceAction : ILogMacroAction {
-    private readonly ILogRepository _logs; private readonly ITraceRepository _traces;
+    private readonly ILogRepository _logs;
+    private readonly ITraceRepository _traces;
     public string Name => "CorrelateTrace";
-    public CorrelateTraceAction(ILogRepository logs, ITraceRepository traces) { _logs = logs; _traces = traces; }
+
+    public CorrelateTraceAction(ILogRepository logs, ITraceRepository traces) {
+        _logs = logs;
+        _traces = traces;
+    }
+
     public bool CanExecute(MacroContext ctx) => string.IsNullOrEmpty(ctx.TraceId); // lo scopre
+
     public async Task<MacroResult> ExecuteAsync(MacroContext ctx, CancellationToken ct = default) {
-        var recent = new List<TraceRecord>();
-        await foreach (var t in _traces.GetRecentAsync(50).WithCancellation(ct))
-            recent.Add(t);
+        // _traces.GetRecentAsync ritorna Task<IReadOnlyList<TraceRecord>>
+        var recent = await _traces.GetRecentAsync(50, ct);
 
-        // euristica semplice: primo trace con errori
-        var hit = recent.FirstOrDefault(t => t.Error);
+        // scegli il predicato coerente col tuo model (es. Anomaly == true)
+        var hit = recent.FirstOrDefault(t => t.Anomaly == true);
 
-        return new MacroResult(Name,
+        return new MacroResult(
+            Name,
             hit is null
                 ? "Nessun trace con errori recenti."
-                : $"Trace candidato: {hit.TraceId} servizio {hit.Service} durata {hit.Duration}.",
-            hit is null ? null : new() { ["traceId"] = hit.TraceId });
+                : $"Trace candidato: {hit.TraceId} servizio {hit.Name} durata {hit.Duration}.",
+            hit is null ? null : new() { ["traceId"] = hit.TraceId }
+        );
     }
 }

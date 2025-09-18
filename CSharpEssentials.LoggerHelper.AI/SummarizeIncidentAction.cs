@@ -1,4 +1,4 @@
-﻿using CSharpEssentials.LoggerHelper.AI.Doamin;
+﻿using CSharpEssentials.LoggerHelper.AI.Domain;
 using CSharpEssentials.LoggerHelper.AI.Ports;
 
 namespace CSharpEssentials.LoggerHelper.AI;
@@ -11,15 +11,22 @@ public sealed class SummarizeIncidentAction : ILogMacroAction {
     public async Task<MacroResult> ExecuteAsync(MacroContext ctx, CancellationToken ct = default) {
         var buf = new List<string>();
         int n = 0;
-        await foreach (var r in _logs.SearchAsync(ctx.TraceId!, 200).WithCancellation(ct)) {
-            buf.Add($"[{r.Ts:u}] {r.Level} {r.Content}");
+
+        // se esiste l’overload con ct, usalo
+        var records = await _logs.SearchAsync(ctx.TraceId!, 200);
+        // altrimenti: var records = await _logs.SearchAsync(ctx.TraceId!, 200);
+
+        foreach (var r in records) {
+            buf.Add($"{r.Ts:u} {r.Level} {r.Message}");
             if (++n >= 50)
                 break;
         }
+
         var context = string.Join("\n", buf);
-        var system = "Sei un SRE assistant. Rispondi in 8-10 righe, con elenco puntato per cause e fix.";
-        var user = $"Trace: {ctx.TraceId}\nLog:\n{context}";
-        var summary = await _llm.ChatAsync(system, user, 0.0);
+        var system = "Sei un SRE assistant.";
+        var user = $"Trace: {ctx.TraceId}\n{context}";
+        var summary = await _llm.ChatAsync(system, user);
+
         return new MacroResult(Name, summary, new() { ["traceId"] = ctx.TraceId!, ["count"] = n });
     }
 }

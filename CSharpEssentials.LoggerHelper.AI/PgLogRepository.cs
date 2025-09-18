@@ -1,4 +1,4 @@
-﻿using CSharpEssentials.LoggerHelper.AI.Doamin;
+﻿using CSharpEssentials.LoggerHelper.AI.Domain;
 using CSharpEssentials.LoggerHelper.AI.Ports;
 using Microsoft.Data.SqlClient;
 using Dapper;

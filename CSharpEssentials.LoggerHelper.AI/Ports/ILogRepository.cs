@@ -1,4 +1,4 @@
-﻿using CSharpEssentials.LoggerHelper.AI.Doamin;
+﻿using CSharpEssentials.LoggerHelper.AI.Domain;
 
 namespace CSharpEssentials.LoggerHelper.AI.Ports;
 public interface ILogRepository {
@@ -9,7 +9,7 @@ public interface ILogRepository {
 
 public interface ITraceRepository {
     Task<TraceRecord?> GetByIdAsync(string traceId);
-    Task<IReadOnlyList<TraceRecord>> GetRecentAsync(int limit);
+    Task<IReadOnlyList<TraceRecord>> GetRecentAsync(int limit, CancellationToken ct = default);
     Task<IReadOnlyList<TraceRecord>> WithErrorsAsync(int limit);
 }
 
