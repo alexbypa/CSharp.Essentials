@@ -18,7 +18,11 @@ public interface IEmbeddingService {
 public interface ILlmChat {
     Task<string> ChatAsync(string system, string user, double temperature = 0.0);
 }
-
+// Domain/LlmOptions.cs
+public sealed class LlmOptions {
+        public string Model { get; set; } = "gpt-4o-mini";
+        public double DefaultTemperature { get; set; } = 0.2;
+}
 // Macro Action (OCP + DIP)
 public interface ILogMacroAction {
     string Name { get; }                 // es. "SummarizeIncident"
