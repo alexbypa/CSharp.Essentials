@@ -1,6 +1,6 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Domain;
 
-namespace CSharpEssentials.LoggerHelper.AI;
+namespace CSharpEssentials.LoggerHelper.AI.Application;
 public interface IActionOrchestrator {
     Task<IReadOnlyList<MacroResult>> RunAsync(MacroContext ctx, CancellationToken ct = default);
 }

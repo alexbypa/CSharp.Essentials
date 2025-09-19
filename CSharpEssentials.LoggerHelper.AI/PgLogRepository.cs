@@ -40,12 +40,13 @@ ORDER BY Ts DESC";
     public async Task<IReadOnlyList<LogRecord>> ByTraceAsync(string traceId, int limit) {
         var sql = @"
 SELECT TOP (@lim)
-    Id, CAST(JSON_VALUE(LogEvent,'$.Timestamp') AS datetimeoffset) AS Ts,
+    Id, TimeStamp,
     Level, Message, Exception,
-    @traceId AS TraceId, MachineName AS Machine, ApplicationName AS App
+    @traceId AS IdTransaction, MachineName, ApplicationName 
 FROM dbo.LogEntry
-WHERE JSON_VALUE(LogEvent,'$.TraceId') = @traceId
-ORDER BY Ts DESC";
+--WHERE JSON_VALUE(LogEvent,'$.TraceId') = @traceId
+WHERE IdTransaction = @traceId
+ORDER BY TimeStamp DESC";
         var rows = await _db.QueryAsync<LogRecord>(sql, new { lim = limit, traceId });
         return rows.AsList();
     }

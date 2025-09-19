@@ -1,6 +1,8 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Domain;   // fix del typo
 using CSharpEssentials.LoggerHelper.AI.Ports;
 
+namespace CSharpEssentials.LoggerHelper.AI.Application;
+
 public sealed class CorrelateTraceAction : ILogMacroAction {
     private readonly ILogRepository _logs;
     private readonly ITraceRepository _traces;

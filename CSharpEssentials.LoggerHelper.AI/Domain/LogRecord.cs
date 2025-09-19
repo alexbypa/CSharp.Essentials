@@ -1,15 +1,22 @@
 ﻿namespace CSharpEssentials.LoggerHelper.AI.Domain;
 public sealed record LogRecord(
-    long Id, DateTimeOffset Ts, string Level, string Message,
-    string? Exception, string? TraceId, string? Machine, string? App);
+    int Id, DateTime TimeStamp, string Level, string Message,
+    string? Exception, string? IdTransaction, string? MachineName, string? ApplicationName);
 
 public sealed record TraceRecord(
     string TraceId, string SpanId, string? ParentSpanId, string Name,
     DateTimeOffset StartTime, DateTimeOffset EndTime, TimeSpan Duration, string? TagsJson, bool? Anomaly);
 
 public sealed record MetricPoint(
-    string Name, double Value, DateTimeOffset Ts, string? TagsJson, string? TraceId);
-
+    string Name, double Value, DateTimeOffset TimeStamp, string? TagsJson, string? TraceId);
+/// <summary>
+/// Contract for text embeddings and cosine similarity.
+/// Use a remote API (e.g., OpenAI /embeddings) or a local model.
+/// RAG (Retrieval Augmented Generation)
+///     Retrieval = recupero dei dati simili.
+///     Augmented = aggiunti al prompt.
+///     Generation = il modello produce la risposta finale.
+/// </summary>ILogVectorStore 
 public interface IEmbeddingService {
     Task<float[]> EmbedAsync(string text);
     double Cosine(float[] a, float[] b);

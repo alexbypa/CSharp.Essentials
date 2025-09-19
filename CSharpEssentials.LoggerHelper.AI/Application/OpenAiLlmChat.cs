@@ -1,20 +1,23 @@
 ﻿// OpenAiLlmChat.cs
+using CSharpEssentials.HttpHelper;
 using CSharpEssentials.LoggerHelper.AI.Domain;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace CSharpEssentials.LoggerHelper.AI {
+namespace CSharpEssentials.LoggerHelper.AI.Application {
     // Usa l'endpoint GitHub Models compatibile OpenAI: /chat/completions
     public sealed class OpenAiLlmChat : ILlmChat {
-        private readonly HttpClient _http;
+        private readonly IhttpsClientHelper _http;
         private readonly LlmOptions _opt;
-
-        public OpenAiLlmChat(IHttpClientFactory factory, IOptions<LlmOptions> opt) {
-            _http = factory.CreateClient("ghmodels");
+        IConfiguration _configuration;
+        public OpenAiLlmChat(IhttpsClientHelperFactory factory, IOptions<LlmOptions> opt, IConfiguration configuration) {
+            _http = factory.CreateOrGet("testAI"); // TODO: da aggiornare -> nome della configurazione in appsettings.json
             _opt = opt.Value;
+            _configuration = configuration;
         }
-
         public async Task<string> ChatAsync(string system, string user, double temperature) {
             var payload = new {
                 model = _opt.Model,
@@ -25,8 +28,22 @@ namespace CSharpEssentials.LoggerHelper.AI {
                     new { role = "user",   content = user   ?? string.Empty }
                 }
             };
+            IContentBuilder jsonBuilder = new JsonContentBuilder();
 
-            using var resp = await _http.PostAsJsonAsync("/chat/completions", payload);
+            Dictionary<string, string> headers = new Dictionary<string, string> { { "accept", "application/json" }, { "X-GitHub-Api-Version", "2023-10-01" } };
+
+            var chatghapikey = _configuration.GetValue<string>("chat-gh-apikey");
+            _http.setHeadersAndBearerAuthentication(headers, new httpsClientHelper.httpClientAuthenticationBearer(chatghapikey));
+
+            _http.AddRequestAction(async (request, response, nr, ts) => {
+                Console.WriteLine($"Request : {request}");
+                await Task.CompletedTask;
+            });
+
+            string jsonPayload = JsonSerializer.Serialize(payload);
+
+            using var resp = await _http.SendAsync("https://models.inference.ai.azure.com/chat/completions", HttpMethod.Post, jsonPayload, jsonBuilder);
+           
             resp.EnsureSuccessStatusCode();
 
             var data = await resp.Content.ReadFromJsonAsync<ChatResponse>(new CancellationToken());
@@ -36,7 +53,7 @@ namespace CSharpEssentials.LoggerHelper.AI {
         // DTO minimi per risposta OpenAI-compatibile
         private sealed class ChatResponse {
             [JsonPropertyName("choices")]
-            public Choice[] Choices { get; set; } = System.Array.Empty<Choice>();
+            public Choice[] Choices { get; set; } = Array.Empty<Choice>();
         }
 
         private sealed class Choice {

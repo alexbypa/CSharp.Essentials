@@ -1,7 +1,7 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Domain;
 using CSharpEssentials.LoggerHelper.AI.Ports;
 
-namespace CSharpEssentials.LoggerHelper.AI;
+namespace CSharpEssentials.LoggerHelper.AI.Application;
 
 public sealed class DetectAnomalyAction : ILogMacroAction {
     private readonly IMetricRepository _metrics;
@@ -14,11 +14,11 @@ public sealed class DetectAnomalyAction : ILogMacroAction {
         var series = new List<(DateTimeOffset Time, double Value)>();
 
         // se esiste l’overload con ct
-        var points = await _metrics.QueryAsync("http_5xx_rate", from, to);
+        var points = await _metrics.QueryAsync("http.client.request.duration", from, to);
         // altrimenti: var points = await _metrics.QueryAsync("http_5xx_rate", from, to);
 
         foreach (var t in points)
-            series.Add((t.Ts, t.Value));
+            series.Add((t.TimeStamp, t.Value));
 
         if (series.Count < 10)
             return new MacroResult(Name, "Serie insufficiente.");
