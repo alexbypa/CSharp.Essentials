@@ -18,16 +18,29 @@ namespace CSharpEssentials.LoggerHelper.AI.Application {
             _opt = opt.Value;
             _configuration = configuration;
         }
+
+        public async Task<string> ChatAsync(IEnumerable<ChatPromptMessage> messages, double temperature = 0) {
+            var payload = new {
+                model = "gpt-4o-mini",
+                temperature,
+                messages = messages
+                .Select(m => new { role = m.Role, content = m.Content })
+                .ToArray()
+            };
+            return await ReadResponseContentAsync(payload);
+        }
         public async Task<string> ChatAsync(string system, string user, double temperature) {
             var payload = new {
                 model = _opt.Model,
                 temperature = _opt.DefaultTemperature,
-                messages = new[]
-                {
+                messages = new[]{
                     new { role = "system", content = system ?? string.Empty },
                     new { role = "user",   content = user   ?? string.Empty }
                 }
             };
+            return await ReadResponseContentAsync(payload);
+        }
+        private async Task<string> ReadResponseContentAsync(object payload) {
             IContentBuilder jsonBuilder = new JsonContentBuilder();
 
             Dictionary<string, string> headers = new Dictionary<string, string> { { "accept", "application/json" }, { "X-GitHub-Api-Version", "2023-10-01" } };
@@ -43,7 +56,7 @@ namespace CSharpEssentials.LoggerHelper.AI.Application {
             string jsonPayload = JsonSerializer.Serialize(payload);
 
             using var resp = await _http.SendAsync("https://models.inference.ai.azure.com/chat/completions", HttpMethod.Post, jsonPayload, jsonBuilder);
-           
+
             resp.EnsureSuccessStatusCode();
 
             var data = await resp.Content.ReadFromJsonAsync<ChatResponse>(new CancellationToken());

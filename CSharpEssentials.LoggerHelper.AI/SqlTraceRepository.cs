@@ -13,7 +13,7 @@ TraceId, SpanId, ParentSpanId, Name,
 StartTime, EndTime,
 DATEDIFF_BIG(millisecond, StartTime, EndTime) AS DurationMs,
 CAST(TagsJson AS nvarchar(max)) AS TagsJson,
-CASE WHEN Anomaly IN (1,'1','true') THEN 1 ELSE 0 END AS Anomaly";
+CASE WHEN Anomaly IN ('true') THEN convert(bit, 1) ELSE convert(bit, 0) END AS Anomaly";
 
     public async Task<TraceRecord?> GetByIdAsync(string traceId) {
         var sql = $"SELECT {BaseCols} FROM dbo.TraceEntry WHERE TraceId=@traceId";

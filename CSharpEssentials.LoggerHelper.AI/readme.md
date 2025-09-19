@@ -52,11 +52,13 @@ few_shot_examples:
 
 ---
 
-## Flusso di utilizzo
+## Flusso di utilizzo ( ROADMAP )
 
 1. Il package carica il `system_prompt` e le `context_views`.
 2. Integra gli `user_prompt` dinamici durante la sessione.
 3. Se presenti, aggiunge `few_shot_examples`.
 4. (Opzionale) Recupera dati da `retrieval_sources`.
 5. Costruisce il prompt finale da passare al modello AI.
+5. L' invio del prompt al modello AI avviene tramite il package Csharp.Essential.HttpHelper ( da rimuovere su appSettings la chiave "UseMock": true, viene impostata da program.cs a false) che gestisce la comunicazione HTTP con l'API del modello AI.)
 6. (Opzionale) Le risposte del modello possono essere inviate via email tramite `LoggerHelper.Sink.Email`.
+7. inserire gli agent per la lettura sul DB ( da implementare)

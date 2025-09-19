@@ -23,11 +23,21 @@ public sealed class SummarizeIncidentAction : ILogMacroAction {
         var timeline = TakeForTokenBudget(lines, maxChars: 4000);
 
         // 4) Compose prompts
-        var system = "You are an SRE assistant. Summarize root cause, impact, key signals, and remediation. Be concise.";
-        var user = $"Trace: {ctx.TraceId}\n{string.Join("\n", timeline)}";
+        //var system = "You are an SRE assistant. Summarize root cause, impact, key signals, and remediation. Be concise.";
+        //var user = $"Trace: {ctx.TraceId}\n{string.Join("\n", timeline)}";
+        var messages = new List<ChatPromptMessage>
+        {
+            new("system", "You are an SRE assistant. Summarize root cause, impact, key signals, and remediation. Be concise."),
+            // Example few‑shot Q/A pair to guide tone and structure
+            new("user",      "Esempio di richiesta: sintetizza un problema di latenza e suggerisci rimedi."),
+            new("assistant", "Sintesi: L'applicazione ha sperimentato una latenza elevata a causa di un sovraccarico del database. Impatto: gli utenti hanno registrato tempi di risposta lenti. Segnali: picchi di CPU e query lente. Remediation: scalare il database e ottimizzare le query."),
+            // Actual user request with context
+            new("user",     $"Trace: {ctx.TraceId}\n{string.Join("\n", timeline)}")
+        };
 
         // 5) Call the LLM
-        var summary = await _llm.ChatAsync(system, user);
+        //var summary = await _llm.ChatAsync(system, user);
+        var summary = await _llm.ChatAsync(messages);
 
         return new MacroResult(Name, summary, new() { ["traceId"] = ctx.TraceId!, ["count"] = lines.Count });
     }

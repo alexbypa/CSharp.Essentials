@@ -24,11 +24,18 @@ public interface IEmbeddingService {
 
 public interface ILlmChat {
     Task<string> ChatAsync(string system, string user, double temperature = 0.0);
+    /// <summary>
+    /// Sends a sequence of chat messages to the model.  Each message should specify a role
+    /// ("system", "user" or "assistant") and content.  This overload can be used to include
+    /// few‑shot examples or additional context before the final user prompt.
+    /// </summary>
+    Task<string> ChatAsync(IEnumerable<ChatPromptMessage> messages, double temperature = 0.0);
+
 }
 // Domain/LlmOptions.cs
 public sealed class LlmOptions {
-        public string Model { get; set; } = "gpt-4o-mini";
-        public double DefaultTemperature { get; set; } = 0.2;
+    public string Model { get; set; } = "gpt-4o-mini";
+    public double DefaultTemperature { get; set; } = 0.2;
 }
 // Macro Action (OCP + DIP)
 public interface ILogMacroAction {
@@ -36,6 +43,19 @@ public interface ILogMacroAction {
     bool CanExecute(MacroContext ctx);   // regole veloci
     Task<MacroResult> ExecuteAsync(MacroContext ctx, CancellationToken ct = default);
 }
-
-public sealed record MacroContext(string? DocId, string? TraceId, string? Query, DateTimeOffset Now);
+public sealed record MacroContext (
+    //Used for RAG to work with textual context or embedding -> vector
+    string? DocId,
+    //To analize a trace Id
+    string? TraceId,
+    // Query: a free-text search term provided by the user.
+    // Example: Query = "NullReferenceException"
+    // Used by actions to look up logs or events containing that text.
+    string? Query,
+    // Now: the "current" timestamp passed from the caller.
+    // Example: Now = DateTimeOffset.UtcNow
+    // Used by actions that need a time window, e.g. anomaly detection
+    // checks metrics between (Now - 30 minutes) and Now.
+    DateTimeOffset Now
+);
 public sealed record MacroResult(string Action, string Summary, Dictionary<string, object>? Data = null);
