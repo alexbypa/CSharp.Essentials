@@ -12,7 +12,8 @@ public sealed class ActionOrchestrator : IActionOrchestrator {
         var results = new List<MacroResult>();
         foreach (var a in _actions)
             if (a.CanExecute(ctx))
-                results.Add(await a.ExecuteAsync(ctx, ct));
+                if (a is RagAnswerQueryAction)
+                    results.Add(await a.ExecuteAsync(ctx, ct));
         return results;
     }
 }

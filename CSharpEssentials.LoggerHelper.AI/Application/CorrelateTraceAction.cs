@@ -25,7 +25,9 @@ public sealed class CorrelateTraceAction : ILogMacroAction {
 
         var lines = recent.Select(t =>$"{t.TraceId} | name={t.Name} | dur={t.Duration.TotalMilliseconds:F0}ms | anomaly={(t.Anomaly == true ? 1 : 0)} | tags={t.TagsJson}");
 
-        var system = "You are an SRE assistant. Pick the most suspicious trace and explain why.";
+        //var system = "You are an SRE assistant. Pick the most suspicious trace and explain why.";
+        var system = ctx.Query;
+
         var user = "Candidates:\n" + string.Join("\n", lines) + "\nReturn: traceId + short reason.";
         var pick = await _llm.ChatAsync(system, user);
 

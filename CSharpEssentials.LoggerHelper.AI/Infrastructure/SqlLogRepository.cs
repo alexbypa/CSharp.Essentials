@@ -3,7 +3,7 @@ using CSharpEssentials.LoggerHelper.AI.Ports;
 using Microsoft.Data.SqlClient;
 using Dapper;
 
-namespace CSharpEssentials.LoggerHelper.AI;
+namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
 
 public sealed class SqlLogRepository : ILogRepository {
     readonly SqlConnection _db;

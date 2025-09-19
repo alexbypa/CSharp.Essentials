@@ -53,8 +53,7 @@ few_shot_examples:
 ---
 
 ## Flusso di utilizzo ( ROADMAP )
-
-1. Il package carica il `system_prompt` e le `context_views`.
+1. Code Review solid prnciples.
 2. Integra gli `user_prompt` dinamici durante la sessione.
 3. Se presenti, aggiunge `few_shot_examples`.
 4. (Opzionale) Recupera dati da `retrieval_sources`.

@@ -30,7 +30,6 @@ public interface ILlmChat {
     /// few‑shot examples or additional context before the final user prompt.
     /// </summary>
     Task<string> ChatAsync(IEnumerable<ChatPromptMessage> messages, double temperature = 0.0);
-
 }
 // Domain/LlmOptions.cs
 public sealed class LlmOptions {
