@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Version>4.0.3</Version>
     <PackageIcon>./CSharpEssentials.png</PackageIcon>
     <Title>Package to manage openTelemetry</Title>

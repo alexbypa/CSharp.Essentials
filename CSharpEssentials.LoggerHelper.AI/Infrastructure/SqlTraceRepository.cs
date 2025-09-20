@@ -1,12 +1,11 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Domain;
 using CSharpEssentials.LoggerHelper.AI.Ports;
 using Dapper;
-using Microsoft.Data.SqlClient;
 
 namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
 public sealed class SqlTraceRepository : ITraceRepository {
-    readonly SqlConnection _db;
-    public SqlTraceRepository(SqlConnection db) => _db = db;
+    readonly IWrapperDbConnection _db;
+    public SqlTraceRepository(IWrapperDbConnection db) => _db = db;
 
     const string BaseCols = @"
 TraceId, SpanId, ParentSpanId, Name,
@@ -17,7 +16,7 @@ CASE WHEN Anomaly IN ('true') THEN convert(bit, 1) ELSE convert(bit, 0) END AS A
 
     public async Task<TraceRecord?> GetByIdAsync(string traceId) {
         var sql = $"SELECT {BaseCols} FROM dbo.TraceEntry WHERE TraceId=@traceId";
-        var r = await _db.QueryFirstOrDefaultAsync(sql, new { traceId });
+        var r = await _db.GetConnection().QueryFirstOrDefaultAsync(sql, new { traceId });
         return r is null ? null :
             new TraceRecord(r.TraceId, r.SpanId, r.ParentSpanId, r.Name,
                 (DateTimeOffset)r.StartTime, (DateTimeOffset)r.EndTime,
@@ -26,7 +25,7 @@ CASE WHEN Anomaly IN ('true') THEN convert(bit, 1) ELSE convert(bit, 0) END AS A
 
     public async Task<IReadOnlyList<TraceRecord>> GetRecentAsync(int limit, CancellationToken ct = default) {
         var sql = $"SELECT TOP (@lim) {BaseCols} FROM dbo.TraceEntry ORDER BY StartTime DESC";
-        var rows = await _db.QueryAsync(sql, new { lim = limit });
+        var rows = await _db.GetConnection().QueryAsync(sql, new { lim = limit });
         return rows.Select(r => new TraceRecord(
             r.TraceId, r.SpanId, r.ParentSpanId, r.Name,
             (DateTimeOffset)r.StartTime, (DateTimeOffset)r.EndTime,
@@ -35,7 +34,7 @@ CASE WHEN Anomaly IN ('true') THEN convert(bit, 1) ELSE convert(bit, 0) END AS A
 
     public async Task<IReadOnlyList<TraceRecord>> WithErrorsAsync(int limit) {
         var sql = $"SELECT TOP (@lim) {BaseCols} FROM dbo.TraceEntry WHERE Anomaly = 1 ORDER BY StartTime DESC";
-        var rows = await _db.QueryAsync(sql, new { lim = limit });
+        var rows = await _db.GetConnection().QueryAsync(sql, new { lim = limit });
         return rows.Select(r => new TraceRecord(
             r.TraceId, r.SpanId, r.ParentSpanId, r.Name,
             (DateTimeOffset)r.StartTime, (DateTimeOffset)r.EndTime,

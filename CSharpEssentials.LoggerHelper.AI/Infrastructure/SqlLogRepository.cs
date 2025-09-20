@@ -6,8 +6,8 @@ using Dapper;
 namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
 
 public sealed class SqlLogRepository : ILogRepository {
-    readonly SqlConnection _db;
-    public SqlLogRepository(SqlConnection db) => _db = db;
+    readonly IWrapperDbConnection _db;
+    public SqlLogRepository(IWrapperDbConnection db) => _db = db;
 
     public async Task<IReadOnlyList<LogRecord>> GetRecentAsync(string? app, int limit) {
         var sql = @"
@@ -19,7 +19,7 @@ SELECT TOP (@lim)
 FROM dbo.LogEntry
 WHERE (@app IS NULL OR ApplicationName = @app)
 ORDER BY Ts DESC";
-        var rows = await _db.QueryAsync<LogRecord>(sql, new { lim = limit, app });
+        var rows = await _db.GetConnection().QueryAsync<LogRecord>(sql, new { lim = limit, app });
         return rows.AsList();
     }
 
@@ -33,7 +33,7 @@ SELECT TOP (@lim)
 FROM dbo.LogEntry
 WHERE Message LIKE '%' + @q + '%' OR RenderedMessage LIKE '%' + @q + '%'
 ORDER BY Ts DESC";
-        var rows = await _db.QueryAsync<LogRecord>(sql, new { lim = limit, q = term });
+        var rows = await _db.GetConnection().QueryAsync<LogRecord>(sql, new { lim = limit, q = term });
         return rows.AsList();
     }
 
@@ -47,7 +47,7 @@ FROM dbo.LogEntry
 --WHERE JSON_VALUE(LogEvent,'$.TraceId') = @traceId
 WHERE IdTransaction = @traceId
 ORDER BY TimeStamp DESC";
-        var rows = await _db.QueryAsync<LogRecord>(sql, new { lim = limit, traceId });
+        var rows = await _db.GetConnection().QueryAsync<LogRecord>(sql, new { lim = limit, traceId });
         return rows.AsList();
     }
 }
