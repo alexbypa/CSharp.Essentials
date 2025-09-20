@@ -3,7 +3,7 @@
 namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
 
 public sealed class InMemoryLogVectorStore : ILogVectorStore {
-    private readonly List<LogEmbedding> _docs = new();
+    private readonly List<LogEmbedding> _docs;
     private readonly IEmbeddingService _emb;
     public InMemoryLogVectorStore(IEmbeddingService emb) => _emb = emb;
 
