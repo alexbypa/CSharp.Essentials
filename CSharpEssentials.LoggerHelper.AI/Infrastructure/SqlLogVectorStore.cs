@@ -28,12 +28,24 @@ WHEN NOT MATCHED THEN INSERT (Id,App,Ts,Vector,Text,TraceId) VALUES (@Id,@App,@T
     }
 
     public async Task<IReadOnlyList<LogEmbeddingHit>> SimilarAsync(float[] query, int k, string? app = null, TimeSpan? within = null, CancellationToken ct = default) {
-        var from = within.HasValue ? DateTimeOffset.UtcNow - within.Value : (DateTimeOffset?)null;
-        var sql = @"SELECT TOP (@n) Id, App, Ts, Vector, Text, TraceId FROM dbo.LogVector
-                    WHERE (@app IS NULL OR App=@app) AND (@from IS NULL OR Ts >= @from)
-                    ORDER BY Ts DESC";
-        // fetch more than k, then score and take top-k
-        var rows = (await _db.GetConnection().QueryAsync(sql, new { n = 200, app, from })).ToList();
+
+        //TEMP
+        //var from = within.HasValue ? DateTimeOffset.UtcNow - within.Value : (DateTimeOffset?)null;
+        //var sql = @"SELECT TOP (@n) Id, App, Ts, Vector, Text, TraceId FROM dbo.LogVector
+        //            WHERE (@app IS NULL OR App=@app) AND (@from IS NULL OR Ts >= @from)
+        //            ORDER BY Ts DESC";
+        //// fetch more than k, then score and take top-k
+        //var rows = (await _db.GetConnection().QueryAsync(sql, new { n = 200, app, from })).ToList();
+        var rows = new List<dynamic> {
+            new {
+                Id = Guid.NewGuid().ToString(),
+                App = "myapp",
+                Ts = DateTimeOffset.UtcNow,
+                Vector = Serialize(await _emb.EmbedAsync("This is a test log entry.")),
+                TraceId = Guid.NewGuid().ToString(),
+                Text = "This is a test log entry."
+            }
+        };
 
         var hits = new List<LogEmbeddingHit>(rows.Count);
         foreach (var r in rows) {

@@ -3,6 +3,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
 
+/// <summary>
+/// // Questa classe è un'implementazione concreta dell'interfaccia 'ILogVectorStore'.
+/// Rappresenta il nostro "Magazzino Dati" in-memory.
+/// Le sue responsabilità sono:
+/// 1. CONSERVARE una collezione di 'LogEmbedding'.
+/// 2. FORNIRE metodi per aggiungere/aggiornare dati (UpsertAsync).
+/// 3. FORNIRE metodi per cercare dati in base alla similarità semantica (SimilarAsync).
+///
+/// Grazie all'astrazione (l'interfaccia), potremmo sostituire questa classe con un
+/// 'SqlLogVectorStore' o 'RedisLogVectorStore' senza modificare il resto dell'applicazione.
+/// </summary>
 public sealed class InMemoryLogVectorStore : ILogVectorStore {
     private readonly List<LogEmbedding> _docs;
     private readonly IEmbeddingService _emb;
@@ -17,7 +28,10 @@ public sealed class InMemoryLogVectorStore : ILogVectorStore {
             }
         }
     }
-
+    // NOTA: L'implementazione attuale non gestisce l'aggiornamento (Update),
+    // ma solo l'inserimento (Insert). Una logica di 'Upsert' completa
+    // dovrebbe prima cercare se un documento con lo stesso ID esiste e, in caso,
+    // sostituirlo. Per ora, aggiunge semplicemente il nuovo documento.
     public Task UpsertAsync(LogEmbedding doc, CancellationToken ct = default) {
         var i = _docs.FindIndex(d => d.Id == doc.Id);
         if (i >= 0)
@@ -26,7 +40,7 @@ public sealed class InMemoryLogVectorStore : ILogVectorStore {
             _docs.Add(doc);
         return Task.CompletedTask;
     }
-
+    // --- FLUSSO DI RICERCA SEMANTICA (CORE LOGIC) ---
     public Task<IReadOnlyList<LogEmbeddingHit>> SimilarAsync(
         float[] query, int k, string? app = null, TimeSpan? within = null, CancellationToken ct = default) {
         var now = DateTimeOffset.UtcNow;

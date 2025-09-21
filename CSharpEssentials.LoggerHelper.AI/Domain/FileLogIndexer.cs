@@ -1,4 +1,12 @@
 ﻿namespace CSharpEssentials.LoggerHelper.AI.Domain;
+/// <summary>
+/// REVIEW: FileLogIndexer.cs
+/// Questo file rappresenta il "Costruttore di Dati" nel nostro sistema.
+/// La sua UNICA responsabilità (in accordo con il Single Responsibility Principle)
+/// è quella di prendere una sorgente dati (un file o uno stream) e trasformarla
+/// in una lista di oggetti 'LogEmbedding', arricchiti con i vettori generati
+/// dall'embedding service. Non sa e non deve sapere dove questi dati verranno salvati.
+/// </summary>
 public class FileLogIndexer {
     private readonly IEmbeddingService _embeddingService;
 
