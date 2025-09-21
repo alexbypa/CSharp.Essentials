@@ -1,29 +1,23 @@
-﻿using CSharpEssentials.LoggerHelper.AI.Infrastructure;
-
-namespace CSharpEssentials.LoggerHelper.AI.Domain;
+﻿namespace CSharpEssentials.LoggerHelper.AI.Domain;
 public class FileLogIndexer {
     private readonly IEmbeddingService _embeddingService;
 
     public FileLogIndexer(IEmbeddingService embeddingService) {
         _embeddingService = embeddingService;
     }
-
-    public async Task<ILogVectorStore> IndexFileAsync(string filePath) {
-        if (!File.Exists(filePath)) {
-            throw new FileNotFoundException($"Il file non è stato trovato: {filePath}");
-        }
-
-        var rawDocs = await File.ReadAllLinesAsync(filePath);
+    public async Task<List<LogEmbedding>> IndexStreamAsync(Stream stream) {
         var docsWithEmbeddings = new List<LogEmbedding>();
+        using var reader = new StreamReader(stream);
 
-        foreach (var text in rawDocs) {
-            // La logica per generare gli embedding si trova qui
-            var embedding = await _embeddingService.EmbedAsync(text);
+        string? line;
+        while ((line = await reader.ReadLineAsync()) != null) {
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
 
-            docsWithEmbeddings.Add(new LogEmbedding(Guid.NewGuid().ToString(), "test", DateTimeOffset.UtcNow, embedding, text, null));
+            var embedding = await _embeddingService.EmbedAsync(line);
+            docsWithEmbeddings.Add(new LogEmbedding(Guid.NewGuid().ToString(), "dynamic-upload", DateTimeOffset.UtcNow, embedding, line, null));
         }
 
-        // Il repository in memoria viene istanziato e popolato in questo momento
-        return new InMemoryLogVectorStore(docsWithEmbeddings);
+        return docsWithEmbeddings;
     }
 }

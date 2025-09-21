@@ -16,12 +16,18 @@ public sealed class RagAnswerQueryAction : ILogMacroAction {
     public async Task<MacroResult> ExecuteAsync(MacroContext ctx, CancellationToken ct = default) {
         // 1) Embed query
         var qvec = await _emb.EmbedAsync(ctx.Query!);
+        
+
 
         // 2) Top-K documenti simili dal vector store (ultime 24h)
         var hits = await _store.SimilarAsync(qvec, k: 3, app: null, within: TimeSpan.FromHours(24), ct);
 
         // 3) Prompt con contesto recuperato + domanda utente
         var system = "You are an SRE assistant. Use the provided CONTEXT to answer precisely and concisely.";
+        //var system = "Rispondi alla domanda dell'utente basandoti esclusivamente sul seguente contesto. Se le informazioni non sono presenti nel contesto, rispondi 'Non ho abbastanza informazioni per rispondere'.";
+        if (ctx.system is not null)
+            system = ctx.system;
+
         var contextBlock = string.Join("\n---\n", hits.Select(h => h.Doc.Text));
         var messages = new[]
         {
@@ -35,7 +41,8 @@ public sealed class RagAnswerQueryAction : ILogMacroAction {
 
         return new MacroResult(Name, answer, new() {
             ["matches"] = hits.Count,
-            ["topScore"] = hits.FirstOrDefault()?.Score ?? 0,
+            //["topScore"] = hits.FirstOrDefault()?.Score ?? 0,
+            ["topScore"] = hits.ToList()
         });
     }
 }

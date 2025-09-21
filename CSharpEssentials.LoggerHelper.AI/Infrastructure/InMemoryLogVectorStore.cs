@@ -1,11 +1,22 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Domain;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
 
 public sealed class InMemoryLogVectorStore : ILogVectorStore {
     private readonly List<LogEmbedding> _docs;
     private readonly IEmbeddingService _emb;
-    public InMemoryLogVectorStore(IEmbeddingService emb) => _emb = emb;
+    public InMemoryLogVectorStore(IEmbeddingService emb, IServiceProvider sp) {
+        _emb = emb;
+        if (_docs is null) {
+            using var scope = sp.CreateScope();
+            var fileToLoad = scope.ServiceProvider.GetRequiredService<FileLogIndexer>();
+            if (fileToLoad != null) {
+                var initialDocs = fileToLoad.IndexStreamAsync(File.OpenRead("C:\\Github\\rag.txt")).Result;
+                _docs = initialDocs.ToList();
+            }
+        }
+    }
 
     public Task UpsertAsync(LogEmbedding doc, CancellationToken ct = default) {
         var i = _docs.FindIndex(d => d.Id == doc.Id);
@@ -30,5 +41,10 @@ public sealed class InMemoryLogVectorStore : ILogVectorStore {
             .AsReadOnly();
 
         return Task.FromResult((IReadOnlyList<LogEmbeddingHit>)hits);
+    }
+    public void Populate(IEnumerable<LogEmbedding> initialDocs) {
+        foreach (var doc in initialDocs) {
+            _docs.Add(doc);
+        }
     }
 }
