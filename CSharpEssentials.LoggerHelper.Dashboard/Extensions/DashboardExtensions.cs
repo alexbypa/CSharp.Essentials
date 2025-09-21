@@ -110,6 +110,7 @@ public static class DashboardExtensions {
 
             await stream.CopyToAsync(context.Response.Body);
         };
+        
         app.MapGet("/assets/{**slug}", async context =>
         {
             var asm = typeof(DashboardExtensions).Assembly;
@@ -146,7 +147,8 @@ public static class DashboardExtensions {
                 "application/octet-stream";
 
             await stream.CopyToAsync(context.Response.Body);
-        });
+        })
+        .ExcludeFromDescription();
         // 2) Route
         app.MapGet("/ui", UiHandler);
         app.MapGet("/ui/{**slug}", UiHandler);
