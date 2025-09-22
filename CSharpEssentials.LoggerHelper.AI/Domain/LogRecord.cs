@@ -23,18 +23,13 @@ public interface IEmbeddingService {
 }
 
 public interface ILlmChat {
-    Task<string> ChatAsync(string system, string user, double temperature = 0.0);
+    Task<string> ChatAsync(string system, string user);
     /// <summary>
     /// Sends a sequence of chat messages to the model.  Each message should specify a role
     /// ("system", "user" or "assistant") and content.  This overload can be used to include
     /// few‑shot examples or additional context before the final user prompt.
     /// </summary>
-    Task<string> ChatAsync(IEnumerable<ChatPromptMessage> messages, double temperature = 0.0);
-}
-// Domain/LlmOptions.cs
-public sealed class LlmOptions {
-    public string Model { get; set; } = "gpt-4o-mini";
-    public double DefaultTemperature { get; set; } = 0.2;
+    Task<string> ChatAsync(IEnumerable<ChatPromptMessage> messages);
 }
 // Macro Action (OCP + DIP)
 public interface ILogMacroAction {

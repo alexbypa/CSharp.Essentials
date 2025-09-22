@@ -1,4 +1,5 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Domain;
+using Microsoft.Extensions.Options;
 
 namespace CSharpEssentials.LoggerHelper.AI.Application;
 
@@ -6,10 +7,10 @@ public sealed class RagAnswerQueryAction : ILogMacroAction {
     private readonly IEmbeddingService _emb;
     private readonly ILogVectorStore _store;
     private readonly ILlmChat _llm;
-
+    private readonly IOptions<LoggerAIOptions> _opt;
     public string Name => "RagAnswerQuery";
-    public RagAnswerQueryAction(IEmbeddingService emb, ILogVectorStore store, ILlmChat llm)
-        => (_emb, _store, _llm) = (emb, store, llm);
+    public RagAnswerQueryAction(IEmbeddingService emb, ILogVectorStore store, ILlmChat llm, IOptions<LoggerAIOptions> opt)
+        => (_emb, _store, _llm, _opt) = (emb, store, llm, opt);
 
     public bool CanExecute(MacroContext ctx) => !string.IsNullOrWhiteSpace(ctx.Query);
 
@@ -20,7 +21,7 @@ public sealed class RagAnswerQueryAction : ILogMacroAction {
 
 
         // 2) Top-K documenti simili dal vector store (ultime 24h)
-        var hits = await _store.SimilarAsync(qvec, k: 3, app: null, within: TimeSpan.FromHours(24), ct);
+        var hits = await _store.SimilarAsync(qvec, k: _opt.Value.topScore, app: null, within: TimeSpan.FromHours(24), ct);
 
         // 3) Prompt con contesto recuperato + domanda utente
         var system = "You are an SRE assistant. Use the provided CONTEXT to answer precisely and concisely.";
@@ -37,7 +38,7 @@ public sealed class RagAnswerQueryAction : ILogMacroAction {
         };
 
         // 4) Generazione
-        var answer = await _llm.ChatAsync(messages, temperature: 0.2);
+        var answer = await _llm.ChatAsync(messages);
 
         return new MacroResult(Name, answer, new() {
             ["matches"] = hits.Count,

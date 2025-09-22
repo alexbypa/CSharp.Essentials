@@ -1,5 +1,4 @@
-﻿using CSharpEssentials.LoggerHelper.Configuration;
-using CSharpEssentials.LoggerHelper.Telemetry.Exporters;
+﻿using CSharpEssentials.LoggerHelper.Telemetry.Exporters;
 using CSharpEssentials.LoggerHelper.Telemetry.Metrics;
 using CSharpEssentials.LoggerHelper.Telemetry.middlewares;
 using CSharpEssentials.LoggerHelper.Telemetry.Proxy;
