@@ -4,7 +4,6 @@ namespace CSharpEssentials.LoggerHelper.AI.Application;
 public interface IActionOrchestrator {
     Task<IReadOnlyList<MacroResult>> RunAsync(MacroContext ctx, CancellationToken ct = default);
 }
-
 public sealed class ActionOrchestrator : IActionOrchestrator {
     private readonly IEnumerable<ILogMacroAction> _actions;
     public ActionOrchestrator(IEnumerable<ILogMacroAction> actions) => _actions = actions;
@@ -12,7 +11,7 @@ public sealed class ActionOrchestrator : IActionOrchestrator {
         var results = new List<MacroResult>();
         foreach (var a in _actions)
             if (a.CanExecute(ctx))
-                if (a is RagAnswerQueryAction) {
+                if (a.Name.Equals(ctx.action, StringComparison.InvariantCultureIgnoreCase)  ) {
                     results.Add(await a.ExecuteAsync(ctx, ct));
                 }
         return results;

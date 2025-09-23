@@ -42,7 +42,7 @@ public sealed class InMemoryLogVectorStore : ILogVectorStore {
     }
     // --- FLUSSO DI RICERCA SEMANTICA (CORE LOGIC) ---
     public Task<IReadOnlyList<LogEmbeddingHit>> SimilarAsync(
-        float[] query, int k, string? app = null, TimeSpan? within = null, CancellationToken ct = default) {
+        string sqlQuery, float[] query, int k, string? app = null, TimeSpan? within = null, CancellationToken ct = default) {
         var now = DateTimeOffset.UtcNow;
         var from = within.HasValue ? now - within.Value : DateTimeOffset.MinValue;
 

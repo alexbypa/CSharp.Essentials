@@ -11,31 +11,23 @@ public sealed class SqlLogVectorStore : ILogVectorStore {
     //private readonly SqlConnection _db;
     private readonly IWrapperDbConnection _db;
     private readonly IEmbeddingService _emb;
-    private readonly IFileLoader _fileLoader;
-    public SqlLogVectorStore(IWrapperDbConnection db, IEmbeddingService emb, IFileLoader fileLoader) { 
+    //private readonly IFileLoader _fileLoader;
+    public SqlLogVectorStore(IWrapperDbConnection db, IEmbeddingService emb/*, IFileLoader fileLoader*/) { 
         _db = db; 
         _emb = emb;
-        _fileLoader = fileLoader;
+        //_fileLoader = fileLoader;
     }
 
     public async Task UpsertAsync(LogEmbedding doc, CancellationToken ct = default) {
-        //TODO:
-//        var bytes = Serialize(doc.Vector);
-//        var cmd = @"
-//MERGE dbo.LogVector AS t
-//USING (SELECT @Id AS Id) AS s
-//ON (t.Id = s.Id)
-//WHEN MATCHED THEN UPDATE SET App=@App, Ts=@Ts, Vector=@Vector, Text=@Text, TraceId=@TraceId
-//WHEN NOT MATCHED THEN INSERT (Id,App,Ts,Vector,Text,TraceId) VALUES (@Id,@App,@Ts,@Vector,@Text,@TraceId);";
-//        await _db.GetConnection().ExecuteAsync(cmd, new { doc.Id, doc.App, doc.Ts, Vector = bytes, doc.Text, doc.TraceId });
+        //TODO:....
     }
 
-    public async Task<IReadOnlyList<LogEmbeddingHit>> SimilarAsync(float[] query, int k, string? app = null, TimeSpan? within = null, CancellationToken ct = default) {
+    public async Task<IReadOnlyList<LogEmbeddingHit>> SimilarAsync(string sqlQuery, float[] query, int k, string? app = null, TimeSpan? within = null, CancellationToken ct = default) {
         var from = within.HasValue ? DateTimeOffset.UtcNow - within.Value : (DateTimeOffset?)null;
         
-        var sql = _fileLoader.getSqlQuery();
+        //var sql = _fileLoader.getModelSQLLMModels();
 
-        var rows = (await _db.GetConnection().QueryAsync(sql, new { n = 200, app, from })).ToList();
+        var rows = (await _db.GetConnection().QueryAsync(sqlQuery, new { n = 200, app, from })).ToList();
 
         var hits = new List<LogEmbeddingHit>(rows.Count);
         foreach (var r in rows) {

@@ -1,4 +1,5 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Domain;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace CSharpEssentials.LoggerHelper.AI.Application;
@@ -8,20 +9,21 @@ public sealed class RagAnswerQueryAction : ILogMacroAction {
     private readonly ILogVectorStore _store;
     private readonly ILlmChat _llm;
     private readonly IOptions<LoggerAIOptions> _opt;
+    private readonly List<SQLLMModels> _sQLLMModels;
     public string Name => "RagAnswerQuery";
-    public RagAnswerQueryAction(IEmbeddingService emb, ILogVectorStore store, ILlmChat llm, IOptions<LoggerAIOptions> opt)
-        => (_emb, _store, _llm, _opt) = (emb, store, llm, opt);
+    public RagAnswerQueryAction(IEmbeddingService emb, ILogVectorStore store, ILlmChat llm, IOptions<LoggerAIOptions> opt, List<SQLLMModels> sQLLMModels)
+        => (_emb, _store, _llm, _opt, _sQLLMModels) = (emb, store, llm, opt, sQLLMModels);
 
     public bool CanExecute(MacroContext ctx) => !string.IsNullOrWhiteSpace(ctx.Query);
 
     public async Task<MacroResult> ExecuteAsync(MacroContext ctx, CancellationToken ct = default) {
         // 1) Embed query
         var qvec = await _emb.EmbedAsync(ctx.Query!);
-        
-
 
         // 2) Top-K documenti simili dal vector store (ultime 24h)
-        var hits = await _store.SimilarAsync(qvec, k: _opt.Value.topScore, app: null, within: TimeSpan.FromHours(24), ct);
+        var sqlQuery = _sQLLMModels.FirstOrDefault(a => a.action == Name).contents.FirstOrDefault(a => a.fileName == ctx.fileName)?.content;
+
+        var hits = await _store.SimilarAsync(sqlQuery, qvec, k: _opt.Value.topScore, app: null, within: TimeSpan.FromHours(24), ct);
 
         // 3) Prompt con contesto recuperato + domanda utente
         var system = "You are an SRE assistant. Use the provided CONTEXT to answer precisely and concisely.";

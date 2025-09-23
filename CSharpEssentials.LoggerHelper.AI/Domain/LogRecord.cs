@@ -26,7 +26,7 @@ public interface ILlmChat {
     Task<string> ChatAsync(string system, string user);
     /// <summary>
     /// Sends a sequence of chat messages to the model.  Each message should specify a role
-    /// ("system", "user" or "assistant") and content.  This overload can be used to include
+    /// ("system", "user" or "assistant") and contents.  This overload can be used to include
     /// few‑shot examples or additional context before the final user prompt.
     /// </summary>
     Task<string> ChatAsync(IEnumerable<ChatPromptMessage> messages);
@@ -52,7 +52,9 @@ public sealed record MacroContext(
     // checks metrics between (Now - 30 minutes) and Now.
     //DateTimeOffset Now,
     //Custom prompt system
-    string system
+    string system,
+    string action,
+    string fileName
 ) {
     private readonly DateTimeOffset? _now;
     public DateTimeOffset Now {

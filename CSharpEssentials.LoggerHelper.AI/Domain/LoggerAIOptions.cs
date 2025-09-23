@@ -3,7 +3,7 @@
 namespace CSharpEssentials.LoggerHelper.AI.Domain;
 public class LoggerAIOptions {
     public required string chatghapikey { get; set; }
-    public required string FileSqlLoaderContainer { get; set; }
+    public required string FolderSqlLoaderContainer { get; set; }
     [Range(0.0, 1.0)]
     public required double Temperature { get; set; }
     [Range(1, int.MaxValue)]
