@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 
 namespace CSharpEssentials.LoggerHelper.AI.Domain;
 public interface IFileLoader {
