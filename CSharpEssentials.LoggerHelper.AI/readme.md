@@ -69,7 +69,7 @@ This mode is designed to detect anomalies in a time series of metrics.
 ---
 ### How to Test AI Models
 
-You can test the four AI models and their corresponding actions using two different methods: the web API demo with Scalar or the `LoggerHelper.Dashboard` client application.
+You can test the four AI models and their corresponding actions using two different methods: the web API demo with Scalar or the [CSharpEssentials.LoggerHelper.Dashboard](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) client application.
 
 #### 1\. Web API Demo with Scalar
 
