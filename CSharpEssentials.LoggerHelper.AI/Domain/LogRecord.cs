@@ -54,7 +54,8 @@ public sealed record MacroContext(
     //Custom prompt system
     string system,
     string action,
-    string fileName
+    string fileName,
+    int topResultsOnQuery = 1000
 ) {
     private readonly DateTimeOffset? _now;
     public DateTimeOffset Now {

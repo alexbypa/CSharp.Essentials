@@ -22,12 +22,11 @@ public sealed class SqlLogVectorStore : ILogVectorStore {
         //TODO:....
     }
 
-    public async Task<IReadOnlyList<LogEmbeddingHit>> SimilarAsync(string sqlQuery, float[] query, int k, string? app = null, TimeSpan? within = null, CancellationToken ct = default) {
-        var from = within.HasValue ? DateTimeOffset.UtcNow - within.Value : (DateTimeOffset?)null;
-        
+    public async Task<IReadOnlyList<LogEmbeddingHit>> SimilarAsync(string sqlQuery, float[] query, int k, DateTimeOffset from, CancellationToken ct = default) {
+        //var from = within.HasValue ? DateTimeOffset.UtcNow - within.Value : (DateTimeOffset?)null;
         //var sql = _fileLoader.getModelSQLLMModels();
 
-        var rows = (await _db.GetConnection().QueryAsync(sqlQuery, new { n = 200, app, from })).ToList();
+        var rows = (await _db.GetConnection().QueryAsync(sqlQuery, new { n = 200, now = from })).ToList();
 
         var hits = new List<LogEmbeddingHit>(rows.Count);
         foreach (var r in rows) {

@@ -41,13 +41,12 @@ public sealed class InMemoryLogVectorStore : ILogVectorStore {
         return Task.CompletedTask;
     }
     // --- FLUSSO DI RICERCA SEMANTICA (CORE LOGIC) ---
-    public Task<IReadOnlyList<LogEmbeddingHit>> SimilarAsync(
-        string sqlQuery, float[] query, int k, string? app = null, TimeSpan? within = null, CancellationToken ct = default) {
+    public Task<IReadOnlyList<LogEmbeddingHit>> SimilarAsync(string sqlQuery, float[] query, int k, DateTimeOffset from, CancellationToken ct = default) {
         var now = DateTimeOffset.UtcNow;
-        var from = within.HasValue ? now - within.Value : DateTimeOffset.MinValue;
+        //var from = within.HasValue ? now - within.Value : DateTimeOffset.MinValue;
 
         var hits = _docs
-            .Where(d => (app is null || d.App == app) && d.Ts >= from)
+            .Where(d => d.Ts >= from)
             .Select(d => new LogEmbeddingHit(d, _emb.Cosine(query, d.Vector)))
             .OrderByDescending(h => h.Score)
             .Take(k)

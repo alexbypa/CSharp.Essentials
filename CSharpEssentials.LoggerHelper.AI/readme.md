@@ -97,7 +97,8 @@ To run a test, you must send a `POST` request to the `http://localhost:1234/AI/r
           "system": "If you don't find anything in the context, reply with 'I'm sorry but I couldn't find this information in the database!'",
           "action": "RagAnswerQuery",
           "fileName": "getTraces.sql",
-          "now": "2025-09-22T08:00:00"
+          "now": "2025-09-22T08:00:00",
+          "topResultsOnQuery" : 200
         }
         ```
   * **Result:** The `RagAnswerQuery` action will search for relevant information based on the provided `query` and `fileName`. As shown in the example, if the information is not found in the database, the AI will respond with the message defined in the `system` parameter.
@@ -137,11 +138,10 @@ This example demonstrates how to use the RAG system to analyze recent log entrie
     Here's an example of the `getlogs.sql` file content:
 
     ```sql
-    select "Id", "ApplicationName" "App", "TimeStamp" "Ts", "LogEvent" "Message", "IdTransaction" "TraceId"
-    from "LogEntry"
-    where "TimeStamp" > {now}
+    select "Id", "ApplicationName" "App", "TimeStamp" "Ts", "LogEvent" "Message", "IdTransaction" "TraceId" from "LogEntry"  
+    where "TimeStamp" > @now
     order by "Id" desc
-    limit {n}
+    limit @n
     ```
 
       * `{now}`: The starting date from the user input. The query will return logs from this date onward.
@@ -161,10 +161,7 @@ The system will execute the `getlogs.sql` query, retrieve the relevant log entri
 -----
 
 
-## Flusso di utilizzo ( ROADMAP )
+## ( ROADMAP )
 1. Code Review solid prnciples.
-4. (Opzionale) Recupera dati da `retrieval_sources`.
-5. Costruisce il prompt finale da passare al modello AI.
 5. L' invio del prompt al modello AI avviene tramite il package Csharp.Essential.HttpHelper ( da rimuovere su appSettings la chiave "UseMock": true, viene impostata da program.cs a false) che gestisce la comunicazione HTTP con l'API del modello AI.)
 6. (Opzionale) Le risposte del modello possono essere inviate via email tramite `LoggerHelper.Sink.Email`.
-7. inserire gli agent per la lettura sul DB ( da implementare)
