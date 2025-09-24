@@ -3,10 +3,18 @@ public sealed record LogRecord(
     int Id, DateTime TimeStamp, string Level, string Message,
     string? Exception, string? IdTransaction, string? MachineName, string? ApplicationName);
 
-public sealed record TraceRecord(
-    string TraceId, string SpanId, string? ParentSpanId, string Name,
-    DateTimeOffset StartTime, DateTimeOffset EndTime, TimeSpan Duration, string? TagsJson, bool? Anomaly);
+public sealed class TraceRecord {
+    public TraceRecord() { }
 
+    public string TraceId { get; set; }
+    public string SpanId { get; set; }
+    public string? ParentSpanId { get; set; }
+    public string Name { get; set; }
+    public DateTimeOffset StartTime { get; set; }
+    public DateTimeOffset EndTime { get; set; }
+    public double Duration { get; set; }
+    public string? TagsJson { get; set; }
+}
 public sealed record MetricPoint(
     string Name, double Value, DateTimeOffset TimeStamp, string? TagsJson, string? TraceId);
 /// <summary>
@@ -59,8 +67,8 @@ public sealed record MacroContext(
 ) {
     private readonly DateTimeOffset? _now;
     public DateTimeOffset Now {
-        get {return _now ?? DateTimeOffset.UtcNow.AddHours(-4);}
-        init {_now = value;}
+        get { return _now ?? DateTimeOffset.UtcNow.AddHours(-4); }
+        init { _now = value; }
     }
 }
 public sealed record MacroResult(string Action, string Summary, Dictionary<string, object>? Data = null);
