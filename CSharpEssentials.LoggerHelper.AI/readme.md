@@ -1,4 +1,8 @@
-﻿### AI Package Configuration
+﻿1) DetectAnomaly to fix with Interface on SQL Queryt without schema
+2) Code Review SOLID
+3) Review Readme.md with all use cases
+
+### AI Package Configuration
 
 To enable the AI features in your project, you must add the **`LoggerAIOptions`** section to your `AppSettings.json` file. 
 This section contains all the necessary settings to configure the AI model and its connection to the service.

@@ -1,33 +1,47 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Domain;
 using CSharpEssentials.LoggerHelper.AI.Ports;
+using Microsoft.Extensions.Diagnostics.Metrics;
 
 namespace CSharpEssentials.LoggerHelper.AI.Application;
 
 public sealed class DetectAnomalyAction : ILogMacroAction {
     private readonly IMetricRepository _metrics;
     public string Name => "DetectAnomaly";
-    public DetectAnomalyAction(IMetricRepository m) => _metrics = m;
+    private readonly List<SQLLMModels> _sQLLMModels;
+    private readonly ILlmChat _llm;
+    public DetectAnomalyAction(IMetricRepository m, List<SQLLMModels> sQLLMModels, ILlmChat llm) => (_metrics, _sQLLMModels, _llm) = (m, sQLLMModels, llm);
     public bool CanExecute(MacroContext ctx) => true;
     public async Task<MacroResult> ExecuteAsync(MacroContext ctx, CancellationToken ct = default) {
         var to = ctx.Now;
         var from = to.AddMinutes(-30);
         var series = new List<(DateTimeOffset Time, double Value)>();
 
-        // se esiste l’overload con ct
-        var points = await _metrics.QueryAsync("http.client.request.duration", from, to);
+        var sqlQuery = _sQLLMModels.FirstOrDefault(a => a.action == Name).contents.FirstOrDefault(a => a.fileName == ctx.fileName)?.content;
+        
+        var metrics = await _metrics.QueryAsync(sqlQuery, from, to);
+
+        var hits = metrics.Select(a => new {
+            Id = a.TraceId,
+            Message = a.TagsJson,
+            trace = a.TraceJson,
+            Score = a.Value
+        }).ToList();
+
+        var contextData = string.Join("\n", hits.Select(h => $"TraceId: {h.Id} | LogEvent: {h.Message} | Score: {h.Score}"));
         // altrimenti: var points = await _metrics.QueryAsync("http_5xx_rate", from, to);
 
-        foreach (var t in points)
-            series.Add((t.TimeStamp, t.Value));
+        var contextBlock = string.Join("\n---\n", hits.Select(h => h.Message));
+        var messages = new[]
+        {
+            new ChatPromptMessage("system", ctx.system),
+            new ChatPromptMessage("assistant", $"CONTEXT:\n{contextBlock}"),
+            new ChatPromptMessage("user", $"Question: {ctx.Query}")
+        };
 
-        if (series.Count < 10)
-            return new MacroResult(Name, "Serie insufficiente.");
+        // 4) Generazione
+        var answer = await _llm.ChatAsync(messages);
 
-        var mean = series.Average(x => x.Value);
-        var std = Math.Sqrt(series.Sum(x => Math.Pow(x.Value - mean, 2)) / series.Count);
-        var last = series[^1].Value;
-        var z = std == 0 ? 0 : (last - mean) / std;
-        var msg = z >= 3 ? $"Anomalia: z={z:F2}" : $"OK: z={z:F2}";
-        return new MacroResult(Name, msg, new() { ["z"] = z, ["last"] = last, ["mean"] = mean });
+        return new MacroResult(Name, answer);
+
     }
 }

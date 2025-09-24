@@ -15,8 +15,16 @@ public sealed class TraceRecord {
     public double Duration { get; set; }
     public string? TagsJson { get; set; }
 }
-public sealed record MetricPoint(
-    string Name, double Value, DateTimeOffset TimeStamp, string? TagsJson, string? TraceId);
+public sealed class MetricPoint {
+    public MetricPoint() {
+        
+    }
+    public string Name { get; set; }
+    public double Value { get; set; }
+    public DateTimeOffset TimeStamp { get; set; }
+    public string? TagsJson { get; set; }
+    public string? TraceId { get; set; }
+}
 /// <summary>
 /// Contract for text embeddings and cosine similarity.
 /// Use a remote API (e.g., OpenAI /embeddings) or a local model.
