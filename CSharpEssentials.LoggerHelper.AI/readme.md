@@ -121,6 +121,44 @@ You can also test the AI models directly from the `LoggerHelper.Dashboard` clien
 
 The SQL queries used by the AI actions are retrieved from the `FolderSqlLoaderContainer`. It's crucial to note that the syntax of these queries must be compatible with your specific database provider (e.g., **MSSQL** or **PostgreSQL**). Ensure that the queries are written correctly for the database you are using.
 
+-----
+
+### RAG with SQL Query Files 📊
+
+A key feature of the **AI Assistant** is its ability to perform **Retrieval-Augmented Generation (RAG)** using pre-saved SQL queries. This is useful for fetching specific data from your database to provide context for the LLM.
+
+#### **Use Case: Analyzing Recent Logs**
+
+This example demonstrates how to use the RAG system to analyze recent log entries by referencing a saved SQL query file.
+
+1.  **Prepare your SQL Query**:
+    Save your query in a `.sql` file within the `RagAnswerQuery` folder. For this example, let's use `getlogs.sql` as shown in the image below. The query uses placeholders `{now}` for the current timestamp and `{n}` for the number of results, which are replaced dynamically at runtime.
+
+    Here's an example of the `getlogs.sql` file content:
+
+    ```sql
+    select "Id", "ApplicationName" "App", "TimeStamp" "Ts", "LogEvent" "Message", "IdTransaction" "TraceId"
+    from "LogEntry"
+    where "TimeStamp" > {now}
+    order by "Id" desc
+    limit {n}
+    ```
+
+      * `{now}`: The starting date from the user input. The query will return logs from this date onward.
+      * `{n}`: The limit on the number of results to fetch, which you can specify in the UI.
+
+2.  **Use the AI Assistant Dashboard**:
+    Navigate to the **AI Assistant** page in your dashboard.
+
+      * **Action**: Select `RagAnswerQuery`.
+      * **File Name**: Choose the `getlogs.sql` file.
+      * **Query**: Enter your natural language question, for example: "Were there any HTTP responses with status 401?"
+      * **Data di Partenza (Start Date)**: Set the date to filter the query.
+      * **System**: Add any specific instructions for the LLM, like "Stick closely to the context. If you don't find anything, reply with 'sorry but I didn't find anything'".
+
+The system will execute the `getlogs.sql` query, retrieve the relevant log entries, and use that data as context to generate a precise answer to your question.
+
+-----
 
 
 ## Flusso di utilizzo ( ROADMAP )
