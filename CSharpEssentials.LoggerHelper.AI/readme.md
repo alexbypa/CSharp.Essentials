@@ -158,6 +158,27 @@ This example demonstrates how to use the RAG system to analyze recent log entrie
 
 The system will execute the `getlogs.sql` query, retrieve the relevant log entries, and use that data as context to generate a precise answer to your question.
 
+---
+
+### AI-Powered Log Analysis with RAG 🤖
+
+A key benefit of the **AI Assistant** is its ability to perform **Retrieval-Augmented Generation (RAG)** on your application's logs, saving operators from having to manually query the database. The LLM can analyze log data provided by a SQL query to answer complex questions instantly.
+
+#### **Example: Troubleshooting an Error**
+
+Let's illustrate with an example. An operator needs to check if a specific HTTP error occurred in the logs.
+
+1.  **Context from SQL Query**:
+    The system uses a pre-saved query, like `getlogs.sql`, to retrieve a specific set of log records. The query includes parameters for the start date and the maximum number of records, allowing the operator to define the search scope directly from the dashboard.
+
+    
+2.  **LLM Analysis**:
+    The operator inputs a natural language query like "**Are there any HTTP responses with status 401?**" The LLM then receives the results from the executed SQL query as its context. By analyzing this context, the LLM provides a precise and detailed answer, summarizing the findings without the operator ever needing to write SQL or connect to the database.
+
+3.  **Efficiency**:
+    This process is extremely efficient. The more logs you write, the more powerful the LLM becomes in providing deep insights into your application's behavior. It automates the task of searching through vast amounts of log data, allowing your team to focus on resolving issues faster.
+
+This feature is a powerful demonstration of how `CSharpEssentials.LoggerHelper.AI` can transform raw log data into actionable insights, improving diagnostic speed and overall operational efficiency.
 -----
 
 
