@@ -24,7 +24,8 @@ This section contains all the necessary settings to configure the AI model and i
 
 If you encounter configuration issues with your `appSettings.json` file, don't worry. The `CSharpEssentials.LoggerHelper.AI` logger instance is designed to send an **error message** directly to your dashboard.
 
-[]
+ ![Dashboard AI Errors](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper.AI/Docs/Dashboard_AI_Error.png)
+
 As shown in the image below, you'll be able to view the error details in the **Monitor-Sink** menu by filtering the `Sink` for "LoggerHelper.AI". This allows you to quickly identify any missing or invalid configuration keys and resolve the problem.
 
 -----
