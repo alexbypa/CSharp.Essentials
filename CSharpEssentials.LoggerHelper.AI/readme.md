@@ -67,6 +67,51 @@ This mode is designed to detect anomalies in a time series of metrics.
 * **How it works**: It queries a repository for a specific metric (e.g., `http.client.request.duration`) over a defined time period (e.g., the last 30 minutes). It then calculates the statistical **mean** and **standard deviation** of the data points. Finally, it computes the **Z-score** of the last data point and determines if it indicates an anomaly based on a predefined threshold (e.g., `z >= 3`).
 
 ---
+### How to Test AI Models
+
+You can test the four AI models and their corresponding actions using two different methods: the web API demo with Scalar or the `LoggerHelper.Dashboard` client application.
+
+#### 1\. Web API Demo with Scalar
+
+A web API demo is available to test the AI actions directly. This method allows you to interact with the backend API without using the frontend dashboard. The API documentation can be accessed via the Scalar interface, typically at the path `D:\Project_Pixelo\CSharp.Essentials\CSharpEssentials.LoggerHelper.AI\Docs`.
+
+To run a test, you must send a `POST` request to the `http://localhost:1234/AI/run` endpoint with a JSON body.
+
+  * **Example for `RagAnswerQuery` Action:**
+      * **Endpoint:** `http://localhost:1234/AI/run`
+      * **Body:**
+        ```json
+        {
+          "docId": null,
+          "traceId": null,
+          "query": "I received http response with httpstatus 401",
+          "system": "If you don't find anything in the context, reply with 'I'm sorry but I couldn't find this information in the database!'",
+          "action": "RagAnswerQuery",
+          "fileName": "getTraces.sql",
+          "now": "2025-09-22T08:00:00"
+        }
+        ```
+  * **Result:** The `RagAnswerQuery` action will search for relevant information based on the provided `query` and `fileName`. As shown in the example, if the information is not found in the database, the AI will respond with the message defined in the `system` parameter.
+
+-----
+
+#### 2\. LoggerHelper.Dashboard
+
+You can also test the AI models directly from the `LoggerHelper.Dashboard` client application. This method provides a user-friendly interface for interacting with the AI.
+
+  * **Interface:** The interface includes dropdown menus for `Action` and `File Name`, along with text areas for `Query` and `System` prompts.
+  * **Workflow:**
+    1.  Select the desired **`Action`** from the dropdown menu (e.g., `RagAnswerQuery`).
+    2.  Choose the specific SQL file from the **`File Name`** dropdown. This file is located in the `FolderSqlLoaderContainer` and corresponds to the selected action (e.g., `getTraces.sql` for `RagAnswerQuery`).
+    3.  Enter your **`Query`** and a custom **`System`** prompt to guide the AI's response.
+    4.  Click **`Send to LLM`** to process the request.
+
+-----
+
+#### Important Note on SQL Syntax
+
+The SQL queries used by the AI actions are retrieved from the `FolderSqlLoaderContainer`. It's crucial to note that the syntax of these queries must be compatible with your specific database provider (e.g., **MSSQL** or **PostgreSQL**). Ensure that the queries are written correctly for the database you are using.
+
 
 
 ## Flusso di utilizzo ( ROADMAP )
