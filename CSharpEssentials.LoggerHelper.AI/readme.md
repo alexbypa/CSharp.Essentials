@@ -81,11 +81,35 @@ Il package supporta i seguenti elementi:
    - Possibilità di collegare fonti esterne (database, API, knowledge base).  
    - Campo: `retrieval_sources`.
 
+`FolderSqlLoaderContainer` defines the path where the SQL query files for the AI are stored. These files provide the context for the AI's actions, allowing it to perform specific tasks. The system currently supports four distinct modes, each corresponding to a different action.
+
+Each mode is represented by a specific C# class that inherits from `ILogMacroAction` and performs a unique task, often using an embedded SQL file to query data.
+
+#### 1. `RagAnswerQuery`
+This mode is designed to answer user questions based on a specific set of data. It uses **Retrieval-Augmented Generation (RAG)** by fetching the most relevant documents from a vector store and using them as context for the LLM.
+
+* **How it works**: The system embeds the user's query into a vector and uses it to retrieve similar documents from the vector store. The SQL query defined in the `sqlQuery` variable is used to query the vector store. The retrieved documents are then used as the `CONTEXT` for a prompt, and the AI generates a precise and concise answer.
+
+#### 2. `CorrelateTrace`
+This mode helps to identify the most suspicious trace within a recent set of logs.
+
+* **How it works**: It fetches the most recent 50 traces. It then composes a list of candidate traces, including details like `TraceId`, `duration`, and `anomaly` status. This list is provided to the LLM as a prompt, and the AI is instructed to select the most suspicious one and explain why.
+
+#### 3. `SummarizeIncident`
+This action is used to summarize the root cause, impact, and remediation of a specific incident using a `TraceId`.
+
+* **How it works**: The system fetches up to 200 logs associated with the provided `TraceId`. It builds a compact, chronological timeline from these logs, ensuring the content fits within a specified character budget. This timeline is then passed to the LLM, which generates a concise summary of the incident. The prompt includes an example of the desired output to guide the AI's tone and structure.
+
+#### 4. `DetectAnomaly`
+This mode is designed to detect anomalies in a time series of metrics.
+
+* **How it works**: It queries a repository for a specific metric (e.g., `http.client.request.duration`) over a defined time period (e.g., the last 30 minutes). It then calculates the statistical **mean** and **standard deviation** of the data points. Finally, it computes the **Z-score** of the last data point and determines if it indicates an anomaly based on a predefined threshold (e.g., `z >= 3`).
+
+---
+
 
 ## Flusso di utilizzo ( ROADMAP )
 1. Code Review solid prnciples.
-2. Integra gli `user_prompt` dinamici durante la sessione.
-3. Se presenti, aggiunge `few_shot_examples`.
 4. (Opzionale) Recupera dati da `retrieval_sources`.
 5. Costruisce il prompt finale da passare al modello AI.
 5. L' invio del prompt al modello AI avviene tramite il package Csharp.Essential.HttpHelper ( da rimuovere su appSettings la chiave "UseMock": true, viene impostata da program.cs a false) che gestisce la comunicazione HTTP con l'API del modello AI.)
