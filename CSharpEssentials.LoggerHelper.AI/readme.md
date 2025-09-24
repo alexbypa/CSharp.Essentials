@@ -42,18 +42,6 @@ By using a **named `HttpClient`**, you can centralize the configuration for the 
 
 The `CSharpEssentials.HttpHelper` package streamlines this process by providing an easy way to define and manage these named clients, ensuring consistency and maintainability in your codebase.
 
-
-
-  
-
-
-# Prompt Engineering Package
-
-Questo package ha l’obiettivo di permettere al cliente di personalizzare il comportamento di un modello AI tramite la definizione di prompt strutturati.  
-Il cliente potrà inserire direttamente i testi e le viste da utilizzare, senza modificare il codice.
-
----
-
 `FolderSqlLoaderContainer` defines the path where the SQL query files for the AI are stored. These files provide the context for the AI's actions, allowing it to perform specific tasks. The system currently supports four distinct modes, each corresponding to a different action.
 
 Each mode is represented by a specific C# class that inherits from `ILogMacroAction` and performs a unique task, often using an embedded SQL file to query data.
