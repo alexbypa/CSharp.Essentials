@@ -138,7 +138,7 @@ This example demonstrates how to use the RAG system to analyze recent log entrie
     Here's an example of the `getlogs.sql` file content:
 
     ```sql
-    select "Id", "ApplicationName" "App", "TimeStamp" "Ts", "LogEvent" "Message", "IdTransaction" "TraceId" from "LogEntry"  
+    select "Id", "ApplicationName" "App", "TimeStamp" "Ts", "Message", "IdTransaction" "TraceId" from "LogEntry"  
     where "TimeStamp" > @now
     order by "Id" desc
     limit @n
