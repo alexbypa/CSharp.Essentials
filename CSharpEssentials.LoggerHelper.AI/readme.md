@@ -81,25 +81,6 @@ Il package supporta i seguenti elementi:
    - Possibilità di collegare fonti esterne (database, API, knowledge base).  
    - Campo: `retrieval_sources`.
 
----
-
-## Configurazione
-
-Il cliente compila un file di configurazione (es. `config.yaml`) con i propri testi:
-
-```yaml
-system_prompt: >
-  Sei un assistente specializzato in [dominio].
-  
-context_views:
-  - "Vista 1: Documento tecnico"
-  - "Vista 2: Dati prodotto"
-  
-few_shot_examples:
-  - input: "Domanda esempio"
-    output: "Risposta esempio"
-
----
 
 ## Flusso di utilizzo ( ROADMAP )
 1. Code Review solid prnciples.
