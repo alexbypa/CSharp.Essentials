@@ -179,6 +179,7 @@ Let's illustrate with an example. An operator needs to check if a specific HTTP 
     This process is extremely efficient. The more logs you write, the more powerful the LLM becomes in providing deep insights into your application's behavior. It automates the task of searching through vast amounts of log data, allowing your team to focus on resolving issues faster.
 
 This feature is a powerful demonstration of how `CSharpEssentials.LoggerHelper.AI` can transform raw log data into actionable insights, improving diagnostic speed and overall operational efficiency.
+![Dashboard AI RAG Example](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper.AI/Docs/dashboard_AI_Rag_Example.png)
 -----
 
 
