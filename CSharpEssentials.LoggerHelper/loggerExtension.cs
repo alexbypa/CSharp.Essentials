@@ -125,7 +125,7 @@ public class loggerExtension<T> where T : IRequest {
     //protected static readonly ILogger log;
     protected static readonly ILogger log;
     public static string CurrentError { get; set; }
-    public static readonly List<LogErrorEntry> Errors = new();
+    public static List<LogErrorEntry> Errors = new();
     public static List<LoadedSinkInfo> SinksLoaded = new List<LoadedSinkInfo>();
     static loggerExtension() {
         log = GlobalLogger.Instance;

@@ -1,4 +1,4 @@
-### AI Package Configuration
+﻿### AI Package Configuration
 
 To enable the AI features in your project, you must add the **`LoggerAIOptions`** section to your `AppSettings.json` file. 
 This section contains all the necessary settings to configure the AI model and its connection to the service.
@@ -18,6 +18,14 @@ This section contains all the necessary settings to configure the AI model and i
   "httpClientName": "testAI"
 }
 ```
+-----
+
+### Configuration Error Diagnostics ⚠️
+
+If you encounter configuration issues with your `appSettings.json` file, don't worry. The `CSharpEssentials.LoggerHelper.AI` logger instance is designed to send an **error message** directly to your dashboard.
+
+[]
+As shown in the image below, you'll be able to view the error details in the **Monitor-Sink** menu by filtering the `Sink` for "LoggerHelper.AI". This allows you to quickly identify any missing or invalid configuration keys and resolve the problem.
 
 -----
 
@@ -73,7 +81,7 @@ You can test the four AI models and their corresponding actions using two differ
 
 #### 1\. Web API Demo with Scalar
 
-A web API demo is available to test the AI actions directly. This method allows you to interact with the backend API without using the frontend dashboard. The API documentation can be accessed via the Scalar interface, typically at the path `D:\Project_Pixelo\CSharp.Essentials\CSharpEssentials.LoggerHelper.AI\Docs`.
+A web API demo is available to test the AI actions directly. This method allows you to interact with the backend API without using the frontend dashboard. The API documentation can be accessed via the Scalar interface.
 
 To run a test, you must send a `POST` request to the `http://localhost:1234/AI/run` endpoint with a JSON body.
 

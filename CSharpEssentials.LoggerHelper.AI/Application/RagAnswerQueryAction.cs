@@ -23,7 +23,7 @@ public sealed class RagAnswerQueryAction : ILogMacroAction {
         // 2) Top-K documenti simili dal vector store (ultime 24h)
         var sqlQuery = _sQLLMModels.FirstOrDefault(a => a.action == Name).contents.FirstOrDefault(a => a.fileName == ctx.fileName)?.content;
 
-        var hits = await _store.SimilarAsync(sqlQuery, qvec, k: _opt.Value.topScore, app: null, within: TimeSpan.FromHours(24), ct);
+        var hits = await _store.SimilarAsync(sqlQuery, qvec, k: (int)_opt.Value.topScore, app: null, within: TimeSpan.FromHours(24), ct);
 
         // 3) Prompt con contesto recuperato + domanda utente
         var system = "You are an SRE assistant. Use the provided CONTEXT to answer precisely and concisely.";

@@ -23,4 +23,7 @@
   <ItemGroup>
     <Folder Include="Docs\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
+  </ItemGroup>
 </Project>

@@ -11,6 +11,9 @@ public sealed class FileLoader : IFileLoader {
         _options = options.Value;
     }
     public List<SQLLMModels> getModelSQLLMModels() {
+        if (!Directory.Exists(_options.FolderSqlLoaderContainer))
+            return new List<SQLLMModels>();
+
         var path = _options.FolderSqlLoaderContainer;
         var directories = Directory.GetDirectories(path);
         var models = directories.Select(dirPath => 
