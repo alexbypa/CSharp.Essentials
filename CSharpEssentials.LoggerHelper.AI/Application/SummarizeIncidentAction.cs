@@ -1,6 +1,7 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Domain;
 using CSharpEssentials.LoggerHelper.AI.Infrastructure;
 using CSharpEssentials.LoggerHelper.AI.Ports;
+using CSharpEssentials.LoggerHelper.AI.Shared;
 
 namespace CSharpEssentials.LoggerHelper.AI.Application;
 public sealed class SummarizeIncidentAction : ILogMacroAction<SummarizeContext> {

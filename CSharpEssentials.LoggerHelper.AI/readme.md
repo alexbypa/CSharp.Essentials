@@ -190,6 +190,22 @@ Of course. Adding the `CorrelateTraceAction` use case to your `readme.md` is a g
 
 Here is the section you can append to your `readme.md`, formatted in Markdown for a global audience.
 
+
+```curl
+curl http://localhost:1234/IAI/run \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "docId": null,
+  "traceId": "12af05aec797daec1fde50adb55a88d4",
+  "query": "I have an issue with a slow request. Can you find the suspicious trace and tell me the root cause of the timeout?",
+  "system": "You are an SRE assistant specialized in distributed tracing. Analyze the provided traces and logs, identify the longest-running span, and explain why the operation timed out. If you find a specific error, mention the service and the error message.",
+  "action": "DetectAnomaly",
+  "fileName": "getMetrics.sql",
+  "dtStart": "2022-09-22T08:00:00",
+  "topResultsOnQuery": 100
+}'
+```
 ---
 
 ### **AI-Powered Root Cause Analysis with CorrelateTrace 🕵️**
