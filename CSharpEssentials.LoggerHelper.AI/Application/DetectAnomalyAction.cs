@@ -23,7 +23,7 @@ public sealed class DetectAnomalyAction : ILogMacroAction {
         var hits = metrics.Select(a => new {
             Id = a.TraceId,
             Message = a.TagsJson,
-            trace = a.TraceJson,
+            //trace = a.TraceJson,
             Score = a.Value
         }).ToList();
 

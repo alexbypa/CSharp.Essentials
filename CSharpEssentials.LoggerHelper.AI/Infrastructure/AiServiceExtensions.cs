@@ -1,10 +1,64 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Application;
 using CSharpEssentials.LoggerHelper.AI.Domain;
+using CSharpEssentials.LoggerHelper.AI.Ports;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
+
+public static class ServiceCollectionExtensions {
+    public static IServiceCollection AddCSharpEssentialsLoggerAI(
+        this IServiceCollection services, 
+        IConfiguration configuration,
+        Action<IServiceCollection> configurePersistence) {
+        services
+            .AddOptions<LoggerAIOptions>()
+            .Bind(configuration.GetSection("LoggerAIOptions"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        configurePersistence(services);
+        // --- SEZIONE REPOSITORY (Livello Accesso Dati) ---
+        // I repository sono classi che contengono la logica per interrogare il database.
+        // Dipendono da 'IWrapperDbConnection' che abbiamo registrato sopra.
+        // -> Quando una classe chiede 'ILogRepository', gli viene data un'istanza di 'SqlLogRepository'.
+        services.AddScoped<ILogRepository, SqlLogRepository>();
+        services.AddScoped<ITraceRepository<TraceRecord>, SqlTraceRepository>();
+        services.AddScoped<IMetricRepository, SqlMetricRepository>();
+
+        // -> Registra il servizio per creare gli embedding (vettori numerici dal testo).
+        services.AddScoped<IEmbeddingService, NaiveEmbeddingService>();
+
+        // -> Registra il nostro "costruttore di dati" da file. È 'Transient' perché è leggero,
+        //    senza stato, e vogliamo un'istanza nuova ogni volta che viene usato.
+        services.AddTransient<FileLogIndexer>(); // se vuoi usarlo per popolare il vettore store da file
+
+        services.AddTransient<IFileLoader, FileLoader>();
+
+        services.AddSingleton(sp => {
+            var fileLoader = sp.GetRequiredService<IFileLoader>();
+            return fileLoader.getModelSQLLMModels();
+        });
+
+        services.AddScoped<ILogVectorStore, SqlLogVectorStore>();
+
+        services.AddScoped<ILogMacroAction, SummarizeIncidentAction>();
+        services.AddScoped<ILogMacroAction, CorrelateTraceAction>();
+        services.AddScoped<ILogMacroAction, DetectAnomalyAction>();
+        services.AddScoped<ILogMacroAction, RagAnswerQueryAction>();
+        // -> Registra l'orchestratore, la classe che gestisce e coordina tutte le azioni.
+        services.AddScoped<IActionOrchestrator, ActionOrchestrator>();
+        services.AddScoped<ILlmChat, OpenAiLlmChat>(); // oppure
+
+        return services;
+    }
+}
+
 public static class AIServiceExtensions {
     public static IEndpointRouteBuilder MapAiEndpoints(this IEndpointRouteBuilder endpoints) {
         endpoints.MapPost("/api/AISettings", (IFileLoader fileLoader) => fileLoader.getModelSQLLMModels()).ExcludeFromDescription();
