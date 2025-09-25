@@ -2,13 +2,16 @@
 using CSharpEssentials.LoggerHelper.AI.Ports;
 
 namespace CSharpEssentials.LoggerHelper.AI.Application;
-public sealed class SummarizeIncidentAction : ILogMacroAction {
+public sealed class SummarizeIncidentAction : ILogMacroAction<SummarizeContext> {
     private readonly ILogRepository _logs; private readonly ILlmChat _llm;
     public string Name => "SummarizeIncident";
+
+    public Type ContextType => typeof(SummarizeContext);
+
     public SummarizeIncidentAction(ILogRepository logs, ILlmChat llm) { _logs = logs; _llm = llm; }
 
-    public bool CanExecute(MacroContext ctx) => !string.IsNullOrEmpty(ctx.TraceId);
-    public async Task<MacroResult> ExecuteAsync(MacroContext ctx, CancellationToken ct = default) {
+    public bool CanExecute(IMacroContext ctx) => !string.IsNullOrEmpty(ctx.TraceId);
+    public async Task<MacroResult> ExecuteAsync(IMacroContext ctx, CancellationToken ct = default) {
         // 1) Fetch logs for the given trace
         // Use the dedicated API for correlation by TraceId
         var records = await _logs.ByTraceAsync(ctx.TraceId!, 200);

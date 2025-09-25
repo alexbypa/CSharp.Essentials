@@ -2,12 +2,12 @@
 
 namespace CSharpEssentials.LoggerHelper.AI.Application;
 public interface IActionOrchestrator {
-    Task<IReadOnlyList<MacroResult>> RunAsync(MacroContext ctx, CancellationToken ct = default);
+    Task<IReadOnlyList<MacroResult>> RunAsync(IMacroContext ctx, CancellationToken ct = default);
 }
 public sealed class ActionOrchestrator : IActionOrchestrator {
     private readonly IEnumerable<ILogMacroAction> _actions;
     public ActionOrchestrator(IEnumerable<ILogMacroAction> actions) => _actions = actions;
-    public async Task<IReadOnlyList<MacroResult>> RunAsync(MacroContext ctx, CancellationToken ct = default) {
+    public async Task<IReadOnlyList<MacroResult>> RunAsync(IMacroContext ctx, CancellationToken ct = default) {
         var results = new List<MacroResult>();
         foreach (var a in _actions)
             if (a.CanExecute(ctx))

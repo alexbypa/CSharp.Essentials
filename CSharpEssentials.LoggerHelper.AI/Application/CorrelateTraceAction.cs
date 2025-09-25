@@ -3,10 +3,12 @@ using CSharpEssentials.LoggerHelper.AI.Ports;
 
 namespace CSharpEssentials.LoggerHelper.AI.Application;
 
-public sealed class CorrelateTraceAction : ILogMacroAction {
+public sealed class CorrelateTraceAction : ILogMacroAction<CorrelateContext> {
     private readonly ILogRepository _logs;
     private readonly ITraceRepository<TraceRecord> _traces;
     public string Name => "CorrelateTrace";
+    public Type ContextType => typeof(CorrelateContext);
+
     private readonly ILlmChat _llm;
     private readonly List<SQLLMModels> _sQLLMModels;
     public CorrelateTraceAction(ILogRepository logs, ITraceRepository<TraceRecord> traces, ILlmChat llm, List<SQLLMModels> sQLLMModels) {
@@ -15,10 +17,8 @@ public sealed class CorrelateTraceAction : ILogMacroAction {
         _llm = llm;
         _sQLLMModels = sQLLMModels;
     }
-
-    public bool CanExecute(MacroContext ctx) => !string.IsNullOrEmpty(ctx.TraceId); // lo scopre
-
-    public async Task<MacroResult> ExecuteAsync(MacroContext ctx, CancellationToken ct = default) {
+    public bool CanExecute(IMacroContext ctx) => !string.IsNullOrEmpty(ctx.TraceId);
+    public async Task<MacroResult> ExecuteAsync(IMacroContext ctx, CancellationToken ct = default) {
         // _traces.GetRecentAsync ritorna Task<IReadOnlyList<TraceRecord>>
         // var recent = await _traces.GetRecentAsync(50, ct);
         var sqlQuery = _sQLLMModels.FirstOrDefault(a => a.action == Name).contents.FirstOrDefault(a => a.fileName == ctx.fileName)?.content;

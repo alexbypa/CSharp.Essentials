@@ -47,10 +47,27 @@ public static class ServiceCollectionExtensions {
 
         services.AddScoped<ILogVectorStore, SqlLogVectorStore>();
 
-        services.AddScoped<ILogMacroAction, SummarizeIncidentAction>();
-        services.AddScoped<ILogMacroAction, CorrelateTraceAction>();
-        services.AddScoped<ILogMacroAction, DetectAnomalyAction>();
-        services.AddScoped<ILogMacroAction, RagAnswerQueryAction>();
+        // 1. Registra le implementazioni concrete una sola volta.
+        services.AddScoped<SummarizeIncidentAction>();
+        services.AddScoped<CorrelateTraceAction>();
+        services.AddScoped<DetectAnomalyAction>();
+        services.AddScoped<RagAnswerQueryAction>();
+
+        services.AddScoped<ILogMacroAction, SummarizeIncidentAction>(sp => sp.GetRequiredService<SummarizeIncidentAction>());
+        //services.AddScoped<ILogMacroAction<SummarizeContext>, SummarizeIncidentAction>(sp => sp.GetRequiredService<SummarizeIncidentAction>());
+
+        // --- Registrazione CorrelateTraceAction ---
+        services.AddScoped<ILogMacroAction, CorrelateTraceAction>(sp => sp.GetRequiredService<CorrelateTraceAction>());
+        //services.AddScoped<ILogMacroAction<CorrelateContext>, CorrelateTraceAction>(sp => sp.GetRequiredService<CorrelateTraceAction>());
+
+        // --- Registrazione DetectAnomalyAction ---
+        services.AddScoped<ILogMacroAction, DetectAnomalyAction>(sp => sp.GetRequiredService<DetectAnomalyAction>());
+        //services.AddScoped<ILogMacroAction<DetectAnomalyContext>, DetectAnomalyAction>(sp => sp.GetRequiredService<DetectAnomalyAction>());
+
+        // --- Registrazione RagAnswerQueryAction ---
+        services.AddScoped<ILogMacroAction, RagAnswerQueryAction>(sp => sp.GetRequiredService<RagAnswerQueryAction>());
+        //Sservices.AddScoped<ILogMacroAction<RagContext>, RagAnswerQueryAction>(sp => sp.GetRequiredService<RagAnswerQueryAction>());
+
         // -> Registra l'orchestratore, la classe che gestisce e coordina tutte le azioni.
         services.AddScoped<IActionOrchestrator, ActionOrchestrator>();
         services.AddScoped<ILlmChat, OpenAiLlmChat>(); // oppure
@@ -63,7 +80,7 @@ public static class AIServiceExtensions {
     public static IEndpointRouteBuilder MapAiEndpoints(this IEndpointRouteBuilder endpoints) {
         endpoints.MapPost("/api/AISettings", (IFileLoader fileLoader) => fileLoader.getModelSQLLMModels()).ExcludeFromDescription();
 
-        endpoints.MapPost("/api/LLMQuery", async (IActionOrchestrator orc, MacroContext ctx, CancellationToken ct) =>
+        endpoints.MapPost("/api/LLMQuery", async (IActionOrchestrator orc, IMacroContext ctx, CancellationToken ct) =>
             Results.Ok(await orc.RunAsync(ctx, ct)))
                 .ExcludeFromDescription();
 

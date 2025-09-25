@@ -47,36 +47,4 @@ public interface ILlmChat {
     /// </summary>
     Task<string> ChatAsync(IEnumerable<ChatPromptMessage> messages);
 }
-// Macro Action (OCP + DIP)
-public interface ILogMacroAction {
-    string Name { get; }                 // es. "SummarizeIncident"
-    bool CanExecute(MacroContext ctx);   // regole veloci
-    Task<MacroResult> ExecuteAsync(MacroContext ctx, CancellationToken ct = default);
-}
-public sealed record MacroContext(
-    //Used for RAG to work with textual context or embedding -> vector
-    string? DocId,
-    //To analize a trace Id
-    string? TraceId,
-    // Query: a free-text search term provided by the user.
-    // Example: Query = "NullReferenceException"
-    // Used by actions to look up logs or events containing that text.
-    string? Query,
-    // Now: the "current" timestamp passed from the caller.
-    // Example: Now = DateTimeOffset.UtcNow
-    // Used by actions that need a time window, e.g. anomaly detection
-    // checks metrics between (Now - 30 minutes) and Now.
-    //DateTimeOffset Now,
-    //Custom prompt system
-    string system,
-    string action,
-    string fileName,
-    int topResultsOnQuery = 1000
-) {
-    private readonly DateTimeOffset? _now;
-    public DateTimeOffset Now {
-        get { return _now ?? DateTimeOffset.UtcNow.AddHours(-4); }
-        init { _now = value; }
-    }
-}
 public sealed record MacroResult(string Action, string Summary, Dictionary<string, object>? Data = null);
