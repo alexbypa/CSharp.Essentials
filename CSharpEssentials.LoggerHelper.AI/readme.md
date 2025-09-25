@@ -215,6 +215,22 @@ Imagine you're troubleshooting a slow request or a timeout. Instead of manually 
 This feature showcases how `CSharpEssentials.LoggerHelper.AI` turns raw data into intelligent, actionable insights, here there is an example of answer : 
 ![Dashboard AI RAG Example](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper.AI/Docs/dashboard_AI_CorrelateTrace_Example.png)
 
+```curl
+curl http://localhost:1234/IAI/run \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "docId": null,
+  "traceId": "12af05aec797daec1fde50adb55a88d4",
+  "query": "I have an issue with a slow request. Can you find the suspicious trace and tell me the root cause of the timeout?",
+  "system": "You are an SRE assistant specialized in distributed tracing. Analyze the provided traces and logs, identify the longest-running span, and explain why the operation timed out. If you find a specific error, mention the service and the error message.",
+  "action": "CorrelateTrace",
+  "fileName": "getTraces.sql",
+  "dtStart": "2022-09-22T08:00:00",
+  "topResultsOnQuery": 100
+}'
+```
+
 ## ( ROADMAP )
 1. Code Review solid prnciples.
 5. L' invio del prompt al modello AI avviene tramite il package Csharp.Essential.HttpHelper ( da rimuovere su appSettings la chiave "UseMock": true, viene impostata da program.cs a false) che gestisce la comunicazione HTTP con l'API del modello AI.)

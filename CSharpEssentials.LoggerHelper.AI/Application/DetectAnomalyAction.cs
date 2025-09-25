@@ -23,10 +23,15 @@ public sealed class DetectAnomalyAction : ILogMacroAction<DetectAnomalyContext> 
         dynamic traceRecords = await _sqlQueryWrapper.QueryAsync(sqlQuery, ctx.TraceId);
         //var metrics = await _metrics.QueryAsync(sqlQuery, from, to);
 
-        TraceFormatterService _formatter;
-        string myFormatTemplate = "TraceId: {h.Id} | LogEvent: {h.Message} | Score: {h.Score}";
-        _formatter = new TraceFormatterService(myFormatTemplate);
-        var contextBlock = _formatter.Format(traceRecords);
+
+        //TraceFormatterService _formatter;
+        //string myFormatTemplate = "TraceId: {h.Id} | LogEvent: {h.Message} | Score: {h.Score}";
+        //_formatter = new TraceFormatterService(myFormatTemplate);
+        //var contextBlock = _formatter.Format(traceRecords);
+
+        string Template = "TraceId: {h.Id} | LogEvent: {h.Message} | Score: {h.Score}";
+        var contextBlock = string.Join("\n---\n", TraceFormatter.FormatRecords(traceRecords, Template));
+
 
 
         //var hits = metrics.Select(a => new {

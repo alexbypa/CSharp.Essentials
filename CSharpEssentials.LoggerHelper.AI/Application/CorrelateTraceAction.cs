@@ -1,6 +1,7 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Domain;   // fix del typo
 using CSharpEssentials.LoggerHelper.AI.Infrastructure;
 using CSharpEssentials.LoggerHelper.AI.Ports;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
@@ -34,15 +35,10 @@ public sealed class CorrelateTraceAction : ILogMacroAction<CorrelateContext> {
         //// scegli il predicato coerente col tuo model (es. Anomaly == true)
         //var hit = recent.FirstOrDefault(t => t.Anomaly == true);
         
-
-        TraceFormatterService _formatter;
-        string myFormatTemplate = "{TraceId} | Span Name={Name} | duration={Duration:F0}ms | tags={TagsJson}";
-        _formatter = new TraceFormatterService(myFormatTemplate);
-        var contextBlock = _formatter.Format(traceRecords);
-
+        string Template = "{TraceId} | Span Name={Name} | duration={Duration:F0}ms | tags={TagsJson}";
+        var contextBlock =  string.Join("\n---\n", TraceFormatter.FormatRecords(traceRecords, Template));
 
         //var lines = traceRecords.Select(t => $"{t.TraceId} | Span Name={t.Name} | duration={t.Duration:F0}ms | tags={t.TagsJson}");
-
         //var contextBlock = string.Join("\n---\n", lines.Select(h => h));
 
         var messages = new[]{
@@ -61,75 +57,39 @@ public sealed class CorrelateTraceAction : ILogMacroAction<CorrelateContext> {
 
 
 
-public class TraceFormatterService {
-    private readonly Func<TEntity, string> _compiledFormatter;
-    // Regex per trovare i placeholder come {NomeCampo} o {NomeCampo:Formato}
-    private static readonly Regex FormatRegex = new Regex(@"\{(?<propName>\w+)(?::(?<formatSpecifier>[^}]+))?\}", RegexOptions.Compiled);
+public static class TraceFormatter {
+    // {Prop} oppure {Prop:Formato} -> es. {Duration:F0}
+    private static readonly Regex FormatRegex =
+        new(@"\{(?<prop>\w+)(?::(?<fmt>[^}]+))?\}", RegexOptions.Compiled);
 
-    public TraceFormatterService(string formatTemplate) {
-        _compiledFormatter = CompileFormatter(formatTemplate);
-    }
+    public static IEnumerable<string> FormatRecords(IEnumerable<dynamic> records, string template) {
+        if (records is null)
+            throw new ArgumentNullException(nameof(records));
+        if (template is null)
+            throw new ArgumentNullException(nameof(template));
 
-    private Func<TEntity, string> CompileFormatter(string formatTemplate) {
-        var entityType = typeof(TEntity); // IDictionary<string, object>
-        var parameter = Expression.Parameter(entityType, "t"); // t è IDictionary
-        var arguments = new List<Expression>();
+        var propOrder = new List<string>();
 
-        // Ottiene il MethodInfo per la funzione di accesso all'indice: IDictionary<TKey, TValue>.get_Item(TKey key)
-        var getItemMethod = entityType.GetMethod("get_Item");
-
-        int index = 0;
-
-        string indexedFormatString = FormatRegex.Replace(formatTemplate, match => {
-            var propName = match.Groups["propName"].Value;
-            var formatSpecifier = match.Groups["formatSpecifier"].Success ? match.Groups["formatSpecifier"].Value : null;
-
-            // 1. Costruisce l'accesso al valore: t.get_Item("PropName") => t["PropName"]
-            var valueAccessExpression = Expression.Call(
-                parameter,
-                getItemMethod,
-                Expression.Constant(propName)
-            );
-
-            // Il risultato è di tipo 'object'. string.Format gestisce i tipi in un array di oggetti.
-            // Aggiungiamo l'espressione alla lista degli argomenti per string.Format
-            arguments.Add(valueAccessExpression);
-
-            // Restituisce l'indice e aggiunge l'eventuale specificatore di formato (es. :F0) per string.Format
-            var placeholder = $"{{{index++}{(formatSpecifier != null ? $":{formatSpecifier}" : "")}}}";
-            return placeholder;
+        // Costruisce il template indicizzato per string.Format e registra l'ordine dei campi
+        string indexedTemplate = FormatRegex.Replace(template, m => {
+            var prop = m.Groups["prop"].Value;
+            var fmt = m.Groups["fmt"].Success ? ":" + m.Groups["fmt"].Value : string.Empty;
+            propOrder.Add(prop);
+            return "{" + (propOrder.Count - 1) + fmt + "}";
         });
 
-        // 2. Prepara l'espressione per la chiamata a string.Format(string format, params object[] args)
+        foreach (var r in records) {
+            // Supporta ExpandoObject, Dapper row, e anonymous dynamics via IDictionary<string, object>
+            if (r is not IDictionary<string, object> dict)
+                throw new ArgumentException("Ogni record dynamic deve essere castabile a IDictionary<string, object>.");
 
-        // Raggruppa i valori delle proprietà in un array di oggetti (Expression.NewArrayInit)
-        var objectArray = Expression.NewArrayInit(typeof(object), arguments);
+            var args = new object?[propOrder.Count];
+            for (int i = 0; i < propOrder.Count; i++) {
+                dict.TryGetValue(propOrder[i], out var val);
+                args[i] = val; // null ok, string.Format gestisce null
+            }
 
-        // Ottiene il MethodInfo per string.Format(string, object[])
-        var formatMethod = typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object[]) });
-
-        // Costruisce la chiamata: string.Format(indexedFormatString, new object[] { arg0, arg1, ... })
-        var callExpression = Expression.Call(
-            formatMethod,
-            Expression.Constant(indexedFormatString),
-            objectArray
-        );
-
-        // 3. Compila l'Expression Tree in un delegate eseguibile: t => string.Format(...)
-        var lambda = Expression.Lambda<Func<TEntity, string>>(callExpression, parameter);
-
-        return lambda.Compile();
-    }
-
-    /// <summary>
-    /// Esegue la formattazione su un singolo record 'dynamic' di Dapper.
-    /// </summary>
-    public string Format(dynamic dynamicRecord) {
-        // Casting a IDictionary<string, object> per usare il delegate compilato in modo performante.
-        return _compiledFormatter((TEntity)dynamicRecord);
-    }
-
-    public IEnumerable<string> Format(IEnumerable<dynamic> dynamicRecords) {
-        return dynamicRecords.Select(Format);
+            yield return string.Format(CultureInfo.InvariantCulture, indexedTemplate, args);
+        }
     }
 }

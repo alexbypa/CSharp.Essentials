@@ -19,10 +19,14 @@ public sealed class SummarizeIncidentAction : ILogMacroAction<SummarizeContext> 
         // 2) Build a compact, chronologically ordered timeline
         //var lines = records.Select(x => $"{x.TimeStamp:u} {x.Level} {Compact(x.Message)}").ToList();
 
-        TraceFormatterService _formatter;
-        string myFormatTemplate = "{x.TimeStamp:u} {x.Level} {Compact(x.Message)}";
-        _formatter = new TraceFormatterService(myFormatTemplate);
-        var contextBlock = _formatter.Format(records);
+        //TraceFormatterService _formatter;
+        //string myFormatTemplate = "{x.TimeStamp:u} {x.Level} {Compact(x.Message)}";
+        //_formatter = new TraceFormatterService(myFormatTemplate);
+        //var contextBlock = _formatter.Format(records);
+
+        string Template = "{x.TimeStamp:u} {x.Level} {Compact(x.Message)}";
+        var contextBlock = string.Join("\n---\n", TraceFormatter.FormatRecords(records, Template));
+
 
         // 3) Enforce a simple token/char budget
         //var timeline = TakeForTokenBudget(contextBlock, maxChars: 4000); 
