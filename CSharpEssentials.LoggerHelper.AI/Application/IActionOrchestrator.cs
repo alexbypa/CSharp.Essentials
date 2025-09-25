@@ -11,7 +11,7 @@ public sealed class ActionOrchestrator : IActionOrchestrator {
         var results = new List<MacroResult>();
         foreach (var a in _actions)
             if (a.CanExecute(ctx))
-                if (a.Name.Equals(ctx.action, StringComparison.InvariantCultureIgnoreCase)  ) {
+                if (a.Name.Equals(ctx.action, StringComparison.InvariantCultureIgnoreCase)) {
                     results.Add(await a.ExecuteAsync(ctx, ct));
                 }
         return results;

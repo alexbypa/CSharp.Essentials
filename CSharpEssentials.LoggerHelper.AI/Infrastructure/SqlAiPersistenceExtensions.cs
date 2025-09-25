@@ -25,9 +25,9 @@ namespace CSharpEssentials.LoggerHelper.AI.Infrastructure {
                 }
 
                 // REPOSITORY & VECTOR STORE (Implementazioni specifiche)
-                services.AddScoped<ILogRepository, SqlLogRepository>();
-                services.AddScoped<ITraceRepository<TraceRecord>, SqlTraceRepository>();
-                services.AddScoped<IMetricRepository, SqlMetricRepository>();
+                //services.AddScoped<ILogRepository, SqlLogRepository>();
+                //services.AddScoped<ITraceRepository<TraceRecord>, SqlTraceRepository>();
+                //services.AddScoped<IMetricRepository, SqlMetricRepository>();
                 services.AddScoped<ILogVectorStore, SqlLogVectorStore>();
             };
         }
