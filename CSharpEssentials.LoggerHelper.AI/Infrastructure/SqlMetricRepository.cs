@@ -3,7 +3,7 @@ using CSharpEssentials.LoggerHelper.AI.Ports;
 using Dapper;
 
 namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
-public sealed class SqlMetricRepository : IMetricRepository {
+public sealed class SqlMetricRepository /*: IMetricRepository*/ {
     readonly IWrapperDbConnection _db;
     public SqlMetricRepository(IWrapperDbConnection db) => _db = db;
 
@@ -24,12 +24,13 @@ public sealed class SqlMetricRepository : IMetricRepository {
     }
 
     public async Task<MetricPoint?> LastAsync(string name) {
-        var sql = @"
-SELECT TOP 1 Name, CAST(Value AS float) AS Value, [Timestamp] AS Ts,
-CAST(TagsJson AS nvarchar(max)) AS TagsJson, TraceId
-FROM dbo.MetricEntry
-WHERE Name=@name
-ORDER BY [Timestamp] DESC";
-        return await _db.GetConnection().QueryFirstOrDefaultAsync<MetricPoint>(sql, new { name });
+        throw new NotImplementedException();
+        //        var sql = @"
+        //SELECT TOP 1 Name, CAST(Value AS float) AS Value, [Timestamp] AS Ts,
+        //CAST(TagsJson AS nvarchar(max)) AS TagsJson, TraceId
+        //FROM dbo.MetricEntry
+        //WHERE Name=@name
+        //ORDER BY [Timestamp] DESC";
+        //        return await _db.GetConnection().QueryFirstOrDefaultAsync<MetricPoint>(sql, new { name });
     }
 }
