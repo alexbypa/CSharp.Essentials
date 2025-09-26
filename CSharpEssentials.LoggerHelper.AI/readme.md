@@ -1,8 +1,10 @@
-﻿1) DetectAnomaly to fix with Interface on SQL Queryt without schema
-2) Code Review SOLID
-3) Review Readme.md with all use cases
+﻿# CSharpEssentials.LoggerHelper.AI: Advanced AI Analysis Toolkit (Rag, Correlate Trace, Summarize Incident, Detect Anomaly)
 
-### AI Package Configuration
+🚀 The Challenge: Log Analysis is Too Slow
+Are you tired of manually sifting through mountains of logs and connecting scattered traces to understand complex failures?
+CSharpEssentials.LoggerHelper.AI provides a powerful solution by integrating Large Language Models (LLMs) directly into your logging and observability pipeline, transforming raw log data and operational context into actionable, real-time insights.
+
+# AI Package Configuration
 
 To enable the AI features in your project, you must add the **`LoggerAIOptions`** section to your `AppSettings.json` file. 
 This section contains all the necessary settings to configure the AI model and its connection to the service.
@@ -101,7 +103,7 @@ To run a test, you must send a `POST` request to the `http://localhost:1234/AI/r
           "system": "If you don't find anything in the context, reply with 'I'm sorry but I couldn't find this information in the database!'",
           "action": "RagAnswerQuery",
           "fileName": "getTraces.sql",
-          "now": "2025-09-22T08:00:00",
+          "dtStart": "2025-09-22T08:00:00",
           "topResultsOnQuery" : 200
         }
         ```

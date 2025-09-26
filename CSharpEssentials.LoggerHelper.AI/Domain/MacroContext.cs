@@ -1,10 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace CSharpEssentials.LoggerHelper.AI.Domain {
-    //[JsonDerivedType(typeof(SummarizeContext), typeDiscriminator: nameof(SummarizeContext))]
-    //[JsonDerivedType(typeof(CorrelateContext), typeDiscriminator: nameof(CorrelateContext))]
-    //[JsonDerivedType(typeof(DetectAnomalyContext), typeDiscriminator: nameof(DetectAnomalyContext))]
-    //[JsonDerivedType(typeof(RagContext), typeDiscriminator: nameof(RagContext))]
+﻿namespace CSharpEssentials.LoggerHelper.AI.Domain {
     public class IMacroContext {
         public string action { get; set; }
         public string Query { get; set; }
