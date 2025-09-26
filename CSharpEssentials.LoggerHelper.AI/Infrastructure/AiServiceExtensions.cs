@@ -24,7 +24,6 @@ public static class ServiceCollectionExtensions {
         // I repository sono classi che contengono la logica per interrogare il database.
         // Dipendono da 'FactorySQlConnection' che abbiamo registrato sopra.
         // -> Quando una classe chiede 'ILogRepository', gli viene data un'istanza di 'SqlLogRepository'.
-        services.AddScoped<ISqlQueryWrapper, SqlQueryWrapper>();
 
         // -> Registra il servizio per creare gli embedding (vettori numerici dal testo).
         services.AddScoped<IEmbeddingService, NaiveEmbeddingService>();

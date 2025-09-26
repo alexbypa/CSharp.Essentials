@@ -8,6 +8,8 @@ namespace CSharpEssentials.LoggerHelper.AI.Infrastructure {
     public static class SqlAiPersistenceFactory {
         public static Action<IServiceCollection> AddSqlAiPersistence(IConfiguration configuration) {
             return services => {
+                services.AddScoped<ISqlQueryWrapper, SqlQueryWrapper>();
+
                 var connectionString = configuration.GetConnectionString("Default");
                 var databaseProvider = configuration.GetValue<string>("DatabaseProvider");
 
@@ -18,7 +20,6 @@ namespace CSharpEssentials.LoggerHelper.AI.Infrastructure {
                     services.AddScoped(_ => new SqlConnection(connectionString));
                     services.AddScoped<IWrapperDbConnection>(_ => new FactorySQlConnection(connectionString!));
                 }
-                //services.AddScoped<ILogVectorStore, SqlLogVectorStore>();
             };
         }
     }

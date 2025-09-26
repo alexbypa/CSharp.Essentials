@@ -6,8 +6,8 @@ public interface ISqlQueryWrapper {
     Task<List<object>> QueryAsync(string sql, object? param = null);
 }
 public class SqlQueryWrapper : ISqlQueryWrapper {
-    private readonly FactorySQlConnection _db;
-    public SqlQueryWrapper(FactorySQlConnection db) => _db = db;
+    private readonly IWrapperDbConnection _db;
+    public SqlQueryWrapper(IWrapperDbConnection db) => _db = db;
 
     public async Task<List<object>> QueryAsync(string sql, object? param = null) {
         using var connection = _db.GetConnection();

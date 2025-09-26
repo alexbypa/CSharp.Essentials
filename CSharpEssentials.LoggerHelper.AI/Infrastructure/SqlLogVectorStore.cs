@@ -7,14 +7,11 @@ namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
 // performs cosine similarity in memory after a coarse SQL filter.
 // Replace with a native KNN query if your DB supports it.
 public sealed class SqlLogVectorStore : ILogVectorStore {
-    //private readonly SqlConnection _db;
-    private readonly FactorySQlConnection _db;
+    private readonly IWrapperDbConnection _db;
     private readonly IEmbeddingService _emb;
-    //private readonly IFileLoader _fileLoader;
-    public SqlLogVectorStore(FactorySQlConnection db, IEmbeddingService emb/*, IFileLoader fileLoader*/) { 
+    public SqlLogVectorStore(IWrapperDbConnection db, IEmbeddingService emb) { 
         _db = db; 
         _emb = emb;
-        //_fileLoader = fileLoader;
     }
 
     public async Task UpsertAsync(LogEmbedding doc, CancellationToken ct = default) {
