@@ -61,6 +61,29 @@ The `CSharpEssentials.HttpHelper` package streamlines this process by providing 
 
 Each mode is represented by a specific C# class that inherits from `ILogMacroAction` and performs a unique task, often using an embedded SQL file to query data.
 
+### 1. Hybrid Contextual Data Sourcing (Unique Feature!)
+
+Enable the AI to reason over your *operational data* by dynamically providing context via a simple folder structure:
+
+* **SQL Query Injection (`.sql`):** Define your contextual data extraction in standard `.sql` files within a designated folder (`ContextFolderPath`). The AI system dynamically loads and executes these queries.
+    
+    **Crucially, the SQL syntax in these files must be compatible with the database provider selected in your `appsettings.json`:**
+    
+    ```json
+    {
+      "DatabaseProvider": "postgresql", // Set to "postgresql" or "sqlserver"
+      "ConnectionStrings": {
+        "Default": "Your_Connection_String_Here"
+      }
+    }
+    ```
+    
+    The selection via `"DatabaseProvider"` determines the dialect and parameter syntax required for your `.sql` files. These queries fetch relevant data (e.g., transaction details, user history) to enrich the LLM prompt.
+
+* **Structured Formatting and Prompting (`.txt`):** For **every** `.sql` file that defines an extraction, a corresponding file with the **same name and a `.txt` extension must exist**. This `.txt` file dictates the exact **structured format** required for the resulting SQL data. This mechanism ensures the output is perfectly prepared, structured, and optimized to be consumed as context by the LLM, maintaining prompt integrity.
+
+
+
 #### 1. `RagAnswerQuery`
 This mode is designed to answer user questions based on a specific set of data. It uses **Retrieval-Augmented Generation (RAG)** by fetching the most relevant documents from a vector store and using them as context for the LLM.
 
