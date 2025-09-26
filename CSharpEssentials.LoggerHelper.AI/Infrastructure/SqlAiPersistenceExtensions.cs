@@ -1,9 +1,8 @@
-﻿using CSharpEssentials.LoggerHelper.AI.Domain;
-using CSharpEssentials.LoggerHelper.AI.Ports;
+﻿using CSharpEssentials.LoggerHelper.AI.Ports;
 using Microsoft.Data.SqlClient;
-using Npgsql;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace CSharpEssentials.LoggerHelper.AI.Infrastructure {
     public static class SqlAiPersistenceFactory {
@@ -14,10 +13,10 @@ namespace CSharpEssentials.LoggerHelper.AI.Infrastructure {
 
                 if (databaseProvider != null && databaseProvider.Contains("postgresql", StringComparison.InvariantCultureIgnoreCase)) {
                     services.AddScoped(_ => new NpgsqlConnection(connectionString));
-                    services.AddScoped<FactorySQlConnection>(_ => new FactoryPostgreSqlConnection(connectionString!));
+                    services.AddScoped<IWrapperDbConnection>(_ => new FactoryPostgreSqlConnection(connectionString!));
                 } else {
                     services.AddScoped(_ => new SqlConnection(connectionString));
-                    services.AddScoped<FactorySQlConnection>(_ => new FactorySQlConnection(connectionString!));
+                    services.AddScoped<IWrapperDbConnection>(_ => new FactorySQlConnection(connectionString!));
                 }
                 //services.AddScoped<ILogVectorStore, SqlLogVectorStore>();
             };
