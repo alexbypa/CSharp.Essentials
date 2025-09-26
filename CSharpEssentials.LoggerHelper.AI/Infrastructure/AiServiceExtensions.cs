@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions {
         configurePersistence(services);
         // --- SEZIONE REPOSITORY (Livello Accesso Dati) ---
         // I repository sono classi che contengono la logica per interrogare il database.
-        // Dipendono da 'IWrapperDbConnection' che abbiamo registrato sopra.
+        // Dipendono da 'FactorySQlConnection' che abbiamo registrato sopra.
         // -> Quando una classe chiede 'ILogRepository', gli viene data un'istanza di 'SqlLogRepository'.
         services.AddScoped<ISqlQueryWrapper, SqlQueryWrapper>();
 
@@ -59,7 +59,7 @@ public static class AIServiceExtensions {
     public static IEndpointRouteBuilder MapAiEndpoints(this IEndpointRouteBuilder endpoints) {
         endpoints.MapPost("/api/AISettings", (IFileLoader fileLoader) => fileLoader.getModelSQLLMModels()).ExcludeFromDescription();
 
-        endpoints.MapPost("/api/LLMQuery", async (IActionOrchestrator orc, IMacroContext ctx, CancellationToken ct) =>
+        endpoints.MapPost("/api/LLMQuery", async (IActionOrchestrator orc, MacroContextBase ctx, CancellationToken ct) =>
             Results.Ok(await orc.RunAsync(ctx, ct)))
                 .ExcludeFromDescription();
 

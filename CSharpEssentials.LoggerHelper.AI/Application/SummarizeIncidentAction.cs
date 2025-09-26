@@ -15,8 +15,8 @@ public sealed class SummarizeIncidentAction : ILogMacroAction<SummarizeContext> 
         _llm = llm;
         _sQLLMModels = sQLLMModels;
     }
-    public bool CanExecute(IMacroContext ctx) => !string.IsNullOrEmpty(ctx.TraceId);
-    public async Task<MacroResult> ExecuteAsync(IMacroContext ctx, CancellationToken ct = default) {
+    public bool CanExecute(MacroContextBase ctx) => !string.IsNullOrEmpty(ctx.TraceId);
+    public async Task<MacroResult> ExecuteAsync(MacroContextBase ctx, CancellationToken ct = default) {
         // 1) Fetch logs for the given trace
         // Use the dedicated API for correlation by TraceId
         var records = await _sqlQueryWrapper.QueryAsync(ctx.TraceId!, 200);

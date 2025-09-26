@@ -8,10 +8,10 @@ namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
 // Replace with a native KNN query if your DB supports it.
 public sealed class SqlLogVectorStore : ILogVectorStore {
     //private readonly SqlConnection _db;
-    private readonly IWrapperDbConnection _db;
+    private readonly FactorySQlConnection _db;
     private readonly IEmbeddingService _emb;
     //private readonly IFileLoader _fileLoader;
-    public SqlLogVectorStore(IWrapperDbConnection db, IEmbeddingService emb/*, IFileLoader fileLoader*/) { 
+    public SqlLogVectorStore(FactorySQlConnection db, IEmbeddingService emb/*, IFileLoader fileLoader*/) { 
         _db = db; 
         _emb = emb;
         //_fileLoader = fileLoader;

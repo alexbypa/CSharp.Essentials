@@ -9,7 +9,7 @@ public class AIEndpoints : ControllerBase {
     [HttpPost("LLMQuery")]
     public async Task<IActionResult> LLMQuery(
         [FromServices] IActionOrchestrator orc,
-        [FromBody] IMacroContext ctx,
+        [FromBody] MacroContextBase ctx,
         CancellationToken ct) {
         return Ok(await orc.RunAsync(ctx, ct));
     }

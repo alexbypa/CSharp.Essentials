@@ -6,10 +6,12 @@ public interface ISqlQueryWrapper {
     Task<List<object>> QueryAsync(string sql, object? param = null);
 }
 public class SqlQueryWrapper : ISqlQueryWrapper {
-    private readonly IWrapperDbConnection _db;
-    public SqlQueryWrapper(IWrapperDbConnection db) => _db = db;
+    private readonly FactorySQlConnection _db;
+    public SqlQueryWrapper(FactorySQlConnection db) => _db = db;
+
     public async Task<List<object>> QueryAsync(string sql, object? param = null) {
-        var Query = await _db.GetConnection().QueryAsync(sql, param);
-        return Query.AsList();
+        using var connection = _db.GetConnection();
+        var queryResult = await connection.QueryAsync(sql, param);
+        return queryResult.AsList();
     }
 }

@@ -12,8 +12,8 @@ public sealed class DetectAnomalyAction : ILogMacroAction<DetectAnomalyContext> 
     private readonly List<SQLLMModels> _sQLLMModels;
     private readonly ILlmChat _llm;
     public DetectAnomalyAction(ISqlQueryWrapper sqlQueryWrapper, List<SQLLMModels> sQLLMModels, ILlmChat llm) => (_sqlQueryWrapper, _sQLLMModels, _llm) = (sqlQueryWrapper, sQLLMModels, llm);
-    public bool CanExecute(IMacroContext ctx) => true;
-    public async Task<MacroResult> ExecuteAsync(IMacroContext ctx, CancellationToken ct = default) {
+    public bool CanExecute(MacroContextBase ctx) => true;
+    public async Task<MacroResult> ExecuteAsync(MacroContextBase ctx, CancellationToken ct = default) {
         var to = ctx.dtStart;
         var from = to.AddMinutes(-30);
         var series = new List<(DateTimeOffset Time, double Value)>();

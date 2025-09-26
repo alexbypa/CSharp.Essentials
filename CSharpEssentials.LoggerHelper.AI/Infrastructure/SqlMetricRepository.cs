@@ -4,8 +4,8 @@ using Dapper;
 
 namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
 public sealed class SqlMetricRepository /*: IMetricRepository*/ {
-    readonly IWrapperDbConnection _db;
-    public SqlMetricRepository(IWrapperDbConnection db) => _db = db;
+    readonly FactorySQlConnection _db;
+    public SqlMetricRepository(FactorySQlConnection db) => _db = db;
 
     public async Task<IReadOnlyList<MetricPoint>> QueryAsync(string sqlQuery, DateTimeOffset from, DateTimeOffset to) {
         var rows = await _db.GetConnection().QueryAsync<MetricPoint>(sqlQuery);
