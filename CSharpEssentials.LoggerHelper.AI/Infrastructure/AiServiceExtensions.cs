@@ -1,13 +1,10 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Application;
 using CSharpEssentials.LoggerHelper.AI.Domain;
-using CSharpEssentials.LoggerHelper.AI.Ports;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 
 namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
 

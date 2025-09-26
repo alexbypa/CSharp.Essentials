@@ -147,12 +147,6 @@ You can also test the AI models directly from the `LoggerHelper.Dashboard` clien
 
 -----
 
-#### Important Note on SQL Syntax
-
-The SQL queries used by the AI actions are retrieved from the `FolderSqlLoaderContainer`. It's crucial to note that the syntax of these queries must be compatible with your specific database provider (e.g., **MSSQL** or **PostgreSQL**). Ensure that the queries are written correctly for the database you are using.
-
------
-
 ### RAG with SQL Query Files 📊
 
 A key feature of the **AI Assistant** is its ability to perform **Retrieval-Augmented Generation (RAG)** using pre-saved SQL queries. This is useful for fetching specific data from your database to provide context for the LLM.
@@ -271,8 +265,3 @@ curl http://localhost:1234/IAI/run \
   "topResultsOnQuery": 100
 }'
 ```
-
-## ( ROADMAP )
-1. Code Review solid prnciples.
-5. L' invio del prompt al modello AI avviene tramite il package Csharp.Essential.HttpHelper ( da rimuovere su appSettings la chiave "UseMock": true, viene impostata da program.cs a false) che gestisce la comunicazione HTTP con l'API del modello AI.)
-6. (Opzionale) Le risposte del modello possono essere inviate via email tramite `LoggerHelper.Sink.Email`.

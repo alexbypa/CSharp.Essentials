@@ -1,7 +1,6 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Domain;
 using CSharpEssentials.LoggerHelper.AI.Ports;
 using Dapper;
-using Microsoft.IdentityModel.Abstractions;
 
 namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
 // Simple SQL-backed vector store: persists embeddings as varbinary and
