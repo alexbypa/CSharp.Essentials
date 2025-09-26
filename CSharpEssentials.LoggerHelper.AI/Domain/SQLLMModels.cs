@@ -6,4 +6,5 @@ public class SQLLMModels {
 public class SQLLMModelContent {
     public required string content { get; set; }
     public required string fileName { get; set; }
+    public string MarkdownFieldSelector { get; set; }
 }

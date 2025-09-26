@@ -26,7 +26,7 @@ public sealed class SqlLogVectorStore : ILogVectorStore {
         //var from = within.HasValue ? DateTimeOffset.UtcNow - within.Value : (DateTimeOffset?)null;
         //var sql = _fileLoader.getModelSQLLMModels();
 
-        var rows = (await _db.GetConnection().QueryAsync(sqlQuery, new { n = k, now = from })).ToList();
+        var rows = (await _db.GetConnection().QueryAsync(sqlQuery, new { n = k, dtStart = from })).ToList();
 
         var hits = new List<LogEmbeddingHit>(rows.Count);
         foreach (var r in rows) {

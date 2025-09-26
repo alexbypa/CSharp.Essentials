@@ -1,5 +1,4 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Domain;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace CSharpEssentials.LoggerHelper.AI.Application;
@@ -27,7 +26,7 @@ public sealed class RagAnswerQueryAction : ILogMacroAction<RagContext> {
         // 2) Top-K documenti simili dal vector store (ultime 24h)
         var sqlQuery = _sQLLMModels.FirstOrDefault(a => a.action == Name).contents.FirstOrDefault(a => a.fileName == ctx.fileName)?.content;
 
-        var hits = await _store.SimilarAsync(sqlQuery, qvec, k: ctx.topResultsOnQuery, ctx.dtStart, ct);
+        var hits = await _store.SimilarAsync(sqlQuery, qvec, k: ctx.topResultsOnQuery, ctx.dtStart.ToUniversalTime(), ct);
 
         // 3) Prompt con contesto recuperato + domanda utente
         var system = "You are an SRE assistant. Use the provided CONTEXT to answer precisely and concisely.";

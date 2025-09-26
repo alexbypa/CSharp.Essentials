@@ -9,10 +9,14 @@ public sealed class ActionOrchestrator : IActionOrchestrator {
     public ActionOrchestrator(IEnumerable<ILogMacroAction> actions) => _actions = actions;
     public async Task<IReadOnlyList<MacroResult>> RunAsync(IMacroContext ctx, CancellationToken ct = default) {
         var results = new List<MacroResult>();
-        foreach (var a in _actions)
+        foreach (var a in _actions.Distinct())
             if (a.CanExecute(ctx))
-                if (a.Name.Equals(ctx.action, StringComparison.InvariantCultureIgnoreCase)  ) {
-                    results.Add(await a.ExecuteAsync(ctx, ct));
+                if (a.Name.Equals(ctx.action, StringComparison.InvariantCultureIgnoreCase)) {
+                    try {
+                        results.Add(await a.ExecuteAsync(ctx, ct));
+                    }catch (Exception ex) {
+                        results.Add(new MacroResult(a.Name, "Exception", new Dictionary<string, object> { {  "Exception", ex.Message } }));
+                    }
                 }
         return results;
     }

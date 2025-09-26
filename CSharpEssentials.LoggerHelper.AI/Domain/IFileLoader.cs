@@ -21,10 +21,18 @@ public sealed class FileLoader : IFileLoader {
                 action = Path.GetFileName(dirPath),
                 contents = Directory.GetFiles(dirPath, "*.sql", SearchOption.AllDirectories).Select(
                     fl => new SQLLMModelContent {
-                        fileName = Path.GetFileName(fl),
-                        content = File.ReadAllText(fl)
+                        fileName =  Path.GetFileName(fl),
+                        content = File.ReadAllText(fl),
+                        MarkdownFieldSelector = File.Exists(fl.Replace("sql", "txt")) ? File.ReadAllText(fl.Replace("sql", "txt")) : ""
                     }).ToList()
         }).ToList();
         return models;
     }
+}
+public static class FileLoaderExtensions {
+    public static string getQuery(this List<SQLLMModels> models, string Name, string fileName) => 
+        models.FirstOrDefault(a => a.action == Name).contents.FirstOrDefault(a => a.fileName == fileName)?.content;
+    public static string getFieldTemplate(this List<SQLLMModels> models, string Name, string fileName) => 
+        models.FirstOrDefault(a => a.action == Name).contents.FirstOrDefault(a => a.fileName == fileName)?.MarkdownFieldSelector;
+    
 }
