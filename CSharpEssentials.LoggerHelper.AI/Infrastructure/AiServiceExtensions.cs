@@ -29,10 +29,6 @@ public static class ServiceCollectionExtensions {
         // -> Quando una classe chiede 'ILogRepository', gli viene data un'istanza di 'SqlLogRepository'.
         services.AddScoped<ISqlQueryWrapper, SqlQueryWrapper>();
 
-        //services.AddScoped<ILogRepository, SqlLogRepository>();
-        //services.AddScoped<ITraceRepository<TraceRecord>, SqlTraceRepository>();
-        //services.AddScoped<IMetricRepository, SqlMetricRepository>();
-
         // -> Registra il servizio per creare gli embedding (vettori numerici dal testo).
         services.AddScoped<IEmbeddingService, NaiveEmbeddingService>();
 
@@ -49,16 +45,10 @@ public static class ServiceCollectionExtensions {
 
         services.AddScoped<ILogVectorStore, SqlLogVectorStore>();
 
-        // 1. Registra le implementazioni concrete una sola volta.
-        services.AddScoped<SummarizeIncidentAction>();
-        services.AddScoped<CorrelateTraceAction>();
-        services.AddScoped<DetectAnomalyAction>();
-        services.AddScoped<RagAnswerQueryAction>();
-
-        services.AddScoped<ILogMacroAction, SummarizeIncidentAction>(sp => sp.GetRequiredService<SummarizeIncidentAction>());
-        services.AddScoped<ILogMacroAction, CorrelateTraceAction>(sp => sp.GetRequiredService<CorrelateTraceAction>());
-        services.AddScoped<ILogMacroAction, DetectAnomalyAction>(sp => sp.GetRequiredService<DetectAnomalyAction>());
-        services.AddScoped<ILogMacroAction, RagAnswerQueryAction>(sp => sp.GetRequiredService<RagAnswerQueryAction>());
+        services.AddScoped<ILogMacroAction, SummarizeIncidentAction>();
+        services.AddScoped<ILogMacroAction, CorrelateTraceAction>();
+        services.AddScoped<ILogMacroAction, DetectAnomalyAction>();
+        services.AddScoped<ILogMacroAction, RagAnswerQueryAction>();
 
         // -> Registra l'orchestratore, la classe che gestisce e coordina tutte le azioni.
         services.AddScoped<IActionOrchestrator, ActionOrchestrator>();

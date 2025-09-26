@@ -24,13 +24,6 @@ public sealed class SummarizeIncidentAction : ILogMacroAction<SummarizeContext> 
         //var lines = records.Select(x => $"{x.TimeStamp:u} {x.Level} {Compact(x.Message)}").ToList();
         var contextBlock = string.Join("\n---\n", TraceFormatter.FormatRecords(records, _sQLLMModels.getFieldTemplate(Name, ctx.fileName)));
 
-
-        // 3) Enforce a simple token/char budget
-        //var timeline = TakeForTokenBudget(contextBlock, maxChars: 4000); 
-
-        // 4) Compose prompts
-        //var system = "You are an SRE assistant. Summarize root cause, impact, key signals, and remediation. Be concise.";
-        //var user = $"Trace: {ctx.TraceId}\n{string.Join("\n", timeline)}";
         var messages = new List<ChatPromptMessage>
         {
             new("system", ctx.system),
