@@ -70,8 +70,9 @@ Just install the package and define your desired levels (`Information`, `Warning
 - **Telegram**: `CSharpEssentials.LoggerHelper.Sink.Telegram` _Used via `HttpClient`_  
 - **Email**: `CSharpEssentials.LoggerHelper.Sink.Email`_Used via `System.Net.Mail`_  
 - **xUnit**: `CSharpEssentials.LoggerHelper.Sink.xUnit` ✅ ( new from 3.1.5 )
-- - **"Telemetry"**: `CSharpEssentials.LoggerHelper.Sink.Telemetry` – `CSharpEssentials.LoggerHelper.Sink.Telemetry` collects logs, metrics and traces using OpenTelemetry.
-
+- **"Telemetry"**: `CSharpEssentials.LoggerHelper.Sink.Telemetry` collects logs, metrics and traces using OpenTelemetry.
+- **"DashBoard"**: `CSharpEssentials.LoggerHelper.Dashboard` giving you real-time visibility into how sinks are loaded and use AI.
+- **"AI"**: `CSharpEssentials.LoggerHelper.AI` AI-Powered Observability & Root Cause Analysis.
 
 ---
 
