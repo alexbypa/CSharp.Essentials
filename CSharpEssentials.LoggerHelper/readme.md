@@ -11,17 +11,22 @@
 **The ultimate Serilog sink hub — extensible, modular, centralized.**
 
 ---
-## 🚀 News: Embedded Dashboard
+## 🚀 Major Update: AI Integration for Advanced Observability!
 
-A first version of the **LoggerHelper Dashboard** has been published!
+We are excited to announce a significant enhancement to the CSharpEssentials ecosystem with the introduction of the new AI package:
 
-🔎 What it provides:
-- Complete overview of all loaded sinks (MSSqlServer, Console, Elasticsearch, …)
-- Current write levels (Information, Warning, Error, Fatal, …)
-- Real-time view of sink initialization and **any loading errors**
+### ✨ New Package: `CSharpEssentials.LoggerHelper.AI`
 
-📦 NuGet: [CSharpEssentials.LoggerHelper.Dashboard](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard)
+This add-on package integrates Large Language Models (LLMs) and Retrieval-Augmented Generation (RAG) directly into your logging and tracing workflow. It enables powerful, AI-driven diagnostic actions, including:
 
+* **RAG Querying:** Ask natural language questions against your logs via dynamic SQL (MS SQL/PostgreSQL).
+* **Correlate Trace:** Pinpoint the root cause of failures and timeouts in distributed traces.
+* **Detect Anomaly:** Identify statistical anomalies in metrics.
+* **Summarize Incident:** Get concise, AI-generated root cause summaries.
+
+### 📊 Dashboard Package Updated
+
+The companion package, **`CSharpEssentials.LoggerHelper.Dashboard`**, has been fully updated to seamlessly support all new AI capabilities. You can now configure and execute all the new LLM variants (RAG, Anomaly Detection, etc.) dynamically through a user-friendly interface.
 
 ## 💡 Why CSharpEssentials.LoggerHelper?
 

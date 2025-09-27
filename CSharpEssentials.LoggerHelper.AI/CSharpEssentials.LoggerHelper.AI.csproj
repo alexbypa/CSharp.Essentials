@@ -12,6 +12,18 @@
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.AI</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <Description>C# AI Observability: RAG, Trace Correlation &amp; Anomaly Detection
+
+</Description>
+    <PackageTags>C#, .NET, AI, LLM, RAG, Observability, Logging, Serilog, Tracing, OpenTelemetry, DistributedTracing, AnomalyDetection, RootCauseAnalysis, MSSQL, PostgreSQL, DevOps, SRE, Diagnostic</PackageTags>
+    <PackageReleaseNotes>Stop manually sifting through logs. CSharpEssentials.LoggerHelper.AI integrates advanced LLMs and RAG directly into your C# observability pipeline to provide real-time, actionable insights.
+
+It performs AI-powered Root Cause Analysis (CorrelateTrace), Anomaly Detection, and RAG over your MS SQL/PostgreSQL logs via dynamic SQL queries. Dramatically reduce MTTR and transform your diagnostic process with AI.
+
+</PackageReleaseNotes>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageOutputPath>D:\Nuget</PackageOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CSharpEssentials.HttpHelper" Version="4.0.2" />
@@ -39,6 +51,10 @@
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Update="readme.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
