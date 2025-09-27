@@ -236,7 +236,7 @@ This feature is a powerful demonstration of how `CSharpEssentials.LoggerHelper.A
 
 ### 🕵️ AI-Powered Root Cause Analysis with CorrelateTrace
 
-Beyond simple log retrieval, the **AI Assistant** can perform powerful root cause analysis by correlating logs and distributed traces. This is particularly useful for debugging complex issues in microservice architectures without having to manually sift through data.
+Beyond simple log retrieval, the **AI Assistant** can perform powerful root cause analysis by correlating logs and distributed traces. This is particularly useful for debugging complex issues in microservice architectures without having to manually sift through data. While sharing a similar execution pattern with `SummarizeIncident`, the `CorrelateTrace` action is specifically designed to **identify the most suspicious trace** within a set of related activities, focusing on pinpointing anomalies rather than just summarizing.
 
 #### **Use Case: Diagnosing a Timeout Error in a Chain of Responsibility Pattern**
 
