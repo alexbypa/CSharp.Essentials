@@ -14,16 +14,14 @@ public sealed class DetectAnomalyAction : ILogMacroAction<DetectAnomalyContext> 
     public DetectAnomalyAction(ISqlQueryWrapper sqlQueryWrapper, List<SQLLMModels> sQLLMModels, ILlmChat llm) => (_sqlQueryWrapper, _sQLLMModels, _llm) = (sqlQueryWrapper, sQLLMModels, llm);
     public bool CanExecute(MacroContextBase ctx) => true;
     public async Task<MacroResult> ExecuteAsync(MacroContextBase ctx, CancellationToken ct = default) {
-        var to = ctx.dtStart;
-        var from = to.AddMinutes(-30);
-        var series = new List<(DateTimeOffset Time, double Value)>();
-        var sqlQuery = _sQLLMModels.FirstOrDefault(a => a.action == Name).contents.FirstOrDefault(a => a.fileName == ctx.fileName)?.content;
-        dynamic traceRecords = await _sqlQueryWrapper.QueryAsync(sqlQuery, ctx.TraceId);
-        
+        var sqlQuery = _sQLLMModels.getQuery(Name, ctx.fileName);
+        dynamic traceRecords = await _sqlQueryWrapper.QueryAsync(sqlQuery, new {from = ctx.dtStart, to = ctx.dtEnd});
+
+        //Context example   : You are a systems analyst with expertise in observability. Analyze the provided metrics and logs (CONTEXT) to identify the root cause of the detected anomaly and recommend mitigation. Prioritize abnormal error rates and latency.
+        //user example      : Analyze the data in context. Is there an anomaly? If so, what is the root cause and possible solution?
         //string Template = "TraceId: {Id} | LogEvent: {TgasJson} | Score: {Value}";
         var contextBlock = string.Join("\n---\n", TraceFormatter.FormatRecords(traceRecords, _sQLLMModels.getFieldTemplate(Name, ctx.fileName)));
-
-
+        
 
         var messages = new[]
         {
@@ -32,7 +30,6 @@ public sealed class DetectAnomalyAction : ILogMacroAction<DetectAnomalyContext> 
             new ChatPromptMessage("user", $"Question: {ctx.Query}")
         };
 
-        // 4) Generazione
         var answer = await _llm.ChatAsync(messages);
 
         return new MacroResult(Name, answer);

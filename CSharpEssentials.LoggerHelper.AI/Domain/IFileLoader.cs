@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace CSharpEssentials.LoggerHelper.AI.Domain;
@@ -23,7 +24,10 @@ public sealed class FileLoader : IFileLoader {
                     fl => new SQLLMModelContent {
                         fileName =  Path.GetFileName(fl),
                         content = File.ReadAllText(fl),
-                        MarkdownFieldSelector = File.Exists(fl.Replace("sql", "txt")) ? File.ReadAllText(fl.Replace("sql", "txt")) : ""
+                        MarkdownFieldSelector = File.Exists(fl.Replace("sql", "txt")) ? File.ReadAllText(fl.Replace("sql", "txt")) : "",
+                        getMetricDetails = File.Exists(fl.Replace("sql", "json")) 
+                        ? JsonSerializer.Deserialize<MetricDetails>(File.ReadAllText(fl.Replace("sql", "json")))
+                        : null,
                     }).ToList()
         }).ToList();
         return models;
@@ -34,5 +38,7 @@ public static class FileLoaderExtensions {
         models.FirstOrDefault(a => a.action == Name).contents.FirstOrDefault(a => a.fileName == fileName)?.content;
     public static string getFieldTemplate(this List<SQLLMModels> models, string Name, string fileName) => 
         models.FirstOrDefault(a => a.action == Name).contents.FirstOrDefault(a => a.fileName == fileName)?.MarkdownFieldSelector;
+    public static MetricDetails getMetrics(this List<SQLLMModels> models, string Name, string fileName) => 
+        models.FirstOrDefault(a => a.action == Name).contents.FirstOrDefault(a => a.fileName == fileName).getMetricDetails;
     
 }

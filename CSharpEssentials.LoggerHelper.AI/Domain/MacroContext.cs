@@ -6,6 +6,7 @@
         public string system { get; set; }
         public string TraceId { get; set; }
         public DateTimeOffset dtStart { get; set; }
+        public DateTimeOffset dtEnd { get; set; }
         public int topResultsOnQuery { get; set; }
     }
     // File: CSharpEssentials.LoggerHelper.AI/Domain/RagContext.cs (Nuovo)

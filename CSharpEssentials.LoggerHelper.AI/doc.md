@@ -249,11 +249,11 @@ You can easily simulate this scenario using the `CSharpEssentials.LoggerHelper.T
 1.  **Trigger a Simulated Latency**: Using the demo project (which leverages `CSharpEssentials.HttpHelper` for mocking `HttpClient` behavior), you can invoke an HTTP endpoint that intentionally introduces a delay in one of its internal spans. This simulates a slow external dependency or a bottleneck in your application's chain of responsibility.
     For example, make a `GET` request to `http://localhost:1234/Telemetry/Simple` with a `SecondsDelay` parameter set to `40`. This will simulate a 40-second delay in one of the internal HTTP calls.
 
- ![scalar demo delay](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper.AI/Docs/scalar_http_Simple_delay.png)    
+![scalar demo delay](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper.AI/Docs/scalar_http_Simple_delay.png)    
     
 2.  **Capture the `IdTransaction`**: Upon receiving the (potentially timed-out) response, extract the `IdTransaction` (which corresponds to the `TraceId` of the activity). This ID links all the telemetry data for that specific request.
  
- 1. ![scalar demo delay](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper.AI/Docs/scalar_http_Simple_delay_response.png)    
+![scalar demo delay](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper.AI/Docs/scalar_http_Simple_delay_response.png)    
     
 3.  **LLM Diagnosis via the Dashboard**:
     Now, with the `TraceId` in hand, navigate to the `CSharpEssentials.LoggerHelper.Dashboard` and use the AI Assistant. Provide a natural language query like: **"I have an issue with a slow request. Can you find the suspicious trace and tell me the root cause of the timeout?"**
