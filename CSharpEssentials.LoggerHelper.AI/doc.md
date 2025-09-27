@@ -48,7 +48,28 @@ In the **Monitor-Sink** section, by filtering the `Sink` for "LoggerHelper.AI," 
 *   **`headersLLM`**: A collection of HTTP headers required for API requests, such as authentication tokens or content types.
 *   **`httpClientName`**: The name of the `HttpClient` instance used for making requests to the LLM service. This is typically configured in the application's startup file.
 
----
+-----
+
+### 🚀 Service Registration
+
+To enable the AI-powered logging features, you must register the `CSharpEssentials.LoggerHelper.AI` services within your application's `Program.cs` or startup file.
+
+Use the `AddCSharpEssentialsLoggerAI` extension method on `IServiceCollection`. This method requires your application's **`IConfiguration`** and an optional `Action<IServiceCollection>` to configure the persistence mechanism.
+
+### Basic Registration
+
+
+```csharp
+using CSharpEssentials.LoggerHelper.AI.Infrastructure;
+
+// ... in Program.cs
+builder.Services.AddCSharpEssentialsLoggerAI(
+    builder.Configuration,
+    SqlAiPersistenceFactory.AddSqlAiPersistence(builder.Configuration)
+);
+```
+
+-----
 
 ### Managing HttpClients with `CSharpEssentials.HttpHelper`
 
