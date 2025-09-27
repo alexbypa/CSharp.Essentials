@@ -2,6 +2,7 @@
 
 namespace CSharpEssentials.LoggerHelper.Telemetry.Context;
 public static class LoggerExtensionWithMetrics<T> where T : IRequest {
+    public static string TraceId { get; set; }
     public static ILogTraceContext<T> TraceAsync(
             T request,
             LogEventLevel level,

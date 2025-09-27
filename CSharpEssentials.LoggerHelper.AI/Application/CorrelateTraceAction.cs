@@ -1,43 +1,35 @@
-﻿using CSharpEssentials.LoggerHelper.AI.Domain;   // fix del typo
-using CSharpEssentials.LoggerHelper.AI.Ports;
+﻿using CSharpEssentials.LoggerHelper.AI.Domain;
+using CSharpEssentials.LoggerHelper.AI.Infrastructure;
+using CSharpEssentials.LoggerHelper.AI.Shared;
 
 namespace CSharpEssentials.LoggerHelper.AI.Application;
 
-public sealed class CorrelateTraceAction : ILogMacroAction {
-    private readonly ILogRepository _logs;
-    private readonly ITraceRepository _traces;
+public sealed class CorrelateTraceAction : ILogMacroAction<CorrelateContext> {
+    private readonly ISqlQueryWrapper _sqlQueryWrapper;
     public string Name => "CorrelateTrace";
+    public Type ContextType => typeof(CorrelateContext);
     private readonly ILlmChat _llm;
-    public CorrelateTraceAction(ILogRepository logs, ITraceRepository traces, ILlmChat llm) {
-        _logs = logs;
-        _traces = traces;
+    private readonly List<SQLLMModels> _sQLLMModels;
+    public CorrelateTraceAction(ISqlQueryWrapper sqlQueryWrapper , ILlmChat llm, List<SQLLMModels> sQLLMModels) {
+        _sqlQueryWrapper = sqlQueryWrapper;
         _llm = llm;
+        _sQLLMModels = sQLLMModels;
     }
+    public bool CanExecute(MacroContextBase ctx) => !string.IsNullOrEmpty(ctx.TraceId);
+    public async Task<MacroResult> ExecuteAsync(MacroContextBase ctx, CancellationToken ct = default) {
+        var sqlQuery = _sQLLMModels.getQuery(Name, ctx.fileName);
+        
+        dynamic traceRecords = await _sqlQueryWrapper.QueryAsync(sqlQuery, new {traceid = ctx.TraceId});
 
-    public bool CanExecute(MacroContext ctx) => string.IsNullOrEmpty(ctx.TraceId); // lo scopre
+        //string Template = "{TraceId} | Span Name={Name} | duration={Duration:F0}ms | tags={TagsJson}";
+        var contextBlock =  string.Join("\n---\n", TraceFormatter.FormatRecords(traceRecords, _sQLLMModels.getFieldTemplate(Name, ctx.fileName)));
 
-    public async Task<MacroResult> ExecuteAsync(MacroContext ctx, CancellationToken ct = default) {
-        // _traces.GetRecentAsync ritorna Task<IReadOnlyList<TraceRecord>>
-        var recent = await _traces.GetRecentAsync(50, ct);
-
-        //// scegli il predicato coerente col tuo model (es. Anomaly == true)
-        //var hit = recent.FirstOrDefault(t => t.Anomaly == true);
-
-        var lines = recent.Select(t =>$"{t.TraceId} | name={t.Name} | dur={t.Duration.TotalMilliseconds:F0}ms | anomaly={(t.Anomaly == true ? 1 : 0)} | tags={t.TagsJson}");
-
-        //var system = "You are an SRE assistant. Pick the most suspicious trace and explain why.";
-        var system = ctx.Query;
-
-        var user = "Candidates:\n" + string.Join("\n", lines) + "\nReturn: traceId + short reason.";
-        var pick = await _llm.ChatAsync(system, user);
-
-        // estrai traceId dalla risposta (regex semplice)
-        //var id = ExtractTraceId(pick);
-        //var hit = recent.FirstOrDefault(t => t.TraceId == id);
-
-        return new MacroResult(
-            Name,
-            pick
-        );
+        var messages = new[]{
+            new ChatPromptMessage("system", ctx.system),
+            new ChatPromptMessage("assistant", $"CONTEXT:\n{contextBlock}"),
+            new ChatPromptMessage("user", $"Question: {ctx.Query}")
+        };
+        var answer = await _llm.ChatAsync(messages);
+        return new MacroResult(Name, answer);
     }
 }

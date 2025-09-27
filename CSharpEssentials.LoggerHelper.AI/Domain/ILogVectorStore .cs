@@ -3,8 +3,7 @@
 // Replace this with a native vector DB if available (pgvector, Qdrant, etc.).
 public interface ILogVectorStore {
     Task UpsertAsync(LogEmbedding doc, CancellationToken ct = default);
-    Task<IReadOnlyList<LogEmbeddingHit>> SimilarAsync(
-        float[] query, int k, string? app = null, TimeSpan? within = null, CancellationToken ct = default);
+    Task<IReadOnlyList<LogEmbeddingHit>> SimilarAsync(string sqlQuery, float[] query, int k, DateTimeOffset from, CancellationToken ct = default);
 }
 public sealed record LogEmbedding(
     string Id,               // unique id, e.g. $"{traceId}:{logId}"

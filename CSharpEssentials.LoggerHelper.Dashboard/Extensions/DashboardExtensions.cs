@@ -189,6 +189,19 @@ public static class DashboardExtensions {
 
             return Results.Ok(dto);
         });
+
+        app.MapGet("/api/check-ai-package", () =>
+        {
+            var baseDir = AppContext.BaseDirectory;
+
+            // Cerca il file .dll del pacchetto AI
+            var aiPackageDll = Directory
+                .EnumerateFiles(baseDir, "CSharpEssentials.LoggerHelper.AI.dll")
+                .FirstOrDefault();
+
+            // Restituisci un oggetto JSON con il risultato
+            return new { isAIPackagePresent = aiPackageDll != null };
+        });
     }
     // DTO minimali
     public record LoggerSinkDto(string SinkName, List<string> Levels);
