@@ -5,10 +5,10 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>CSharpEssentials.LoggerHelper.AI</Title>
-    <Version>4.0.4</Version>
+    <Version>4.0.5</Version>
     <Authors>Alessandro Chiodo</Authors>
     <Company>Alessandro Chiodo</Company>
-    <PackageIcon>CSharpEssentials</PackageIcon>
+    <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.AI</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -27,6 +27,7 @@ It performs AI-powered Root Cause Analysis (CorrelateTrace), Anomaly Detection, 
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CSharpEssentials.HttpHelper" Version="4.0.2" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="4.0.5" />
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.3.0" />
@@ -42,20 +43,15 @@ It performs AI-powered Root Cause Analysis (CorrelateTrace), Anomaly Detection, 
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Docs\CSharpEssentials">
+    <None Include="LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="LICENSE.txt">
+    <None Include="Docs\CSharpEssentials.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Update="readme.md">
+    <None Include="readme.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
