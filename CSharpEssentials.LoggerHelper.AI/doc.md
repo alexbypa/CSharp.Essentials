@@ -287,3 +287,45 @@ curl http://localhost:1234/AI/run \
   "dtStart": "2022-09-22T08:00:00",
   "topResultsOnQuery": 100
 }'
+
+
+---
+
+### 🚨 AI-Powered Anomaly Detection
+
+The **AI Assistant** excels at proactively identifying anomalies within your operational metrics, transforming raw data into actionable alerts and insights. This feature helps SREs and developers quickly pinpoint unusual behavior, understand its root cause, and implement timely solutions, significantly reducing the mean time to detect (MTTD) and mean time to resolve (MTTR) critical issues.
+
+#### **Use Case: Detecting Abnormal Error Rates or Latency**
+
+Imagine your application experiences a sudden spike in error rates or an unexpected increase in request latency. Manually sifting through dashboards and logs to find the anomaly and its cause can be a time-consuming process. The `DetectAnomaly` action automates this by leveraging the power of LLMs.
+
+**Scenario:** A critical microservice starts exhibiting higher-than-usual error rates or response times.
+
+**How to use the `DetectAnomaly` action:**
+
+1.  **Configure your Metric Query**:
+    Ensure you have a SQL query file, such as `getMetrics.sql`, within your `DetectAnomaly` folder. This query should retrieve the time-series data for the metric you want to monitor (e.g., `http.client.request.duration`, error counts, CPU usage).
+
+    The corresponding `getMetrics.txt` file defines how the fetched data should be structured for the LLM. For instance:
+
+    ```
+    TraceId: {TraceId} | LogEvent: {TraceJson} | Score: {Value}
+    ```
+
+    This structure ensures the AI receives key information like the `TraceId`, the full `LogEvent` (potentially JSON data), and a calculated `Score` (e.g., Z-score or anomaly score) for each data point.
+
+2.  **Use the AI Assistant Dashboard**:
+    Navigate to the **AI Assistant** page in your dashboard.
+    *   **Action**: Select `DetectAnomaly`.
+    *   **File Name**: Choose the `getMetrics.sql` file.
+    *   **Query**: Enter a natural language question asking the AI to analyze the context for anomalies, for example: "Analyze the data in context. Is there an anomaly? If so, what is the root cause and possible solution?"
+    *   **Start Date / End Date**: Define the time window for the metric data you want to analyze.
+    *   **Top Records**: Specify the number of records to fetch.
+    *   **System Prompt**: Provide specific instructions to guide the AI's analysis and recommendations: "You are a systems analyst with expertise in observability. Analyze the provided metrics and logs (CONTEXT) to identify the root cause of the detected anomaly and recommend mitigation. Prioritize abnormal error rates and latency."
+
+    The system will execute the `getMetrics.sql` query, retrieve the relevant metric data and associated logs, perform statistical analysis (like Z-score calculation), and then use this enriched data as context for the LLM. The AI will then identify any anomalies, explain their potential root causes, and suggest possible solutions.
+
+    **Example Output from the Dashboard:**
+![Dashboard AI detect anoamly Example](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper.AI/Docs/dashboard_AI_DetectAnomaly_Example.png)
+
+    
