@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace CSharpEssentials.HttpHelper;
 public static class httpExtension {
@@ -22,7 +23,10 @@ public static class httpExtension {
         List<httpClientOptions>? options = getOptions(httpclientoptions);
         
         services.AddSingleton<IhttpsClientHelperFactory, httpsClientHelperFactory>();
-        
+
+        Assembly assemblyCorrente = Assembly.GetExecutingAssembly();
+
+
         if (options != null)
             foreach (var option in options) {
                 services
