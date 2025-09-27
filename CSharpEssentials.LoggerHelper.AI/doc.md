@@ -304,7 +304,18 @@ Imagine your application experiences a sudden spike in error rates or an unexpec
 **How to use the `DetectAnomaly` action:**
 
 1.  **Configure your Metric Query**:
-    Ensure you have a SQL query file, such as `getMetrics.sql`, within your `DetectAnomaly` folder. This query should retrieve the time-series data for the metric you want to monitor (e.g., `http.client.request.duration`, error counts, CPU usage).
+    Ensure you have a SQL query file, such as `getMetrics.sql`, 
+```sql
+select
+	M."TraceId", 
+	M."Value", 
+	T."TagsJson" "TraceJson" from "MetricEntry" M 
+	inner join "TraceEntry" T ON M."TraceId" = T."TraceId"
+	where M."TraceId" IS NOT NULL and M."Name" = 'db.client.commands.duration' 
+		and "Timestamp" between '2025-09-20T08:00:00' and '2025-09-28T11:00:00'
+		order by M."Value" desc limit 10
+```
+within your `DetectAnomaly` folder. This query should retrieve the time-series data for the metric you want to monitor (e.g., `http.client.request.duration`, error counts, CPU usage).
 
     The corresponding `getMetrics.txt` file defines how the fetched data should be structured for the LLM. For instance:
 
