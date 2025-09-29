@@ -50,7 +50,7 @@
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>telemetries, loggerhelper, serilog, logger, structured-logging, email-sink, console-sink, database-logging, postgresql, elasticsearch, sink, logging-helper, dotnet-logging, aspnetcore-logging</PackageTags>
+    <PackageTags>serilog, logger, logging, abstraction, csharp, .net, dotnetcore, nlog, log4net, aspnetcore-logging, structured-logging, middleware, loggerhelper, logging-helper, database-logging, postgresql, elasticsearch, email-sink, console-sink</PackageTags>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
