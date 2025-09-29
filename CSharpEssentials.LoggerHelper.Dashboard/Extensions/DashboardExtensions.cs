@@ -6,38 +6,9 @@ namespace CSharpEssentials.LoggerHelper.Dashboard.Extensions;
 
 public static class DashboardExtensions {
     // Metodo di estensione per registrare la dashboard embedded
-    public static void UseLoggerHelperDashboard<T>(this WebApplication app, string path = "/loggerdashboard") where T : class, IRequest {
+    public static void UseLoggerHelperDashboard<T>(this WebApplication app, string path = "/ui") where T : class, IRequest {
         var assembly = typeof(DashboardExtensions).Assembly;
-        var resourceNames = assembly.GetManifestResourceNames();
-        foreach (var name in resourceNames)
-            Console.WriteLine(name);
 
-        var assemblyForDebug = typeof(DashboardExtensions).Assembly;
-        Console.WriteLine($"--- Debugging ManifestEmbeddedFileProvider Error ---");
-        Console.WriteLine($"Assembly Name: {assemblyForDebug.FullName}"); // Controlla che sia l'assembly corretto
-
-        var allResourceNames = assemblyForDebug.GetManifestResourceNames();
-        Console.WriteLine($"Total embedded resources found: {allResourceNames.Length}");
-        Console.WriteLine($"Looking for baseNamespace: 'CSharpEssentials.LoggerHelper.Dashboard'"); // Nota le virgolette per chiarezza
-
-        bool foundAnyResourceWithPrefix = false;
-        foreach (var name in allResourceNames) {
-            Console.WriteLine($"  Found Resource: '{name}'"); // Stampa ogni nome tra virgolette per vedere spazi o caratteri extra
-            if (name.StartsWith("CSharpEssentials.LoggerHelper.Dashboard")) // Case-sensitive check
-            {
-                foundAnyResourceWithPrefix = true;
-            }
-        }
-        Console.WriteLine($"Found any resource starting with 'CSharpEssentials.LoggerHelper.Dashboard': {foundAnyResourceWithPrefix}");
-        Console.WriteLine($"----------------------------------------------------");
-
-        var testProvider = new ManifestEmbeddedFileProvider(assembly);
-        var contents = testProvider.GetDirectoryContents("/");
-        foreach (var file in contents)
-            Console.WriteLine($">> Embedded file: {file.Name}");
-
-
-        // Crea il FileProvider UNA VOLTA e riusalo
         var embeddedFileProvider = new ManifestEmbeddedFileProvider(
             assembly//,
                     //"assets" // **2. CORREZIONE FONDAMENTALE: baseNamespace**
@@ -46,7 +17,7 @@ public static class DashboardExtensions {
         // Questo middleware serve index.html quando l'URL termina con /ui/
         var defaultFilesOptions = new DefaultFilesOptions {
             FileProvider = embeddedFileProvider, // Usa lo stesso provider
-            RequestPath = "/ui/assets", // Corrisponde al RequestPath di UseStaticFiles
+            RequestPath = $"/{path}/assets", // Corrisponde al RequestPath di UseStaticFiles
             DefaultFileNames = { "index.html" } // "index.html" è ora alla "radice" del tuo baseNamespace appiattito
         };
         app.UseDefaultFiles(defaultFilesOptions);
@@ -59,10 +30,20 @@ public static class DashboardExtensions {
             var all = asm.GetManifestResourceNames();
 
             // ricava lo "slug" dal path (potrebbe essere vuoto se /ui)
-            var raw = context.Request.Path.Value ?? "/ui";
-            var slug = raw.StartsWith("/ui", StringComparison.OrdinalIgnoreCase)
-                ? raw.Substring(3) // toglie "/ui"
+            
+            var raw = context.Request.Path.Value ?? $"/{path}";
+
+            //var slug = raw.StartsWith($"/{path}", StringComparison.OrdinalIgnoreCase)
+            //    ? raw.Substring(3) // toglie "/ui"
+            //    : raw;
+
+
+
+            var slug = raw.StartsWith($"/{path}", StringComparison.OrdinalIgnoreCase)
+                ? raw.Substring(path.Length+1) // toglie "/{path}"
                 : raw;
+
+
             slug = slug.TrimStart('/');
             if (slug.Contains('?'))
                 slug = slug.Split('?', 2)[0];
@@ -90,7 +71,7 @@ public static class DashboardExtensions {
 
             if (string.IsNullOrEmpty(resourceName)) {
                 context.Response.StatusCode = 404;
-                await context.Response.WriteAsync($"❌ Embedded resource not found for slug '{slug}'.");
+                await context.Response.WriteAsync($"Embedded resource not found for slug '{slug}'.");
                 return;
             }
 
@@ -150,8 +131,8 @@ public static class DashboardExtensions {
         })
         .ExcludeFromDescription();
         // 2) Route
-        app.MapGet("/ui", UiHandler);
-        app.MapGet("/ui/{**slug}", UiHandler);
+        app.MapGet($"/{path}", UiHandler);
+        app.MapGet("/{path}/{**slug}", UiHandler);
 
 
 

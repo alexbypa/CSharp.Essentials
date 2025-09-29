@@ -22,10 +22,11 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="ui\**\*.*">
-      <LogicalName>$(RootNamespace).$([System.String]::Copy('%(RecursiveDir)').Replace('ui\\', '').Replace('ui/', '').TrimEnd('\\').Replace('\', '.')).%(Filename)%(Extension)</LogicalName>
-      <!--<LogicalName>$(RootNamespace).$([System.String]::Copy('%(RecursiveDir)').Replace('ui\\', '').Replace('ui/', '').Replace('\', '')).%(Filename)%(Extension)</LogicalName>-->
+      <LogicalName>$(RootNamespace).$([System.String]::Copy('%(RecursiveDir)').Replace('\', '.')).%(Filename)%(Extension)</LogicalName>
+      <!--<LogicalName>$(RootNamespace).$([System.String]::Copy('%(RecursiveDir)').Replace('ui\\', '').Replace('ui/', '').TrimEnd('\\').Replace('\', '.')).%(Filename)%(Extension)</LogicalName>-->
     </EmbeddedResource>
   </ItemGroup>
+  
   <ItemGroup>
     <None Include="..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png">
       <Pack>True</Pack>
