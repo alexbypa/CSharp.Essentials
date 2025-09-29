@@ -5,9 +5,9 @@ An **embedded dashboard** for [CSharpEssentials.LoggerHelper](https://github.com
 
 ---
 
-### 🎉 What's New in Version 4.0.6
-
+### 🎉 What's New 
 With version **4.0.6**, we've introduced the highly requested ability to **customize the main Dashboard page**.
+With version **4.0.5**, we've significantly simplified the integration and usage of the **AI-powered logging features**.
 
 This release introduces an easy-to-use factory pattern and extension methods to integrate the separate, powerful **`CSharpEssentials.LoggerHelper.AI`** package. This package enables advanced capabilities like **Vector Store (RAG) for logs**, **Anomaly Detection**, and **Trace Correlation** directly within your application's logging pipeline.
 
