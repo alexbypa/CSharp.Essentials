@@ -1136,35 +1136,35 @@ within your `DetectAnomaly` folder. This query should retrieve the time-series d
     **Example Output from the Dashboard:**
 ![Dashboard AI detect anoamly Example](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper.AI/Docs/dashboard_AI_DetectAnomaly_Example.png)
 
+---
+
 ## 🔍 Dashboard <a id='dashboard'></a>   [🔝](#table-of-contents)
+The Monitoring Dashboard allows users to view the status of Sinks, active logging levels, and any internal errors (`SelfLog`) directly within the web application, without external dependencies.
 
-> NuGet: [CSharpEssentials.LoggerHelper.Dashboard](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard)
+### Registration and Custom Path 🧭
 
-The **embedded Dashboard** lets you quickly inspect the logging setup at runtime:
-- See all **registered sinks** (e.g., MSSqlServer, Console, Elasticsearch, …)
-- Check **enabled levels** per sink (Information, Warning, Error, Fatal, …)
-- Spot **initialization / load errors** for any sink at a glance
+To register the dashboard in your ASP.NET Core application, use the `UseLoggerHelperDashboard<T>` extension method.
+Dove T deve essere l' estensione dell' intefaccia IRequest di LoggerHelper.
 
-#### Install
-```bash
-dotnet add package CSharpEssentials.LoggerHelper.Dashboard
-````
-
-#### Usage
-
-Register the embedded dashboard in your Web API:
+**Example of Registration with Custom Path:**
 
 ```csharp
-// Program.cs
-// ...
-app.UseLoggerHelperDashboard<RequestHelper>(); // registers the embedded dashboard
-// ...
+// In your Program.cs file:
+app.UseLoggerHelperDashboard<RequestSample>("admin"); 
 ```
+-----
 
-Once enabled, the dashboard UI is served by the application and provides a live view of
-configured sinks, their write levels, and any sink-loading issues:
+### Endpoints and AI Functionality 🤖
 
-> ![Dashboard](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper/img/Dashboard.png)
+The dashboard exposes other two main endpoints for monitoring requests and verifying the presence of the AI package:
+
+
+The advanced features for **AI-powered querying and macros** (`RAG Answer Query`, `Correlate Trace`, etc.) are not part of the base dashboard but are exposed as separate API endpoints upon integration of the `CSharpEssentials.LoggerHelper.AI` package.
+
+For detailed documentation on how to use and query logs via the AI functions, please refer to the **dedicated AI integration section** within this document.
+
+-----
+
 
 ## 🚀 Extending LogEvent Properties from Your Project<a id='customprop'></a>   [🔝](#table-of-contents)
 
