@@ -10,7 +10,9 @@ With version **4.0.6**, we've introduced the highly requested ability to **custo
 
 With version **4.0.5**, we've significantly simplified the integration and usage of the **AI-powered logging features**.
 
-This release introduces an easy-to-use factory pattern and extension methods to integrate the separate, powerful **`CSharpEssentials.LoggerHelper.AI`** package. This package enables advanced capabilities like **Vector Store (RAG) for logs**, **Anomaly Detection**, and **Trace Correlation** directly within your application's logging pipeline.
+**[📝 View the Complete Changelog History Here](https://github.com/alexbypa/CSharp.Essentials/blob/main/CSharpEssentials.LoggerHelper.Dashboard/changelog.md)**
+
+In release 4.0.5 introduces an easy-to-use factory pattern and extension methods to integrate the separate, powerful **`CSharpEssentials.LoggerHelper.AI`** package. This package enables advanced capabilities like **Vector Store (RAG) for logs**, **Anomaly Detection**, and **Trace Correlation** directly within your application's logging pipeline.
 
 **Simplified Integration:**
 
