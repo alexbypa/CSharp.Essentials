@@ -1,6 +1,7 @@
 ﻿using CSharpEssentials.HttpHelper;
 using CSharpEssentials.LoggerHelper.AI.Domain;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -17,6 +18,16 @@ public sealed class GeminiLlmChat : ILlmChat {
         _configuration = configuration;
     }
     public async Task<string> ChatAsync(IEnumerable<ChatPromptMessage> messages) {
+        string finalPayload = _opt.RequestTemplate;
+
+        string systemText = messages.FirstOrDefault(m => m.Role == "system")?.Content ?? "You are a helpful assistant.";
+        string userText = messages.FirstOrDefault(m => m.Role == "user")?.Content ?? string.Empty;
+        string assistantText = messages.FirstOrDefault(m => m.Role == "model" || m.Role == "assistant")?.Content ?? string.Empty;
+        string test = _opt.RequestTemplate
+            .Replace("@SystemText", assistantText)
+            .Replace("@user", userText)
+            .Replace("@AssistantText", assistantText);
+
         var payload = new {
             system_instruction = new {
                 parts = new[]{
@@ -45,7 +56,7 @@ public sealed class GeminiLlmChat : ILlmChat {
     public async Task<string> ChatAsync(string system, string user) {
         throw new NotImplementedException();
     }
-    private async Task<string> ReadResponseContentAsync(object payload) {
+    private async Task<string> ReadResponseContentAsync(string jsonPayload) {
         IContentBuilder jsonBuilder = new JsonContentBuilder();
 
         var chatghapikey = _opt.chatghapikey;
@@ -56,7 +67,7 @@ public sealed class GeminiLlmChat : ILlmChat {
             await Task.CompletedTask;
         });
 
-        string jsonPayload = JsonSerializer.Serialize(payload);
+        //string jsonPayload = JsonSerializer.Serialize(payload);
 
         using var resp = await _http.SendAsync(_opt.urlLLM, HttpMethod.Post, jsonPayload, jsonBuilder);
 

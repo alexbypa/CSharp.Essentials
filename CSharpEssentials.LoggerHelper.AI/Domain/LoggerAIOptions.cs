@@ -16,6 +16,7 @@ public class LoggerAIOptions {
     public Dictionary<string, string>? headersLLM { get; set; }
     public string Model { get; set; } = "gpt-4o-mini";
     public required string httpClientName { get; set; }
+    public string RequestTemplate { get; set; }
 }
 
 public static class LoggerAIOptionsValidator {
