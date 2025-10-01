@@ -48,7 +48,9 @@ public static class ServiceCollectionExtensions {
 
         // -> Registra l'orchestratore, la classe che gestisce e coordina tutte le azioni.
         services.AddScoped<IActionOrchestrator, ActionOrchestrator>();
-        services.AddScoped<ILlmChat, OpenAiLlmChat>(); // oppure
+        
+        //services.AddScoped<ILlmChat, OpenAiLlmChat>();
+        services.AddScoped<ILlmChat, GeminiLlmChat>();
 
         return services;
     }
