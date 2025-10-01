@@ -17,33 +17,36 @@ public sealed class GeminiLlmChat : ILlmChat {
         _configuration = configuration;
     }
     public async Task<string> ChatAsync(IEnumerable<ChatPromptMessage> messages) {
-        throw new NotImplementedException();
-    }
-    public async Task<string> ChatAsync(string system, string user) {
         var payload = new {
-            systemInstruction = system,
-            contents = new[]
-            {
-                    new
-                    {
-                        role = "user", // Il prompt dell'utente
-                        parts = new[]
-                        {
-                            new { text = user}
-                        }
+            system_instruction = new {
+                parts = new[]{
+                    new{
+                        text = messages.FirstOrDefault(m => m.Role == "system")?.Content ?? "You are a helpful assistant."
+                    }
+                }
+            },
+            contents = new[]{
+                new{
+                    role = "user",
+                    parts = new[]{
+                        new { text = messages.FirstOrDefault(item => item.Role == "user")!.Content }
                     }
                 },
-            config = new {
-                temperature = _opt.Temperature
+                new{
+                    role = "model",
+                    parts = new[]{
+                        new { text = messages.FirstOrDefault(item => item.Role == "assistant")!.Content }
+                    }
+                }
             }
         };
-
-
         return await ReadResponseContentAsync(payload);
+    }
+    public async Task<string> ChatAsync(string system, string user) {
+        throw new NotImplementedException();
     }
     private async Task<string> ReadResponseContentAsync(object payload) {
         IContentBuilder jsonBuilder = new JsonContentBuilder();
-
 
         var chatghapikey = _opt.chatghapikey;
         _http.setHeadersWithoutAuthorization(new Dictionary<string, string> { { "x-goog-api-key", chatghapikey } });
