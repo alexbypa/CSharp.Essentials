@@ -10,7 +10,7 @@ public sealed class CorrelateTraceAction : ILogMacroAction<CorrelateContext> {
     public Type ContextType => typeof(CorrelateContext);
     private readonly ILlmChat _llm;
     private readonly List<SQLLMModels> _sQLLMModels;
-    public CorrelateTraceAction(ISqlQueryWrapper sqlQueryWrapper , ILlmChat llm, List<SQLLMModels> sQLLMModels) {
+    public CorrelateTraceAction(ISqlQueryWrapper sqlQueryWrapper, ILlmChat llm, List<SQLLMModels> sQLLMModels) {
         _sqlQueryWrapper = sqlQueryWrapper;
         _llm = llm;
         _sQLLMModels = sQLLMModels;

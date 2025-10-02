@@ -8,6 +8,8 @@ public class LoggerAIOptions {
     public string chatghapikey { get; set; }
     [CustomValidation(typeof(LoggerAIOptionsValidator), nameof(LoggerAIOptionsValidator.checkPathSqlQuery))]
     public string FolderSqlLoaderContainer { get; set; }
+    [CustomValidation(typeof(LoggerAIOptionsValidator), nameof(LoggerAIOptionsValidator.checkPathModels))]
+    public string FolderAIModelsLoaderContainer { get; set; }
     [CustomValidation(typeof(LoggerAIOptionsValidator), nameof(LoggerAIOptionsValidator.ValidateTemperature))]
     public double? Temperature { get; set; }
     [Range(1, int.MaxValue)]
@@ -17,6 +19,8 @@ public class LoggerAIOptions {
     public string Model { get; set; } = "gpt-4o-mini";
     public required string httpClientName { get; set; }
     public string RequestTemplate { get; set; }
+    public string ResponseTemplate { get; set; }
+    public string Name { get; set; }
 }
 
 public static class LoggerAIOptionsValidator {
@@ -56,9 +60,11 @@ public static class LoggerAIOptionsValidator {
     public static ValidationResult checkPathSqlQuery(string FolderSqlLoaderContainer, ValidationContext context) {
         if (!Directory.Exists(FolderSqlLoaderContainer)) 
             AddValidationError("The folder settled on FolderSqlLoaderContainer not exists. Please check key [LoggerAIOptions:FolderSqlLoaderContainer] appsettings.json file.", "FolderSqlLoaderContainer");
-
         return ValidationResult.Success;    
     }
-
+    public static ValidationResult checkPathModels(string FolderAIModelsLoaderContainer, ValidationContext context) {
+        if (!Directory.Exists(FolderAIModelsLoaderContainer))
+            AddValidationError("The folder settled on FolderAIModelsLoaderContainer not exists. Please check key [LoggerAIOptions:FolderAIModelsLoaderContainer] appsettings.json file.", "FolderAIModelsLoaderContainer");
+        return ValidationResult.Success;    
+    }
 }
-

@@ -38,6 +38,10 @@ public static class ServiceCollectionExtensions {
             var fileLoader = sp.GetRequiredService<IFileLoader>();
             return fileLoader.getModelSQLLMModels();
         });
+        services.AddSingleton(sp => {
+            var fileLoader = sp.GetRequiredService<IFileLoader>();
+            return fileLoader.getModelLLMModels();
+        });
 
         services.AddScoped<ILogVectorStore, SqlLogVectorStore>();
 
