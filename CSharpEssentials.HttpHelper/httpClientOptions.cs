@@ -1,6 +1,7 @@
 ﻿namespace CSharpEssentials.HttpHelper;
 public class httpClientOptions {
     public required string Name { get; set; }
+    public string? Mock { get; set; }
     public httpClientCertificate? Certificate { get; set; }
     public httpClientRateLimitOptions? RateLimitOptions { get; set; }
 }

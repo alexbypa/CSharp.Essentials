@@ -1,10 +1,57 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using CSharpEssentials.LoggerHelper;
+using CSharpEssentials.LoggerHelper.model;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 namespace CSharpEssentials.HttpHelper;
 public static class httpExtension {
-    public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration, HttpMessageHandler PrimaryHandler) {
+    private static HttpMessageHandler checkForMock(string primaryHandlerMethodName) {
+        //TODO: 
+        /*
+            1) httpHelper deve avere il packafge LogegrHelper per inserire errori nella dashboard
+            2) inserire verifica che se non trova nulla 
+            3) deve rispettare i principi SOLID (SRP in particolare)
+            4) deve essere testato con unit test e integration test più README ! ! !
+        */
+        HttpMessageHandler primaryHandlerInstance = null;
+        if (!string.IsNullOrEmpty(primaryHandlerMethodName)) {
+            try {
+                Type? handlerType = AppDomain.CurrentDomain.GetAssemblies()
+                                        .SelectMany(a => a.GetTypes())
+                                        .FirstOrDefault(t => t.Name == primaryHandlerMethodName.Split(".").FirstOrDefault()); // Cerca la classe di Mock
+
+                if (handlerType != null) {
+                    MethodInfo? createHandlerMethod = handlerType.GetMethod(
+                        primaryHandlerMethodName.Split(".").Last(),
+                        BindingFlags.Public | BindingFlags.Static
+                    );
+                    if (createHandlerMethod != null && createHandlerMethod.ReturnType == typeof(HttpMessageHandler)) {
+                        primaryHandlerInstance = createHandlerMethod.Invoke(null, null) as HttpMessageHandler;
+                    }
+                }
+                if (primaryHandlerInstance == null) {
+                    GlobalLogger.Errors.Add(new LogErrorEntry {
+                        ContextInfo = "HttpHelper",
+                        ErrorMessage = $"Mock {primaryHandlerMethodName} not founded",
+                        SinkName = "HttpHelper",
+                        Timestamp = DateTime.Now,
+                        StackTrace = "No static class Moq founded , the method must be static !"
+                    });
+                }
+            } catch (Exception ex) {
+                GlobalLogger.Errors.Add(new LogErrorEntry {
+                    ContextInfo = "HttpHelper",
+                    ErrorMessage = $"Error on mock {primaryHandlerMethodName} : {ex.Message }",
+                    SinkName = "HttpHelper",
+                    Timestamp = DateTime.Now,
+                    StackTrace = ex.StackTrace
+                });
+            }
+        }
+        return primaryHandlerInstance;
+    }
+    public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration) {
         var configurationBuilder = new ConfigurationBuilder().AddConfiguration(configuration);  // Usa la configurazione di partenza
 
         var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.httpHelper.json");
@@ -21,7 +68,7 @@ public static class httpExtension {
 
         services.Configure<List<httpClientOptions>>(httpclientoptions);
         List<httpClientOptions>? options = getOptions(httpclientoptions);
-        
+
         services.AddSingleton<IhttpsClientHelperFactory, httpsClientHelperFactory>();
 
         Assembly assemblyCorrente = Assembly.GetExecutingAssembly();
@@ -33,7 +80,8 @@ public static class httpExtension {
                     .AddHttpClient<IhttpsClientHelper, httpsClientHelper>(option.Name)
                     .SetHandlerLifetime(TimeSpan.FromSeconds(30))
                     .AddHttpMessageHandler<HttpClientHandlerLogging>()
-                    .ConfigurePrimaryHttpMessageHandler(() => PrimaryHandler ?? new SocketsHttpHandler());
+                    .ConfigurePrimaryHttpMessageHandler(() => checkForMock(option.Mock) ?? new SocketsHttpHandler());
+                //.ConfigurePrimaryHttpMessageHandler(() => PrimaryHandler ?? new SocketsHttpHandler());
 
                 services.AddSingleton<IhttpsClientHelper>(sp => {
                     var factory = sp.GetRequiredService<IHttpClientFactory>();
