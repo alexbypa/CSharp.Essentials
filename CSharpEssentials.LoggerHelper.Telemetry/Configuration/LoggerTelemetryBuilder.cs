@@ -33,10 +33,12 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
                           .GetRequiredService<IOptions<LoggerTelemetryOptions>>()
                           .Value;
 
-
-            LoggerTelemetryDbConfigurator.Configure(services);
-
-            //var options = TelemetryOptionsProvider.Load(builder);
+            bool canContinueWithTelemetry = true;
+            LoggerTelemetryDbConfigurator.InitializeMigrationsAndDbContext(services, out canContinueWithTelemetry);
+            if (canContinueWithTelemetry == false ) {
+                Console.WriteLine("LoggerTelemetry is disabled. Skipping telemetry setup.");
+                return services;
+            }
 
             services.AddSingleton<ITelemetryGatekeeper, TelemetryGatekeeper>((sp) => {
                 var optionsMonitor = sp.GetRequiredService<IOptionsMonitor<LoggerTelemetryOptions>>();

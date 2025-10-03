@@ -40,7 +40,7 @@ public class TraceEntry {
     /// <summary>
     /// durationMs
     /// </summary>
-    public double DurationMs { get; set; }
+    public double? DurationMs { get; set; }
     /// <summary>
     /// Tags
     /// </summary>

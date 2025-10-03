@@ -12,7 +12,7 @@
 //    public DateTime LastUpdated { get; set; }
 //}
 //public class LoggerTelemetryOptionsConfiguration : IEntityTypeConfiguration<LoggerTelemetryOptions> {
-//    public void Configure(EntityTypeBuilder<LoggerTelemetryOptions> builder) {
+//    public void InitializeMigrationsAndDbContext(EntityTypeBuilder<LoggerTelemetryOptions> builder) {
 //        builder.HasKey(e => e.Id);
 //    }
 //}

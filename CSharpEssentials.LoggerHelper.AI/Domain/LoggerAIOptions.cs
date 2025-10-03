@@ -20,6 +20,7 @@ public class LoggerAIOptions {
     public required string httpClientName { get; set; }
     public string RequestTemplate { get; set; }
     public string ResponseTemplate { get; set; }
+    [CustomValidation(typeof(LoggerAIOptionsValidator), nameof(LoggerAIOptionsValidator.ValidateName))]
     public string Name { get; set; }
 }
 
@@ -54,6 +55,12 @@ public static class LoggerAIOptionsValidator {
     public static ValidationResult ValidateTemperature(double temperature, ValidationContext context) {
         if (temperature < 0.0 || temperature > 1.0)
             AddValidationError("The field Temperature must be between 0 and 1. Please check key [LoggerAIOptions:Temperature] appsettings.json file.", "Temperature");
+        
+        return ValidationResult.Success!;    
+    }
+    public static ValidationResult ValidateName(string Name, ValidationContext context) {
+        if (!Name.Equals("gemini") || !Name.Equals("openai"))
+            AddValidationError("The field Name must be equal to 'gemini' or 'openAI'. Please check key [LoggerAIOptions:Name] appsettings.json file.", "Name");
         
         return ValidationResult.Success!;    
     }

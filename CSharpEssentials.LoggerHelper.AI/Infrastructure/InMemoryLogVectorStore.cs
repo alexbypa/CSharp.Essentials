@@ -4,9 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace CSharpEssentials.LoggerHelper.AI.Infrastructure;
 
 /// <summary>
-/// // Questa classe è un'implementazione concreta dell'interfaccia 'ILogVectorStore'.
-/// Rappresenta il nostro "Magazzino Dati" in-memory.
-/// Le sue responsabilità sono:
+/// This class si a concrete implementaion of interface 'ILogVectorStore'.
 /// 1. CONSERVARE una collezione di 'LogEmbedding'.
 /// 2. FORNIRE metodi per aggiungere/aggiornare dati (UpsertAsync).
 /// 3. FORNIRE metodi per cercare dati in base alla similarità semantica (SimilarAsync).

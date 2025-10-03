@@ -65,51 +65,14 @@ public class LoggerTelemetryMeterListenerService : BackgroundService {
         }
     }
 
-    protected /*override*/ Task ExecuteAsync_Deprecate(CancellationToken stoppingToken) {
-        if (!_gatekeeper.IsEnabled) {
-            return Task.CompletedTask;
-        }
-        _listener = new MeterListener {
-            //TOHACK: passare i parametri esternamente tramite IOptions !
-            InstrumentPublished = (instrument, listener) => {
-                Console.WriteLine($"Published: Meter={instrument.Meter.Name}, Instrument={instrument.Name}");
-
-                //if (instrument.Meter.Name == "LoggerHelper.Metrics"
-                //    || instrument.Name.StartsWith("db.client")
-                //    || instrument.Name.StartsWith("http.server")) {
-                listener.EnableMeasurementEvents(instrument);
-                //}
-            }
-        };
-
-        _listener.SetMeasurementEventCallback<double>(OnMeasurement);
-        _listener.SetMeasurementEventCallback<long>((i, m, t, s) => {
-            Console.WriteLine($"CB<long>: {i.Meter.Name}/{i.Name}={m}");
-            OnMeasurement(i, (double)m, t, s); }
-        );
-        _listener.SetMeasurementEventCallback<int>((i, m, t, s) => {
-            Console.WriteLine($"CB<int>: {i.Meter.Name}/{i.Name}={m}");
-            OnMeasurement(i, (double)m, t, s); }
-        );
-        _listener.SetMeasurementEventCallback<float>((i, m, t, s) => OnMeasurement(i, (double)m, t, s));
-        _listener.SetMeasurementEventCallback<decimal>((i, m, t, s) => OnMeasurement(i, (double)m, t, s));
-        _listener.Start();
-
-        _ = Task.Run(async () => {
-            while (!stoppingToken.IsCancellationRequested) {
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-                await FlushBufferAsync(stoppingToken);
-            }
-            await FlushBufferAsync(stoppingToken);
-        }, stoppingToken);
-        return Task.CompletedTask;
-    }
     private void OnMeasurement(Instrument instrument, double measurement, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state) {
         var entry = _factory.Create(instrument, measurement, tags);
         lock (_lock) {
-            Console.WriteLine($"Adding ON DB: Meter={instrument.Meter.Name}, Instrument={instrument.Name}");
-
+            try {
             _buffer.Add(entry);
+            }catch (Exception ex) {
+                Console.WriteLine($"ERR Buffer Metric: {ex.Message}");
+            }
         }
     }
     private async Task FlushBufferAsync(CancellationToken token) {

@@ -1,5 +1,6 @@
 ﻿using CSharpEssentials.LoggerHelper.AI.Application;
 using CSharpEssentials.LoggerHelper.AI.Domain;
+using CSharpEssentials.LoggerHelper.AI.Ports;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -53,9 +54,12 @@ public static class ServiceCollectionExtensions {
         // -> Registra l'orchestratore, la classe che gestisce e coordina tutte le azioni.
         services.AddScoped<IActionOrchestrator, ActionOrchestrator>();
         
-        //services.AddScoped<ILlmChat, OpenAiLlmChat>();
-        services.AddScoped<ILlmChat, GeminiLlmChat>();
-
+        if (configuration.GetValue<string>("LoggerAIOptions:Name", "") == "gemini")
+            services.AddScoped<IPayloadLLM, PayloadGemini>();
+        else
+            services.AddScoped<IPayloadLLM, PayloadOpenAI>();
+        
+        services.AddScoped<ILlmChat, LlmChat>();
         return services;
     }
 }

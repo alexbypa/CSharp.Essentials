@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using Serilog.Debugging;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace CSharpEssentials.LoggerHelper.Sink.Postgresql;
     internal class PostGreSinkPlugin : ISinkPlugin {
@@ -23,7 +24,7 @@ namespace CSharpEssentials.LoggerHelper.Sink.Postgresql;
                                         needAutoCreateTable: true,
                                         columnOptions: CustomPostgresQLSink.BuildPostgresColumns(serilogConfig).GetAwaiter().GetResult()
                                     );
-                            }
+                                }
                             );
         }catch (Exception ex) {
             SelfLog.WriteLine($"Error HandleSink on PostgreSQL: {ex.Message}");

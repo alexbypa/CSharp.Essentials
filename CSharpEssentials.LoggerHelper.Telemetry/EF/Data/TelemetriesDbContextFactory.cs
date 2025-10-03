@@ -27,7 +27,7 @@ public class TelemetriesDbContextFactory : IDesignTimeDbContextFactory<Telemetri
                .Build();
 
         var connectionString = configuration.GetValue<string>("Serilog:SerilogConfiguration:LoggerTelemetryOptions:ConnectionString");
-
+        
         var optionsBuilder = new DbContextOptionsBuilder<TelemetriesDbContext>();
         optionsBuilder.UseNpgsql(connectionString);
         return new TelemetriesDbContext(optionsBuilder.Options);

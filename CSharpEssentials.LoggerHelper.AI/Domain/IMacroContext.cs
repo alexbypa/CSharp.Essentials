@@ -2,7 +2,6 @@
 public sealed record LogRecord(
     int Id, DateTime TimeStamp, string Level, string Message,
     string? Exception, string? IdTransaction, string? MachineName, string? ApplicationName);
-
 public sealed class TraceRecord {
     public TraceRecord() { }
 
@@ -39,7 +38,6 @@ public interface IEmbeddingService {
 }
 
 public interface ILlmChat {
-    Task<string> ChatAsync(string system, string user);
     /// <summary>
     /// Sends a sequence of chat messages to the model.  Each message should specify a role
     /// ("system", "user" or "assistant") and contents.  This overload can be used to include

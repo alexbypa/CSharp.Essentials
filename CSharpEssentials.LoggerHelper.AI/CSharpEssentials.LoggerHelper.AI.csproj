@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>CSharpEssentials.LoggerHelper.AI</Title>
-    <Version>4.0.5</Version>
+    <Version>4.0.6</Version>
     <Authors>Alessandro Chiodo</Authors>
     <Company>Alessandro Chiodo</Company>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
