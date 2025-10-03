@@ -5,7 +5,6 @@ namespace CSharpEssentials.LoggerHelper.AI.Domain;
 
 [CustomValidation(typeof(LoggerAIOptionsValidator), nameof(LoggerAIOptionsValidator.ValidateOptions))]
 public class LoggerAIOptions {
-    public string chatghapikey { get; set; }
     [CustomValidation(typeof(LoggerAIOptionsValidator), nameof(LoggerAIOptionsValidator.checkPathSqlQuery))]
     public string FolderSqlLoaderContainer { get; set; }
     [CustomValidation(typeof(LoggerAIOptionsValidator), nameof(LoggerAIOptionsValidator.checkPathModels))]
@@ -34,8 +33,8 @@ public static class LoggerAIOptionsValidator {
         });
     }
     public static ValidationResult ValidateOptions(LoggerAIOptions options, ValidationContext context) {
-        if (string.IsNullOrWhiteSpace(options.chatghapikey)) 
-            AddValidationError("The 'chatghapikey' key was not found or is empty. It is a required field.", "chatghapikey");
+        if (string.IsNullOrWhiteSpace(options.urlLLM)) 
+            AddValidationError("The 'urlLLM' key was not found or is empty. It is a required field.", "urlLLM");
         
         if (string.IsNullOrWhiteSpace(options.FolderSqlLoaderContainer))
             AddValidationError("The 'FolderSqlLoaderContainer' key was not found or is empty. It is a required field.", "FolderSqlLoaderContainer");

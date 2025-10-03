@@ -27,7 +27,6 @@ public sealed class LlmChat: ILlmChat {
     }
     private async Task<string> ReadResponseContentAsync(string jsonPayload) {
         IContentBuilder jsonBuilder = new JsonContentBuilder();
-        var chatghapikey = _opt.chatghapikey;
 
         if (_opt.headersLLM != null)
             _http.setHeadersWithoutAuthorization(_opt.headersLLM);
