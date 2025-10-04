@@ -26,7 +26,6 @@ It performs AI-powered Root Cause Analysis (CorrelateTrace), Anomaly Detection, 
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CSharpEssentials.HttpHelper" Version="4.0.2" />
     <PackageReference Include="CSharpEssentials.LoggerHelper" Version="4.0.5" />
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.3.0" />
@@ -55,5 +54,8 @@ It performs AI-powered Root Cause Analysis (CorrelateTrace), Anomaly Detection, 
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.HttpHelper\CSharpEssentials.HttpHelper.csproj" />
   </ItemGroup>
 </Project>

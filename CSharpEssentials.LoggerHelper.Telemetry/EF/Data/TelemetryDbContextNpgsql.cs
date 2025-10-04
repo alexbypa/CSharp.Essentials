@@ -7,9 +7,6 @@ public sealed class TelemetryDbContextNpgsql : TelemetriesDbContext {
 
     protected override void OnModelCreating(ModelBuilder b) {
         base.OnModelCreating(b);
-        // opzionale: tipi specifici PG
         b.Entity<MetricEntry>().Property(x => x.Value).HasColumnType("double precision");
-        // Se vuoi JSONB:
-        // b.Entity<MetricEntry>().Property(x => x.TagsJson).HasColumnType("jsonb");
     }
 }

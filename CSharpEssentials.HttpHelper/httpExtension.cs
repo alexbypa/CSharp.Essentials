@@ -7,13 +7,6 @@ using System.Reflection;
 namespace CSharpEssentials.HttpHelper;
 public static class httpExtension {
     private static HttpMessageHandler checkForMock(string primaryHandlerMethodName) {
-        //TODO: 
-        /*
-            1) httpHelper deve avere il packafge LogegrHelper per inserire errori nella dashboard
-            2) inserire verifica che se non trova nulla 
-            3) deve rispettare i principi SOLID (SRP in particolare)
-            4) deve essere testato con unit test e integration test più README ! ! !
-        */
         HttpMessageHandler primaryHandlerInstance = null;
         if (!string.IsNullOrEmpty(primaryHandlerMethodName)) {
             try {

@@ -58,8 +58,8 @@ public static class LoggerAIOptionsValidator {
         return ValidationResult.Success!;    
     }
     public static ValidationResult ValidateName(string Name, ValidationContext context) {
-        if (!Name.Equals("gemini") || !Name.Equals("openai"))
-            AddValidationError("The field Name must be equal to 'gemini' or 'openAI'. Please check key [LoggerAIOptions:Name] appsettings.json file.", "Name");
+        if (!Name.Equals("gemini") && !Name.Equals("openai"))
+            AddValidationError("The field Name must be equal to 'gemini' or 'openai'. Please check key [LoggerAIOptions:Name] appsettings.json file.", "Name");
         
         return ValidationResult.Success!;    
     }

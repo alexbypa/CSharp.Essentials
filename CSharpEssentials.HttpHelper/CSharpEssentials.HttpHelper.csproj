@@ -7,13 +7,11 @@
     <Authors>Alessandro Chiodo</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.HttpHelper</RepositoryUrl>
-    <AssemblyVersion>4.0.2</AssemblyVersion>
+    <AssemblyVersion>4.0.3</AssemblyVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
-    <FileVersion>4.0.2</FileVersion>
-    <Version>4.0.2</Version>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <Description>package to help manage of httpHelper</Description>
     <Company>Alessandro Chiodo</Company>
