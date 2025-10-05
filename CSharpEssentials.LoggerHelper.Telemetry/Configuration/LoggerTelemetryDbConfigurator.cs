@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,25 +19,31 @@ public static class LoggerTelemetryDbConfigurator {
     /// </summary>
     /// <param name="canContinueWithTelemetry">Outputs whether telemetry can continue based on database availability.</param>
     /// <param name="services">The service collection to register the DbContext into.</param>
-    public static void InitializeMigrationsAndDbContext(IServiceCollection services, out bool canContinueWithTelemetry) {
+    public static void InitializeMigrationsAndDbContext(IServiceCollection services, IConfiguration configuration, out bool canContinueWithTelemetry) {
         canContinueWithTelemetry = true;
+
+        var ConnectionString = configuration.GetValue<string>("Serilog:SerilogConfiguration:LoggerTelemetryOptions:ConnectionString");
+        var provider = configuration.GetValue<string>("Serilog:SerilogConfiguration:LoggerTelemetryOptions:Provider");
+
+        //To load connection string fromdocker environment variable if exists
+        //TOHACK:
+        /*
         var options = services.BuildServiceProvider()
                       .GetRequiredService<IOptions<LoggerTelemetryOptions>>()
                       .Value;
-
         var provider = options.Provider;
-
+        */
 
         if (provider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase)) {
             services.AddDbContext<TelemetriesDbContext, TelemetryDbContextNpgsql>(opt =>
-                opt.UseNpgsql(options.ConnectionString, b =>
+                opt.UseNpgsql(ConnectionString, b =>
                     b.MigrationsAssembly(typeof(TelemetryDbContextNpgsql).Assembly.FullName))
                 .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))
                 .LogTo(Console.WriteLine, LogLevel.Information)
                 );
         } else {
             services.AddDbContext<TelemetriesDbContext, TelemetryDbContextSqlServer>(opt =>
-                opt.UseSqlServer(options.ConnectionString, b =>
+                opt.UseSqlServer(ConnectionString, b =>
                     b.MigrationsAssembly(typeof(TelemetryDbContextSqlServer).Assembly.FullName))
                 .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))
                 .LogTo(Console.WriteLine, LogLevel.Information)

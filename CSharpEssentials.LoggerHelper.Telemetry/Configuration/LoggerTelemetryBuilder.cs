@@ -34,7 +34,7 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
                           .Value;
 
             bool canContinueWithTelemetry = true;
-            LoggerTelemetryDbConfigurator.InitializeMigrationsAndDbContext(services, out canContinueWithTelemetry);
+            LoggerTelemetryDbConfigurator.InitializeMigrationsAndDbContext(services, builder.Configuration, out canContinueWithTelemetry);
             if (canContinueWithTelemetry == false ) {
                 Console.WriteLine("LoggerTelemetry is disabled. Skipping telemetry setup.");
                 return services;
