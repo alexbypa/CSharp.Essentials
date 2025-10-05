@@ -22,7 +22,6 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
         /// <param name="builder">The WebApplicationBuilder containing app configuration.</param>
         /// <returns>The modified IServiceCollection.</returns>
         public static IServiceCollection AddLoggerTelemetry(this IServiceCollection services, WebApplicationBuilder builder) {
-
             builder.Services
                 .AddOptions<LoggerTelemetryOptions>()
                 .Bind(builder.Configuration.GetSection("Serilog:SerilogConfiguration:LoggerTelemetryOptions"))
@@ -32,6 +31,8 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
             var options = services.BuildServiceProvider()
                           .GetRequiredService<IOptions<LoggerTelemetryOptions>>()
                           .Value;
+            if (options.IsEnabled == false) 
+                return services;
 
             bool canContinueWithTelemetry = true;
             LoggerTelemetryDbConfigurator.InitializeMigrationsAndDbContext(services, builder.Configuration, out canContinueWithTelemetry);

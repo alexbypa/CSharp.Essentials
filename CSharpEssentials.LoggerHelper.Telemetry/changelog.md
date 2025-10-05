@@ -8,3 +8,4 @@
 | **4.0.6** | 2025-09-25 | Added log on dashboard when are errors on migrations EF |
 | **4.0.7** | 2025-10-01 | Added another log on dashboard when are errors on migrations EF |
 | **4.0.8** | 2025-10-05 | Changed InitializeMigrationsAndDbContext get provider and connectionstring from IConfiguration to load also environment variables from docker container |
+| **4.0.9** | 2025-10-05 | Added rule for Condition IsEnabled |
