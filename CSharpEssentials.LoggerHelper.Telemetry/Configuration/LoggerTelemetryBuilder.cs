@@ -4,6 +4,7 @@ using CSharpEssentials.LoggerHelper.Telemetry.middlewares;
 using CSharpEssentials.LoggerHelper.Telemetry.Proxy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -14,6 +15,23 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
     /// and exporters for PostgreSQL and console.
     /// </summary>
     public static class LoggerTelemetryBuilder {
+
+        static void DumpConfiguration(IEnumerable<IConfigurationSection> sections, string path) {
+            foreach (var section in sections) {
+                string currentKey = string.IsNullOrEmpty(path) ? section.Key : path + ":" + section.Key;
+                string value = section.Value ?? "";
+
+                // Se la sezione ha un valore (non è solo un contenitore)...
+                if (!string.IsNullOrEmpty(section.Value)) {
+                    // Stampa la chiave completa e il valore finale risolto.
+                    // Se questo valore proviene da K8s, qui vedrai il valore di K8s.
+                    Console.WriteLine($"[{currentKey}] = {value} | Path : {section.Path}");
+                }
+                // Se la sezione ha dei figli, scendi ricorsivamente
+                DumpConfiguration(section.GetChildren(), currentKey);
+            }
+        }
+
         /// <summary>
         /// Adds and configures all telemetry services (metrics, tracing, DB) based
         /// on LoggerTelemetryOptions in configuration. Skips setup if disabled.
@@ -27,6 +45,29 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
                 .Bind(builder.Configuration.GetSection("Serilog:SerilogConfiguration:LoggerTelemetryOptions"))
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
+
+            foreach(var config in builder.Configuration.GetChildren()) {
+                Console.WriteLine($"Config Key: {config.Key}, Value: {config.Value} path: {config.Path}");
+                
+            }
+
+            var configRoot = (IConfigurationRoot)builder.Configuration;
+            DumpConfiguration(configRoot.GetChildren(), "");
+
+
+            int providerIndex = 0;
+            Console.WriteLine("--- CONFIGURATION SOURCES (Highest Priority Last) ---");
+            foreach (var provider in configRoot.Providers) {
+                Console.WriteLine($"[Source {providerIndex++}: {provider.GetType().Name}]");
+                if (provider is Microsoft.Extensions.Configuration.Json.JsonConfigurationProvider) {
+                    Console.WriteLine($"Path : {((Microsoft.Extensions.Configuration.Json.JsonConfigurationProvider)provider).Source.Path}");
+                    
+                }
+
+
+            }
+
+
 
             var options = services.BuildServiceProvider()
                           .GetRequiredService<IOptions<LoggerTelemetryOptions>>()
