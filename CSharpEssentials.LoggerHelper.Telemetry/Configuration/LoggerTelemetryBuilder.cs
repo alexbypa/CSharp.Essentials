@@ -31,13 +31,6 @@ namespace CSharpEssentials.LoggerHelper.Telemetry.Configuration {
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
-            Console.WriteLine("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
-            Console.WriteLine(Assembly.GetExecutingAssembly().FullName);
-            Console.WriteLine("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
-            ConfigurationPrinter configurationPrinter = new ConfigurationPrinter(builder.Configuration);
-            configurationPrinter.PrintAllConfigurationWithSources();
-
-
             var options = services.BuildServiceProvider()
                           .GetRequiredService<IOptions<LoggerTelemetryOptions>>()
                           .Value;

@@ -15,6 +15,7 @@ public class MSSqlServerSinkPlugin : ISinkPlugin {
             return;
         }
         var opts = serilogConfig.SerilogOption.MSSqlServer;
+        Console.WriteLine($"[DBG] MSSqlServerSinkPlugin: Configuring MSSqlServer sink to {opts.connectionString}, Table={opts.sinkOptionsSection?.tableName}");
         loggerConfig.WriteTo.Conditional(
             evt => serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
             wt => wt.MSSqlServer(serilogConfig?.SerilogOption?.MSSqlServer?.connectionString,

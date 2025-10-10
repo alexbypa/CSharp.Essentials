@@ -44,7 +44,7 @@
       4.0.1 - Update readme.md    
       4.0.5 - Added Package AI and Dashboard
 </Description>
-    <Version>4.0.5</Version>
+    <Version>4.0.9.1</Version>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>

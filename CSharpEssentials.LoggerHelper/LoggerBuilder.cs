@@ -3,6 +3,7 @@ using CSharpEssentials.LoggerHelper.model;
 using Serilog;
 using Serilog.Debugging;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -35,15 +36,21 @@ internal class LoggerBuilder {
         SinkNameInError = "";
         var baseDir = AppContext.BaseDirectory;
         path = $"AddDynamicSinks Path: {baseDir}";
-
+        Console.WriteLine($"[dbg AddDynamicSinks] path:{path}");
         var pluginDlls = Directory
           .EnumerateFiles(baseDir, "CSharpEssentials.LoggerHelper.Sink.*.dll");
 
+        Console.WriteLine($"[dbg AddDynamicSinks] Found {string.Join(", ", pluginDlls.ToArray())} potential plugins");
         // 2) Caricali TUTTI nel default context
         var loadedAssemblies = new List<Assembly>();
         foreach (var dll in pluginDlls) {
             try {
-                // qui NON uso alcun AssemblyLoadContext custom!
+                var asmName = AssemblyName.GetAssemblyName(dll);
+                var asmVer = asmName.Version?.ToString() ?? "n/a";
+                var fvi = FileVersionInfo.GetVersionInfo(dll);
+                var fileVer = fvi.FileVersion ?? "n/a";
+                var prodVer = fvi.ProductVersion ?? "n/a";
+
                 var asm = AssemblyLoadContext.Default
                              .LoadFromAssemblyPath(dll);
                 loadedAssemblies.Add(asm);
@@ -53,6 +60,16 @@ internal class LoggerBuilder {
                     ErrorMessage = $"[DBG] Loaded in DEFAULT context",
                     ContextInfo = baseDir
                 });
+
+                var infoVer = asm
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion ?? "n/a";
+
+                Console.WriteLine(
+            $"[DBG AddDynamicSinks] Loaded {Path.GetFileName(dll)} | " +
+            $"AssemblyVersion={asmVer} | FileVersion={fileVer} | " +
+            $"ProductVersion={prodVer} | InformationalVersion={infoVer} | " +
+            $"context=DEFAULT");
             } catch (Exception ex) {
                 _initializationErrors.Enqueue(new LogErrorEntry {
                     Timestamp = DateTime.UtcNow,
@@ -82,10 +99,7 @@ internal class LoggerBuilder {
           )
           .ToList();
 
-#if DEBUG
-        foreach (var asm in loadedAssemblies)
-            Console.WriteLine($"[DBG] ToScan: {asm.FullName} @ {asm.Location}");
-#endif
+        Console.WriteLine($"[dbg AddDynamicSinks] Found {pluginTypes.Count} ISinkPlugin implementations");
 
         if (!pluginTypes.Any())
             _initializationErrors.Enqueue(new LogErrorEntry {
@@ -100,7 +114,10 @@ internal class LoggerBuilder {
             try {
                 var instance = (ISinkPlugin)Activator.CreateInstance(t)!;
                 SinkPluginRegistry.Register(instance);
+
+                Console.WriteLine($"[dbg AddDynamicSinks] Registered plugin for sink: {t.Name}");
             } catch (Exception ex) {
+                Console.WriteLine($"[err AddDynamicSinks] Exception loading plugin {t.Name}: {ex.Message}");
                 _Errors.Add(
                     new LogErrorEntry {
                         Timestamp = DateTime.UtcNow,
@@ -135,7 +152,10 @@ internal class LoggerBuilder {
                         SinkName = condition.Sink!,
                         Levels = condition.Level!.ToList()
                     });
+
+                    Console.WriteLine($"[dbg AddDynamicSinks] Added sink {condition.Sink} for levels {string.Join(", ", condition.Level)}");
                 } catch (Exception ex) {
+                    Console.WriteLine($"[err AddDynamicSinks] Exception configuring sink {condition.Sink}: {ex.Message}");
                     SelfLog.WriteLine($"Exception {ex.Message} on sink {condition.Sink}");
                 }
             }

@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
-    <Version>4.0.10</Version>
+    <Version>4.0.11</Version>
     <PackageIcon>./CSharpEssentials.png</PackageIcon>
     <Title>Package to manage openTelemetry</Title>
     <Description>A full OpenTelemetry sink for CSharpEssentials.LoggerHelper, enabling metrics, traces, and logs with automatic database storage for end-to-end observability. </Description>

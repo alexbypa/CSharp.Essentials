@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using CSharpEssentials.LoggerHelper.shared;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -22,11 +23,13 @@ public static class LoggerExtensionConfig {
         builder.Services.AddSingleton<LoggerErrorStore>();
         return builder.Services;
     }
-#else
+#else   
     /// <summary>
     /// Adds external LoggerHelper configuration (e.g., appsettings.LoggerHelper.json) to a WebApplicationBuilder.
     /// </summary>
     public static IServiceCollection AddloggerConfiguration(this IServiceCollection services, WebApplicationBuilder builder) {
+        ConfigurationPrinter.PrintByProvider(builder.Configuration);
+
         var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
                        ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
 
@@ -38,9 +41,10 @@ public static class LoggerExtensionConfig {
         var configPath = Path.Combine(Directory.GetCurrentDirectory(), fileNameSettings);
         var SettingsProvider = new PhysicalFileProvider(Directory.GetCurrentDirectory());
 
+        builder.Configuration.AddJsonFile(SettingsProvider, fileNameSettings, false, true)
+            .AddEnvironmentVariables();
 
-        builder.Configuration.AddJsonFile(SettingsProvider, fileNameSettings, false, true);
-
+        Console.WriteLine($"[dbg LoggerHElper] Using LoggerHelper settings from {configPath} with AddEnvironmentVariables !");
 
         //var configuration = LoggerHelperServiceLocator.GetService<IConfiguration>();
         var configuration = builder.Configuration;
