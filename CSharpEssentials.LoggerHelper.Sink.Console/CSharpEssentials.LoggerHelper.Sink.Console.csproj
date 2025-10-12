@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Sink Console</Title>
-    <Version>4.0.2</Version>
+    <Version>4.0.10</Version>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>

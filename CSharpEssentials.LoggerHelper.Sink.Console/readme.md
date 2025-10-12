@@ -5,6 +5,17 @@ It plugs into the LoggerHelper **HUB** core via the `ISinkPlugin` mechanism, so 
 
 ---
 
+### ⚡ Version 4.0.10 — Extended Console Integration
+
+Starting from **version 4.0.10**, the **Console Sink** can now **forward console messages directly to the LoggerHelper Dashboard**.  
+This enhancement allows developers to **visualize all console output inside the web dashboard** right at application startup — perfect for monitoring initialization steps and early configuration logs.
+
+Additionally, this integration can be **extended and customized** within your own projects by leveraging the `TraceDashBoardSync` and `TraceDashBoardAsync` methods, giving you full control over how console logs are collected and displayed.
+
+> 🧠 In short: version 4.0.10 connects the Console Sink to the Dashboard for real-time visibility at startup — and lets you extend it for your own logging scenarios.
+
+---
+
 ## Key Features
 
 - 🖥️ **Colorized output**: easily distinguish Information, Warning, Error, etc. by custom colors  

@@ -7,3 +7,4 @@
 | **4.0.5** | 2025-09-20 | We've significantly simplified the integration and usage of the **AI-powered logging features**. |
 | **4.0.6** | 2025-09-29 | introduced the highly requested ability to **customize the main Dashboard page |
 | **4.0.7** | 2025-10-12 | Added basic authentication and console page |
+| **4.0.7.1** | 2025-10-12 | update readme.md |

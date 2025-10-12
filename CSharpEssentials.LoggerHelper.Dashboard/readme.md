@@ -6,6 +6,17 @@ An **embedded dashboard** for [CSharpEssentials.LoggerHelper](https://github.com
 ---
 
 ### 🎉 What's New 
+With **version 4.0.7**, we’ve taken the Dashboard to a whole new level.  
+A brand-new **Console Page** has been added, allowing you to **see in real time what’s happening inside your application** — directly within the dashboard!  
+
+This feature mirrors the **Console Sink output** inside the web interface, making it incredibly easy to monitor your app’s internal behavior without external tools.  
+And because production environments often restrict console access, this update ensures you **never miss critical logs**, even when your app runs remotely.
+
+To protect sensitive data, **the Dashboard now supports optional Basic Authentication**.  
+You can safely expose the dashboard behind authorized access, giving visibility only to trusted users — a must-have for production-grade observability.
+
+> 🧠 **In short:** version 4.0.7 introduces the **Console Page** and **secured Basic Authentication**, turning your LoggerHelper Dashboard into a complete real-time monitoring hub.
+
 With version **4.0.6**, we've introduced the highly requested ability to **customize the main Dashboard page**.
 
 With version **4.0.5**, we've significantly simplified the integration and usage of the **AI-powered logging features**.
