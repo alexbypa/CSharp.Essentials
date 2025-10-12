@@ -1,9 +1,11 @@
 ﻿using CSharpEssentials.LoggerHelper.shared;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
+using Serilog.Events;
 using System.Runtime.CompilerServices;
 
 namespace CSharpEssentials.LoggerHelper.Configuration;
@@ -28,7 +30,6 @@ public static class LoggerExtensionConfig {
     /// Adds external LoggerHelper configuration (e.g., appsettings.LoggerHelper.json) to a WebApplicationBuilder.
     /// </summary>
     public static IServiceCollection AddloggerConfiguration(this IServiceCollection services, WebApplicationBuilder builder) {
-        ConfigurationPrinter.PrintByProvider(builder.Configuration);
 
         var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
                        ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
@@ -44,9 +45,7 @@ public static class LoggerExtensionConfig {
         builder.Configuration.AddJsonFile(SettingsProvider, fileNameSettings, false, true)
             .AddEnvironmentVariables();
 
-        Console.WriteLine($"[dbg LoggerHElper] Using LoggerHelper settings from {configPath} with AddEnvironmentVariables !");
 
-        //var configuration = LoggerHelperServiceLocator.GetService<IConfiguration>();
         var configuration = builder.Configuration;
         services.Configure<SerilogConfiguration>(configuration.GetSection("Serilog:SerilogConfiguration"));
         var _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
@@ -61,11 +60,16 @@ public static class LoggerExtensionConfig {
         var _config = new LoggerConfiguration().ReadFrom.Configuration(configuration)
             .WriteTo.Sink(new OpenTelemetryLogEventSink())//TODO: da configurare
             .Enrich.WithProperty("ApplicationName", appName)
+            .Enrich.FromLogContext()
             .Enrich.With<RenderedMessageEnricher>();
 
         services.AddSingleton<LoggerErrorStore>();
 
         LoggerConfigHelper.Initialize(configPath, _serilogConfig, _config);
+        
+        loggerExtension<RequestInfo>.TraceDashBoardSync(new RequestInfo { Action = "Setup" }, LogEventLevel.Warning, null, $"Using LoggerHelper settings from {configPath} with AddEnvironmentVariables !");
+        
+        ConfigurationPrinter.PrintByProvider(builder.Configuration);
         
         return services;
     }

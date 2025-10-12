@@ -117,12 +117,16 @@ public static class GlobalLogger {
         }
     }
 }
+
+public enum ChannelLog {
+    None = 0,
+    Dashboard = 1
+}
 /// <summary>
 /// Static logger extension for writing log entries enriched with transaction context.
 /// </summary>
 /// <typeparam name="T">The request type implementing IRequest.</typeparam>
 public class loggerExtension<T> where T : IRequest {
-    //protected static readonly ILogger log;
     protected static readonly ILogger log;
     public static string CurrentError { get; set; }
     public static List<LogErrorEntry> Errors = new();
@@ -130,6 +134,20 @@ public class loggerExtension<T> where T : IRequest {
     static loggerExtension() {
         log = GlobalLogger.Instance;
     }
+
+    public static async void TraceDashBoardAsync(IRequest request, LogEventLevel level, Exception? ex, string message, params object[] args) {
+        object[] newArgument = args;
+        var newArgumentToSend = newArgument.ToList();
+        newArgumentToSend.Add("Dashboard");
+        await Task.Run(() => TraceSync(request, level, ex, message + "{TargetSink}", newArgumentToSend.ToArray()));
+    }
+    public static async void TraceDashBoardSync(IRequest request, LogEventLevel level, Exception? ex, string message, params object[] args) {
+        object[] newArgument = args;
+        var newArgumentToSend = newArgument.ToList();
+        newArgumentToSend.Add("Dashboard");
+        TraceSync(request, level, ex, message + "{TargetSink}", newArgumentToSend.ToArray());
+    }
+
     /// <summary>
     /// method to write log Async
     /// </summary>

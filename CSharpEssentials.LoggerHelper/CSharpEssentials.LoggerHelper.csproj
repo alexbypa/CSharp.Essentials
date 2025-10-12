@@ -8,43 +8,16 @@
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <Title>CSharpEssentials.LoggerHelper - Structured Logging Helper for Serilog (Console, Email, DB, PostgreSQL, ElasticSearch)</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>      
-	  1.1.2 added Middleware
-      1.1.3 Aggiornamento Middleware
-      1.1.4 Removed TraceAsync on finally Invoke of RequestResponseLoggingMiddleware
-      1.1.5 Removed TraceAsync on finally Invoke of RequestResponseLoggingMiddleware
-      1.1.6 Fix with code QL
-      1.2.1 Optmized with test web api
-      1.2.2 Optmized Properties and sink Email
-      1.2.3 Update Readme.md
-      1.3.1 Added compatibility with 6.0
-      2.0.0 Fixed Email
-      2.0.1 update readme.md
-      2.0.2 Optimezed html template for middleware
-      2.0.3 update readme.md
-      2.0.4 rollback removed 7.0
-      2.0.4 Update Readme.md
-      2.0.5 Fix IRequest interface
-      2.0.6 Added email template
-      2.0.7 Added addAutoIncrementColumn and ColumnsPostGreSQL on sink postgresQL
-      2.0.8 - Enhanced MSSQL Sink Configuration : Introduced comprehensive management of custom columns for the MSSQL sink.
-      2.0.9 - Breaking Change: Added support for extending log context with custom fields (IRequest extensions)
-      3.0.1 - Moved all built-in sinks into separate NuGet packages; updated documentation to highlight explicit sink installation and aligned sink package versions
-      3.0.2 - ⚠️ Version 3.0.1 introduced an issue where `Serilog.Sinks.Elasticsearch` included an internal reference to `Serilog.Sinks.Console`, causing duplicate registration and build errors in some projects.
-      3.0.3 - Fix load appsettings.LoggerHelper.debug.json when you debug with remote packges from nuget
-      3.0.4 - Added framework 9.0
-      3.0.5 - Fixed load assembly and added property CurrentError on loggerExtension
-      3.1.1 - Exposed the `SinkPluginRegistry.PluginError` event for centralized plugin‐error handling; improved error diagnostics in the README and prepared the Dashboard package layout
-      3.1.2 - Readme.md
-      3.1.3 - Fixed MSSQL Server Sink !
-      3.1.4 - Added throttling on Email and Telegram !
-      3.1.5 - Added sink xUnit !
-      4.0.0 - Added Dashboard and custom OpenTelemetry
-      4.0.1 - Added Checks for errors on Dashboard and LoggerHelper !
-      4.0.1 - Update readme.md    
-      4.0.5 - Added Package AI and Dashboard
-</Description>
-    <Version>4.0.9.1</Version>
+    <Description>
+				CSharpEssentials.LoggerHelper is a modular, centralized hub for Serilog sinks that delivers comprehensive observability
+				. Its flexible JSON‑based configuration lets you decide which log levels go to which sink—for example, routing only Error messages to email while sending all logs to ElasticSearch—without touching your code
+				. The package unifies logs, metrics and traces via OpenTelemetry; every log entry carries a trace_id to correlate distributed requests, and an interactive dashboard lets you visualize traces, sink failures and telemetry, and configure alerts
+				. Standard structured fields (e.g., IdTransaction, ApplicationName, MachineName, Action) are included by default, and you can enrich logs with custom properties that propagate across all sinks
+				. Each sink—Console, File, MSSQL, PostgreSQL, ElasticSearch, Email, Telegram, xUnit, Telemetry, Dashboard and AI—is delivered as a separate NuGet package, so you install only what you need; the core loads them dynamically and exposes CurrentError and an in‑memory Errors queue to simplify debugging
+				. The latest AI integration enables natural‑language queries against logs, trace correlation for root‑cause analysis, anomaly detection and automatic incident summaries
+				, while the new xUnit sink captures full traces of failed tests directly in your test output—ideal for debugging flaky tests or disconnected environments
+		</Description>
+    <Version>4.0.10</Version>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>

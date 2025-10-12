@@ -13,7 +13,7 @@
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
-    <Version>4.0.6</Version>
+    <Version>4.0.7</Version>
     <Authors>Alessandro Chiodo</Authors>
     <Description>An embedded dashboard for CSharpEssentials.LoggerHelper, giving you real-time visibility into how sinks are loaded, which log levels are enabled, and any initialization errors — all from inside your application. </Description>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials/tree/main/CSharpEssentials.LoggerHelper.Dashboard</PackageProjectUrl>
@@ -38,7 +38,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="4.0.5" />
+    <PackageReference Include="CSharpEssentials.LoggerHelper" Version="4.0.10" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.6" />
   </ItemGroup>
   <ItemGroup>

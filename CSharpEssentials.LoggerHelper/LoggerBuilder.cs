@@ -1,7 +1,9 @@
 ﻿using CSharpEssentials.LoggerHelper.Configuration;
 using CSharpEssentials.LoggerHelper.model;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Serilog;
 using Serilog.Debugging;
+using Serilog.Events;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
@@ -14,7 +16,7 @@ namespace CSharpEssentials.LoggerHelper;
 internal class LoggerBuilder {
     private LoggerConfiguration _config;
     private SerilogConfiguration _serilogConfig;
-   internal LoggerBuilder() {
+    internal LoggerBuilder() {
         _config = LoggerConfigHelper.LoggerConfig;
         _serilogConfig = LoggerConfigHelper.SerilogConfig;
     }
@@ -25,7 +27,7 @@ internal class LoggerBuilder {
     public ILogger Build() => _config.CreateLogger();
 
     internal ConcurrentQueue<LogErrorEntry> _initializationErrors = new ConcurrentQueue<LogErrorEntry>();
-    
+
     private bool _excludeSinkFile;
 
     /// <summary>
@@ -33,14 +35,19 @@ internal class LoggerBuilder {
     /// </summary>
     /// <returns>The current instance of LoggerBuilder for chaining.</returns>
     internal LoggerBuilder AddDynamicSinks(out string path, out string SinkNameInError, ref List<LogErrorEntry> _Errors, ref List<LoadedSinkInfo> SinksLoaded) {
+        var request = new RequestInfo {
+            Action = "AddDynamicSinks",
+            ApplicationName = "LoggerHelper Config"
+        };
+
         SinkNameInError = "";
         var baseDir = AppContext.BaseDirectory;
         path = $"AddDynamicSinks Path: {baseDir}";
-        Console.WriteLine($"[dbg AddDynamicSinks] path:{path}");
+        loggerExtension<RequestInfo>.TraceDashBoardSync(request, LogEventLevel.Information, null, $"path:{path}");
         var pluginDlls = Directory
           .EnumerateFiles(baseDir, "CSharpEssentials.LoggerHelper.Sink.*.dll");
 
-        Console.WriteLine($"[dbg AddDynamicSinks] Found {string.Join(", ", pluginDlls.ToArray())} potential plugins");
+        loggerExtension<RequestInfo>.TraceDashBoardSync(request, LogEventLevel.Information, null, $"Found {string.Join(", ", pluginDlls.ToArray())} potential plugins");
         // 2) Caricali TUTTI nel default context
         var loadedAssemblies = new List<Assembly>();
         foreach (var dll in pluginDlls) {
@@ -65,12 +72,12 @@ internal class LoggerBuilder {
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
             .InformationalVersion ?? "n/a";
 
-                Console.WriteLine(
-            $"[DBG AddDynamicSinks] Loaded {Path.GetFileName(dll)} | " +
-            $"AssemblyVersion={asmVer} | FileVersion={fileVer} | " +
-            $"ProductVersion={prodVer} | InformationalVersion={infoVer} | " +
-            $"context=DEFAULT");
+            loggerExtension<RequestInfo>.TraceDashBoardSync(request, LogEventLevel.Information, null, $"Loaded {Path.GetFileName(dll)} | " +
+                $"AssemblyVersion={asmVer} | FileVersion={fileVer} | " +
+                $"ProductVersion={prodVer} | InformationalVersion={infoVer} | " +
+                $"context=DEFAULT");
             } catch (Exception ex) {
+                loggerExtension<RequestInfo>.TraceDashBoardSync(request, LogEventLevel.Error, ex, "Exception on load Plugins");
                 _initializationErrors.Enqueue(new LogErrorEntry {
                     Timestamp = DateTime.UtcNow,
                     SinkName = Path.GetFileNameWithoutExtension(dll),
@@ -99,7 +106,7 @@ internal class LoggerBuilder {
           )
           .ToList();
 
-        Console.WriteLine($"[dbg AddDynamicSinks] Found {pluginTypes.Count} ISinkPlugin implementations");
+        loggerExtension<RequestInfo>.TraceDashBoardSync(request, LogEventLevel.Information, null, $"Found {pluginTypes.Count} ISinkPlugin implementations");
 
         if (!pluginTypes.Any())
             _initializationErrors.Enqueue(new LogErrorEntry {
@@ -114,10 +121,9 @@ internal class LoggerBuilder {
             try {
                 var instance = (ISinkPlugin)Activator.CreateInstance(t)!;
                 SinkPluginRegistry.Register(instance);
-
-                Console.WriteLine($"[dbg AddDynamicSinks] Registered plugin for sink: {t.Name}");
+                loggerExtension<RequestInfo>.TraceDashBoardSync(request, LogEventLevel.Information, null, $"Registered plugin for sink: {t.Name}");
             } catch (Exception ex) {
-                Console.WriteLine($"[err AddDynamicSinks] Exception loading plugin {t.Name}: {ex.Message}");
+                loggerExtension<RequestInfo>.TraceDashBoardSync(request, LogEventLevel.Error, null, $"Exception loading plugin {t.Name}: {ex.Message}");
                 _Errors.Add(
                     new LogErrorEntry {
                         Timestamp = DateTime.UtcNow,
@@ -152,10 +158,9 @@ internal class LoggerBuilder {
                         SinkName = condition.Sink!,
                         Levels = condition.Level!.ToList()
                     });
-
-                    Console.WriteLine($"[dbg AddDynamicSinks] Added sink {condition.Sink} for levels {string.Join(", ", condition.Level)}");
+                    loggerExtension<RequestInfo>.TraceDashBoardSync(request, LogEventLevel.Warning, null, $"Added sink {condition.Sink} for levels {string.Join(", ", condition.Level)}");
                 } catch (Exception ex) {
-                    Console.WriteLine($"[err AddDynamicSinks] Exception configuring sink {condition.Sink}: {ex.Message}");
+                    loggerExtension<RequestInfo>.TraceDashBoardSync(request, LogEventLevel.Error, ex, $"Exception configuring sink {condition.Sink}: {ex.Message}");
                     SelfLog.WriteLine($"Exception {ex.Message} on sink {condition.Sink}");
                 }
             }

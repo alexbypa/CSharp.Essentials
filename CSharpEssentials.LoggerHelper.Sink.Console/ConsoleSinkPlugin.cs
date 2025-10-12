@@ -1,16 +1,19 @@
 ﻿using Serilog;
+using Serilog.Core;
 using System.Runtime.CompilerServices;
+using CSharpEssentials.LoggerHelper.InMemorySink;
 
 namespace CSharpEssentials.LoggerHelper.Sink.Console;
-    internal class ConsoleSinkPlugin : ISinkPlugin {
-    // Determines if this plugin should handle the given sink name
+internal class ConsoleSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) => sinkName == "Console";
-    // Applies the MSSqlServer sink configuration to the LoggerConfiguration
+    ILogEventSink dashboardSink = new InMemoryDashboardSink();
     public void HandleSink(LoggerConfiguration loggerConfig, SerilogCondition condition, SerilogConfiguration serilogConfig) {
-        var opts = serilogConfig.SerilogOption.MSSqlServer;
         loggerConfig.WriteTo.Conditional(
-            evt => serilogConfig.IsSinkLevelMatch(condition.Sink, evt.Level),
+            evt => serilogConfig.IsSinkLevelMatch(condition.Sink ?? "", evt.Level) && !evt.Properties.TryGetValue("TargetSink", out _),
             wt => wt.Console()
+        ).WriteTo.Conditional(
+            evt => serilogConfig.IsSinkLevelMatch(condition.Sink ?? "", evt.Level) && evt.Properties["TargetSink"] != null && evt.Properties["TargetSink"].ToString() == "\"Dashboard\"",
+            wt => wt.Sink(dashboardSink)
         );
     }
 }

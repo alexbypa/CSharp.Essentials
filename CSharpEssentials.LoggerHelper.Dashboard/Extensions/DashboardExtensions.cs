@@ -1,12 +1,43 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
+using CSharpEssentials.LoggerHelper.InMemorySink;
 
 namespace CSharpEssentials.LoggerHelper.Dashboard.Extensions;
 
 public static class DashboardExtensions {
     // Metodo di estensione per registrare la dashboard embedded
-    public static void UseLoggerHelperDashboard<T>(this WebApplication app, string path = "/ui") where T : class, IRequest {
+    public static void UseLoggerHelperDashboard<T>(this WebApplication app, string path = "/ui", Action<DashboardOptions>? configure = null) where T : class, IRequest {
+        var options = new DashboardOptions();
+        configure?.Invoke(options);
+        bool HasFilters() => options.Authorization.Count > 0;
+        bool IsAuthorized(HttpContext ctx) {
+            if (!HasFilters())
+                return true; // come Hangfire: nessun filtro = allow all
+            var ctxWrap = new DashboardContext(ctx);
+            // stile Hangfire: TUTTI i filtri devono autorizzare
+            foreach (var f in options.Authorization)
+                if (!f.Authorize(ctxWrap))
+                    return false;
+            return true;
+        }
+
+        app.Use(async (context, next) =>
+        {
+            var p = context.Request.Path.Value ?? "";
+            var isDashboardRequest =
+                p.Equals($"/{path}", StringComparison.OrdinalIgnoreCase) ||
+                p.StartsWith($"/{path}/", StringComparison.OrdinalIgnoreCase) ||
+                p.StartsWith("/assets/", StringComparison.OrdinalIgnoreCase) ||
+                p.StartsWith("/api/", StringComparison.OrdinalIgnoreCase);
+
+            if (!isDashboardRequest) { await next(); return; }
+
+            if (!IsAuthorized(context))
+                return; // il filtro ha già scritto 401/403 se serve
+            await next();
+        });
+
         var assembly = typeof(DashboardExtensions).Assembly;
 
         var embeddedFileProvider = new ManifestEmbeddedFileProvider(
@@ -183,6 +214,9 @@ public static class DashboardExtensions {
             // Restituisci un oggetto JSON con il risultato
             return new { isAIPackagePresent = aiPackageDll != null };
         });
+
+        /// In-memory log events endpoint
+        app.MapGet("/api/console", () => InMemoryDashboardSink.GetLogEvents());
     }
     // DTO minimali
     public record LoggerSinkDto(string SinkName, List<string> Levels);

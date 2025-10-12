@@ -1,8 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Serilog.Events;
 
 namespace CSharpEssentials.LoggerHelper.shared;
 
 public static class ConfigurationPrinter {
+    static RequestInfo request = new RequestInfo {
+        Action = "ConfigurationPrinter",
+        ApplicationName = "LoggerHelper Config"
+    };
     public static void PrintByProvider(IConfiguration configuration) {
         var root = configuration as IConfigurationRoot
             ?? throw new InvalidOperationException("Passa un IConfigurationRoot.");
@@ -39,19 +44,14 @@ public static class ConfigurationPrinter {
                 continue;
 
             // 4. Stampa provider e coppie chiave/valore
-            Console.WriteLine($"Provider: {providerInfo.Display}");
+            request.Action = $"Configuration from provider: {providerInfo.Display} {(string.IsNullOrEmpty(providerInfo.File) ? "(No File)" : $"(File: {providerInfo.File})")}";
             if (!string.IsNullOrEmpty(providerInfo.File))
-                Console.WriteLine($"  File: {providerInfo.File}");
+                loggerExtension<RequestInfo>.TraceDashBoardSync(request, LogEventLevel.Information, null, $"  File: {providerInfo.File}");
 
             foreach (var (key, value) in providedKeys.OrderBy(kv => kv.Key, StringComparer.Ordinal)) {
-                Console.WriteLine($"  Key: {key}");
-                Console.WriteLine($"  Value: {value}");
-                Console.WriteLine(new string('-', 5));
+                loggerExtension<RequestInfo>.TraceDashBoardSync(request, LogEventLevel.Information, null, $"  Key: {key} \n\rValue: {value}");
             }
-
-            Console.WriteLine(new string('-', 80));
         }
     }
-
     private record ProviderInfo(IConfigurationProvider Provider, string Display, string File);
 }
