@@ -10,6 +10,16 @@
 
 **The ultimate Serilog sink hub — extensible, modular, centralized.**
 
+### ⚡ Version 4.0.10 — The Ultimate Visibility Upgrade
+
+With **version 4.0.10**, LoggerHelper reaches a new level of observability.  
+You can now use the **latest Dashboard** together with the **updated Console Sink** to view all startup configuration details **directly in the web dashboard**, instead of the local console.
+
+No more hidden logs — the Dashboard now becomes your live control center, showing every initialization parameter and system behavior in real time, right from application launch.  
+And for production environments, you can **securely open the Dashboard behind Basic Authentication**, giving authorized users safe access to configuration and runtime insights.
+
+> 🚀 **In short:** version 4.0.10 transforms your Console output into a fully interactive, authenticated Dashboard experience — giving you complete visibility from the moment your app starts.
+
 ---
 ## 🚀 Major Update: AI Integration for Advanced Observability!
 

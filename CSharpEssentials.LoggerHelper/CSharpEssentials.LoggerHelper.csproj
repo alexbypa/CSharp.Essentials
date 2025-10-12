@@ -17,7 +17,7 @@
 				. The latest AI integration enables natural‑language queries against logs, trace correlation for root‑cause analysis, anomaly detection and automatic incident summaries
 				, while the new xUnit sink captures full traces of failed tests directly in your test output—ideal for debugging flaky tests or disconnected environments
 		</Description>
-    <Version>4.0.10</Version>
+    <Version>4.0.10.1</Version>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
