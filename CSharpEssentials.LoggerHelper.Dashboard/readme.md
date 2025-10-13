@@ -4,6 +4,15 @@
 An **embedded dashboard** for [CSharpEssentials.LoggerHelper](https://github.com/alexbypa/CSharp.Essentials), giving you **real-time visibility** into how sinks are loaded, which log levels are enabled, and any initialization errors — all from inside your application.
 
 ---
+## 🚨 Critical Notice: Console Page Availability
+
+The **Console Page** is available **only starting from version 4.1.0** of `CSharpEssentials.LoggerHelper.Dashboard`.
+
+If you are using any version **below 4.1.0**, the **Console** section **will not appear** due to a **publishing error in earlier builds**.
+
+### ✅ Required Action
+Upgrade immediately to version **4.1.0 or higher**:
+
 
 ### 🎉 What's New 
 With **version 4.0.7**, we’ve taken the Dashboard to a whole new level.  
