@@ -44,7 +44,7 @@ public static class httpExtension {
         }
         return primaryHandlerInstance;
     }
-    public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration) {
+    public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration, SocketsHttpHandler socketsHttpHandler = null) {
         var configurationBuilder = new ConfigurationBuilder().AddConfiguration(configuration);  // Usa la configurazione di partenza
 
         var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.httpHelper.json");
@@ -73,7 +73,7 @@ public static class httpExtension {
                     .AddHttpClient<IhttpsClientHelper, httpsClientHelper>(option.Name)
                     .SetHandlerLifetime(TimeSpan.FromSeconds(30))
                     .AddHttpMessageHandler<HttpClientHandlerLogging>()
-                    .ConfigurePrimaryHttpMessageHandler(() => checkForMock(option.Mock) ?? new SocketsHttpHandler());
+                    .ConfigurePrimaryHttpMessageHandler(() => checkForMock(option.Mock) ?? socketsHttpHandler ?? new SocketsHttpHandler());
                 //.ConfigurePrimaryHttpMessageHandler(() => PrimaryHandler ?? new SocketsHttpHandler());
 
                 services.AddSingleton<IhttpsClientHelper>(sp => {
