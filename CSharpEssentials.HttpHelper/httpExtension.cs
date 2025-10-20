@@ -3,6 +3,7 @@ using CSharpEssentials.LoggerHelper.model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 
 namespace CSharpEssentials.HttpHelper;
 public static class httpExtension {
@@ -73,8 +74,36 @@ public static class httpExtension {
                     .AddHttpClient<IhttpsClientHelper, httpsClientHelper>(option.Name)
                     .SetHandlerLifetime(TimeSpan.FromSeconds(30))
                     .AddHttpMessageHandler<HttpClientHandlerLogging>()
-                    .ConfigurePrimaryHttpMessageHandler(() => checkForMock(option.Mock) ?? socketsHttpHandler ?? new SocketsHttpHandler());
-                //.ConfigurePrimaryHttpMessageHandler(() => PrimaryHandler ?? new SocketsHttpHandler());
+                    .ConfigurePrimaryHttpMessageHandler(() => {
+                        HttpMessageHandler handler = checkForMock(option.Mock) ?? socketsHttpHandler ?? new SocketsHttpHandler();
+                        if (handler is HttpClientHandler httpClienthandler) {
+                            if (!string.IsNullOrEmpty(option.Certificate.Path)) {
+                                var clientCertificate = new X509Certificate2(
+                                    option.Certificate.Path,
+                                    option.Certificate.Password,
+                                    X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.Exportable | X509KeyStorageFlags.PersistKeySet
+                                );
+                                ((HttpClientHandler )handler).ClientCertificates.Add(clientCertificate);
+                            }
+                        }
+                        if (handler is SocketsHttpHandler socketsHandfer) {
+                            if (!string.IsNullOrEmpty(option.Certificate.Path)) {
+                                var clientCertificate = new X509Certificate2(
+                                    option.Certificate.Path,
+                                    option.Certificate.Password
+                                );
+                                ((SocketsHttpHandler)handler).SslOptions.ClientCertificates = new X509CertificateCollection();
+                                socketsHandfer.SslOptions.EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
+                                ((SocketsHttpHandler)handler).SslOptions.ClientCertificates.Add(clientCertificate);
+                            }
+                        }
+                        return handler;
+                        //checkForMock(option.Mock) ?? socketsHttpHandler ?? new SocketsHttpHandler()
+                    }
+                    )
+
+                    //.getCertificateForHttpHandler(option.Certificate.Path, option.Certificate.Password)
+                    ;
 
                 services.AddSingleton<IhttpsClientHelper>(sp => {
                     var factory = sp.GetRequiredService<IHttpClientFactory>();
