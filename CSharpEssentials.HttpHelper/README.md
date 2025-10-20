@@ -12,16 +12,29 @@
 
 ## 📦 Package
 
+### 🛠️ Change Log [Version 4.0.5] 
+
+#### **1. Feature: Custom HttpClient Handler Support**
+
+A significant improvement has been introduced to allow users to inject a custom `SocketsHttpHandler` when configuring a named `HttpClient`. This enhancement provides granular control over network behavior, such as connection settings, proxy configuration, and automatic HTTP compression.
+
+**Example: Enabling Automatic HTTP Compression**
+
+You can now configure automatic HTTP decompression for your named client:
+
+```csharp
+var handler = new SocketsHttpHandler 
+{
+    // Enable automatic decompression for GZip and Deflate
+    AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate,
+};
+
+builder.Services.AddHttpClients(builder.Configuration, handler);
+```
+
 `CSharpEssentials.HttpHelper` is a lightweight helper to simplify the usage of `HttpClient` in .NET with a fluent, configurable API.  
 It provides convenient methods for request customization, retries, timeouts, authentication headers, and more.
 
-You can install it via NuGet:
-
-```bash
-dotnet add package CSharpEssentials.HttpHelper
-````
-
-NuGet Gallery: [CSharpEssentials.HttpHelper](https://www.nuget.org/packages/CSharpEssentials.HttpHelper/)
 
 ---
 

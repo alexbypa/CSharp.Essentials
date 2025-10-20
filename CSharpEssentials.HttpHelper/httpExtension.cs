@@ -36,7 +36,7 @@ public static class httpExtension {
             } catch (Exception ex) {
                 GlobalLogger.Errors.Add(new LogErrorEntry {
                     ContextInfo = "HttpHelper",
-                    ErrorMessage = $"Error on mock {primaryHandlerMethodName} : {ex.Message }",
+                    ErrorMessage = $"Error on mock {primaryHandlerMethodName} : {ex.Message}",
                     SinkName = "HttpHelper",
                     Timestamp = DateTime.Now,
                     StackTrace = ex.StackTrace
@@ -76,34 +76,21 @@ public static class httpExtension {
                     .AddHttpMessageHandler<HttpClientHandlerLogging>()
                     .ConfigurePrimaryHttpMessageHandler(() => {
                         HttpMessageHandler handler = checkForMock(option.Mock) ?? socketsHttpHandler ?? new SocketsHttpHandler();
-                        if (handler is HttpClientHandler httpClienthandler) {
-                            if (!string.IsNullOrEmpty(option.Certificate.Path)) {
-                                var clientCertificate = new X509Certificate2(
-                                    option.Certificate.Path,
-                                    option.Certificate.Password,
-                                    X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.Exportable | X509KeyStorageFlags.PersistKeySet
-                                );
-                                ((HttpClientHandler )handler).ClientCertificates.Add(clientCertificate);
+                        if (option.Certificate != null && !string.IsNullOrEmpty(option.Certificate.Path) && !string.IsNullOrEmpty(option.Certificate!.Password)) {
+                            var clientCertificate = new X509Certificate2(
+                                option.Certificate.Path,
+                                option.Certificate.Password
+                            );
+                            if (handler is HttpClientHandler httpClienthandler) {
+                                ((HttpClientHandler)handler).ClientCertificates.Add(clientCertificate);
                             }
-                        }
-                        if (handler is SocketsHttpHandler socketsHandfer) {
-                            if (!string.IsNullOrEmpty(option.Certificate.Path)) {
-                                var clientCertificate = new X509Certificate2(
-                                    option.Certificate.Path,
-                                    option.Certificate.Password
-                                );
-                                ((SocketsHttpHandler)handler).SslOptions.ClientCertificates = new X509CertificateCollection();
+                            if (handler is SocketsHttpHandler socketsHandfer) {
                                 socketsHandfer.SslOptions.EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
-                                ((SocketsHttpHandler)handler).SslOptions.ClientCertificates.Add(clientCertificate);
+                                ((SocketsHttpHandler)handler).SslOptions.ClientCertificates = [clientCertificate];
                             }
                         }
                         return handler;
-                        //checkForMock(option.Mock) ?? socketsHttpHandler ?? new SocketsHttpHandler()
-                    }
-                    )
-
-                    //.getCertificateForHttpHandler(option.Certificate.Path, option.Certificate.Password)
-                    ;
+                    });
 
                 services.AddSingleton<IhttpsClientHelper>(sp => {
                     var factory = sp.GetRequiredService<IHttpClientFactory>();
