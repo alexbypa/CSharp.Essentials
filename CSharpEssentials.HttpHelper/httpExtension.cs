@@ -77,6 +77,12 @@ public static class httpExtension {
                     .ConfigurePrimaryHttpMessageHandler(() => {
                         HttpMessageHandler handler = checkForMock(option.Mock) ?? socketsHttpHandler ?? new SocketsHttpHandler();
                         if (option.Certificate != null && !string.IsNullOrEmpty(option.Certificate.Path) && !string.IsNullOrEmpty(option.Certificate!.Password)) {
+                            Console.ForegroundColor = ConsoleColor.DarkBlue;
+                            Console.WriteLine($"Loading certificate from path: {option.Certificate.Path}");
+                            Console.ResetColor();
+                            if (!File.Exists(option.Certificate.Path))
+                                throw new FileNotFoundException($"Certificate file not found at path: {option.Certificate.Path}");
+
                             var clientCertificate = new X509Certificate2(
                                 option.Certificate.Path,
                                 option.Certificate.Password
