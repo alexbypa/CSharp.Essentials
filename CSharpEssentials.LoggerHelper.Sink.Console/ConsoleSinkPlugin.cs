@@ -9,7 +9,7 @@ internal class ConsoleSinkPlugin : ISinkPlugin {
     ILogEventSink dashboardSink = new InMemoryDashboardSink();
     public void HandleSink(LoggerConfiguration loggerConfig, SerilogCondition condition, SerilogConfiguration serilogConfig) {
         loggerConfig.WriteTo.Conditional(
-            evt => serilogConfig.IsSinkLevelMatch(condition.Sink ?? "", evt.Level) && !evt.Properties.TryGetValue("TargetSink", out _),
+            evt => serilogConfig.IsSinkLevelMatch(condition.Sink ?? "", evt.Level),
             wt => wt.Console()
         ).WriteTo.Conditional(
             evt => serilogConfig.IsSinkLevelMatch(condition.Sink ?? "", evt.Level) && evt.Properties["TargetSink"] != null && evt.Properties["TargetSink"].ToString() == "\"Dashboard\"",
