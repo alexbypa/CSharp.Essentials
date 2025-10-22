@@ -50,7 +50,7 @@ public static class httpExtension {
 
         var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.httpHelper.json");
         if (File.Exists(externalConfigPath)) {
-            configurationBuilder.AddJsonFile(externalConfigPath, optional: true, reloadOnChange: true);
+            configurationBuilder.AddJsonFile(externalConfigPath, optional: true, reloadOnChange: true).AddEnvironmentVariables();
         }
         IConfiguration finalConfiguration = configurationBuilder.Build();
 
