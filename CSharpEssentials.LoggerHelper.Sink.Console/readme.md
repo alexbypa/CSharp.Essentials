@@ -4,8 +4,16 @@ The **Console Sink** for **CSharpEssentials.LoggerHelper** lets you output struc
 It plugs into the LoggerHelper **HUB** core via the `ISinkPlugin` mechanism, so you can route console-based logging based on your HUB configuration (e.g. per-level routing).
 
 ---
+### 🚀 Version 4.0.12 — Custom Console Sink and Dashboard Sync
 
-### ⚡ Version 4.0.10 — Extended Console Integration
+This release updates the package version to **4.0.12* and introduces the new **`CustomConsoleSink`** class. Implementing the Serilog `ILogEventSink` interface, `CustomConsoleSink` manages the formatting and writing of log messages to the console. It features **log level-based coloring** for each message, which significantly enhances log visibility and debugging efficiency.
+
+The integration enhancements from previous versions are maintained: the **Console Sink** continues to **forward console messages directly to the LoggerHelper Dashboard** for real-time visualization, even at application startup. This can be further **extended and customized** using the `TraceDashBoardSync` and `TraceDashBoardAsync` methods.
+
+> 🧠 In short: version 4.0.12 boosts console logging with the customizable `CustomConsoleSink` for improved visibility and maintains Dashboard synchronization.
+
+
+### ⚡ Version 4.0.11 — Extended Console Integration
 
 Starting from **version 4.0.10**, the **Console Sink** can now **forward console messages directly to the LoggerHelper Dashboard**.  
 This enhancement allows developers to **visualize all console output inside the web dashboard** right at application startup — perfect for monitoring initialization steps and early configuration logs.
