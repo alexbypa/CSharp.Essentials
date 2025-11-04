@@ -1,7 +1,9 @@
 ﻿using CSharpEssentials.LoggerHelper;
 using CSharpEssentials.LoggerHelper.model;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
@@ -83,16 +85,26 @@ public static class httpExtension {
                             if (!File.Exists(option.Certificate.Path))
                                 throw new FileNotFoundException($"Certificate file not found at path: {option.Certificate.Path}");
 
+                            
                             var clientCertificate = new X509Certificate2(
                                 option.Certificate.Path,
                                 option.Certificate.Password
                             );
-                            if (handler is HttpClientHandler httpClienthandler) {
-                                ((HttpClientHandler)handler).ClientCertificates.Add(clientCertificate);
-                            }
+
                             if (handler is SocketsHttpHandler socketsHandfer) {
                                 socketsHandfer.SslOptions.EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
                                 ((SocketsHttpHandler)handler).SslOptions.ClientCertificates = [clientCertificate];
+                            }
+                        }
+
+                        //Gestione Proxy
+                        if (handler is SocketsHttpHandler httpClienthandler) {
+                            if (option.httpProxy != null && option.httpProxy.UseProxy && option.httpProxy.UseProxy) {
+                                httpClienthandler.Proxy = new WebProxy {
+                                    Address = new Uri(option.httpProxy.Address),
+                                    Credentials = new NetworkCredential(option.httpProxy.UserName, option.httpProxy.Password)
+                                };
+                                httpClienthandler.UseProxy = option.httpProxy.UseProxy;
                             }
                         }
                         return handler;
