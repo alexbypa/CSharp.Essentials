@@ -4,6 +4,11 @@ The **Console Sink** for **CSharpEssentials.LoggerHelper** lets you output struc
 It plugs into the LoggerHelper **HUB** core via the `ISinkPlugin` mechanism, so you can route console-based logging based on your HUB configuration (e.g. per-level routing).
 
 ---
+### 🚀 Version 4.0.13 — Fixed TargetSink
+
+Fixed loggerConfig.WriteTo.Conditional
+
+---
 ### 🚀 Version 4.0.12 — Custom Console Sink and Dashboard Sync
 
 This release updates the package version to **4.0.12* and introduces the new **`CustomConsoleSink`** class. Implementing the Serilog `ILogEventSink` interface, `CustomConsoleSink` manages the formatting and writing of log messages to the console. It features **log level-based coloring** for each message, which significantly enhances log visibility and debugging efficiency.

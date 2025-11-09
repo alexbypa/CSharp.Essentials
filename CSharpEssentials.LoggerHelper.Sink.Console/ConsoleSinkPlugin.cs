@@ -14,7 +14,7 @@ internal class ConsoleSinkPlugin : ISinkPlugin {
             //wt => wt.Console()
             wt => wt.Sink(new CustomConsoleSink(null))
         ).WriteTo.Conditional(
-            evt => serilogConfig.IsSinkLevelMatch(condition.Sink ?? "", evt.Level) && evt.Properties["TargetSink"] != null && evt.Properties["TargetSink"].ToString() == "\"Dashboard\"",
+            evt => serilogConfig.IsSinkLevelMatch(condition.Sink ?? "", evt.Level) && evt.Properties.TryGetValue("TargetSink", out _) && evt.Properties["TargetSink"].ToString() == "\"Dashboard\"",
             wt => wt.Sink(dashboardSink)
         );
     }
