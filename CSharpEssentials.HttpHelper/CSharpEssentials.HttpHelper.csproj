@@ -34,6 +34,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.2" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.1" />
+    <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="Polly" Version="8.5.2" />
     <PackageReference Include="System.Threading.RateLimiting" Version="9.0.1" />
   </ItemGroup>

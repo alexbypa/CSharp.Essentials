@@ -1,13 +1,95 @@
-﻿using CSharpEssentials.LoggerHelper;
+﻿using CSharpEssentials.HttpHelper.HttpMocks;
+using CSharpEssentials.LoggerHelper;
 using CSharpEssentials.LoggerHelper.model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Security;
 using System.Reflection;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 
 namespace CSharpEssentials.HttpHelper;
+
+/*
+public class HttpMockDelegatingHandler : DelegatingHandler {
+    private readonly IHttpMockEngine _engine;
+
+    public HttpMockDelegatingHandler(IHttpMockEngine engine) {
+        _engine = engine ?? throw new ArgumentNullException(nameof(engine));
+    }
+    //Con questo eliminiamo TUTTA la reflection(checkForMock), perché ora il mock è parte della pipeline.
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken cancellationToken) { 
+        var mock = _engine.Match(request);
+        if (mock != null)
+            return await mock();
+
+        return await base.SendAsync(request, cancellationToken);
+    }
+}
+public static class CertificateConfigurator {
+    public static void Apply(SocketsHttpHandler handler, httpClientOptions opt) {
+        if (opt.Certificate == null)
+            return;
+
+        var cert = new X509Certificate2(opt.Certificate.Path, opt.Certificate.Password);
+
+        handler.SslOptions.EnabledSslProtocols =
+            SslProtocols.Tls12 | SslProtocols.Tls13;
+
+        handler.SslOptions.ClientCertificates = new X509CertificateCollection { cert };
+
+        handler.SslOptions.RemoteCertificateValidationCallback =
+            (sender, certificate, chain, errors) => errors == SslPolicyErrors.None;
+    }
+}
+public static class ProxyConfigurator {
+    public static void Apply(SocketsHttpHandler handler, httpClientOptions opt) {
+        if (opt.httpProxy == null || !opt.httpProxy.UseProxy)
+            return;
+
+        handler.Proxy = new WebProxy {
+            Address = new Uri(opt.httpProxy.Address),
+            Credentials = new NetworkCredential(opt.httpProxy.UserName, opt.httpProxy.Password)
+        };
+        handler.UseProxy = true;
+    }
+}
+
+
+
+
+
+
+
+public static class httpExtension {
+
+    public static IServiceCollection AddHttpClients(
+    this IServiceCollection services,
+    IConfiguration configuration) {
+        var options = configuration.GetSection("HttpClientOptions").Get<List<httpClientOptions>>();
+
+        services.AddSingleton<IHttpMockEngine, HttpMockEngine>(); // DI
+        //services.AddTransient<HttpMockDelegatingHandler>();
+
+        foreach (var opt in options) {
+            services.AddHttpClient<IhttpsClientHelper, httpsClientHelper>(opt.Name)
+                //.AddHttpMessageHandler<HttpMockDelegatingHandler>()    // Mock
+                .AddHttpMessageHandler<HttpClientHandlerLogging>()     // Logging
+                .ConfigurePrimaryHttpMessageHandler(() => {
+                    var handler = new SocketsHttpHandler {
+                        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+                    };
+
+                    CertificateConfigurator.Apply(handler, opt);
+                    ProxyConfigurator.Apply(handler, opt);
+
+                    return handler;
+                });
+        }
+        return services;
+    }
+    */
 public static class httpExtension {
     private static HttpMessageHandler checkForMock(string primaryHandlerMethodName) {
         HttpMessageHandler primaryHandlerInstance = null;
@@ -48,6 +130,7 @@ public static class httpExtension {
         }
         return primaryHandlerInstance;
     }
+    
     public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration, SocketsHttpHandler socketsHttpHandler = null) {
         var configurationBuilder = new ConfigurationBuilder().AddConfiguration(configuration);  // Usa la configurazione di partenza
 
@@ -127,6 +210,7 @@ public static class httpExtension {
 
         return services;
     }
+ 
     private static List<httpClientOptions>? getOptions(IConfigurationSection httpclientoptions) {
         if (httpclientoptions == null)
             return null;
