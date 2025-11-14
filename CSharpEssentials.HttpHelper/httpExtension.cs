@@ -1,9 +1,9 @@
 ﻿using CSharpEssentials.LoggerHelper;
 using CSharpEssentials.LoggerHelper.model;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
@@ -36,6 +36,7 @@ public static class httpExtension {
                     });
                 }
             } catch (Exception ex) {
+
                 GlobalLogger.Errors.Add(new LogErrorEntry {
                     ContextInfo = "HttpHelper",
                     ErrorMessage = $"Error on mock {primaryHandlerMethodName} : {ex.Message}",
@@ -79,21 +80,28 @@ public static class httpExtension {
                     .ConfigurePrimaryHttpMessageHandler(() => {
                         HttpMessageHandler handler = checkForMock(option.Mock) ?? socketsHttpHandler ?? new SocketsHttpHandler();
                         if (option.Certificate != null && !string.IsNullOrEmpty(option.Certificate.Path) && !string.IsNullOrEmpty(option.Certificate!.Password)) {
-                            Console.ForegroundColor = ConsoleColor.DarkBlue;
                             Console.WriteLine($"Loading certificate from path: {option.Certificate.Path}");
-                            Console.ResetColor();
-                            if (!File.Exists(option.Certificate.Path))
+                            loggerExtension<RequestHttpExtension>.TraceAsync(new RequestHttpExtension(), Serilog.Events.LogEventLevel.Debug, null, "Loading certificate from path: {Path}", option.Certificate.Path);
+                            if (!File.Exists(option.Certificate.Path)) {
+                                loggerExtension<RequestHttpExtension>.TraceAsync(new RequestHttpExtension(), Serilog.Events.LogEventLevel.Fatal, new Exception("path certified error"), "Certificate file not found at path {path}", option.Certificate.Path);
                                 throw new FileNotFoundException($"Certificate file not found at path: {option.Certificate.Path}");
+                            }
 
-                            
                             var clientCertificate = new X509Certificate2(
                                 option.Certificate.Path,
                                 option.Certificate.Password
                             );
 
-                            if (handler is SocketsHttpHandler socketsHandfer) {
-                                socketsHandfer.SslOptions.EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
-                                ((SocketsHttpHandler)handler).SslOptions.ClientCertificates = [clientCertificate];
+                            if (handler is SocketsHttpHandler socketsHandler) {
+                                loggerExtension<RequestHttpExtension>.TraceAsync(new RequestHttpExtension(), Serilog.Events.LogEventLevel.Debug, null, "Abilitato ptotocollo SSL Tls12 e Tls13: {Path}", option.Certificate.Path);
+                                socketsHandler.SslOptions.EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
+
+                                //socketsHandler.SslOptions.client = 
+                                socketsHandler.SslOptions.RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => {
+                                    loggerExtension<RequestHttpExtension>.TraceAsync(new RequestHttpExtension(), Serilog.Events.LogEventLevel.Debug, null, $"[{DateTime.Now:HH:mm:ss}] TLS handshake → server: {certificate?.Subject}, errori: {sslPolicyErrors}");
+                                    return sslPolicyErrors == SslPolicyErrors.None;
+                                };
+                                socketsHandler.SslOptions.ClientCertificates = [clientCertificate];
                             }
                         }
 
@@ -125,4 +133,12 @@ public static class httpExtension {
         else
             return httpclientoptions.Get<List<httpClientOptions>>();
     }
+}
+
+public class RequestHttpExtension : IRequest {
+    public string IdTransaction => DateTime.Now.ToString();
+
+    public string Action => "HttpHelper";
+
+    public string ApplicationName => "HttpHelper";
 }
