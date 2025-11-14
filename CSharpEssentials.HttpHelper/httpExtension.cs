@@ -98,7 +98,7 @@ public static class httpExtension {
 
                                 //socketsHandler.SslOptions.client = 
                                 socketsHandler.SslOptions.RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => {
-                                    loggerExtension<RequestHttpExtension>.TraceAsync(new RequestHttpExtension(), Serilog.Events.LogEventLevel.Fatal, null, $"[{DateTime.Now:HH:mm:ss}] TLS handshake → server: {certificate?.Subject}, errori: {sslPolicyErrors}");
+                                    loggerExtension<RequestHttpExtension>.TraceAsync(new RequestHttpExtension(), Serilog.Events.LogEventLevel.Debug, null, $"[{DateTime.Now:HH:mm:ss}] TLS handshake → server: {certificate?.Subject}, errori: {sslPolicyErrors}");
                                     return sslPolicyErrors == SslPolicyErrors.None;
                                 };
                                 socketsHandler.SslOptions.ClientCertificates = [clientCertificate];
