@@ -5,6 +5,7 @@ namespace CSharpEssentials.HttpHelper.HttpMocks;
 public interface IHttpMockEngine {
     IEnumerable<IHttpMockScenario> scenarios { get; }
     bool Match(HttpRequestMessage request);
+    HttpMessageHandler Build();
 }
 /// <summary>
 /// Real Moq
@@ -12,13 +13,19 @@ public interface IHttpMockEngine {
 public class HttpMockEngine : IHttpMockEngine {
     public IEnumerable<IHttpMockScenario> scenarios { get; }
     public bool Match(HttpRequestMessage request) {
-        return true; // per adesso restituiamo sempre true !
+        bool isMatched = false;
+        foreach (var scenario in scenarios) {
+            if (scenario.Match.Invoke(request)) {
+                isMatched = true;
+                break;
+            }
+        }
+        return isMatched;
     }
-
     public HttpMockEngine(IEnumerable<IHttpMockScenario> httpMockScenarios) {
         scenarios = httpMockScenarios;
     }
-    private HttpMessageHandler Build() {
+    public HttpMessageHandler Build() {
         var mock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
         foreach (var scenario in scenarios) {
             var seq = mock.Protected()

@@ -5,6 +5,7 @@ public class httpClientOptions {
     public httpClientCertificate? Certificate { get; set; }
     public httpClientRateLimitOptions? RateLimitOptions { get; set; }
     public httpProxy httpProxy { get; set; }
+    public bool UseCompression { get; set; }
 }
 public class httpClientCertificate {
     public string Path { get; set; }
