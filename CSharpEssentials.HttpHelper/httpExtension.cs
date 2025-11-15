@@ -89,9 +89,6 @@ public static class httpExtension {
         services.AddSingleton<IhttpsClientHelperFactory, httpsClientHelperFactory>();
 
         services.InjectMock();
-        services.AddTransient<IHttpMockEngine, HttpMockEngine>();
-        services.AddTransient<HttpMockDelegatingHandler>();
-
 
         if (options != null) {
             foreach (var option in options) {

@@ -17,19 +17,22 @@ public static class LoggerExtensionConfig {
     /// <summary>
     /// Adds external LoggerHelper configuration (e.g., appsettings.LoggerHelper.json) to a WebApplicationBuilder.
     /// </summary>
-    public static IServiceCollection AddLoggerConfiguration(this WebApplicationBuilder builder) {
+    public static IServiceCollection AddLoggerConfiguration(this ServiceCollection Services, IConfiguration configuration) {
         var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.LoggerHelper.json");
         if (File.Exists(externalConfigPath)) {
-            builder.Configuration.AddJsonFile(externalConfigPath, optional: true, reloadOnChange: true);
+            var finalConfig = new ConfigurationBuilder()
+                .AddJsonFile(externalConfigPath, optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
         }
-        builder.Services.AddSingleton<LoggerErrorStore>();
-        return builder.Services;
+        Services.AddSingleton<LoggerErrorStore>();
+        return Services;
     }
 #else   
     /// <summary>
     /// Adds external LoggerHelper configuration (e.g., appsettings.LoggerHelper.json) to a WebApplicationBuilder.
     /// </summary>
-    public static IServiceCollection AddloggerConfiguration(this IServiceCollection services, WebApplicationBuilder builder) {
+    public static IServiceCollection AddloggerConfiguration(this IServiceCollection services, IConfiguration configuration) {
 
         var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
                        ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
@@ -42,13 +45,14 @@ public static class LoggerExtensionConfig {
         var configPath = Path.Combine(Directory.GetCurrentDirectory(), fileNameSettings);
         var SettingsProvider = new PhysicalFileProvider(Directory.GetCurrentDirectory());
 
-        builder.Configuration.AddJsonFile(SettingsProvider, fileNameSettings, false, true)
-            .AddEnvironmentVariables();
+        var finalConfig = new ConfigurationBuilder() 
+            .AddJsonFile(SettingsProvider, fileNameSettings, false, true)
+            .AddEnvironmentVariables()
+            .Build();
 
 
-        var configuration = builder.Configuration;
-        services.Configure<SerilogConfiguration>(configuration.GetSection("Serilog:SerilogConfiguration"));
-        var _serilogConfig = configuration.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
+        services.Configure<SerilogConfiguration>(finalConfig.GetSection("Serilog:SerilogConfiguration"));
+        var _serilogConfig = finalConfig.GetSection("Serilog:SerilogConfiguration").Get<SerilogConfiguration>();
         if (_serilogConfig == null)
             throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
         if (_serilogConfig.SerilogOption == null)
@@ -57,7 +61,7 @@ public static class LoggerExtensionConfig {
             throw new InvalidOperationException($"Section 'Serilog:SerilogConfiguration:SerilogCondition' not found on {fileNameSettings}. See Documentation https://github.com/alexbypa/CSharp.Essentials/blob/TestLogger/LoggerHelperDemo/LoggerHelperDemo/Readme.md#installation");
 
         var appName = _serilogConfig.ApplicationName;
-        var _config = new LoggerConfiguration().ReadFrom.Configuration(configuration)
+        var _config = new LoggerConfiguration().ReadFrom.Configuration(finalConfig)
             .WriteTo.Sink(new OpenTelemetryLogEventSink())//TODO: da configurare
             .Enrich.WithProperty("ApplicationName", appName)
             .Enrich.FromLogContext()
@@ -69,7 +73,7 @@ public static class LoggerExtensionConfig {
         
         loggerExtension<RequestInfo>.TraceDashBoardSync(new RequestInfo { Action = "Setup" }, LogEventLevel.Warning, null, $"Using LoggerHelper settings from {configPath} with AddEnvironmentVariables !");
         
-        ConfigurationPrinter.PrintByProvider(builder.Configuration);
+        ConfigurationPrinter.PrintByProvider(finalConfig);
         
         return services;
     }
