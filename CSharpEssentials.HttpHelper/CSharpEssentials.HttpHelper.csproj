@@ -15,7 +15,7 @@
     <Description>package to help manage of httpHelper</Description>
     <Company>Alessandro Chiodo</Company>
     <PackageTags>HttpClient, Resiliency, RateLimiting, ASP.NET Core, HTTP, Retry, TransientFaultHandling, Logger, Serilog, Custom Handler, .http Test</PackageTags>
-    <Version>4.0.9</Version>
+    <Version>4.0.10</Version>
   </PropertyGroup>
 
   <ItemGroup>
