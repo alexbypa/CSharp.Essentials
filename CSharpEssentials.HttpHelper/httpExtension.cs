@@ -1,35 +1,33 @@
 ﻿using CSharpEssentials.HttpHelper.HttpMocks;
 using CSharpEssentials.LoggerHelper;
-using CSharpEssentials.LoggerHelper.model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Security;
-using System.Reflection;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 
 namespace CSharpEssentials.HttpHelper;
 
-public class HttpMockDelegatingHandler : DelegatingHandler {
-    private readonly IHttpMockEngine? _engine;
-    private HttpMessageHandler? _mockHandler;
-    public HttpMockDelegatingHandler(IHttpMockEngine? engine = null) {
-        _engine = engine;
-    }
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken cancellationToken) {
-        if (_engine == null)
-            return base.SendAsync(request, cancellationToken);
+//public class HttpMockDelegatingHandler : DelegatingHandler {
+//    private readonly IHttpMockEngine? _engine;
+//    private HttpMessageHandler? _mockHandler;
+//    public HttpMockDelegatingHandler(IHttpMockEngine? engine = null) {
+//        _engine = engine;
+//    }
+//    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken cancellationToken) {
+//        if (_engine == null)
+//            return base.SendAsync(request, cancellationToken);
 
-        if (!_engine.Match(request))
-            return base.SendAsync(request, cancellationToken);
+//        if (!_engine.Match(request))
+//            return base.SendAsync(request, cancellationToken);
 
-        _mockHandler ??= _engine.Build();
-        var invoker = new HttpMessageInvoker(_mockHandler);
+//        _mockHandler ??= _engine.Build();
+//        var invoker = new HttpMessageInvoker(_mockHandler);
 
-        return invoker.SendAsync(request, cancellationToken);
-    }
-}
+//        return invoker.SendAsync(request, cancellationToken);
+//    }
+//}
 
 #pragma warning disable SYSLIB0057
 public static class CertificateConfigurator {
@@ -88,7 +86,7 @@ public static class httpExtension {
 
         services.AddSingleton<IhttpsClientHelperFactory, httpsClientHelperFactory>();
 
-        services.InjectMock();
+        //services.InjectMock();
 
         if (options != null) {
             foreach (var option in options) {
@@ -96,7 +94,7 @@ public static class httpExtension {
                 .AddHttpClient<IhttpsClientHelper, httpsClientHelper>(option.Name)
                 .SetHandlerLifetime(TimeSpan.FromSeconds(30)) //TODO: sarebbe meglio metterlo su appSettings.json
                 .AddHttpMessageHandler<HttpClientHandlerLogging>()
-                .AddHttpMessageHandler<HttpMockDelegatingHandler>()
+                //.AddHttpMessageHandler<HttpMockDelegatingHandler>()
                 .ConfigurePrimaryHttpMessageHandler(() => {
                     var handler = new SocketsHttpHandler();
                     if (option.UseCompression) {

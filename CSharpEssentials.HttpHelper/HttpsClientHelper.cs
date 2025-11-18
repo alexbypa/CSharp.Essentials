@@ -1,5 +1,6 @@
 ﻿using Polly;
 using Polly.Retry;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.RateLimiting;
 using static CSharpEssentials.HttpHelper.httpsClientHelper;
@@ -56,6 +57,8 @@ public class httpsClientHelper : IhttpsClientHelper {
         httpClient.DefaultRequestHeaders.Clear();
         if (_HeaderValues != null)
             foreach (var item in _HeaderValues) {
+                if (item.Key == null)
+                    Debug.Print("semu");
                 httpClient.DefaultRequestHeaders.Add(item.Key, item.Value);
             }
     }
@@ -79,42 +82,46 @@ public class httpsClientHelper : IhttpsClientHelper {
     HttpMethod httpMethod,
     object body,
     IContentBuilder contentBuilder) {
-        var request = new HttpRequestBuilder()
-            .WithUrl(baseUrl)
-            .WithMethod(httpMethod)
-            .WithBody(body)
-            .WithContentBuilder(contentBuilder)
-            .Build();
-
-        DateTime dtStartRequest = DateTime.Now;
-        TimeSpan timeSpanRateLimit = TimeSpan.Zero;
-        if (rateLimiter != null) {
-            var lease = await rateLimiter.AcquireAsync(1);
-            if (!lease.IsAcquired) {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[RateLimit] BLOCCATA la richiesta.");
-                Console.ResetColor();
-                throw new InvalidOperationException("Rate limit exceeded");
-            }
-            if (request.Headers.Contains("X-RateLimit-TimeSpanElapsed"))
-                request.Headers.Remove("X-RateLimit-TimeSpanElapsed");
-            request.Headers.Add("X-RateLimit-TimeSpanElapsed", (DateTime.Now - dtStartRequest).ToString());
-        }
-        var context = new Context();
-
         Task<HttpResponseMessage> response = null;
-        if (_retryPolicy == null) {
-            response = _SendAsync(request);
-        } else {
-            response = _retryPolicy.ExecuteAsync(async ctx => {
-                var attempt = ctx.ContainsKey("RetryAttempt") ? (int)ctx["RetryAttempt"] : 0;
-                if (request.Headers.Contains("X-Retry-Attempt"))
-                    request.Headers.Remove("X-Retry-Attempt");
-                request.Headers.Add("X-Retry-Attempt", attempt.ToString());
+        try {
+            var request = new HttpRequestBuilder()
+                .WithUrl(baseUrl)
+                .WithMethod(httpMethod)
+                .WithBody(body)
+                .WithContentBuilder(contentBuilder)
+                .Build();
 
-                return await _SendAsync(CloneHttpRequestMessage(request));
+            DateTime dtStartRequest = DateTime.Now;
+            TimeSpan timeSpanRateLimit = TimeSpan.Zero;
+            if (rateLimiter != null) {
+                var lease = await rateLimiter.AcquireAsync(1);
+                if (!lease.IsAcquired) {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("[RateLimit] BLOCCATA la richiesta.");
+                    Console.ResetColor();
+                    throw new InvalidOperationException("Rate limit exceeded");
+                }
+                if (request.Headers.Contains("X-RateLimit-TimeSpanElapsed"))
+                    request.Headers.Remove("X-RateLimit-TimeSpanElapsed");
+                request.Headers.Add("X-RateLimit-TimeSpanElapsed", (DateTime.Now - dtStartRequest).ToString());
+            }
+            var context = new Context();
 
-            }, context);
+            if (_retryPolicy == null) {
+                response = _SendAsync(request);
+            } else {
+                response = _retryPolicy.ExecuteAsync(async ctx => {
+                    var attempt = ctx.ContainsKey("RetryAttempt") ? (int)ctx["RetryAttempt"] : 0;
+                    if (request.Headers.Contains("X-Retry-Attempt"))
+                        request.Headers.Remove("X-Retry-Attempt");
+                    request.Headers.Add("X-Retry-Attempt", attempt.ToString());
+
+                    return await _SendAsync(CloneHttpRequestMessage(request));
+
+                }, context);
+            }
+        } catch(Exception ex) {
+            Trace.TraceError(ex.ToString());
         }
         return await response;
     }
@@ -124,7 +131,10 @@ public class httpsClientHelper : IhttpsClientHelper {
             ? new CancellationTokenSource(httpClient.Timeout)
             : new CancellationTokenSource();
         try {
-            var response = await httpClient.SendAsync(request, cts.Token);
+            // var response = await httpClient.SendAsync(request, cts.Token);
+            
+            var response = httpClient.Send (request, cts.Token);
+
             return response;
         } catch (OperationCanceledException) when (cts.IsCancellationRequested) {
             var elapsed = DateTime.UtcNow - startedAt;
@@ -180,7 +190,7 @@ public class httpsClientHelper : IhttpsClientHelper {
 
     public IhttpsClientHelper ClearRequestActions() {
         _events.ClearAll();
-        return this;    
+        return this;
     }
 }
 public interface IhttpsClientHelper {
