@@ -62,16 +62,16 @@ public class httpsClientHelper : IhttpsClientHelper {
                 httpClient.DefaultRequestHeaders.Add(item.Key, item.Value);
             }
     }
-    public IhttpsClientHelper setHeadersWithoutAuthorization(Dictionary<string, string> _HeaderValues) {
+    public IhttpsClientHelper setHeadersWithoutAuthorizationSync(Dictionary<string, string> _HeaderValues) {
         _setHeaders(_HeaderValues);
         return this;
     }
-    public IhttpsClientHelper setHeadersAndBearerAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBearer httpClientAuthenticationBearer) {
+    public IhttpsClientHelper setHeadersAndBearerAuthenticationSync(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBearer httpClientAuthenticationBearer) {
         _setHeaders(_HeaderValues);
         httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + httpClientAuthenticationBearer.token);
         return this;
     }
-    public IhttpsClientHelper setHeadersAndBasicAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBasic httpClientAuthenticationBasic) {
+    public IhttpsClientHelper setHeadersAndBasicAuthenticationSync(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBasic httpClientAuthenticationBasic) {
         _setHeaders(_HeaderValues);
         String encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(httpClientAuthenticationBasic.userName + ":" + httpClientAuthenticationBasic.password));
         httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + encoded);
@@ -81,7 +81,8 @@ public class httpsClientHelper : IhttpsClientHelper {
     string baseUrl,
     HttpMethod httpMethod,
     object body,
-    IContentBuilder contentBuilder) {
+    IContentBuilder contentBuilder,
+    IDictionary<string, string>? headers) {
         Task<HttpResponseMessage> response = null;
         try {
             var request = new HttpRequestBuilder()
@@ -91,6 +92,13 @@ public class httpsClientHelper : IhttpsClientHelper {
                 .WithContentBuilder(contentBuilder)
                 .Build();
 
+            // Applica gli header per-request (thread-safe)
+            if (headers != null) {
+                foreach (var kv in headers) {
+                    if (!string.IsNullOrEmpty(kv.Key) && kv.Value != null)
+                        request.Headers.TryAddWithoutValidation(kv.Key, kv.Value);
+                }
+            }
             DateTime dtStartRequest = DateTime.Now;
             TimeSpan timeSpanRateLimit = TimeSpan.Zero;
             if (rateLimiter != null) {
@@ -131,10 +139,7 @@ public class httpsClientHelper : IhttpsClientHelper {
             ? new CancellationTokenSource(httpClient.Timeout)
             : new CancellationTokenSource();
         try {
-            // var response = await httpClient.SendAsync(request, cts.Token);
-            
-            var response = httpClient.Send (request, cts.Token);
-
+            var response = await httpClient.SendAsync(request, cts.Token);
             return response;
         } catch (OperationCanceledException) when (cts.IsCancellationRequested) {
             var elapsed = DateTime.UtcNow - startedAt;
@@ -198,14 +203,15 @@ public interface IhttpsClientHelper {
         string baseUrl,
         HttpMethod httpMethod,
         object body,
-        IContentBuilder contentBuilder);
+        IContentBuilder contentBuilder, 
+        IDictionary<string, string>? headers);
     IhttpsClientHelper AddRequestAction(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> action);
     IhttpsClientHelper addFormData(List<KeyValuePair<string, string>> keyValuePairs);
     IhttpsClientHelper addRetryCondition(Func<HttpResponseMessage, bool> RetryCondition, int retryCount, double backoffFactor);
     IhttpsClientHelper addTimeout(TimeSpan timeSpan);
     IhttpsClientHelper ClearRequestActions();
     IhttpsClientHelper addHeaders(string KeyName, string KeyValue);
-    IhttpsClientHelper setHeadersWithoutAuthorization(Dictionary<string, string> _HeaderValues);
-    IhttpsClientHelper setHeadersAndBearerAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBearer httpClientAuthenticationBearer);
-    IhttpsClientHelper setHeadersAndBasicAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBasic httpClientAuthenticationBasic);
+    IhttpsClientHelper setHeadersWithoutAuthorizationSync(Dictionary<string, string> _HeaderValues);
+    IhttpsClientHelper setHeadersAndBearerAuthenticationSync(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBearer httpClientAuthenticationBearer);
+    IhttpsClientHelper setHeadersAndBasicAuthenticationSync(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBasic httpClientAuthenticationBasic);
 }
