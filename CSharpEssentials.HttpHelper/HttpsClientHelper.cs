@@ -2,6 +2,7 @@
 using Polly.Retry;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
 using System.Threading.RateLimiting;
 using static CSharpEssentials.HttpHelper.httpsClientHelper;
 
@@ -82,7 +83,8 @@ public class httpsClientHelper : IhttpsClientHelper {
     HttpMethod httpMethod,
     object body,
     IContentBuilder contentBuilder,
-    IDictionary<string, string>? headers) {
+    IDictionary<string, string>? headers,
+    CancellationToken cancellationToken) {
         Task<HttpResponseMessage> response = null;
         try {
             var request = new HttpRequestBuilder()
@@ -104,9 +106,6 @@ public class httpsClientHelper : IhttpsClientHelper {
             if (rateLimiter != null) {
                 var lease = await rateLimiter.AcquireAsync(1);
                 if (!lease.IsAcquired) {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("[RateLimit] BLOCCATA la richiesta.");
-                    Console.ResetColor();
                     throw new InvalidOperationException("Rate limit exceeded");
                 }
                 if (request.Headers.Contains("X-RateLimit-TimeSpanElapsed"))
@@ -116,7 +115,7 @@ public class httpsClientHelper : IhttpsClientHelper {
             var context = new Context();
 
             if (_retryPolicy == null) {
-                response = _SendAsync(request);
+                response = _SendAsync(request, cancellationToken);
             } else {
                 response = _retryPolicy.ExecuteAsync(async ctx => {
                     var attempt = ctx.ContainsKey("RetryAttempt") ? (int)ctx["RetryAttempt"] : 0;
@@ -124,7 +123,7 @@ public class httpsClientHelper : IhttpsClientHelper {
                         request.Headers.Remove("X-Retry-Attempt");
                     request.Headers.Add("X-Retry-Attempt", attempt.ToString());
 
-                    return await _SendAsync(CloneHttpRequestMessage(request));
+                    return await _SendAsync(CloneHttpRequestMessage(request), cancellationToken);
 
                 }, context);
             }
@@ -133,15 +132,20 @@ public class httpsClientHelper : IhttpsClientHelper {
         }
         return await response;
     }
-    private async Task<HttpResponseMessage> _SendAsync(HttpRequestMessage request) {
+    private async Task<HttpResponseMessage> _SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
         var startedAt = DateTime.UtcNow;
-        using var cts = TimeoutSettled
-            ? new CancellationTokenSource(httpClient.Timeout)
-            : new CancellationTokenSource();
+        using var timeoutCts = TimeoutSettled
+                ? new CancellationTokenSource(httpClient.Timeout)
+                : new CancellationTokenSource();
+
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+            timeoutCts.Token,
+            cancellationToken
+        );
         try {
-            var response = await httpClient.SendAsync(request, cts.Token);
+            var response = await httpClient.SendAsync(request, linkedCts.Token);
             return response;
-        } catch (OperationCanceledException) when (cts.IsCancellationRequested) {
+        } catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested) {
             var elapsed = DateTime.UtcNow - startedAt;
             return new HttpResponseMessage(System.Net.HttpStatusCode.RequestTimeout) {
                 ReasonPhrase = "Client timeout",
@@ -204,7 +208,8 @@ public interface IhttpsClientHelper {
         HttpMethod httpMethod,
         object body,
         IContentBuilder contentBuilder, 
-        IDictionary<string, string>? headers);
+        IDictionary<string, string>? headers,
+        CancellationToken cancellationToken);
     IhttpsClientHelper AddRequestAction(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> action);
     IhttpsClientHelper addFormData(List<KeyValuePair<string, string>> keyValuePairs);
     IhttpsClientHelper addRetryCondition(Func<HttpResponseMessage, bool> RetryCondition, int retryCount, double backoffFactor);
