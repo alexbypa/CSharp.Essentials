@@ -2,9 +2,9 @@
 using CSharpEssentials.LoggerHelper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using System.Net;
 using System.Net.Security;
-using System.Reflection;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 
@@ -16,17 +16,28 @@ public class HttpMockDelegatingHandler : DelegatingHandler {
     public HttpMockDelegatingHandler(IHttpMockEngine? engine = null) {
         _engine = engine;
     }
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
         if (_engine == null)
-            return base.SendAsync(request, cancellationToken);
+            return await base.SendAsync(request, cancellationToken);
 
         if (!_engine.Match(request))
-            return base.SendAsync(request, cancellationToken);
+            return await base.SendAsync(request, cancellationToken);
 
-        _mockHandler ??= _engine.Build();
-        var invoker = new HttpMessageInvoker(_mockHandler);
-
-        return invoker.SendAsync(request, cancellationToken);
+        var _mockHandler = _engine.Build();
+        var invoker = new HttpMessageInvoker(_mockHandler, disposeHandler: false);
+        try {
+            return await invoker.SendAsync(request, cancellationToken);
+        } catch (MockException mex) {
+            throw new InvalidOperationException(
+                $"❌ Mock configuration error for request: {request.Method} {request.RequestUri}\n" +
+                $"The mock matched the request but the setup is incomplete.\n" +
+                $"Details: {mex.Message}",
+                mex
+            );
+        } catch (Exception ex) {
+            Console.WriteLine($"⚠️ Mock execution failed: {ex.Message}");
+            return await base.SendAsync(request, cancellationToken);
+        }
     }
 }
 

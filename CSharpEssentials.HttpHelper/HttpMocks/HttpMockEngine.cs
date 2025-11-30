@@ -39,7 +39,6 @@ public class HttpMockEngine : IHttpMockEngine {
         }
         return mock.Object;
     }
-
     public HttpMessageHandler Orchestrate() {
         return Build();
     }
