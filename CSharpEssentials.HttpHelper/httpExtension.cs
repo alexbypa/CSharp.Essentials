@@ -1,11 +1,9 @@
 ﻿using CSharpEssentials.HttpHelper.HttpMocks;
 using CSharpEssentials.LoggerHelper;
-using CSharpEssentials.LoggerHelper.model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Security;
-using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -18,7 +16,7 @@ public class HttpMockDelegatingHandler : DelegatingHandler {
     public HttpMockDelegatingHandler(IHttpMockEngine? engine = null) {
         _engine = engine;
     }
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken cancellationToken) {
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
         if (_engine == null)
             return base.SendAsync(request, cancellationToken);
 

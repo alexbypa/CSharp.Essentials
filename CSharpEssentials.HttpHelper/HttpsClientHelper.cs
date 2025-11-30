@@ -1,6 +1,8 @@
 ﻿using Polly;
 using Polly.Retry;
+using System.Diagnostics;
 using System.Text;
+using System.Threading;
 using System.Threading.RateLimiting;
 using static CSharpEssentials.HttpHelper.httpsClientHelper;
 
@@ -56,19 +58,21 @@ public class httpsClientHelper : IhttpsClientHelper {
         httpClient.DefaultRequestHeaders.Clear();
         if (_HeaderValues != null)
             foreach (var item in _HeaderValues) {
+                if (item.Key == null)
+                    Debug.Print("semu");
                 httpClient.DefaultRequestHeaders.Add(item.Key, item.Value);
             }
     }
-    public IhttpsClientHelper setHeadersWithoutAuthorization(Dictionary<string, string> _HeaderValues) {
+    public IhttpsClientHelper setHeadersWithoutAuthorizationSync(Dictionary<string, string> _HeaderValues) {
         _setHeaders(_HeaderValues);
         return this;
     }
-    public IhttpsClientHelper setHeadersAndBearerAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBearer httpClientAuthenticationBearer) {
+    public IhttpsClientHelper setHeadersAndBearerAuthenticationSync(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBearer httpClientAuthenticationBearer) {
         _setHeaders(_HeaderValues);
         httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + httpClientAuthenticationBearer.token);
         return this;
     }
-    public IhttpsClientHelper setHeadersAndBasicAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBasic httpClientAuthenticationBasic) {
+    public IhttpsClientHelper setHeadersAndBasicAuthenticationSync(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBasic httpClientAuthenticationBasic) {
         _setHeaders(_HeaderValues);
         String encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(httpClientAuthenticationBasic.userName + ":" + httpClientAuthenticationBasic.password));
         httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + encoded);
@@ -78,55 +82,70 @@ public class httpsClientHelper : IhttpsClientHelper {
     string baseUrl,
     HttpMethod httpMethod,
     object body,
-    IContentBuilder contentBuilder) {
-        var request = new HttpRequestBuilder()
-            .WithUrl(baseUrl)
-            .WithMethod(httpMethod)
-            .WithBody(body)
-            .WithContentBuilder(contentBuilder)
-            .Build();
-
-        DateTime dtStartRequest = DateTime.Now;
-        TimeSpan timeSpanRateLimit = TimeSpan.Zero;
-        if (rateLimiter != null) {
-            var lease = await rateLimiter.AcquireAsync(1);
-            if (!lease.IsAcquired) {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[RateLimit] BLOCCATA la richiesta.");
-                Console.ResetColor();
-                throw new InvalidOperationException("Rate limit exceeded");
-            }
-            if (request.Headers.Contains("X-RateLimit-TimeSpanElapsed"))
-                request.Headers.Remove("X-RateLimit-TimeSpanElapsed");
-            request.Headers.Add("X-RateLimit-TimeSpanElapsed", (DateTime.Now - dtStartRequest).ToString());
-        }
-        var context = new Context();
-
+    IContentBuilder contentBuilder,
+    IDictionary<string, string>? headers,
+    CancellationToken cancellationToken) {
         Task<HttpResponseMessage> response = null;
-        if (_retryPolicy == null) {
-            response = _SendAsync(request);
-        } else {
-            response = _retryPolicy.ExecuteAsync(async ctx => {
-                var attempt = ctx.ContainsKey("RetryAttempt") ? (int)ctx["RetryAttempt"] : 0;
-                if (request.Headers.Contains("X-Retry-Attempt"))
-                    request.Headers.Remove("X-Retry-Attempt");
-                request.Headers.Add("X-Retry-Attempt", attempt.ToString());
+        try {
+            var request = new HttpRequestBuilder()
+                .WithUrl(baseUrl)
+                .WithMethod(httpMethod)
+                .WithBody(body)
+                .WithContentBuilder(contentBuilder)
+                .Build();
 
-                return await _SendAsync(CloneHttpRequestMessage(request));
+            // Applica gli header per-request (thread-safe)
+            if (headers != null) {
+                foreach (var kv in headers) {
+                    if (!string.IsNullOrEmpty(kv.Key) && kv.Value != null)
+                        request.Headers.TryAddWithoutValidation(kv.Key, kv.Value);
+                }
+            }
+            DateTime dtStartRequest = DateTime.Now;
+            TimeSpan timeSpanRateLimit = TimeSpan.Zero;
+            if (rateLimiter != null) {
+                var lease = await rateLimiter.AcquireAsync(1);
+                if (!lease.IsAcquired) {
+                    throw new InvalidOperationException("Rate limit exceeded");
+                }
+                if (request.Headers.Contains("X-RateLimit-TimeSpanElapsed"))
+                    request.Headers.Remove("X-RateLimit-TimeSpanElapsed");
+                request.Headers.Add("X-RateLimit-TimeSpanElapsed", (DateTime.Now - dtStartRequest).ToString());
+            }
+            var context = new Context();
 
-            }, context);
+            if (_retryPolicy == null) {
+                response = _SendAsync(request, cancellationToken);
+            } else {
+                response = _retryPolicy.ExecuteAsync(async ctx => {
+                    var attempt = ctx.ContainsKey("RetryAttempt") ? (int)ctx["RetryAttempt"] : 0;
+                    if (request.Headers.Contains("X-Retry-Attempt"))
+                        request.Headers.Remove("X-Retry-Attempt");
+                    request.Headers.Add("X-Retry-Attempt", attempt.ToString());
+
+                    return await _SendAsync(CloneHttpRequestMessage(request), cancellationToken);
+
+                }, context);
+            }
+        } catch(Exception ex) {
+            Trace.TraceError(ex.ToString());
         }
         return await response;
     }
-    private async Task<HttpResponseMessage> _SendAsync(HttpRequestMessage request) {
+    private async Task<HttpResponseMessage> _SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
         var startedAt = DateTime.UtcNow;
-        using var cts = TimeoutSettled
-            ? new CancellationTokenSource(httpClient.Timeout)
-            : new CancellationTokenSource();
+        using var timeoutCts = TimeoutSettled
+                ? new CancellationTokenSource(httpClient.Timeout)
+                : new CancellationTokenSource();
+
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+            timeoutCts.Token,
+            cancellationToken
+        );
         try {
-            var response = await httpClient.SendAsync(request, cts.Token);
+            var response = await httpClient.SendAsync(request, linkedCts.Token);
             return response;
-        } catch (OperationCanceledException) when (cts.IsCancellationRequested) {
+        } catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested) {
             var elapsed = DateTime.UtcNow - startedAt;
             return new HttpResponseMessage(System.Net.HttpStatusCode.RequestTimeout) {
                 ReasonPhrase = "Client timeout",
@@ -180,7 +199,7 @@ public class httpsClientHelper : IhttpsClientHelper {
 
     public IhttpsClientHelper ClearRequestActions() {
         _events.ClearAll();
-        return this;    
+        return this;
     }
 }
 public interface IhttpsClientHelper {
@@ -188,14 +207,16 @@ public interface IhttpsClientHelper {
         string baseUrl,
         HttpMethod httpMethod,
         object body,
-        IContentBuilder contentBuilder);
+        IContentBuilder contentBuilder, 
+        IDictionary<string, string>? headers,
+        CancellationToken cancellationToken);
     IhttpsClientHelper AddRequestAction(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> action);
     IhttpsClientHelper addFormData(List<KeyValuePair<string, string>> keyValuePairs);
     IhttpsClientHelper addRetryCondition(Func<HttpResponseMessage, bool> RetryCondition, int retryCount, double backoffFactor);
     IhttpsClientHelper addTimeout(TimeSpan timeSpan);
     IhttpsClientHelper ClearRequestActions();
     IhttpsClientHelper addHeaders(string KeyName, string KeyValue);
-    IhttpsClientHelper setHeadersWithoutAuthorization(Dictionary<string, string> _HeaderValues);
-    IhttpsClientHelper setHeadersAndBearerAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBearer httpClientAuthenticationBearer);
-    IhttpsClientHelper setHeadersAndBasicAuthentication(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBasic httpClientAuthenticationBasic);
+    IhttpsClientHelper setHeadersWithoutAuthorizationSync(Dictionary<string, string> _HeaderValues);
+    IhttpsClientHelper setHeadersAndBearerAuthenticationSync(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBearer httpClientAuthenticationBearer);
+    IhttpsClientHelper setHeadersAndBasicAuthenticationSync(Dictionary<string, string> _HeaderValues, httpClientAuthenticationBasic httpClientAuthenticationBasic);
 }
