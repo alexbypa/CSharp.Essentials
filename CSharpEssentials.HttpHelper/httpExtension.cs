@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Security;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -67,7 +68,14 @@ public static class ProxyConfigurator {
             Address = new Uri(opt.httpProxy.Address),
             Credentials = new NetworkCredential(opt.httpProxy.UserName, opt.httpProxy.Password)
         };
+
         handler.UseProxy = true;
+
+        loggerExtension<RequestHttpExtension>.TraceAsync(
+            new RequestHttpExtension(),
+            Serilog.Events.LogEventLevel.Warning,
+            null,
+            "HttpHelper CONFIG : ApplyProxy: UseProxy={UseProxy}, Address={Address}", opt.httpProxy?.UseProxy, opt.httpProxy?.Address);
     }
 }
 
