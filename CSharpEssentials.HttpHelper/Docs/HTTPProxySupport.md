@@ -195,7 +195,7 @@ Host: localhost:1234
 
 ## 🎬 Demo Screenshot
 
-![Fiddler AutoResponder in action](./docs/fiddler-demo.png)
+![Fiddler AutoResponder in action](fiddler-demo.png)
 
 *Example: Fiddler intercepting a request and returning a mocked JSON response through the configured proxy.*
 
