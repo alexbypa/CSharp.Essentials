@@ -42,32 +42,24 @@ builder.Services.AddHttpClients(builder.Configuration);
 ### Step 1: Create a test endpoint
 
 ```csharp
-app.MapGet("Test/proxyweb", (IhttpsClientHelperFactory httpFactory, string httpOptionName = "default") =>
-{
+app.MapGet("Test/proxyweb", async (IhttpsClientHelperFactory httpFactory, string httpOptionName = "testAI") => {
+    string url = "https://httpbin.org/get";
     var client = httpFactory.CreateOrGet(httpOptionName);
 
-    // Configure request
-    client.ClearRequestActions();
-    client.AddTimeout(TimeSpan.FromSeconds(10));
-    client.AddRequestAction((req, res, retry, elapsed) =>
-    {
-        Console.WriteLine($"[{res.StatusCode}] {req.Method} {req.RequestUri}");
-        return Task.CompletedTask;
-    });
+    IContentBuilder nobody = new NoBodyContentBuilder();
+    CancellationTokenSource cts = new CancellationTokenSource();
+    cts.CancelAfter(TimeSpan.FromSeconds(30));
 
-    // Execute request
-    var response = client.SendAsync(
-        "https://httpbin.org/get",
-        HttpMethod.Get,
-        headers: null,
-        new NoBodyContentBuilder()
-    ).GetAwaiter().GetResult();
-
-    response.EnsureSuccessStatusCode();
-    return Results.Ok("✅ Request sent through proxy. Check Fiddler!");
+    var response = await client.SendAsync(url, HttpMethod.Get, null, nobody, null, cts.Token);
+    try {
+        response.EnsureSuccessStatusCode();
+    } catch (HttpRequestException ex) {
+        return Results.Problem($"[FAIL HTTP] connection Error on Proxy/Target: {ex.Message}.");
+    } catch (UriFormatException ex) {
+        return Results.Problem($"[FAIL HTTP] URI fomat error on configuration: {ex.Message}.");
+    }
+    return Results.Ok("See console output for how to call HttpHelper with actions.");
 })
-.WithTags("HTTP HELPER")
-.WithSummary("Test proxy configuration");
 ```
 
 ---
@@ -197,19 +189,6 @@ Host: localhost:1234
     }
   }
 }
-```
-
-### Programmatic override
-
-```csharp
-var client = httpFactory.CreateOrGet("externalApi", options =>
-{
-    options.HttpProxy = new HttpProxyOptions
-    {
-        UseProxy = true,
-        Address = "localhost:8888"
-    };
-});
 ```
 
 ---
