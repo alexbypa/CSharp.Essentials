@@ -171,25 +171,30 @@ Host: localhost:1234
 ### Per-client proxy settings
 
 ```json
-{
-  "HttpClientOptions": {
-    "externalApi": {
-      "BaseAddress": "https://api.example.com",
-      "HttpProxy": {
-        "UseProxy": true,
-        "Address": "corporate-proxy.local:8080",
-        "BypassOnLocal": true
+"HttpClientOptions": [
+    {
+      "name": "testAI",
+      "certificate": {
+        "path": "",
+        "password": ""
+      },
+      "httpProxy": {
+        "Address": "http://127.0.0.1:8888",
+        "UserName": "alex",
+        "Password": "ciccio",
+        "UseProxy": true
+      },
+      "RateLimitOptions": {
+        "AutoReplenishment": true,
+        "PermitLimit": 1,
+        "QueueLimit": 1,
+        "Window": "00:00:15",
+        "SegmentsPerWindow": 2,
+        "IsEnabled": false
       }
-    },
-    "internalApi": {
-      "BaseAddress": "https://internal.company.com",
-      "HttpProxy": {
-        "UseProxy": false  // Direct connection
-      }
-    }
-  }
-}
+    },....
 ```
+> 💡 **Development Tip**: In local debug mode, the library automatically loads `appsettings.Development.json` if it exists. Use this file to configure proxy settings without affecting production.
 
 ---
 
