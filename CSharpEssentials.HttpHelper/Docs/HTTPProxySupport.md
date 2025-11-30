@@ -204,16 +204,6 @@ Host: localhost:1234
 
 *Example: Fiddler intercepting a request and returning a mocked JSON response through the configured proxy.*
 
----
-
-## 📖 Related Documentation
-
-- [Getting Started](./README.md#getting-started)
-- [Request/Response Actions](./README.md#requestresponse-actions)
-- [Error Handling](./README.md#error-handling)
-
----
-
 **🎉 You're all set!** Your application now supports proxy configuration with zero code changes. Just update `appsettings.json` and go! 🚀
 
 ---
