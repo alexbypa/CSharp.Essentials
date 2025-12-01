@@ -17,6 +17,9 @@
     <PackageTags>HttpClient, Resiliency, RateLimiting, ASP.NET Core, HTTP, Retry, TransientFaultHandling, Logger, Serilog, Custom Handler, .http Test</PackageTags>
     <Version>4.0.12</Version>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Docs\HTTPMockAndRetryActions.md" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\LICENSE">
