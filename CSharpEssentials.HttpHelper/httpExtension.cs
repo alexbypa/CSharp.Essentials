@@ -1,4 +1,5 @@
-﻿using CSharpEssentials.HttpHelper.HttpMocks;
+﻿using Castle.Core.Logging;
+using CSharpEssentials.HttpHelper.HttpMocks;
 using CSharpEssentials.LoggerHelper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -73,10 +74,19 @@ public static class ProxyConfigurator {
         if (opt.httpProxy == null || !opt.httpProxy.UseProxy)
             return;
 
+        try {
         handler.Proxy = new WebProxy {
             Address = new Uri(opt.httpProxy.Address),
             Credentials = new NetworkCredential(opt.httpProxy.UserName, opt.httpProxy.Password)
         };
+        }catch (Exception ex) {
+            loggerExtension<RequestHttpExtension>.TraceAsync(
+                new RequestHttpExtension(),
+                Serilog.Events.LogEventLevel.Error,
+                ex,
+                "HttpHelper CONFIG : Proxy Error");
+            return;
+        }
 
         handler.UseProxy = true;
 
