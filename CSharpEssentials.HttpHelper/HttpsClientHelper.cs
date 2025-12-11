@@ -164,6 +164,15 @@ public class httpsClientHelper : IhttpsClientHelper {
                     "application/json"),
                 RequestMessage = request
             };
+        } catch (Exception ex) {
+            return new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError) {
+                ReasonPhrase = "Internal client error",
+                Content = new StringContent(
+                    $"{{\"error\":\"internal_error\",\"message\":\"{ex.Message}\"}}",
+                    Encoding.UTF8,
+                    "application/json"),
+                RequestMessage = request
+            };
         }
     }
     private static HttpRequestMessage CloneHttpRequestMessage(HttpRequestMessage request) {
