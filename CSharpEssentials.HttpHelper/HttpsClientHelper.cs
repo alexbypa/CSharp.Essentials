@@ -48,10 +48,9 @@ public class httpsClientHelper : IhttpsClientHelper {
                         retryAttempt => TimeSpan.FromSeconds(Math.Pow(backoffFactor, retryAttempt)),
                         onRetry: (outcome, timespan, attempt, context) => {
                             context["RetryAttempt"] = attempt;
+                            context["BackoffTime"] = timespan; // Salva il tempo di attesa nel contesto Polly
                         }
-                     )
-
-                    ;
+                     );
         return this;
     }
     private void _setHeaders(Dictionary<string, string> _HeaderValues) {
@@ -122,9 +121,12 @@ public class httpsClientHelper : IhttpsClientHelper {
             } else {
                 response = _retryPolicy.ExecuteAsync(async ctx => {
                     var attempt = ctx.ContainsKey("RetryAttempt") ? (int)ctx["RetryAttempt"] : 0;
-                    if (request.Headers.Contains("X-Retry-Attempt"))
-                        request.Headers.Remove("X-Retry-Attempt");
+                    var backoff = ctx.ContainsKey("BackoffTime") ? (TimeSpan)ctx["BackoffTime"] : TimeSpan.Zero;
+                    if (request.Headers.Contains("X-Retry-Attempt")) request.Headers.Remove("X-Retry-Attempt");
                     request.Headers.Add("X-Retry-Attempt", attempt.ToString());
+                    
+                    if (request.Headers.Contains("X-RateLimit-TimeSpanElapsed")) request.Headers.Remove("X-RateLimit-TimeSpanElapsed");
+                    request.Headers.Add("X-RateLimit-TimeSpanElapsed", backoff.ToString());
 
                     return await _SendAsync(CloneHttpRequestMessage(request), cancellationToken);
 
