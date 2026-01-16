@@ -11,11 +11,11 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
-    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <PackageOutputPath>D:\github\alexbypa\FlowScheduler\LocalNuget</PackageOutputPath>
     <Description>package to help manage of httpHelper</Description>
     <Company>Alessandro Chiodo</Company>
     <PackageTags>HttpClient, Resiliency, RateLimiting, ASP.NET Core, HTTP, Retry, TransientFaultHandling, Logger, Serilog, Custom Handler, .http Test</PackageTags>
-    <Version>4.0.12</Version>
+    <Version>4.0.18</Version>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
   <ItemGroup>

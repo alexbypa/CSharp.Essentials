@@ -101,24 +101,37 @@ public static class ProxyConfigurator {
 public static class httpExtension {
     public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration) {
         var builder = new ConfigurationBuilder().AddConfiguration(configuration);
-        var externalConfigPath = Path.Combine(AppContext.BaseDirectory, "appsettings.httpHelper.json");
+        Console.WriteLine($"[httpExtension] get builder");
+        var externalConfigPath = Path.Combine(AppContext.BaseDirectory, "appsettings.httphelper.json");
         if (File.Exists(externalConfigPath)) {
+            Console.WriteLine($"[httpExtension] ✅ TROVATO: {externalConfigPath}");
             builder.AddJsonFile(externalConfigPath, optional: false, reloadOnChange: true).AddEnvironmentVariables();
         }
         IConfiguration finalConfiguration = builder.Build();
 
+        Console.WriteLine($"[httpExtension] configuration builded....");
+
         services.AddSingleton<IHttpRequestEvents, HttpRequestEvents>();
+        Console.WriteLine($"[httpExtension] singleton IHttpRequestEvents....");
         services.AddTransient<HttpClientHandlerLogging>();
+        Console.WriteLine($"[httpExtension] added HttpClientHandlerLogging ...");
         var httpclientoptions = finalConfiguration.GetSection("HttpClientOptions");
         services.Configure<List<httpClientOptions>>(httpclientoptions);
         List<httpClientOptions>? options = getOptions(httpclientoptions);
+        Console.WriteLine($"[httpExtension] Loaded options ...");
 
         services.AddSingleton<IhttpsClientHelperFactory, httpsClientHelperFactory>();
+        
+        Console.WriteLine($"[httpExtension] Loaded httpsClientHelperFactory ...");
 
         services.InjectMock();
 
+        Console.WriteLine($"[httpExtension] parsing appSettings.json...");
         if (options != null) {
+            Console.WriteLine($"[httpExtension] founded appSettings.json !");
             foreach (var option in options) {
+                Console.WriteLine($"[httpExtension] Trovato option: {option.Name}");
+
                 services
                 .AddHttpClient<IhttpsClientHelper, httpsClientHelper>(option.Name)
                 .SetHandlerLifetime(TimeSpan.FromSeconds(30)) //TODO: sarebbe meglio metterlo su appSettings.json

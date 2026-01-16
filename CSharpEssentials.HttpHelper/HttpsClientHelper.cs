@@ -81,12 +81,15 @@ public class httpsClientHelper : IhttpsClientHelper {
     public async Task<HttpResponseMessage> SendAsync(
     string baseUrl,
     HttpMethod httpMethod,
-    object body,
-    IContentBuilder contentBuilder,
-    IDictionary<string, string>? headers,
-    CancellationToken cancellationToken) {
+    IContentBuilder contentBuilder = null,
+    object body = null,
+    IDictionary<string, string>? headers = null,
+    CancellationToken cancellationToken = default) {
         Task<HttpResponseMessage> response = null;
         try {
+            if (contentBuilder == null) 
+                contentBuilder = new NoBodyContentBuilder();
+
             var request = new HttpRequestBuilder()
                 .WithUrl(baseUrl)
                 .WithMethod(httpMethod)
@@ -212,13 +215,23 @@ public class httpsClientHelper : IhttpsClientHelper {
     }
 }
 public interface IhttpsClientHelper {
+    /// <summary>
+    /// central method for any http call
+    /// </summary>
+    /// <param name="baseUrl">Url to call</param>
+    /// <param name="httpMethod">Get, Post...</param>
+    /// <param name="contentBuilder">Type content</param>
+    /// <param name="body">object to put</param>
+    /// <param name="headers">Headers</param>
+    /// <param name="cancellationToken">cancellationToken</param>
+    /// <returns></returns>
     Task<HttpResponseMessage> SendAsync(
         string baseUrl,
         HttpMethod httpMethod,
-        object body,
-        IContentBuilder contentBuilder, 
-        IDictionary<string, string>? headers,
-        CancellationToken cancellationToken);
+        IContentBuilder contentBuilder = null, 
+        object body = null,
+        IDictionary<string, string>? headers = null,
+        CancellationToken cancellationToken = default);
     IhttpsClientHelper AddRequestAction(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> action);
     IhttpsClientHelper addFormData(List<KeyValuePair<string, string>> keyValuePairs);
     IhttpsClientHelper addRetryCondition(Func<HttpResponseMessage, bool> RetryCondition, int retryCount, double backoffFactor);
