@@ -12,6 +12,7 @@ public interface IHttpMockEngine {
 /// </summary>
 public class HttpMockEngine : IHttpMockEngine {
     public IEnumerable<IHttpMockScenario> scenarios { get; }
+    private HttpMessageHandler? _cachedHandler;
     public bool Match(HttpRequestMessage request) {
         bool isMatched = false;
         foreach (var scenario in scenarios) {
@@ -26,6 +27,8 @@ public class HttpMockEngine : IHttpMockEngine {
         scenarios = httpMockScenarios;
     }
     public HttpMessageHandler Build() {
+        if (_cachedHandler != null) return _cachedHandler;
+
         var mock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
         foreach (var scenario in scenarios) {
             var seq = mock.Protected()

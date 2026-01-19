@@ -18,13 +18,11 @@ public class HttpMockDelegatingHandler : DelegatingHandler {
         _engine = engine;
     }
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
-        if (_engine == null)
+        if (_engine == null || !_engine.Match(request))
             return await base.SendAsync(request, cancellationToken);
 
-        if (!_engine.Match(request))
-            return await base.SendAsync(request, cancellationToken);
+        _mockHandler ??= _engine.Build();
 
-        var _mockHandler = _engine.Build();
         var invoker = new HttpMessageInvoker(_mockHandler, disposeHandler: false);
         try {
             return await invoker.SendAsync(request, cancellationToken);
