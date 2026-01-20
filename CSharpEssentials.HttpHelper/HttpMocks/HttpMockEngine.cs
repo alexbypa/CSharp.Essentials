@@ -27,20 +27,47 @@ public class HttpMockEngine : IHttpMockEngine {
         scenarios = httpMockScenarios;
     }
     public HttpMessageHandler Build() {
-        if (_cachedHandler != null) return _cachedHandler;
+        if (_cachedHandler != null)
+            return _cachedHandler;
 
         var mock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+
         foreach (var scenario in scenarios) {
-            var seq = mock.Protected()
-                .SetupSequence<Task<HttpResponseMessage>>(
+            // Inizializziamo l'indice locale per lo scenario
+            int index = 0;
+
+            mock.Protected()
+                .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
                     ItExpr.Is<HttpRequestMessage>(r => scenario.Match(r)),
-                    ItExpr.IsAny<CancellationToken>());
+                    ItExpr.IsAny<CancellationToken>())
+                .Returns(() => {
+                    // Preleviamo la factory all'indice corrente
+                    var factory = scenario.ResponseFactory[index];
 
-            foreach (var responseFactory in scenario.ResponseFactory)
-                seq.Returns(responseFactory);
+                    // Incrementiamo l'indice e usiamo il modulo per farlo tornare a 0 
+                    // quando raggiunge la fine della lista (scenario.ResponseFactory.Count)
+                    index = (index + 1) % scenario.ResponseFactory.Count;
+
+                    return factory();
+                });
         }
-        return mock.Object;
+
+        _cachedHandler = mock.Object;
+        return _cachedHandler;
+
+        //foreach (var scenario in scenarios) {
+
+        //    var seq = mock.Protected()
+        //        .SetupSequence<Task<HttpResponseMessage>>(
+        //            "SendAsync",
+        //            ItExpr.Is<HttpRequestMessage>(r => scenario.Match(r)),
+        //            ItExpr.IsAny<CancellationToken>());
+
+        //    foreach (var responseFactory in scenario.ResponseFactory)
+        //        seq.Returns(responseFactory);
+        //}
+        //return mock.Object;
     }
     public HttpMessageHandler Orchestrate() {
         return Build();
