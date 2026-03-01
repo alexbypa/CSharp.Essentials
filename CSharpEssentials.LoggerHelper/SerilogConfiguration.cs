@@ -16,6 +16,7 @@ public class SerilogOption {
     public GeneralConfig? GeneralConfig { get; set; }
     public ElasticSearch? ElasticSearch { get; set; }
     public Email? Email { get; set; }
+    public SeqOptions? SeqOptions { get; set; }
 }
 public class Email {
     public string? From { get; set; }
@@ -43,7 +44,9 @@ public class ColumnsPostGreSQL {
     public string Property { get; set; } // solo per SinglePropertyColumnWriter
 }
 
-
+public class SeqOptions {
+    public string? serverUrl { get; set; }
+}
 public class ElasticSearch {
     public string? nodeUris { get; set; }
     public string? indexFormat { get; set; }
