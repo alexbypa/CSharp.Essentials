@@ -1,4 +1,4 @@
-﻿![Frameworks](https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0-blue)
+![Frameworks](https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0%20%7C%2010.0-blue)
 ![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)
 ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)
 ![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)
@@ -6,13 +6,13 @@
 ![GitHub Discussions](https://img.shields.io/github/discussions/alexbypa/CSharp.Essentials)
 ![Issues](https://img.shields.io/github/issues/alexbypa/CSharp.Essentials)
 
-# 📦 CSharpEssentials.LoggerHelper
-
+# 📦 CSharpEssentials.LoggerHelper 
+ 
 **The ultimate Serilog sink hub — extensible, modular, centralized.**
 
-### ⚡ Version 4.0.10 — The Ultimate Visibility Upgrade
+### ⚡ Version 4.1.0 — The Ultimate Visibility Upgrade
 
-With **version 4.0.10**, LoggerHelper reaches a new level of observability.  
+With **version 4.1.0**, LoggerHelper reaches a new level of observability.  
 You can now use the **latest Dashboard** together with the **updated Console Sink** to view all startup configuration details **directly in the web dashboard**, instead of the local console.
 
 No more hidden logs — the Dashboard now becomes your live control center, showing every initialization parameter and system behavior in real time, right from application launch.  
@@ -58,7 +58,14 @@ When something goes wrong, you can inspect:
 Perfect for debugging deployment or configuration issues.
 ---
 
-## 🆕 What’s New in 3.1.5?
+## 🆕 Recent Updates
+
+### ✨ .NET 10.0 Compatibility
+- **Full .NET 10.0 Support**: The library is now fully compatible up to `.NET 10.0`!
+
+---
+
+## 🆕 Old Updates (3.1.5)
 
 ### ✨ Added Sink: xUnit
 
