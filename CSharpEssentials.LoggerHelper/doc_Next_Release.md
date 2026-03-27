@@ -1,4 +1,4 @@
-﻿﻿[![Frameworks](https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0-blue)](https://dotnet.microsoft.com/en-us/download)
+[![Frameworks](https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0-blue)](https://dotnet.microsoft.com/en-us/download)
 [![CodeQL](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml/badge.svg)](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/codeqlLogger.yml)
 [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 [![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
@@ -651,49 +651,60 @@ ElasticSearch is ideal for indexing and searching logs at scale. When integrated
 
 ## 🚀 Extending LogEvent Properties from Your Project<a id='customprop'></a>   [🔝](#table-of-contents)
 
-Starting from version **2.0.9**, you can extend the default log event context by implementing your own **custom enricher**. This allows you to **add extra fields** to the log context and ensure they are included in **all log sinks** (not only in email notifications, but also in any other sink that supports additional fields—especially in the databases, where from version **2.0.8** onwards you can add dedicated columns for these custom properties).
-**How to configure it:**
+Starting from version **2.0.9**, you can extend the default log event context to include extra fields in **all log sinks** (databases, email, etc.). LoggerHelper supports two different enrichment strategies: **Per-Request Contextual Enrichment** and **Global Configuration Enrichment**.
 
-✅ **1️⃣ Register your custom enricher and logger configuration in `Program.cs`**
-Before building the app:
+### 1️⃣ Per-Request Contextual Enrichment (Dynamic)
+This strategy allows you to inject properties that change based on the ambient context (e.g. HTTP request, user identity, IP address).
+
+✅ **Configure the Service**
+Register your custom enricher in `Program.cs` before building the app:
 
 ```csharp
 builder.Services.AddSingleton<IContextLogEnricher, MyCustomEnricher>();
-builder.Services.AddloggerConfiguration(builder);
 ```
 
-✅ **2️⃣ Assign the service provider to `LoggerHelperServiceLocator`**
+✅ **Assign the Service Locator**
 After building the app:
 
 ```csharp
 LoggerHelperServiceLocator.Instance = app.Services;
 ```
 
-✅ **3️⃣ Create your custom enricher class**
-Example implementation:
+✅ **Create your Custom Enricher Class**
+The `Enrich(ILogger logger, object? context)` method will be invoked automatically on every `loggerExtension<T>.TraceSync` call.
+
+**💡 What is `object? context`?**
+It represents the physical `request` object that you pass as the first parameter to the `TraceSync` (or `TraceAsync`) method. Since `LoggerHelper` accepts any class implementing `IRequest` (or child types), this class is passed as a generic object to the enricher. You can safely cast it back to your strongly-typed request (e.g., `MyCustomRequest`) to read its properties!
+
+Inside this method, use `logger.ForContext("ColumnName", Value)` to push your custom fields into Serilog. **Make sure to return the resulting logger.**
 
 ```csharp
 public class MyCustomEnricher : IContextLogEnricher {
     public ILogger Enrich(ILogger logger, object? context) {
+        // 1. Cast the generic context back to your custom request model
         if (context is MyCustomRequest req) {
+            
+            // 2. Add as many properties as you want using .ForContext()
+            // This returns a new enriched logger instance!
             return logger
                 .ForContext("Username", req.Username)
-                .ForContext("IpAddress", req.IpAddress);
+                .ForContext("IpAddress", req.IpAddress)
+                .ForContext("ProviderName", req.ProviderName);
         }
+        
+        // Return the unchanged logger if casting failed or context was null
         return logger;
     }
 
+    // Unused for Global Setup, implemented here just for interface contract
     public LoggerConfiguration Enrich(LoggerConfiguration configuration) => configuration;
 }
 ```
-👉 **Note:**
-In addition to the fields already provided by the package (e.g., `MachineName`, `Action`, `ApplicationName`, `IdTransaction`), you can add **custom fields**—such as the **logged-in username** and the **IP address** of the request—using your own properties.
 
-✅ **4️⃣ Use your custom request class in your application**
+> **Note:** In addition to the default fields (`MachineName`, `Action`, `ApplicationName`, `IdTransaction`), you just added custom fields: `Username`, `IpAddress`, and `ProviderName`.
 
-> **Note:** your custom request class (e.g. `myRequest`) must implement the `ILoggerRequest` interface provided by **LoggerHelper**.
-
-Example usage:
+✅ **Use your custom request class**
+Ensure your request object implements `ILoggerRequest`.
 
 ```csharp
 var myRequest = new MyCustomRequest {
@@ -708,20 +719,38 @@ var myRequest = new MyCustomRequest {
 loggerExtension<MyCustomRequest>.TraceSync(myRequest, LogEventLevel.Information, null, "User login event");
 ```
 
-✅ **5️⃣ Update your email template to include the new fields**
-Example additions:
+---
+
+### 2️⃣ Global Configuration Enrichment (Static / Startup)
+If you want to apply Serilog properties globally to all sinks immediately at startup (which apply to everything, not just requests handled by `loggerExtension`), you can pass a configuration callback during registration:
+
+```csharp
+builder.Services.AddloggerConfiguration(builder.Configuration, config => {
+    config.Enrich.WithProperty("Environment", builder.Environment.EnvironmentName);
+    config.Enrich.WithProperty("Version", "1.0.0");
+    // Or register Serilog Global Enrichers
+    // config.Enrich.With<MyGlobalStaticEnricher>();
+});
+```
+
+---
+
+### 3️⃣ Map Custom Fields to Sinks
+
+✅ **Email Template Customization**
+Include the new placeholders in your `.html` template:
 
 ```html
 <tr><th>User Name</th><td>{{Username}}</td></tr>
 <tr><th>Ip Address</th><td>{{IpAddress}}</td></tr>
 ```
-✅ **6️⃣ MSSQL and PostgresQL sink Template Customization**
-- To add extra fields on table of MSSQL add fields on array **additionalColumns**
-- To add extra fields on table of postgre add fields on array **ColumnsPostGreSQL**
+
+✅ **Database Sink Customization**
+- For **MSSqlServer**: add the field names to the **additionalColumns** array in your `appsettings.LoggerHelper.json`.
+- For **PostgreSQL**: add the field names to the **ColumnsPostGreSQL** array.
 
 🔗 **Download Example**
-You can see an example in the [demo controller](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/LoggerController.cs).
-Whereas the custom class to generate extra fields can be found [here](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/MyCustomEnricher.cs).
+You can see an example in the [demo controller](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/LoggerController.cs) and the custom enricher class [here](https://github.com/alexbypa/CSharp.Essentials/blob/main/Test8.0/Controllers/logger/MyCustomEnricher.cs).
 
 ---
 ## 🧪 Demo API <a id='demo-api'></a>   [🔝](#table-of-contents)

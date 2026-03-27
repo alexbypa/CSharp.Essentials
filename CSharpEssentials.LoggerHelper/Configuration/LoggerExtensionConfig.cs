@@ -1,4 +1,4 @@
-﻿using CSharpEssentials.LoggerHelper.shared;
+using CSharpEssentials.LoggerHelper.shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +17,7 @@ public static class LoggerExtensionConfig {
     /// <summary>
     /// Adds external LoggerHelper configuration (e.g., appsettings.LoggerHelper.json) to a WebApplicationBuilder.
     /// </summary>
-    public static IServiceCollection AddLoggerConfiguration(this ServiceCollection Services, IConfiguration configuration) {
+    public static IServiceCollection AddLoggerConfiguration(this ServiceCollection Services, IConfiguration configuration, Action<LoggerConfiguration>? configureEnrichers = null) {
         var externalConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.LoggerHelper.json");
         if (File.Exists(externalConfigPath)) {
             var finalConfig = new ConfigurationBuilder()
@@ -32,7 +32,7 @@ public static class LoggerExtensionConfig {
     /// <summary>
     /// Adds external LoggerHelper configuration (e.g., appsettings.LoggerHelper.json) to a WebApplicationBuilder.
     /// </summary>
-    public static IServiceCollection AddloggerConfiguration(this IServiceCollection services, IConfiguration configuration) {
+    public static IServiceCollection AddloggerConfiguration(this IServiceCollection services, IConfiguration configuration, Action<LoggerConfiguration>? configureEnrichers = null) {
 
         var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
                        ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
@@ -66,6 +66,9 @@ public static class LoggerExtensionConfig {
             .Enrich.WithProperty("ApplicationName", appName)
             .Enrich.FromLogContext()
             .Enrich.With<RenderedMessageEnricher>();
+
+        if (configureEnrichers != null)
+            configureEnrichers(_config);
 
         services.AddSingleton<LoggerErrorStore>();
 

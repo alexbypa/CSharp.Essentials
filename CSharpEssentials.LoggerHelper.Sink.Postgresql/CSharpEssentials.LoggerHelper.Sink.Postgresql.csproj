@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0;net9.0;net10.0</TargetFrameworks>
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Stores structured logs directly into PostgreSQL with support for custom schemas, JSON fields, and automatic table creation for deep analytics and long-term storage.</Title>
-    <Version>4.0.2</Version>
+    <Version>4.1.0</Version>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
