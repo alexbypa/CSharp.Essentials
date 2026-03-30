@@ -202,6 +202,26 @@ public static class DashboardExtensions {
             return Results.Ok(dto);
         });
 
+        app.MapGet("/api/sink-errors", () =>
+        {
+            var sinkErrors = GlobalLogger.Errors
+                .Where(e => e.SinkName == "SelfLog")
+                .OrderByDescending(e => e.Timestamp)
+                .Select(e => new {
+                    e.Timestamp,
+                    e.SinkName,
+                    category  = ExtractField(e.ErrorMessage, "CATEGORY"),
+                    target    = ExtractField(e.ErrorMessage, "TARGET"),
+                    hint      = ExtractField(e.ErrorMessage, "HINT"),
+                    rawError  = e.ErrorMessage
+                })
+                .ToList();
+
+            return sinkErrors.Count == 0
+                ? Results.Ok(new { status = "ok", message = "No sink errors detected.", errors = sinkErrors })
+                : Results.Ok(new { status = "degraded", message = $"{sinkErrors.Count} sink error(s) detected. One or more sinks (e.g. PostgreSQL) may be unavailable.", errors = sinkErrors });
+        });
+
         app.MapGet("/api/check-ai-package", () =>
         {
             var baseDir = AppContext.BaseDirectory;
@@ -218,6 +238,15 @@ public static class DashboardExtensions {
         /// In-memory log events endpoint
         app.MapGet("/api/console", () => InMemoryDashboardSink.GetLogEvents());
     }
+    private static string ExtractField(string message, string fieldName) {
+        var key = $"{fieldName}=";
+        var start = message.IndexOf(key, StringComparison.OrdinalIgnoreCase);
+        if (start < 0) return string.Empty;
+        start += key.Length;
+        var end = message.IndexOf(" | ", start, StringComparison.OrdinalIgnoreCase);
+        return end < 0 ? message[start..] : message[start..end];
+    }
+
     // DTO minimali
     public record LoggerSinkDto(string SinkName, List<string> Levels);
     public record LoggerErrorDto(DateTime Timestamp, string SinkName, string ErrorMessage);
