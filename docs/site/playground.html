@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LoggerHelper Playground — Try Configuration Live</title>
+    <meta name="description" content="Interactive playground to test LoggerHelper configuration. Edit JSON config and see simulated log routing in real-time." />
+    <link rel="stylesheet" href="assets/style.css" />
+    <style>
+        .pg-layout {
+            display: grid; grid-template-columns: 280px 1fr 1fr;
+            gap: 1rem; min-height: calc(100vh - 80px);
+            padding: 1rem; margin-top: 60px;
+        }
+        .pg-sidebar {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.25rem; overflow-y: auto;
+        }
+        .pg-sidebar h3 { font-size: .9rem; margin-bottom: .75rem; }
+        .preset-btn {
+            display: block; width: 100%; text-align: left;
+            padding: .6rem .75rem; margin-bottom: .4rem;
+            background: var(--bg-code); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text-secondary);
+            font-size: .8rem; cursor: pointer;
+            transition: border-color .2s;
+        }
+        .preset-btn:hover, .preset-btn.active { border-color: var(--brand-primary); color: var(--text-primary); }
+        .preset-btn .label { font-weight: 600; display: block; margin-bottom: 2px; }
+        .preset-btn .desc { color: var(--text-muted); font-size: .72rem; }
+
+        .pg-editor, .pg-output {
+            background: var(--bg-code); border: 1px solid var(--border);
+            border-radius: 12px; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        .pg-editor textarea {
+            flex: 1; width: 100%; padding: 1rem;
+            background: transparent; border: none; resize: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .82rem; line-height: 1.65;
+            color: var(--text-secondary); outline: none;
+        }
+        .pg-output pre {
+            flex: 1; padding: 1rem; overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .8rem; line-height: 1.65;
+            color: var(--text-secondary);
+        }
+        .pg-toolbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: .5rem 1rem; border-bottom: 1px solid var(--border);
+            background: rgba(255,255,255,.02);
+        }
+        .pg-toolbar span { font-size: .75rem; font-weight: 600; color: var(--text-muted); }
+
+        .route-viz {
+            margin-top: 1.5rem; padding: 1rem;
+            background: rgba(124,58,237,.05); border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+        .route-viz h4 { font-size: .8rem; color: var(--text-muted); margin-bottom: .5rem; text-transform: uppercase; letter-spacing: .05em; }
+        .route-row {
+            display: flex; align-items: center; gap: .5rem;
+            padding: .35rem 0; font-size: .78rem;
+        }
+        .route-pill {
+            display: inline-block; padding: 2px 8px;
+            border-radius: 4px; font-size: .7rem; font-weight: 600;
+        }
+        .pill-info { background: rgba(34,197,94,.15); color: #22c55e; }
+        .pill-warn { background: rgba(245,158,11,.15); color: #f59e0b; }
+        .pill-error { background: rgba(239,68,68,.15); color: #ef4444; }
+        .pill-fatal { background: rgba(244,63,94,.15); color: #f43f5e; }
+        .pill-debug { background: rgba(100,116,139,.15); color: #94a3b8; }
+        .sink-label { color: var(--brand-secondary); font-weight: 600; min-width: 90px; }
+
+        @media (max-width: 1024px) {
+            .pg-layout { grid-template-columns: 1fr; }
+            .pg-sidebar { display: flex; gap: .5rem; flex-wrap: wrap; }
+            .preset-btn { width: auto; flex: 1; min-width: 140px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav scrolled">
+    <div class="nav-inner">
+        <a href="index.html" class="nav-logo">
+            <span>CSharp</span><span class="accent">Essentials</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="index.html#quickstart">Quick Start</a></li>
+            <li><a href="index.html#sinks">Sinks</a></li>
+            <li><a href="#" style="color:var(--brand-secondary)">Playground</a></li>
+            <li><a href="https://github.com/alexbypa/CSharp.Essentials" class="nav-cta" target="_blank">GitHub</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="pg-layout">
+    <!-- Sidebar: presets -->
+    <div class="pg-sidebar">
+        <h3>Presets</h3>
+        <button class="preset-btn active" data-preset="basic">
+            <span class="label">Basic Console</span>
+            <span class="desc">Single route, all levels to console</span>
+        </button>
+        <button class="preset-btn" data-preset="production">
+            <span class="label">Production Stack</span>
+            <span class="desc">Console + File + Email for errors</span>
+        </button>
+        <button class="preset-btn" data-preset="microservice">
+            <span class="label">Microservice</span>
+            <span class="desc">Console + Elasticsearch + Seq</span>
+        </button>
+        <button class="preset-btn" data-preset="alerts">
+            <span class="label">Alert-Focused</span>
+            <span class="desc">Email + Telegram for critical only</span>
+        </button>
+        <button class="preset-btn" data-preset="database">
+            <span class="label">Database Logging</span>
+            <span class="desc">SQL Server + PostgreSQL</span>
+        </button>
+        <button class="preset-btn" data-preset="full">
+            <span class="label">Full Stack</span>
+            <span class="desc">All 8 sinks, per-level routing</span>
+        </button>
+
+        <div class="route-viz" id="route-viz">
+            <h4>Route Map</h4>
+            <div id="route-viz-content"></div>
+        </div>
+    </div>
+
+    <!-- Editor -->
+    <div class="pg-editor">
+        <div class="pg-toolbar">
+            <span>Configuration (JSON)</span>
+            <button class="btn btn-primary" id="playground-run" style="padding:.3rem .8rem;font-size:.75rem;">&#9654; Run &nbsp;<kbd style="opacity:.6;font-size:.65rem;">Ctrl+Enter</kbd></button>
+        </div>
+        <textarea id="playground-editor" spellcheck="false"></textarea>
+    </div>
+
+    <!-- Output -->
+    <div class="pg-output">
+        <div class="pg-toolbar"><span>Simulated Log Output</span></div>
+        <pre id="playground-output"></pre>
+    </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+const presets = {
+    basic: {
+        ApplicationName: "MyApp",
+        Routes: [
+            { Sink: "Console", Levels: ["Debug", "Information", "Warning", "Error", "Fatal"] }
+        ]
+    },
+    production: {
+        ApplicationName: "ProductionApp",
+        Routes: [
+            { Sink: "Console", Levels: ["Information", "Warning"] },
+            { Sink: "File", Levels: ["Warning", "Error", "Fatal"] },
+            { Sink: "Email", Levels: ["Error", "Fatal"] }
+        ]
+    },
+    microservice: {
+        ApplicationName: "OrderService",
+        Routes: [
+            { Sink: "Console", Levels: ["Information", "Warning"] },
+            { Sink: "Elasticsearch", Levels: ["Information", "Warning", "Error", "Fatal"] },
+            { Sink: "Seq", Levels: ["Debug", "Information", "Warning", "Error", "Fatal"] }
+        ]
+    },
+    alerts: {
+        ApplicationName: "CriticalService",
+        Routes: [
+            { Sink: "Console", Levels: ["Information"] },
+            { Sink: "Email", Levels: ["Error", "Fatal"] },
+            { Sink: "Telegram", Levels: ["Fatal"] }
+        ]
+    },
+    database: {
+        ApplicationName: "DataApp",
+        Routes: [
+            { Sink: "Console", Levels: ["Information", "Warning"] },
+            { Sink: "MSSqlServer", Levels: ["Warning", "Error", "Fatal"] },
+            { Sink: "Postgresql", Levels: ["Information", "Warning", "Error", "Fatal"] }
+        ]
+    },
+    full: {
+        ApplicationName: "EnterpriseApp",
+        Routes: [
+            { Sink: "Console", Levels: ["Information", "Warning"] },
+            { Sink: "File", Levels: ["Debug", "Information", "Warning", "Error", "Fatal"] },
+            { Sink: "Email", Levels: ["Error", "Fatal"] },
+            { Sink: "Telegram", Levels: ["Fatal"] },
+            { Sink: "Elasticsearch", Levels: ["Information", "Warning", "Error"] },
+            { Sink: "MSSqlServer", Levels: ["Warning", "Error", "Fatal"] },
+            { Sink: "Postgresql", Levels: ["Information", "Warning", "Error", "Fatal"] },
+            { Sink: "Seq", Levels: ["Debug", "Information", "Warning", "Error", "Fatal"] }
+        ]
+    }
+};
+
+const editor = document.getElementById('playground-editor');
+
+function loadPreset(name) {
+    editor.value = JSON.stringify(presets[name], null, 2);
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-preset="${name}"]`)?.classList.add('active');
+    runAndVisualize();
+}
+
+function runAndVisualize() {
+    // Trigger the playground
+    document.getElementById('playground-run').click();
+    // Update route visualization
+    updateRouteViz();
+}
+
+function updateRouteViz() {
+    const vizEl = document.getElementById('route-viz-content');
+    let config;
+    try { config = JSON.parse(editor.value); } catch { vizEl.innerHTML = '<span style="color:var(--error)">Invalid JSON</span>'; return; }
+
+    const routes = config.Routes || [];
+    const pillMap = { Debug: 'pill-debug', Information: 'pill-info', Warning: 'pill-warn', Error: 'pill-error', Fatal: 'pill-fatal' };
+
+    vizEl.innerHTML = routes.map(r => {
+        const pills = (r.Levels || []).map(l =>
+            `<span class="route-pill ${pillMap[l] || ''}">${l.substring(0, 3)}</span>`
+        ).join(' ');
+        return `<div class="route-row"><span class="sink-label">${r.Sink}</span>${pills}</div>`;
+    }).join('') || '<span style="color:var(--text-muted)">No routes</span>';
+}
+
+// Wire up preset buttons
+document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => loadPreset(btn.getAttribute('data-preset')));
+});
+
+// Re-visualize on editor change
+editor.addEventListener('input', () => { clearTimeout(editor._t); editor._t = setTimeout(updateRouteViz, 300); });
+
+// Load default
+loadPreset('basic');
+</script>
+</body>
+</html>

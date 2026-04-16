@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <Title>LoggerHelper File Sink — JSON rolling file logs with per-level routing</Title>
+    <Authors>Alessandro Chiodo</Authors>
+    <Description>File sink for CSharpEssentials.LoggerHelper. JSON structured rolling file logs with per-level routing, configurable retention, and shared file access.</Description>
+    <Version>5.0.0</Version>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
+    <PackageIcon>CSharpEssentials.png</PackageIcon>
+    <PackageTags>serilog;logging;file;sink;structured-logging;loggerhelper;rolling-file;json-log</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+  </ItemGroup>
+</Project>

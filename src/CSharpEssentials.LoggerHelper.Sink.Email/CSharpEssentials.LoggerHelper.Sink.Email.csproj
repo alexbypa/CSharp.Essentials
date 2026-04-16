@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <Title>LoggerHelper Email Sink — HTML email alerts with throttling and templates</Title>
+    <Authors>Alessandro Chiodo</Authors>
+    <Description>Email sink for CSharpEssentials.LoggerHelper. Real-time critical alerts with full HTML template customization, configurable throttling, and secure SMTP (SSL/TLS) delivery.</Description>
+    <Version>5.0.0</Version>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
+    <PackageIcon>CSharpEssentials.png</PackageIcon>
+    <PackageTags>serilog;logging;email;smtp;sink;alerts;monitoring;loggerhelper;structured-logging</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
+  </ItemGroup>
+</Project>

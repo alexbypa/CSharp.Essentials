@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "WebSearch",
+      "Bash(curl -s http://localhost:5199/)",
+      "Bash(taskkill //F //IM \"CSharpEssentials.LoggerHelper.TestApp.exe\")",
+      "Bash(dotnet test:*)",
+      "mcp__plugin_telegram_telegram__reply",
+      "Bash(dotnet new:*)",
+      "Bash(ls:*)",
+      "Bash(dotnet sln:*)",
+      "Bash(dotnet:*)"
+    ]
+  }
+}

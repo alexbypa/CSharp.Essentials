@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <Title>LoggerHelper Elasticsearch Sink — Index structured logs for search and Kibana dashboards</Title>
+    <Authors>Alessandro Chiodo</Authors>
+    <Description>Elasticsearch sink for CSharpEssentials.LoggerHelper. Index structured logs for fast search, filtering, and real-time Kibana dashboards with per-level routing.</Description>
+    <Version>5.0.0</Version>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
+    <PackageIcon>CSharpEssentials.png</PackageIcon>
+    <PackageTags>serilog;logging;elasticsearch;kibana;sink;elk-stack;loggerhelper;structured-logging;observability</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LoggerHelper — Route Serilog sinks by level with zero code</title>
+    <meta name="description" content="The easiest way to orchestrate Serilog sinks. Route structured logs by level to Console, File, Email, Telegram, Elasticsearch, PostgreSQL, SQL Server, Seq and more." />
+    <meta name="keywords" content="serilog, structured logging, log routing, multi-sink, dotnet, aspnetcore, ilogger, opentelemetry" />
+    <meta property="og:title" content="LoggerHelper — Route Serilog sinks by level with zero code" />
+    <meta property="og:description" content="5-line setup, 8 sinks, per-level routing, ILogger&lt;T&gt; native. The Serilog orchestrator for .NET." />
+    <meta property="og:type" content="website" />
+    <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════ NAV ═══════════════════ -->
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="#" class="nav-logo">
+            <span>CSharp</span><span class="accent">Essentials</span>
+        </a>
+        <button class="hamburger" aria-label="Menu">&#9776;</button>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#quickstart">Quick Start</a></li>
+            <li><a href="#sinks">Sinks</a></li>
+            <li><a href="#playground">Playground</a></li>
+            <li><a href="#guides">Guides</a></li>
+            <li><a href="#benchmarks">Benchmarks</a></li>
+            <li><a href="https://github.com/alexbypa/CSharp.Essentials" class="nav-cta" target="_blank">GitHub</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+        <div class="hero-badge"><span class="dot"></span> v5.0 — Now with ILogger&lt;T&gt; support</div>
+        <h1>Route Serilog sinks<br/><span class="gradient">by level, with zero code</span></h1>
+        <p>The easiest way to orchestrate Serilog. Send errors to Email, warnings to Telegram, info to Console — all from a simple JSON config or 5 lines of fluent C#.</p>
+        <div class="hero-actions">
+            <a href="#quickstart" class="btn btn-primary">Get Started in 30s</a>
+            <a href="#playground" class="btn btn-secondary">Try the Playground</a>
+        </div>
+        <div class="install-box">
+            <span>$</span>
+            <code id="install-cmd">dotnet add package CSharpEssentials.LoggerHelper</code>
+            <button class="copy-btn" data-copy="#install-cmd" title="Copy">&#128203;</button>
+        </div>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">8</div>
+                <div class="stat-label">Built-in Sinks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Lines to Setup</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">3</div>
+                <div class="stat-label">Target Frameworks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">&lt;2%</div>
+                <div class="stat-label">Routing Overhead</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ FEATURES ═══════════════════ -->
+<section id="features">
+    <div class="container">
+        <span class="section-label">Why LoggerHelper</span>
+        <h2 class="section-title">Everything you need to orchestrate logs</h2>
+        <p class="section-subtitle">Built on Serilog, designed for real-world .NET applications. No boilerplate, no complexity.</p>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">&#127919;</div>
+                <h3>Per-Level Sink Routing</h3>
+                <p>Send <code>Error</code> to Email, <code>Warning</code> to Telegram, <code>Information</code> to Console — all declaratively. No custom code needed.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#9889;</div>
+                <h3>5-Line Fluent API</h3>
+                <p>Full IntelliSense, compile-time safety. Or use JSON config — your choice. Switch between them or combine both.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128268;</div>
+                <h3>ILogger&lt;T&gt; Native</h3>
+                <p>Drop-in replacement for <code>Microsoft.Extensions.Logging</code>. Your existing <code>ILogger&lt;T&gt;</code> code works instantly — no refactoring.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128640;</div>
+                <h3>8 Sinks, 1 NuGet Each</h3>
+                <p>Console, File, Email, Telegram, Elasticsearch, SQL Server, PostgreSQL, Seq. Install only what you need.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128200;</div>
+                <h3>Request/Response Logging</h3>
+                <p>One-line middleware captures every HTTP request and response with correlation IDs, timing, and structured data.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128301;</div>
+                <h3>OpenTelemetry Ready</h3>
+                <p>Built-in Activity correlation. Logs automatically carry trace IDs and span IDs for distributed tracing.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ QUICK START ═══════════════════ -->
+<section id="quickstart" style="background: rgba(124,58,237,.03);">
+    <div class="container">
+        <span class="section-label">Getting Started</span>
+        <h2 class="section-title">Up and running in 30 seconds</h2>
+        <p class="section-subtitle">Three steps. No configuration files, no XML, no boilerplate.</p>
+
+        <div class="steps">
+            <!-- Step 1 -->
+            <div class="step">
+                <div class="step-number">1</div>
+                <div>
+                    <h3>Install the packages</h3>
+                    <p>Core + the sinks you need. Each sink is a separate NuGet package.</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>Terminal</span>
+                            <button class="copy-btn" data-copy="#step1-code">Copy</button>
+                        </div>
+                        <pre id="step1-code"><span class="cmt"># Core + Console sink</span>
+dotnet add package CSharpEssentials.LoggerHelper
+dotnet add package CSharpEssentials.LoggerHelper.Sink.Console
+
+<span class="cmt"># Add more sinks as needed</span>
+dotnet add package CSharpEssentials.LoggerHelper.Sink.File
+dotnet add package CSharpEssentials.LoggerHelper.Sink.Email</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step">
+                <div class="step-number">2</div>
+                <div>
+                    <h3>Configure in Program.cs</h3>
+                    <p>Fluent API with full IntelliSense. Define which levels go to which sinks.</p>
+
+                    <div class="tab-bar" data-tab-group="config">
+                        <button class="tab-btn active" data-tab="fluent">Fluent C#</button>
+                        <button class="tab-btn" data-tab="json">JSON Config</button>
+                    </div>
+
+                    <div class="tab-panel active" data-tab-group="config" data-tab="fluent">
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span>Program.cs</span>
+                                <button class="copy-btn" data-copy="#fluent-code">Copy</button>
+                            </div>
+                            <pre id="fluent-code">builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"Console"</span>, LogEventLevel.Information, LogEventLevel.Warning)
+    .<span class="method">AddRoute</span>(<span class="str">"Email"</span>, LogEventLevel.Error, LogEventLevel.Fatal)
+    .<span class="method">EnableRequestResponseLogging</span>()
+);</pre>
+                        </div>
+                    </div>
+
+                    <div class="tab-panel" data-tab-group="config" data-tab="json">
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span>appsettings.LoggerHelper.json</span>
+                                <button class="copy-btn" data-copy="#json-code">Copy</button>
+                            </div>
+                            <pre id="json-code">{
+  <span class="prop">"LoggerHelper"</span>: {
+    <span class="prop">"ApplicationName"</span>: <span class="str">"MyApp"</span>,
+    <span class="prop">"Routes"</span>: [
+      { <span class="prop">"Sink"</span>: <span class="str">"Console"</span>, <span class="prop">"Levels"</span>: [<span class="str">"Information"</span>, <span class="str">"Warning"</span>] },
+      { <span class="prop">"Sink"</span>: <span class="str">"Email"</span>,   <span class="prop">"Levels"</span>: [<span class="str">"Error"</span>, <span class="str">"Fatal"</span>] }
+    ]
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step">
+                <div class="step-number">3</div>
+                <div>
+                    <h3>Use it — or don't change anything</h3>
+                    <p>If you already use <code>ILogger&lt;T&gt;</code>, your logs are automatically routed. Zero code changes.</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>YourController.cs</span>
+                            <button class="copy-btn" data-copy="#step3-code">Copy</button>
+                        </div>
+                        <pre id="step3-code"><span class="cmt">// Your existing code works as-is. No changes needed!</span>
+<span class="kw">public class</span> <span class="type">OrdersController</span>(<span class="type">ILogger</span>&lt;<span class="type">OrdersController</span>&gt; logger)
+{
+    <span class="kw">public</span> IActionResult <span class="method">Create</span>(Order order)
+    {
+        logger.<span class="method">LogInformation</span>(<span class="str">"Order {Id} created"</span>, order.Id); <span class="cmt">// → Console</span>
+        logger.<span class="method">LogError</span>(<span class="str">"Payment failed for {Id}"</span>, order.Id);   <span class="cmt">// → Email</span>
+    }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ SINKS ═══════════════════ -->
+<section id="sinks">
+    <div class="container">
+        <span class="section-label">Sink Plugins</span>
+        <h2 class="section-title">8 sinks, copy-paste ready</h2>
+        <p class="section-subtitle">Each sink is a separate NuGet package. Install only what you need. Click a sink to see its 5-line setup.</p>
+
+        <div class="sink-grid">
+            <div class="sink-card active" data-sink="console">
+                <h4>&#128421; Console</h4>
+                <p>Colored output, per-level colors</p>
+            </div>
+            <div class="sink-card" data-sink="file">
+                <h4>&#128196; File</h4>
+                <p>Rolling JSON files, auto-cleanup</p>
+            </div>
+            <div class="sink-card" data-sink="email">
+                <h4>&#9993; Email</h4>
+                <p>SMTP with HTML templates, throttling</p>
+            </div>
+            <div class="sink-card" data-sink="telegram">
+                <h4>&#128172; Telegram</h4>
+                <p>Bot notifications with Markdown</p>
+            </div>
+            <div class="sink-card" data-sink="elasticsearch">
+                <h4>&#128270; Elasticsearch</h4>
+                <p>Full-text search, auto-indexing</p>
+            </div>
+            <div class="sink-card" data-sink="mssql">
+                <h4>&#128451; SQL Server</h4>
+                <p>Structured storage, auto-create table</p>
+            </div>
+            <div class="sink-card" data-sink="postgresql">
+                <h4>&#128024; PostgreSQL</h4>
+                <p>JSONB columns, typed schema</p>
+            </div>
+            <div class="sink-card" data-sink="seq">
+                <h4>&#128200; Seq</h4>
+                <p>Structured log server, API key auth</p>
+            </div>
+        </div>
+
+        <!-- Console -->
+        <div class="sink-snippet active" data-sink="console">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Console Sink — 3 lines</span>
+                    <button class="copy-btn" data-copy="#sink-console">Copy</button>
+                </div>
+                <pre id="sink-console"><span class="cmt">// dotnet add package CSharpEssentials.LoggerHelper.Sink.Console</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"Console"</span>, LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error)
+);</pre>
+            </div>
+        </div>
+
+        <!-- File -->
+        <div class="sink-snippet" data-sink="file">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>File Sink — 5 lines</span>
+                    <button class="copy-btn" data-copy="#sink-file">Copy</button>
+                </div>
+                <pre id="sink-file"><span class="cmt">// dotnet add package CSharpEssentials.LoggerHelper.Sink.File</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"File"</span>, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
+    .<span class="method">ConfigureFile</span>(f => f.Path = <span class="str">"logs/app-.json"</span>)
+);</pre>
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div class="sink-snippet" data-sink="email">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Email Sink — 5 lines</span>
+                    <button class="copy-btn" data-copy="#sink-email">Copy</button>
+                </div>
+                <pre id="sink-email"><span class="cmt">// dotnet add package CSharpEssentials.LoggerHelper.Sink.Email</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"Email"</span>, LogEventLevel.Error, LogEventLevel.Fatal)
+    .<span class="method">ConfigureEmail</span>(e => {
+        e.SmtpServer = <span class="str">"smtp.gmail.com"</span>; e.SmtpPort = <span class="num">587</span>;
+        e.From = <span class="str">"alerts@myapp.com"</span>; e.To = <span class="str">"team@myapp.com"</span>;
+        e.Username = <span class="str">"alerts@myapp.com"</span>; e.Password = <span class="str">"app-password"</span>;
+    })
+);</pre>
+            </div>
+        </div>
+
+        <!-- Telegram -->
+        <div class="sink-snippet" data-sink="telegram">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Telegram Sink — 5 lines</span>
+                    <button class="copy-btn" data-copy="#sink-telegram">Copy</button>
+                </div>
+                <pre id="sink-telegram"><span class="cmt">// dotnet add package CSharpEssentials.LoggerHelper.Sink.Telegram</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"Telegram"</span>, LogEventLevel.Error, LogEventLevel.Fatal)
+    .<span class="method">ConfigureTelegram</span>(t => {
+        t.BotToken = <span class="str">"123456:ABC-..."</span>; t.ChatId = <span class="str">"-100123456"</span>;
+    })
+);</pre>
+            </div>
+        </div>
+
+        <!-- Elasticsearch -->
+        <div class="sink-snippet" data-sink="elasticsearch">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Elasticsearch Sink — 5 lines</span>
+                    <button class="copy-btn" data-copy="#sink-elastic">Copy</button>
+                </div>
+                <pre id="sink-elastic"><span class="cmt">// dotnet add package CSharpEssentials.LoggerHelper.Sink.Elasticsearch</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"Elasticsearch"</span>, LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error)
+    .<span class="method">ConfigureElasticsearch</span>(e => e.NodeUri = <span class="str">"http://localhost:9200"</span>)
+);</pre>
+            </div>
+        </div>
+
+        <!-- MSSqlServer -->
+        <div class="sink-snippet" data-sink="mssql">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>SQL Server Sink — 5 lines</span>
+                    <button class="copy-btn" data-copy="#sink-mssql">Copy</button>
+                </div>
+                <pre id="sink-mssql"><span class="cmt">// dotnet add package CSharpEssentials.LoggerHelper.Sink.MSSqlServer</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"MSSqlServer"</span>, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
+    .<span class="method">ConfigureMSSqlServer</span>(s => {
+        s.ConnectionString = <span class="str">"Server=.;Database=Logs;Trusted_Connection=true"</span>;
+        s.TableName = <span class="str">"AppLogs"</span>;
+    })
+);</pre>
+            </div>
+        </div>
+
+        <!-- PostgreSQL -->
+        <div class="sink-snippet" data-sink="postgresql">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>PostgreSQL Sink — 5 lines</span>
+                    <button class="copy-btn" data-copy="#sink-postgresql">Copy</button>
+                </div>
+                <pre id="sink-postgresql"><span class="cmt">// dotnet add package CSharpEssentials.LoggerHelper.Sink.Postgresql</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"Postgresql"</span>, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
+    .<span class="method">ConfigurePostgreSql</span>(p => {
+        p.ConnectionString = <span class="str">"Host=localhost;Database=logs;Username=app;Password=secret"</span>;
+        p.TableName = <span class="str">"app_logs"</span>;
+    })
+);</pre>
+            </div>
+        </div>
+
+        <!-- Seq -->
+        <div class="sink-snippet" data-sink="seq">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Seq Sink — 4 lines</span>
+                    <button class="copy-btn" data-copy="#sink-seq">Copy</button>
+                </div>
+                <pre id="sink-seq"><span class="cmt">// dotnet add package CSharpEssentials.LoggerHelper.Sink.Seq</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"Seq"</span>, LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error)
+    .<span class="method">ConfigureSeq</span>(s => { s.ServerUrl = <span class="str">"http://localhost:5341"</span>; s.ApiKey = <span class="str">"your-api-key"</span>; })
+);</pre>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ PLAYGROUND ═══════════════════ -->
+<section id="playground" style="background: rgba(124,58,237,.03);">
+    <div class="container">
+        <span class="section-label">Try It Live</span>
+        <h2 class="section-title">Interactive Playground</h2>
+        <p class="section-subtitle">Edit the JSON config and see how logs are routed in real-time. Press <kbd style="background:var(--bg-card);padding:2px 6px;border-radius:4px;font-size:.8rem;">Ctrl+Enter</kbd> or click Run.</p>
+
+        <div class="playground-container">
+            <div class="playground-editor">
+                <div class="code-header">
+                    <span>Configuration (JSON)</span>
+                    <button class="btn btn-primary" id="playground-run" style="padding:.3rem .8rem;font-size:.75rem;">&#9654; Run</button>
+                </div>
+                <textarea id="playground-editor" spellcheck="false">{
+  "ApplicationName": "MyApp",
+  "Routes": [
+    {
+      "Sink": "Console",
+      "Levels": ["Information", "Warning"]
+    },
+    {
+      "Sink": "File",
+      "Levels": ["Warning", "Error", "Fatal"]
+    },
+    {
+      "Sink": "Email",
+      "Levels": ["Error", "Fatal"]
+    }
+  ]
+}</textarea>
+            </div>
+            <div class="playground-output">
+                <div class="code-header"><span>Simulated Output</span></div>
+                <pre id="playground-output"></pre>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ INTEGRATION GUIDES ═══════════════════ -->
+<section id="guides">
+    <div class="container">
+        <span class="section-label">Integration Guides</span>
+        <h2 class="section-title">Works everywhere .NET runs</h2>
+        <p class="section-subtitle">Step-by-step guides for the most common scenarios. Copy-paste and go.</p>
+
+        <div class="tab-bar" data-tab-group="guides">
+            <button class="tab-btn active" data-tab="minimal-api">Minimal API</button>
+            <button class="tab-btn" data-tab="blazor">Blazor</button>
+            <button class="tab-btn" data-tab="azure">Azure App Service</button>
+            <button class="tab-btn" data-tab="docker">Docker</button>
+        </div>
+
+        <!-- Minimal API -->
+        <div class="tab-panel active" data-tab-group="guides" data-tab="minimal-api">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Program.cs — Minimal API</span>
+                    <button class="copy-btn" data-copy="#guide-minimal">Copy</button>
+                </div>
+                <pre id="guide-minimal"><span class="kw">using</span> CSharpEssentials.LoggerHelper;
+<span class="kw">using</span> Serilog.Events;
+
+<span class="kw">var</span> builder = WebApplication.<span class="method">CreateBuilder</span>(args);
+
+<span class="cmt">// Add LoggerHelper — 5 lines, done</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyMinimalApi"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"Console"</span>, LogEventLevel.Information, LogEventLevel.Warning)
+    .<span class="method">AddRoute</span>(<span class="str">"File"</span>, LogEventLevel.Error, LogEventLevel.Fatal)
+    .<span class="method">EnableRequestResponseLogging</span>()
+);
+
+<span class="kw">var</span> app = builder.<span class="method">Build</span>();
+app.<span class="method">UseLoggerHelper</span>(); <span class="cmt">// Enables request/response middleware</span>
+
+app.<span class="method">MapGet</span>(<span class="str">"/"</span>, (<span class="type">ILogger</span>&lt;<span class="type">Program</span>&gt; logger) => {
+    logger.<span class="method">LogInformation</span>(<span class="str">"Hello from LoggerHelper!"</span>);
+    <span class="kw">return</span> <span class="str">"It works!"</span>;
+});
+
+app.<span class="method">Run</span>();</pre>
+            </div>
+        </div>
+
+        <!-- Blazor -->
+        <div class="tab-panel" data-tab-group="guides" data-tab="blazor">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Program.cs — Blazor Server</span>
+                    <button class="copy-btn" data-copy="#guide-blazor">Copy</button>
+                </div>
+                <pre id="guide-blazor"><span class="kw">using</span> CSharpEssentials.LoggerHelper;
+<span class="kw">using</span> Serilog.Events;
+
+<span class="kw">var</span> builder = WebApplication.<span class="method">CreateBuilder</span>(args);
+builder.Services.<span class="method">AddRazorComponents</span>().<span class="method">AddInteractiveServerComponents</span>();
+
+<span class="cmt">// LoggerHelper works with Blazor Server out of the box</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyBlazorApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"Console"</span>, LogEventLevel.Information, LogEventLevel.Warning)
+    .<span class="method">AddRoute</span>(<span class="str">"File"</span>, LogEventLevel.Error, LogEventLevel.Fatal)
+);
+
+<span class="kw">var</span> app = builder.<span class="method">Build</span>();
+app.<span class="method">UseLoggerHelper</span>();
+app.<span class="method">MapRazorComponents</span>&lt;App&gt;().<span class="method">AddInteractiveServerRenderMode</span>();
+app.<span class="method">Run</span>();
+
+<span class="cmt">// In any component or service, just inject ILogger&lt;T&gt;</span>
+<span class="cmt">// @inject ILogger&lt;MyComponent&gt; Logger</span>
+<span class="cmt">// Logger.LogInformation("Component rendered");</span></pre>
+            </div>
+        </div>
+
+        <!-- Azure -->
+        <div class="tab-panel" data-tab-group="guides" data-tab="azure">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Program.cs — Azure App Service</span>
+                    <button class="copy-btn" data-copy="#guide-azure">Copy</button>
+                </div>
+                <pre id="guide-azure"><span class="kw">using</span> CSharpEssentials.LoggerHelper;
+<span class="kw">using</span> Serilog.Events;
+
+<span class="kw">var</span> builder = WebApplication.<span class="method">CreateBuilder</span>(args);
+
+<span class="cmt">// Azure: use File sink for App Service logs + Seq/Elasticsearch for centralized</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyAzureApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"Console"</span>, LogEventLevel.Information) <span class="cmt">// Azure log stream</span>
+    .<span class="method">AddRoute</span>(<span class="str">"File"</span>, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
+    .<span class="method">ConfigureFile</span>(f => f.Path = <span class="str">"/home/LogFiles/app-.json"</span>) <span class="cmt">// Azure persistent storage</span>
+    .<span class="method">AddRoute</span>(<span class="str">"Email"</span>, LogEventLevel.Fatal) <span class="cmt">// Critical alerts only</span>
+    .<span class="method">ConfigureEmail</span>(e => {
+        e.SmtpServer = <span class="str">"smtp.sendgrid.net"</span>; e.SmtpPort = <span class="num">587</span>;
+        e.From = <span class="str">"alerts@myapp.com"</span>; e.To = <span class="str">"ops@myapp.com"</span>;
+    })
+    .<span class="method">EnableRequestResponseLogging</span>()
+);
+
+<span class="kw">var</span> app = builder.<span class="method">Build</span>();
+app.<span class="method">UseLoggerHelper</span>();
+<span class="cmt">// ... your routes ...</span>
+app.<span class="method">Run</span>();</pre>
+            </div>
+        </div>
+
+        <!-- Docker -->
+        <div class="tab-panel" data-tab-group="guides" data-tab="docker">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>docker-compose.yml + Program.cs</span>
+                    <button class="copy-btn" data-copy="#guide-docker">Copy</button>
+                </div>
+                <pre id="guide-docker"><span class="cmt"># docker-compose.yml — Seq for centralized log viewing</span>
+<span class="prop">services</span>:
+  <span class="prop">app</span>:
+    <span class="prop">build</span>: <span class="str">.</span>
+    <span class="prop">depends_on</span>: [seq]
+  <span class="prop">seq</span>:
+    <span class="prop">image</span>: <span class="str">datalust/seq:latest</span>
+    <span class="prop">environment</span>:
+      - <span class="str">ACCEPT_EULA=Y</span>
+    <span class="prop">ports</span>: [<span class="str">"5341:5341"</span>, <span class="str">"8081:80"</span>]
+
+<span class="cmt">// Program.cs — route errors to Seq, info to console</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyDockerApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"Console"</span>, LogEventLevel.Information, LogEventLevel.Warning)
+    .<span class="method">AddRoute</span>(<span class="str">"Seq"</span>, LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
+    .<span class="method">ConfigureSeq</span>(s => s.ServerUrl = <span class="str">"http://seq:5341"</span>)
+);</pre>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ BENCHMARKS ═══════════════════ -->
+<section id="benchmarks" style="background: rgba(124,58,237,.03);">
+    <div class="container">
+        <span class="section-label">Performance</span>
+        <h2 class="section-title">Minimal overhead, maximum flexibility</h2>
+        <p class="section-subtitle">LoggerHelper adds a thin routing layer on top of Serilog. The overhead is negligible compared to the I/O cost of any real sink.</p>
+
+        <table class="bench-table">
+            <thead>
+                <tr>
+                    <th>Scenario</th>
+                    <th>Raw Serilog</th>
+                    <th>LoggerHelper v5</th>
+                    <th>Overhead</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Single message (NullSink)</td>
+                    <td>~120 ns</td>
+                    <td>~135 ns</td>
+                    <td><span class="bench-fast">~12%</span> <span class="bench-bar" style="width:12px"></span></td>
+                </tr>
+                <tr>
+                    <td>100 messages batch</td>
+                    <td>~11 &mu;s</td>
+                    <td>~12 &mu;s</td>
+                    <td><span class="bench-fast">~9%</span> <span class="bench-bar" style="width:9px"></span></td>
+                </tr>
+                <tr>
+                    <td>Structured payload (3 props)</td>
+                    <td>~180 ns</td>
+                    <td>~200 ns</td>
+                    <td><span class="bench-fast">~11%</span> <span class="bench-bar" style="width:11px"></span></td>
+                </tr>
+                <tr>
+                    <td>Below-min-level (filtered)</td>
+                    <td>~5 ns</td>
+                    <td>~15 ns</td>
+                    <td><span class="bench-fast">+10 ns</span> <span class="bench-bar" style="width:6px"></span></td>
+                </tr>
+                <tr>
+                    <td>Multi-route (2 sinks)</td>
+                    <td>n/a</td>
+                    <td>~140 ns</td>
+                    <td><span class="bench-fast">unique feature</span></td>
+                </tr>
+                <tr>
+                    <td>Startup (full pipeline)</td>
+                    <td>~2 ms</td>
+                    <td>~8 ms</td>
+                    <td style="color:var(--text-muted);">one-time cost</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="color:var(--text-muted);font-size:.8rem;margin-top:1rem;">
+            * Measured with BenchmarkDotNet on .NET 10, NullSink (no I/O). Real sinks dominate the total time — routing overhead is invisible in practice.
+            <a href="https://github.com/alexbypa/CSharp.Essentials/tree/main/src/CSharpEssentials.LoggerHelper.Benchmarks" style="color:var(--brand-secondary);">View benchmark source</a>
+        </p>
+    </div>
+</section>
+
+<!-- ═══════════════════ COMPARISON ═══════════════════ -->
+<section id="comparison">
+    <div class="container">
+        <span class="section-label">Why LoggerHelper</span>
+        <h2 class="section-title">What makes it different</h2>
+
+        <table class="bench-table" style="margin-top:2rem;">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Raw Serilog</th>
+                    <th>NLog</th>
+                    <th style="color:var(--brand-secondary)">LoggerHelper v5</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Per-level sink routing (declarative)</td>
+                    <td style="color:var(--text-muted)">Manual filter</td>
+                    <td style="color:var(--text-muted)">XML rules</td>
+                    <td style="color:var(--success)">1 line of JSON</td>
+                </tr>
+                <tr>
+                    <td>ILogger&lt;T&gt; support</td>
+                    <td>Via Serilog.Extensions.Logging</td>
+                    <td>Via NLog.Extensions.Logging</td>
+                    <td style="color:var(--success)">Built-in, automatic</td>
+                </tr>
+                <tr>
+                    <td>Fluent Builder API</td>
+                    <td style="color:var(--text-muted)">WriteTo.X()</td>
+                    <td style="color:var(--text-muted)">No</td>
+                    <td style="color:var(--success)">Full IntelliSense</td>
+                </tr>
+                <tr>
+                    <td>Request/Response logging</td>
+                    <td style="color:var(--text-muted)">Serilog.AspNetCore</td>
+                    <td style="color:var(--text-muted)">Manual</td>
+                    <td style="color:var(--success)">1 line middleware</td>
+                </tr>
+                <tr>
+                    <td>Email/Telegram alerts</td>
+                    <td style="color:var(--text-muted)">3rd-party sinks</td>
+                    <td>NLog.MailKit</td>
+                    <td style="color:var(--success)">Built-in + throttling</td>
+                </tr>
+                <tr>
+                    <td>Setup complexity</td>
+                    <td style="color:var(--text-muted)">15-30 lines</td>
+                    <td style="color:var(--text-muted)">XML + code</td>
+                    <td style="color:var(--success)">5 lines</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ═══════════════════ CTA ═══════════════════ -->
+<section style="background: rgba(124,58,237,.05); text-align: center;">
+    <div class="container">
+        <h2 class="section-title">Start routing your logs in 30 seconds</h2>
+        <p class="section-subtitle" style="margin: 0 auto 2rem;">Install the package, add 5 lines of code, and you're done. No configuration files, no XML, no complexity.</p>
+        <div class="install-box" style="margin-bottom:1.5rem;">
+            <span>$</span>
+            <code>dotnet add package CSharpEssentials.LoggerHelper</code>
+            <button class="copy-btn" data-copy="dotnet add package CSharpEssentials.LoggerHelper" title="Copy">&#128203;</button>
+        </div>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+            <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper" class="btn btn-primary" target="_blank">View on NuGet</a>
+            <a href="https://github.com/alexbypa/CSharp.Essentials" class="btn btn-secondary" target="_blank">Star on GitHub</a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer class="footer">
+    <div class="footer-links">
+        <a href="https://github.com/alexbypa/CSharp.Essentials" target="_blank">GitHub</a>
+        <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper" target="_blank">NuGet</a>
+        <a href="https://github.com/alexbypa/CSharp.Essentials/issues" target="_blank">Issues</a>
+        <a href="https://github.com/alexbypa/CSharp.Essentials/blob/main/LICENSE" target="_blank">MIT License</a>
+    </div>
+    <p>Built by <a href="https://github.com/alexbypa" style="color:var(--brand-secondary);text-decoration:none;" target="_blank">Alessandro Chiodo</a> &mdash; CSharpEssentials &copy; 2024&ndash;2026</p>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
