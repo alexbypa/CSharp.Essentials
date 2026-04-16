@@ -16,7 +16,8 @@ internal class CustomPostgresQLSink {
     /// Adds an auto-increment 'id' column as primary key if it doesn't already exist.
     /// </summary>
     private static void EnsurePrimaryKeyColumn(string connectionString, string table_name, string table_schema) {
-        using var connection = new NpgsqlConnection(connectionString);
+        var csb = new NpgsqlConnectionStringBuilder(connectionString) { Timeout = 3 };
+        using var connection = new NpgsqlConnection(csb.ConnectionString);
         connection.Open();
 
         using var cmd = connection.CreateCommand();
@@ -108,7 +109,8 @@ $$;
     /// Invokes the external TableCreator to create the table with the given column definitions.
     /// </summary>
     private static async Task CreateTable(string connectionstring, string schemaName, string tableName, Dictionary<string, ColumnWriterBase> columnsInfo) {
-        using var conn = new NpgsqlConnection(connectionstring);
+        var csb = new NpgsqlConnectionStringBuilder(connectionstring) { Timeout = 3 };
+        using var conn = new NpgsqlConnection(csb.ConnectionString);
         await conn.OpenAsync();
         await TableCreator.CreateTable(conn, schemaName, tableName, columnsInfo);
     }
