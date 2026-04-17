@@ -1,28 +1,30 @@
 using CSharpEssentials.LoggerHelper;
+using CSharpEssentials.LoggerHelper.Diagnostics;
 using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ══════════════════════════════════════════════════════════════════
-// OPZIONE A — registrazione via IServiceCollection (classica)
+// OPZIONE A — config da JSON (appsettings.LoggerHelper.[Debug.]json)
+// In Development carica appsettings.LoggerHelper.Debug.json
+// In produzione carica appsettings.LoggerHelper.json
 // ══════════════════════════════════════════════════════════════════
-builder.Services.AddLoggerHelper(b => b
-    .WithApplicationName("TestApp")
-    .AddRoute("Console", LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
-    .EnableRequestResponseLogging()
-);
+builder.Services.AddLoggerHelper(builder.Configuration);
 
 // ══════════════════════════════════════════════════════════════════
-// OPZIONE B — registrazione via ILoggingBuilder (rispetta i filtri
-//             "Logging:LogLevel" di appsettings.json)
-// Decommenta questa e commenta l'OPZIONE A per provarla.
+// OPZIONE B — fluent puro (tutto in codice, nessun JSON)
 // ══════════════════════════════════════════════════════════════════
-// builder.Logging.ClearProviders();
-// builder.Logging.AddLoggerHelper(b => b
+// builder.Services.AddLoggerHelper(b => b
 //     .WithApplicationName("TestApp")
 //     .AddRoute("Console", LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
 //     .EnableRequestResponseLogging()
 // );
+
+// ══════════════════════════════════════════════════════════════════
+// OPZIONE C — via ILoggingBuilder (rispetta i filtri "Logging:LogLevel")
+// ══════════════════════════════════════════════════════════════════
+// builder.Logging.ClearProviders();
+// builder.Logging.AddLoggerHelper(builder.Configuration);
 
 var app = builder.Build();
 app.UseLoggerHelper();
@@ -79,7 +81,7 @@ app.MapGet("/orders/{orderId}/pay", (int orderId, ILogger<Program> logger) => {
 
         using (logger.BeginScope(new Dictionary<string, object?> { ["PaymentProvider"] = "Stripe", ["Amount"] = 99.90 }))
         {
-            logger.LogInformation("Chiamata provider pagamento");
+            logger.LogInformation("Chiamata provider pagamento {nome}", "Ciccio");
             // output: {"Message":"Chiamata provider pagamento","OrderId":123,"PaymentProvider":"Stripe","Amount":99.90}
 
             logger.LogWarning("Tentativo 2/3 — provider lento");
@@ -92,6 +94,25 @@ app.MapGet("/orders/{orderId}/pay", (int orderId, ILogger<Program> logger) => {
     }
 
     return $"Pagamento ordine {orderId} ok";
+});
+
+// ──────────────────────────────────────────────────────────────────
+// Endpoint diagnostico — colpire GET /diagnostics per vedere:
+// - opzioni lette dal JSON
+// - sink registrati
+// - errori interni (sink che non si sono configurati)
+// ──────────────────────────────────────────────────────────────────
+app.MapGet("/diagnostics", (
+    LoggerHelperOptions opts,
+    ISinkPluginRegistry registry,
+    ILogErrorStore errors) =>
+{
+    return Results.Ok(new {
+        ApplicationName = opts.ApplicationName,
+        Routes = opts.Routes.Select(r => new { r.Sink, r.Levels }),
+        RegisteredPlugins = registry.All.Select(p => p.GetType().Name),
+        Errors = errors.GetAll().Select(e => new { e.SinkName, e.ErrorMessage, e.ContextInfo })
+    });
 });
 
 app.Run();

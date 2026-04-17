@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper Elasticsearch Sink — Index structured logs for search and Kibana dashboards</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>Elasticsearch sink for CSharpEssentials.LoggerHelper. Index structured logs for fast search, filtering, and real-time Kibana dashboards with per-level routing.</Description>

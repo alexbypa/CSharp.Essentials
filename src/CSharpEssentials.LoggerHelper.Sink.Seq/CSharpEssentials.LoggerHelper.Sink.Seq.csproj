@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper Seq Sink — Ship structured logs to Seq for search and analysis</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>Seq sink for CSharpEssentials.LoggerHelper. Ship structured logs to Seq for real-time search, filtering, dashboards, and alerting with per-level routing.</Description>

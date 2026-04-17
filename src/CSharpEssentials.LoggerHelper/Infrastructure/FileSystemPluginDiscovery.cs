@@ -6,8 +6,9 @@ namespace CSharpEssentials.LoggerHelper;
 
 /// <summary>
 /// Discovers sink plugin assemblies from the application base directory.
-/// Scans for CSharpEssentials.LoggerHelper.Sink.*.dll and loads them
-/// into the default AssemblyLoadContext, triggering [ModuleInitializer] auto-registration.
+/// Scans for CSharpEssentials.LoggerHelper.Sink.*.dll and registers their ISinkPlugin
+/// implementations — either via [ModuleInitializer] (for freshly loaded assemblies)
+/// or via reflection fallback (for assemblies already loaded by the runtime via project references).
 /// </summary>
 internal sealed class FileSystemPluginDiscovery : IPluginDiscovery {
     public void DiscoverAndLoad(ILogErrorStore errorStore) {
@@ -16,8 +17,21 @@ internal sealed class FileSystemPluginDiscovery : IPluginDiscovery {
 
         foreach (var dll in pluginDlls) {
             try {
-                _ = AssemblyName.GetAssemblyName(dll);
-                AssemblyLoadContext.Default.LoadFromAssemblyPath(dll);
+                var assemblyName = AssemblyName.GetAssemblyName(dll);
+
+                // Check if the assembly is already loaded (e.g. via project reference).
+                // In that case LoadFromAssemblyPath would throw or return the existing assembly
+                // without re-running the [ModuleInitializer]. We use the existing instance.
+                var existing = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(a => string.Equals(
+                        a.GetName().Name, assemblyName.Name, StringComparison.OrdinalIgnoreCase));
+
+                var asm = existing ?? AssemblyLoadContext.Default.LoadFromAssemblyPath(dll);
+
+                // [ModuleInitializer] has run if the assembly was freshly loaded above.
+                // For already-loaded assemblies it may not have run (lazy load timing).
+                // Reflection fallback ensures plugins are always registered.
+                RegisterPluginsFromAssembly(asm, errorStore);
             } catch (Exception ex) {
                 errorStore.Add(new LogErrorEntry {
                     SinkName = Path.GetFileNameWithoutExtension(dll),
@@ -25,6 +39,32 @@ internal sealed class FileSystemPluginDiscovery : IPluginDiscovery {
                     ContextInfo = baseDir
                 });
             }
+        }
+    }
+
+    /// <summary>
+    /// Scans an assembly for ISinkPlugin implementations and registers any that are
+    /// not already present in the registry (prevents duplicates with [ModuleInitializer]).
+    /// </summary>
+    private static void RegisterPluginsFromAssembly(Assembly asm, ILogErrorStore errorStore) {
+        try {
+            var pluginTypes = asm.GetTypes()
+                .Where(t => t is { IsClass: true, IsAbstract: false }
+                            && typeof(ISinkPlugin).IsAssignableFrom(t));
+
+            foreach (var type in pluginTypes) {
+                // Skip if a plugin of this exact type is already registered
+                if (SinkPluginRegistry.All.Any(p => p.GetType() == type))
+                    continue;
+
+                if (Activator.CreateInstance(type) is ISinkPlugin plugin)
+                    SinkPluginRegistry.Register(plugin);
+            }
+        } catch (ReflectionTypeLoadException ex) {
+            errorStore.Add(new LogErrorEntry {
+                SinkName = asm.GetName().Name ?? "Unknown",
+                ErrorMessage = $"Failed to scan assembly for plugins: {ex.LoaderExceptions.FirstOrDefault()?.Message}"
+            });
         }
     }
 }

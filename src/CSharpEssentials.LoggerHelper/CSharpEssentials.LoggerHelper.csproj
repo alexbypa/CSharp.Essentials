@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>CSharpEssentials.LoggerHelper — Route Serilog sinks by level with zero code</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>The easiest way to orchestrate Serilog sinks. Route structured logs by level to Console, File, Email, Telegram, Elasticsearch, PostgreSQL, SQL Server, Seq and more — with a simple JSON config or fluent C# API. Built-in dashboard, OpenTelemetry correlation, AI analysis, and ILogger&lt;T&gt; support.</Description>

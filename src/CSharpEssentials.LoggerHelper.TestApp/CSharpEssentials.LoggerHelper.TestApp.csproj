@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.File\CSharpEssentials.LoggerHelper.Sink.File.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Console\CSharpEssentials.LoggerHelper.Sink.Console.csproj" />
   </ItemGroup>

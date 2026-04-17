@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper SQL Server Sink — Log to MSSQL with auto table creation</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>SQL Server sink for CSharpEssentials.LoggerHelper. Log directly to Microsoft SQL Server with automatic table creation, custom columns, batching, and per-level routing.</Description>

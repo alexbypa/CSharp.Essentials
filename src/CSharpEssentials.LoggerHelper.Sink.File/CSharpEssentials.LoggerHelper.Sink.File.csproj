@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper File Sink — JSON rolling file logs with per-level routing</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>File sink for CSharpEssentials.LoggerHelper. JSON structured rolling file logs with per-level routing, configurable retention, and shared file access.</Description>

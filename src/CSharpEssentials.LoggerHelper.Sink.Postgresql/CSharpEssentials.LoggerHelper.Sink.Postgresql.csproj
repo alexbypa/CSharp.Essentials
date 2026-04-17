@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper PostgreSQL Sink — Store structured logs with JSON fields and auto table creation</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>PostgreSQL sink for CSharpEssentials.LoggerHelper. Store structured logs in PostgreSQL with support for custom schemas, JSONB fields, automatic table creation, and per-level routing.</Description>
