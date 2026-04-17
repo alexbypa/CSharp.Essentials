@@ -16,7 +16,8 @@
       "Bash(bun:*)",
       "Bash(tasklist)",
       "Bash(xargs grep:*)",
-      "Skill(telegram:access)"
+      "Skill(telegram:access)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }
