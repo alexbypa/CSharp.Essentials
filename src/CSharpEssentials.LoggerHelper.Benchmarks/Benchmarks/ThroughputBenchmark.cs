@@ -10,6 +10,9 @@ namespace CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks;
 /// <summary>
 /// Confronto throughput: LoggerHelper v5 vs Serilog raw (baseline) vs NLog.
 /// Tutti usano sink no-op — misura overhead del framework, non I/O.
+/// Nota: LoggerHelper measurements include default enrichers (ApplicationName, MachineName,
+/// RenderedMessage) which represent real-world library overhead. OpenTelemetry is explicitly
+/// disabled to ensure a fair framework-to-framework comparison.
 /// </summary>
 [MemoryDiagnoser]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
@@ -30,6 +33,7 @@ public class ThroughputBenchmark
         var services = new ServiceCollection();
         services.AddLoggerHelper(b => b
             .WithApplicationName("Benchmark")
+            .DisableOpenTelemetry()
             .AddRoute("Null",
                 LogEventLevel.Information,
                 LogEventLevel.Warning,
