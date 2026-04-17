@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks.RoutingBenchmark-20260417-171119</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.26200.8246)
+Unknown processor
+.NET SDK 10.0.201
+  [Host]   : .NET 9.0.15 (9.0.1526.17522), X64 RyuJIT AVX2
+  ShortRun : .NET 9.0.15 (9.0.1526.17522), X64 RyuJIT AVX2
+</code></pre>
+<pre><code>Job=ShortRun  IterationCount=3  LaunchCount=1  
+WarmupCount=3  
+</code></pre>
+
+<table>
+<thead><tr><th>Method            </th><th>Mean</th><th>Error</th><th>StdDev</th><th>Ratio</th><th>RatioSD</th><th>Rank</th><th>Gen0</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>NLog_Single_Info</td><td>93.05 ns</td><td>72.83 ns</td><td>3.992 ns</td><td>0.37</td><td>0.04</td><td>1</td><td>0.0280</td><td>176 B</td><td>0.46</td>
+</tr><tr><td>NLog_Multi_Info</td><td>97.38 ns</td><td>30.77 ns</td><td>1.687 ns</td><td>0.39</td><td>0.04</td><td>1</td><td>0.0280</td><td>176 B</td><td>0.46</td>
+</tr><tr><td>NLog_Multi_Error</td><td>131.33 ns</td><td>157.23 ns</td><td>8.618 ns</td><td>0.52</td><td>0.06</td><td>2</td><td>0.0279</td><td>176 B</td><td>0.46</td>
+</tr><tr><td>Serilog_Single_Info</td><td>254.92 ns</td><td>538.75 ns</td><td>29.531 ns</td><td>1.01</td><td>0.14</td><td>3</td><td>0.0610</td><td>384 B</td><td>1.00</td>
+</tr><tr><td>Serilog_Multi_Error</td><td>377.65 ns</td><td>169.35 ns</td><td>9.283 ns</td><td>1.49</td><td>0.14</td><td>4</td><td>0.1554</td><td>976 B</td><td>2.54</td>
+</tr><tr><td>Serilog_Multi_Info</td><td>384.53 ns</td><td>292.39 ns</td><td>16.027 ns</td><td>1.52</td><td>0.15</td><td>4</td><td>0.1554</td><td>976 B</td><td>2.54</td>
+</tr><tr><td>LoggerHelper_Single_Info</td><td>806.30 ns</td><td>709.44 ns</td><td>38.887 ns</td><td>3.19</td><td>0.33</td><td>5</td><td>0.2651</td><td>1664 B</td><td>4.33</td>
+</tr><tr><td>LoggerHelper_Multi_Info</td><td>957.08 ns</td><td>1,226.17 ns</td><td>67.211 ns</td><td>3.79</td><td>0.43</td><td>5</td><td>0.3300</td><td>2072 B</td><td>5.40</td>
+</tr><tr><td>LoggerHelper_Multi_Error</td><td>977.78 ns</td><td>1,956.55 ns</td><td>107.245 ns</td><td>3.87</td><td>0.52</td><td>5</td><td>0.3300</td><td>2072 B</td><td>5.40</td>
+</tr></tbody></table>
+</body>
+</html>

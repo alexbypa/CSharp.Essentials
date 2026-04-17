@@ -21,7 +21,8 @@
       "Bash(git rm:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(find C:WorkProjectsCsharpEssentialsCSharp.Essentials -name *-report*.md)"
     ]
   }
 }

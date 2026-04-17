@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks.ThroughputBenchmark-20260417-171309</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.26200.8246)
+Unknown processor
+.NET SDK 10.0.201
+  [Host]   : .NET 9.0.15 (9.0.1526.17522), X64 RyuJIT AVX2
+  ShortRun : .NET 9.0.15 (9.0.1526.17522), X64 RyuJIT AVX2
+</code></pre>
+<pre><code>Job=ShortRun  IterationCount=3  LaunchCount=1  
+WarmupCount=3  
+</code></pre>
+
+<table>
+<thead><tr><th>Method                  </th><th>Mean  </th><th>Error </th><th>StdDev</th><th>Ratio</th><th>RatioSD</th><th>Rank</th><th>Gen0</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>Serilog_BelowMinLevel</td><td>6.065 ns</td><td>7.696 ns</td><td>0.4218 ns</td><td>0.02</td><td>0.00</td><td>1</td><td>-</td><td>-</td><td>0.00</td>
+</tr><tr><td>NLog_BelowMinLevel</td><td>28.034 ns</td><td>11.623 ns</td><td>0.6371 ns</td><td>0.11</td><td>0.00</td><td>2</td><td>-</td><td>-</td><td>0.00</td>
+</tr><tr><td>LoggerHelper_BelowMinLevel</td><td>42.215 ns</td><td>73.162 ns</td><td>4.0103 ns</td><td>0.17</td><td>0.01</td><td>3</td><td>0.0089</td><td>56 B</td><td>0.15</td>
+</tr><tr><td>NLog_SingleMessage</td><td>106.491 ns</td><td>88.902 ns</td><td>4.8730 ns</td><td>0.42</td><td>0.02</td><td>4</td><td>0.0280</td><td>176 B</td><td>0.46</td>
+</tr><tr><td>NLog_StructuredPayload</td><td>113.169 ns</td><td>14.631 ns</td><td>0.8020 ns</td><td>0.44</td><td>0.01</td><td>4</td><td>0.0356</td><td>224 B</td><td>0.58</td>
+</tr><tr><td>Serilog_SingleMessage</td><td>254.948 ns</td><td>162.015 ns</td><td>8.8806 ns</td><td>1.00</td><td>0.04</td><td>5</td><td>0.0610</td><td>384 B</td><td>1.00</td>
+</tr><tr><td>Serilog_StructuredPayload</td><td>332.962 ns</td><td>696.481 ns</td><td>38.1765 ns</td><td>1.31</td><td>0.14</td><td>5</td><td>0.0787</td><td>496 B</td><td>1.29</td>
+</tr><tr><td>LoggerHelper_SingleMessage</td><td>979.814 ns</td><td>1,224.528 ns</td><td>67.1205 ns</td><td>3.85</td><td>0.26</td><td>6</td><td>0.2651</td><td>1672 B</td><td>4.35</td>
+</tr><tr><td>LoggerHelper_StructuredPayload</td><td>1,283.596 ns</td><td>2,035.680 ns</td><td>111.5825 ns</td><td>5.04</td><td>0.41</td><td>7</td><td>0.3052</td><td>1920 B</td><td>5.00</td>
+</tr></tbody></table>
+</body>
+</html>
