@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Serilog.Context;
 using Serilog.Events;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -14,7 +15,16 @@ internal sealed class LoggerHelperLogger : ILogger {
         _logger = logger;
     }
 
-    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull {
+        if (state is IEnumerable<KeyValuePair<string, object?>> properties) {
+            var disposables = properties
+                .Where(p => p.Key != "{OriginalFormat}")
+                .Select(p => LogContext.PushProperty(p.Key, p.Value, destructureObjects: true))
+                .ToList();
+            return new CompositeDisposable(disposables);
+        }
+        return LogContext.PushProperty("Scope", state, destructureObjects: true);
+    }
 
     public bool IsEnabled(LogLevel logLevel) =>
         _logger.IsEnabled(MapLevel(logLevel));
@@ -43,4 +53,11 @@ internal sealed class LoggerHelperLogger : ILogger {
         LogLevel.Critical => LogEventLevel.Fatal,
         _ => LogEventLevel.Information
     };
+}
+
+internal sealed class CompositeDisposable(List<IDisposable> disposables) : IDisposable {
+    public void Dispose() {
+        foreach (var d in disposables)
+            d.Dispose();
+    }
 }

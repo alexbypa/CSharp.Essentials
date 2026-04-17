@@ -11,7 +11,12 @@
       "Bash(ls:*)",
       "Bash(dotnet sln:*)",
       "Bash(dotnet:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(chmod:*)",
+      "Bash(bun:*)",
+      "Bash(tasklist)",
+      "Bash(xargs grep:*)",
+      "Skill(telegram:access)"
     ]
   }
 }

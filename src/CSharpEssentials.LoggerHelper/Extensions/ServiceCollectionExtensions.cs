@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CSharpEssentials.LoggerHelper;
 
@@ -10,6 +11,38 @@ namespace CSharpEssentials.LoggerHelper;
 /// Extension methods for registering LoggerHelper in the DI container.
 /// </summary>
 public static class ServiceCollectionExtensions {
+    /// <summary>
+    /// Adds LoggerHelper as a Microsoft.Extensions.Logging provider on ILoggingBuilder,
+    /// so that "Logging:LogLevel" filters in appsettings.json are respected.
+    ///
+    /// Example:
+    ///   builder.Logging.AddLoggerHelper(builder.Configuration);
+    /// </summary>
+    public static ILoggingBuilder AddLoggerHelper(this ILoggingBuilder loggingBuilder, IConfiguration configuration) {
+        loggingBuilder.Services.AddLoggerHelper(configuration);
+        loggingBuilder.Services.TryAddEnumerable(
+            ServiceDescriptor.Singleton<ILoggerProvider, LoggerHelperProvider>(
+                sp => (LoggerHelperProvider)sp.GetServices<ILoggerProvider>()
+                          .First(p => p is LoggerHelperProvider)));
+        return loggingBuilder;
+    }
+
+    /// <summary>
+    /// Adds LoggerHelper as a Microsoft.Extensions.Logging provider on ILoggingBuilder
+    /// with fluent builder configuration.
+    ///
+    /// Example:
+    ///   builder.Logging.AddLoggerHelper(b => b.WithApplicationName("MyApp").AddRoute("Console", LogEventLevel.Information));
+    /// </summary>
+    public static ILoggingBuilder AddLoggerHelper(this ILoggingBuilder loggingBuilder, Action<LoggerHelperBuilder> configure) {
+        loggingBuilder.Services.AddLoggerHelper(configure);
+        loggingBuilder.Services.TryAddEnumerable(
+            ServiceDescriptor.Singleton<ILoggerProvider, LoggerHelperProvider>(
+                sp => (LoggerHelperProvider)sp.GetServices<ILoggerProvider>()
+                          .First(p => p is LoggerHelperProvider)));
+        return loggingBuilder;
+    }
+
     /// <summary>
     /// Adds LoggerHelper with fluent builder configuration.
     ///
