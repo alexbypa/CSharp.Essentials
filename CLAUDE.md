@@ -22,7 +22,7 @@ Prima del rewrite, analizzare i top 10 pacchetti di logging su NuGet (download, 
 
 #### Fase 1 — Rewrite del Core LoggerHelper
 Creare un progetto LoggerHelper nuovo prendendo il meglio dall'originale, con queste migliorie:
-- **Fluent Builder API** — Config programmatica oltre a JSON: `builder.AddConsoleSink().AddEmailSink().WithThrottling()` con IntelliSense completo
+- **JSON-first con Fluent minimale** — Il differenziatore e' la config JSON declarativa "zero code" (installi il NuGet, aggiungi JSON, funziona). L'API fluent (`AddRoute`, `ConfigureSink<T>`) esiste come complemento, non come feature primaria. Non hard-codare nomi di sink nel core per rispettare OCP
 - **Compatibilita `ILogger<T>`** — Integrazione nativa con `Microsoft.Extensions.Logging` come provider. Chi gia usa `ILogger<T>` adotta LoggerHelper senza cambiare codice
 - **Source Generator** — Sostituire il runtime reflection per il caricamento sink con source generator: piu veloce, AOT-compatible, trimming-safe. Differenziatore forte vs concorrenza
 - **Benchmark pubblicati** — Comparazioni misurate vs Serilog puro, NLog, etc. con BenchmarkDotNet

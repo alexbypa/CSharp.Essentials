@@ -10,7 +10,8 @@
       "Bash(dotnet new:*)",
       "Bash(ls:*)",
       "Bash(dotnet sln:*)",
-      "Bash(dotnet:*)"
+      "Bash(dotnet:*)",
+      "Bash(mkdir:*)"
     ]
   }
 }
