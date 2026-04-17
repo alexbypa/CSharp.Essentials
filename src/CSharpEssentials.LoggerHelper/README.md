@@ -273,6 +273,20 @@ public static class PluginInitializer {
 
 ---
 
+## Performance
+
+LoggerHelper v5 is built on Serilog, adding a thin MEL-compatible routing layer.
+Overhead vs raw Serilog is kept minimal — no reflection at log time, level checks
+short-circuit before routing evaluation.
+
+> Full benchmark results (auto-updated on each release) → **[docs/benchmarks.md](../../docs/benchmarks.md)**
+
+Benchmarks run with [BenchmarkDotNet](https://benchmarkdotnet.org/) on .NET 9,
+comparing LoggerHelper v5 against Serilog (baseline) and NLog using no-op sinks
+to measure framework overhead independently of I/O.
+
+---
+
 ## Target frameworks
 
 | Package | Targets |
