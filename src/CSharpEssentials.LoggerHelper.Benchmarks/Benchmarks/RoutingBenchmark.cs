@@ -69,7 +69,8 @@ public class RoutingBenchmark
             .CreateLogger();
         _serilogSingle = _serilogSingleRoot;
 
-        // Serilog — multi sub-logger (Info-Error to sink1, Error-Fatal to sink2)
+        // Serilog — multi sub-logger: Info/Warning/Error → sink1, Error/Fatal → sink2.
+        // Error hits both sub-loggers (intentional overlap) — mirrors LoggerHelper NullA+NullB behavior.
         _serilogMultiRoot = new LoggerConfiguration()
             .MinimumLevel.Information()
             .WriteTo.Logger(lc => lc

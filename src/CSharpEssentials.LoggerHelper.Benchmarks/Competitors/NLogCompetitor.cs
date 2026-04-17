@@ -42,6 +42,8 @@ internal sealed class NLogCompetitor : IDisposable
         {
             var t1 = new NullTarget("null-info-error");
             var t2 = new NullTarget("null-error-fatal");
+            // Info/Warning/Error → t1; Error/Fatal → t2.
+            // Error hits BOTH rules (inclusive bounds, no Final flag) — same overlap as LoggerHelper's NullA+NullB.
             cfg.AddRule(LogLevel.Info, LogLevel.Error, t1);
             cfg.AddRule(LogLevel.Error, LogLevel.Fatal, t2);
         });
