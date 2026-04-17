@@ -17,7 +17,11 @@
       "Bash(tasklist)",
       "Bash(xargs grep:*)",
       "Skill(telegram:access)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git:*)"
     ]
   }
 }
