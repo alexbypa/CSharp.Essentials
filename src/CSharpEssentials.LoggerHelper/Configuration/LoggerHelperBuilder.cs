@@ -81,6 +81,16 @@ public sealed class LoggerHelperBuilder {
     }
 
     /// <summary>
+    /// Enables RenderedMessage enricher — adds a pre-rendered message string to each log event.
+    /// Useful for database sinks (MSSqlServer, PostgreSQL) that need a formatted message column.
+    /// Disabled by default to minimize per-log allocations.
+    /// </summary>
+    public LoggerHelperBuilder EnableRenderedMessage() {
+        Options.General.EnableRenderedMessage = true;
+        return this;
+    }
+
+    /// <summary>
     /// Allows adding custom Serilog enrichers to the pipeline.
     /// </summary>
     public LoggerHelperBuilder WithEnrichers(Action<LoggerConfiguration> configure) {

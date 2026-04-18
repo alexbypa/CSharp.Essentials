@@ -30,8 +30,12 @@ internal static class LoggerPipelineFactory {
         var loggerConfig = new LoggerConfiguration()
             .Enrich.WithProperty("ApplicationName", options.ApplicationName)
             .Enrich.WithProperty("MachineName", Environment.MachineName)
-            .Enrich.FromLogContext()
-            .Enrich.With<RenderedMessageEnricher>();
+            .Enrich.FromLogContext();
+
+        // RenderedMessage enricher is opt-in: it allocates a string per log event.
+        // Enable only when database sinks need a pre-rendered message column.
+        if (options.General.EnableRenderedMessage)
+            loggerConfig.Enrich.With<RenderedMessageEnricher>();
 
         if (options.General.EnableOpenTelemetry)
             loggerConfig.WriteTo.Sink(new OpenTelemetryLogEventSink());

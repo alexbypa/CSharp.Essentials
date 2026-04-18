@@ -94,4 +94,11 @@ public sealed class GeneralOptions {
     /// Enable OpenTelemetry trace correlation on log events.
     /// </summary>
     public bool EnableOpenTelemetry { get; set; } = true;
+
+    /// <summary>
+    /// Enable RenderedMessage enricher (adds pre-rendered message string to each log event).
+    /// Useful for database sinks that need a column with the formatted message.
+    /// Disabled by default to reduce per-log allocations.
+    /// </summary>
+    public bool EnableRenderedMessage { get; set; }
 }

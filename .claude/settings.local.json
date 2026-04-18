@@ -22,7 +22,13 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git:*)",
-      "Bash(find C:WorkProjectsCsharpEssentialsCSharp.Essentials -name *-report*.md)"
+      "Bash(find C:WorkProjectsCsharpEssentialsCSharp.Essentials -name *-report*.md)",
+      "Bash(mkdir -p BenchmarkDotNet.Artifacts/v1-baseline)",
+      "Bash(cp BenchmarkDotNet.Artifacts/results/* BenchmarkDotNet.Artifacts/v1-baseline/)",
+      "Bash(mkdir -p BenchmarkDotNet.Artifacts/v2-memory-optimization)",
+      "Bash(cp BenchmarkDotNet.Artifacts/results/*.md BenchmarkDotNet.Artifacts/results/*.csv BenchmarkDotNet.Artifacts/results/*.html BenchmarkDotNet.Artifacts/v2-memory-optimization/)",
+      "Bash(mkdir -p BenchmarkDotNet.Artifacts/v3-trace-api)",
+      "Bash(cp BenchmarkDotNet.Artifacts/results/*.md BenchmarkDotNet.Artifacts/results/*.csv BenchmarkDotNet.Artifacts/results/*.html BenchmarkDotNet.Artifacts/v3-trace-api/)"
     ]
   }
 }

@@ -1,3 +1,4 @@
+using System.Buffers;
 using Microsoft.Extensions.Logging;
 using Serilog.Context;
 using Serilog.Events;
@@ -7,6 +8,7 @@ namespace CSharpEssentials.LoggerHelper;
 
 /// <summary>
 /// ILogger implementation that forwards to Serilog with full structured logging support.
+/// Optimized for minimal allocations on the hot path.
 /// </summary>
 internal sealed class LoggerHelperLogger : ILogger {
     private readonly Serilog.ILogger _logger;
@@ -17,11 +19,13 @@ internal sealed class LoggerHelperLogger : ILogger {
 
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull {
         if (state is IEnumerable<KeyValuePair<string, object?>> properties) {
-            var disposables = properties
-                .Where(p => p.Key != "{OriginalFormat}")
-                .Select(p => LogContext.PushProperty(p.Key, p.Value, destructureObjects: true))
-                .ToList();
-            return new CompositeDisposable(disposables);
+            // Count first to avoid List allocation for small scopes
+            var disposables = new List<IDisposable>();
+            foreach (var p in properties) {
+                if (p.Key != "{OriginalFormat}")
+                    disposables.Add(LogContext.PushProperty(p.Key, p.Value, destructureObjects: true));
+            }
+            return disposables.Count == 1 ? disposables[0] : new CompositeDisposable(disposables);
         }
         return LogContext.PushProperty("Scope", state, destructureObjects: true);
     }
@@ -40,21 +44,59 @@ internal sealed class LoggerHelperLogger : ILogger {
             log = log.ForContext("EventId", eventId.Id)
                      .ForContext("EventName", eventId.Name);
 
-        // When state carries structured properties (the standard MEL case), extract the
-        // original message template and property values so Serilog can parse them properly.
-        // This preserves named properties like {nome} = "Ciccio" in the log event.
-        // Falling back to the rendered string only for custom ILogger.Log<TState> usages
-        // that don't follow the standard MEL key/value convention.
-        if (state is IEnumerable<KeyValuePair<string, object?>> pairs) {
-            var props = pairs.ToList();
-            var template = props.FirstOrDefault(p => p.Key == "{OriginalFormat}").Value?.ToString()
-                           ?? formatter(state, exception);
-            var values = props
-                .Where(p => p.Key != "{OriginalFormat}")
-                .Select(p => p.Value)
-                .ToArray();
+        // Extract structured properties without LINQ allocations.
+        // MEL passes state as IReadOnlyList<KVP> — enumerate once, rent an array for values.
+        if (state is IReadOnlyList<KeyValuePair<string, object?>> props) {
+            string? template = null;
+            int valueCount = 0;
 
-            log.Write(serilogLevel, exception, template, values);
+            // First pass: find template and count values
+            for (int i = 0; i < props.Count; i++) {
+                if (props[i].Key == "{OriginalFormat}")
+                    template = props[i].Value?.ToString();
+                else
+                    valueCount++;
+            }
+
+            template ??= formatter(state, exception);
+
+            if (valueCount == 0) {
+                log.Write(serilogLevel, exception, template);
+            } else {
+                // Rent from pool to avoid per-call array allocation
+                var rented = ArrayPool<object?>.Shared.Rent(valueCount);
+                try {
+                    int idx = 0;
+                    for (int i = 0; i < props.Count; i++) {
+                        if (props[i].Key != "{OriginalFormat}")
+                            rented[idx++] = props[i].Value;
+                    }
+
+                    // Serilog needs exact-length array; slice via Span to avoid copy
+                    // when rented length matches. Otherwise we must copy.
+                    if (rented.Length == valueCount) {
+                        log.Write(serilogLevel, exception, template, rented);
+                    } else {
+                        var exact = new object?[valueCount];
+                        Array.Copy(rented, exact, valueCount);
+                        log.Write(serilogLevel, exception, template, exact);
+                    }
+                } finally {
+                    ArrayPool<object?>.Shared.Return(rented, clearArray: true);
+                }
+            }
+        } else if (state is IEnumerable<KeyValuePair<string, object?>> pairs) {
+            // Fallback for non-list enumerables (rare)
+            string? template = null;
+            var values = new List<object?>();
+            foreach (var p in pairs) {
+                if (p.Key == "{OriginalFormat}")
+                    template = p.Value?.ToString();
+                else
+                    values.Add(p.Value);
+            }
+            template ??= formatter(state, exception);
+            log.Write(serilogLevel, exception, template, values.ToArray());
         } else {
             log.Write(serilogLevel, exception, formatter(state, exception));
         }
