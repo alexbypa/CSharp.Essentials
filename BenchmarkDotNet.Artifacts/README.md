@@ -6,6 +6,44 @@ All benchmarks use **no-op sinks** to measure pure framework overhead, not I/O.
 
 ## Optimization History
 
+### v5 — Memory Safety + Allocation Reduction (2026-04-18)
+
+**Changes:**
+1. **LogErrorStore bounded** — `ConcurrentQueue` was unbounded (memory leak). Added `MaxCapacity = 1000` with circular buffer eviction
+2. **RequestResponseLoggingMiddleware body limit** — Was reading entire request/response bodies into memory. Added 64 KB cap with `ReadBodySafe` truncation
+3. **BeginScope Disposable2/Disposable3** — Replaced `List<IDisposable>` allocation for the common 2-3 property case with fixed-size disposable structs
+4. **BeginTrace KVP array** — Replaced `Dictionary<string, object?>` with `KeyValuePair<string, object?>[]` — avoids Dict internal allocations (buckets, entries, hash computation)
+
+**Results (TraceApiBenchmark):**
+
+| Method | v4 | v5 | Delta |
+|---|---|---|---|
+| LoggerHelper_ILogger | 568 ns / 1,240 B | 558 ns / 1,240 B | stable |
+| LoggerHelper_ILogger_WithException | 490 ns / 1,152 B | 485 ns / 1,152 B | stable |
+| LoggerHelper_BeginTrace_5Logs | 657 ns / 1,378 B | 636 ns / 1,325 B | **-3% time / -4% alloc** |
+| LoggerHelper_Trace | 1,481 ns / 2,688 B | 1,470 ns / 2,688 B | stable |
+
+**Results (RoutingBenchmark):**
+
+| Method | v1 (baseline) | v5 | Delta |
+|---|---|---|---|
+| Single_Info time | 716 ns | 489 ns | **-32%** |
+| Single_Info alloc | 1,664 B | 1,152 B | **-31%** |
+| Multi_Info time | 842 ns | 602 ns | **-29%** |
+
+**Results (ThroughputBenchmark):**
+
+| Method | v1 (baseline) | v5 | Delta |
+|---|---|---|---|
+| SingleMessage time | 979 ns | 493 ns | **-50%** |
+| SingleMessage alloc | 1,672 B | 1,152 B | **-31%** |
+| StructuredPayload time | 1,283 ns | 610 ns | **-52%** |
+| StructuredPayload alloc | 1,920 B | 1,296 B | **-32%** |
+
+**Key insight:** The primary gains over v4 are in memory safety (preventing leaks in production), not raw speed. The BeginTrace scope saved ~53 B/log from the KVP array optimization. The memory leak fixes prevent unbounded growth that would eventually crash long-running services.
+
+---
+
 ### v4 — API Simplification + ArrayPool Removal (2026-04-18)
 
 **Changes:**
@@ -82,6 +120,7 @@ Known issues: LINQ allocations on every log call, RenderedMessageEnricher always
 | [`v2-memory-optimization/`](v2-memory-optimization/) | IReadOnlyList fast-path + RenderedMessage opt-in |
 | [`v3-trace-api/`](v3-trace-api/) | TraceSync/TraceAsync with template appending |
 | [`v4-final-optimization/`](v4-final-optimization/) | API simplification + ArrayPool removal + LIFO bugfix |
+| [`v5-memory-safety/`](v5-memory-safety/) | Memory leak fixes + BeginScope/BeginTrace allocation reduction |
 | [`results/`](results/) | Latest run (working directory for BenchmarkDotNet) |
 
 ## Benchmark Classes
@@ -90,6 +129,7 @@ Known issues: LINQ allocations on every log call, RenderedMessageEnricher always
 - **ThroughputBenchmark** — Per-message throughput: single message, structured payload, below-min-level filtering
 - **StartupBenchmark** — Cold-start initialization cost (DI container + Serilog pipeline creation)
 - **TraceApiBenchmark** — BeginTrace scope vs Trace single-shot vs ILogger direct vs Serilog/NLog
+- **MemoryLeakTest** — Long-running soak test (not BenchmarkDotNet). Runs all APIs in a loop for N minutes, takes heap snapshots every 10s, applies linear regression to detect memory growth. Results saved to `memory-leak-test/`
 
 ## How to Run
 
@@ -102,6 +142,12 @@ dotnet run -c Release --project src/CSharpEssentials.LoggerHelper.Benchmarks --f
 
 # Single benchmark class only:
 dotnet run -c Release --project src/CSharpEssentials.LoggerHelper.Benchmarks --framework net9.0 -- --filter *TraceApi* --job short --exporters github
+
+# Memory leak soak test (30 min default):
+dotnet run -c Release --project src/CSharpEssentials.LoggerHelper.Benchmarks --framework net9.0 -- --leak-test
+
+# Memory leak soak test (custom duration):
+dotnet run -c Release --project src/CSharpEssentials.LoggerHelper.Benchmarks --framework net9.0 -- --leak-test --duration 5
 ```
 
 ## Parameter Reference

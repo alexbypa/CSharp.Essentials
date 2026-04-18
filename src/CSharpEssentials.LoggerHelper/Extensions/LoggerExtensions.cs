@@ -28,14 +28,21 @@ public static class LoggerExtensions {
     /// The scope cost is paid once, not per-log-call.
     /// </summary>
     public static IDisposable? BeginTrace(this ILogger logger, string action, string idTransaction) {
-        var state = new Dictionary<string, object?>(3) {
-            ["IdTransaction"] = idTransaction,
-            ["Action"] = action
-        };
-
         var spanName = Activity.Current?.DisplayName;
-        if (spanName is not null)
-            state["SpanName"] = spanName;
+
+        // Use KeyValuePair array instead of Dictionary — avoids Dict internal allocations
+        // (buckets array, entries array, hash computation). A KVP array is the cheapest
+        // IEnumerable<KVP> that BeginScope recognizes.
+        KeyValuePair<string, object?>[] state = spanName is not null
+            ? [
+                new("IdTransaction", idTransaction),
+                new("Action", action),
+                new("SpanName", spanName)
+              ]
+            : [
+                new("IdTransaction", idTransaction),
+                new("Action", action)
+              ];
 
         return logger.BeginScope(state);
     }

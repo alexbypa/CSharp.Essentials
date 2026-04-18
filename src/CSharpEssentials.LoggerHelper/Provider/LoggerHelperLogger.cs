@@ -18,12 +18,37 @@ internal sealed class LoggerHelperLogger : ILogger {
 
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull {
         if (state is IEnumerable<KeyValuePair<string, object?>> properties) {
-            var disposables = new List<IDisposable>();
+            // Collect pushed disposables. Typical scope = 2-3 properties
+            // (IdTransaction + Action + optional SpanName).
+            IDisposable? d0 = null, d1 = null, d2 = null;
+            List<IDisposable>? overflow = null;
+            int count = 0;
+
             foreach (var p in properties) {
-                if (p.Key != "{OriginalFormat}")
-                    disposables.Add(LogContext.PushProperty(p.Key, p.Value, destructureObjects: true));
+                if (p.Key == "{OriginalFormat}")
+                    continue;
+                var pushed = LogContext.PushProperty(p.Key, p.Value, destructureObjects: true);
+                switch (count) {
+                    case 0: d0 = pushed; break;
+                    case 1: d1 = pushed; break;
+                    case 2: d2 = pushed; break;
+                    default:
+                        overflow ??= [d0!, d1!, d2!];
+                        overflow.Add(pushed);
+                        break;
+                }
+                count++;
             }
-            return disposables.Count == 1 ? disposables[0] : new CompositeDisposable(disposables);
+
+            if (overflow is not null)
+                return new CompositeDisposable(overflow);
+
+            return count switch {
+                0 => null,
+                1 => d0,
+                2 => new Disposable2(d0!, d1!),
+                _ => new Disposable3(d0!, d1!, d2!)
+            };
         }
         return LogContext.PushProperty("Scope", state, destructureObjects: true);
     }
@@ -100,9 +125,19 @@ internal sealed class LoggerHelperLogger : ILogger {
     };
 }
 
+/// <summary>LIFO disposable for exactly 2 properties (most common scope).</summary>
+internal sealed class Disposable2(IDisposable d0, IDisposable d1) : IDisposable {
+    public void Dispose() { d1.Dispose(); d0.Dispose(); }
+}
+
+/// <summary>LIFO disposable for exactly 3 properties (IdTransaction + Action + SpanName).</summary>
+internal sealed class Disposable3(IDisposable d0, IDisposable d1, IDisposable d2) : IDisposable {
+    public void Dispose() { d2.Dispose(); d1.Dispose(); d0.Dispose(); }
+}
+
+/// <summary>LIFO disposable for 4+ properties (rare).</summary>
 internal sealed class CompositeDisposable(List<IDisposable> disposables) : IDisposable {
     public void Dispose() {
-        // LogContext uses a stack — must dispose in reverse (LIFO) order
         for (int i = disposables.Count - 1; i >= 0; i--)
             disposables[i].Dispose();
     }

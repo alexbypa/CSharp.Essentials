@@ -13,6 +13,12 @@ public sealed class RequestResponseLoggingMiddleware {
     private readonly RequestDelegate _next;
     private readonly ILogger<RequestResponseLoggingMiddleware> _logger;
 
+    /// <summary>
+    /// Maximum body size (in bytes) to capture for logging.
+    /// Bodies larger than this are truncated to prevent memory exhaustion.
+    /// </summary>
+    private const int MaxBodySize = 64 * 1024; // 64 KB
+
     public RequestResponseLoggingMiddleware(RequestDelegate next, ILogger<RequestResponseLoggingMiddleware> logger) {
         _next = next;
         _logger = logger;
@@ -25,20 +31,14 @@ public sealed class RequestResponseLoggingMiddleware {
 
         try {
             context.Request.EnableBuffering();
-            using var reader = new StreamReader(
-                context.Request.Body,
-                encoding: Encoding.UTF8,
-                detectEncodingFromByteOrderMarks: false,
-                bufferSize: 1024,
-                leaveOpen: true);
 
-            var requestBody = await reader.ReadToEndAsync();
+            var requestBody = await ReadBodySafe(context.Request.Body);
             context.Request.Body.Position = 0;
 
             await _next(context);
 
             responseBodyStream.Seek(0, SeekOrigin.Begin);
-            var responseBody = await new StreamReader(responseBodyStream).ReadToEndAsync();
+            var responseBody = await ReadBodySafe(responseBodyStream);
             responseBodyStream.Seek(0, SeekOrigin.Begin);
 
             var logLevel = context.Response.StatusCode >= 400 ? LogLevel.Error : LogLevel.Information;
@@ -58,5 +58,38 @@ public sealed class RequestResponseLoggingMiddleware {
         } finally {
             await responseBodyStream.CopyToAsync(originalBodyStream);
         }
+    }
+
+    /// <summary>
+    /// Reads a stream body with size limit to prevent memory exhaustion.
+    /// </summary>
+    private static async Task<string> ReadBodySafe(Stream stream) {
+        if (!stream.CanRead)
+            return "(unreadable)";
+
+        // For streams with known length, skip if too large
+        if (stream.CanSeek && stream.Length > MaxBodySize)
+            return $"(truncated, {stream.Length} bytes)";
+
+        using var reader = new StreamReader(
+            stream,
+            encoding: Encoding.UTF8,
+            detectEncodingFromByteOrderMarks: false,
+            bufferSize: 1024,
+            leaveOpen: true);
+
+        var buffer = new char[MaxBodySize];
+        var charsRead = await reader.ReadAsync(buffer, 0, MaxBodySize);
+
+        if (charsRead == 0)
+            return string.Empty;
+
+        var result = new string(buffer, 0, charsRead);
+
+        // Check if there's more data (truncated)
+        if (charsRead == MaxBodySize && reader.Peek() >= 0)
+            return result + "... (truncated)";
+
+        return result;
     }
 }
