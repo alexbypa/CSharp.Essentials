@@ -4,82 +4,78 @@ using Microsoft.Extensions.Logging;
 namespace CSharpEssentials.LoggerHelper;
 
 /// <summary>
-/// Extension methods that bridge the original TraceSync/TraceAsync pattern
-/// to standard ILogger.
+/// Lightweight extensions for ILogger that add IdTransaction/Action/SpanName enrichment.
 ///
-/// Enrichment is done by appending {IdTransaction} {Action} to the message template
-/// (same approach as the original loggerExtension&lt;T&gt;). This avoids BeginScope/AsyncLocal
-/// overhead which is extremely expensive in hot paths.
+/// Usage (scope-based — set once per operation, all logs inherit):
 ///
-/// TraceSync  — logs synchronously on the calling thread
-/// TraceAsync — fire-and-forget: offloads the log to a background thread via Task.Run
+///   using (logger.BeginTrace("OrderProcess", "TXN-001")) {
+///       logger.LogInformation("Order {OrderId} placed", orderId);
+///       logger.LogError(ex, "Payment failed for {OrderId}", orderId);
+///   }
+///
+/// For fire-and-forget single-shot logging (backward compat with original TraceAsync):
+///
+///   logger.Trace("OrderProcess", "TXN-001", LogLevel.Error, ex, "Failed {OrderId}", orderId);
 /// </summary>
 public static class LoggerExtensions {
-    private const string Suffix = " {IdTransaction} {Action}";
-    private const string SuffixWithSpan = " {IdTransaction} {Action} {SpanName}";
-
     /// <summary>
-    /// Logs a message synchronously, enriched with IdTransaction, Action, and SpanName.
-    /// Equivalent to the original loggerExtension&lt;T&gt;.TraceSync.
-    /// </summary>
-    public static void TraceSync(this ILogger logger, string action, string idTransaction,
-        LogLevel level, Exception? exception, string message, params object?[] args) {
-        if (!logger.IsEnabled(level))
-            return;
-
-        var spanName = Activity.Current?.DisplayName;
-        WriteEnriched(logger, level, exception, action, idTransaction, spanName, message, args);
-    }
-
-    /// <summary>
-    /// TraceSync shorthand — Information level, no exception.
-    /// </summary>
-    public static void TraceSync(this ILogger logger, string action, string idTransaction,
-        string message, params object?[] args) {
-        TraceSync(logger, action, idTransaction, LogLevel.Information, null, message, args);
-    }
-
-    /// <summary>
-    /// Logs a message asynchronously (fire-and-forget), enriched with IdTransaction, Action, and SpanName.
-    /// Equivalent to the original loggerExtension&lt;T&gt;.TraceAsync.
+    /// Creates a logging scope enriched with IdTransaction, Action, and SpanName (if active).
+    /// All logs within the scope automatically include these properties.
     ///
-    /// The call returns immediately — the log is written on a background thread.
+    /// This is the recommended API — set the scope once per operation, then use
+    /// standard ILogger methods (LogInformation, LogError, etc.) inside.
+    ///
+    /// The scope cost is paid once, not per-log-call.
     /// </summary>
-    public static void TraceAsync(this ILogger logger, string action, string idTransaction,
+    public static IDisposable? BeginTrace(this ILogger logger, string action, string idTransaction) {
+        var state = new Dictionary<string, object?>(3) {
+            ["IdTransaction"] = idTransaction,
+            ["Action"] = action
+        };
+
+        var spanName = Activity.Current?.DisplayName;
+        if (spanName is not null)
+            state["SpanName"] = spanName;
+
+        return logger.BeginScope(state);
+    }
+
+    /// <summary>
+    /// Logs a single message enriched with IdTransaction and Action by appending them
+    /// to the message template. No scope/AsyncLocal overhead — properties are inlined.
+    ///
+    /// Use this for isolated one-off logs where a scope would be overkill.
+    /// For multiple logs in the same operation, prefer BeginTrace + standard ILogger.
+    /// </summary>
+    public static void Trace(this ILogger logger, string action, string idTransaction,
         LogLevel level, Exception? exception, string message, params object?[] args) {
         if (!logger.IsEnabled(level))
             return;
 
-        // Capture SpanName on the calling thread (Activity.Current is thread-local)
-        var spanName = Activity.Current?.DisplayName;
-
-        Task.Run(() => WriteEnriched(logger, level, exception, action, idTransaction, spanName, message, args));
-    }
-
-    /// <summary>
-    /// TraceAsync shorthand — Information level, no exception.
-    /// </summary>
-    public static void TraceAsync(this ILogger logger, string action, string idTransaction,
-        string message, params object?[] args) {
-        TraceAsync(logger, action, idTransaction, LogLevel.Information, null, message, args);
-    }
-
-    private static void WriteEnriched(ILogger logger, LogLevel level, Exception? exception,
-        string action, string idTransaction, string? spanName, string message, object?[] args) {
-        bool hasSpan = spanName is not null;
+        bool hasSpan = Activity.Current is not null;
         int extraCount = hasSpan ? 3 : 2;
 
-        // Allocate exact-size array directly — for 4-5 elements, this is faster
-        // than ArrayPool (Rent always returns oversized → forces a copy anyway)
         var enrichedArgs = new object?[args.Length + extraCount];
-        Array.Copy(args, enrichedArgs, args.Length);
+        args.CopyTo(enrichedArgs, 0);
         enrichedArgs[args.Length] = idTransaction;
         enrichedArgs[args.Length + 1] = action;
-        if (hasSpan)
-            enrichedArgs[args.Length + 2] = spanName;
 
-        var enrichedMessage = string.Concat(message, hasSpan ? SuffixWithSpan : Suffix);
+        string enrichedMessage;
+        if (hasSpan) {
+            enrichedArgs[args.Length + 2] = Activity.Current!.DisplayName;
+            enrichedMessage = string.Concat(message, " {IdTransaction} {Action} {SpanName}");
+        } else {
+            enrichedMessage = string.Concat(message, " {IdTransaction} {Action}");
+        }
 
         logger.Log(level, exception, enrichedMessage, enrichedArgs);
+    }
+
+    /// <summary>
+    /// Trace shorthand — Information level, no exception.
+    /// </summary>
+    public static void Trace(this ILogger logger, string action, string idTransaction,
+        string message, params object?[] args) {
+        Trace(logger, action, idTransaction, LogLevel.Information, null, message, args);
     }
 }

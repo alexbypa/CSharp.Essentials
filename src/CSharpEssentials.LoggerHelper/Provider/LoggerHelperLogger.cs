@@ -1,4 +1,3 @@
-using System.Buffers;
 using Microsoft.Extensions.Logging;
 using Serilog.Context;
 using Serilog.Events;
@@ -19,7 +18,6 @@ internal sealed class LoggerHelperLogger : ILogger {
 
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull {
         if (state is IEnumerable<KeyValuePair<string, object?>> properties) {
-            // Count first to avoid List allocation for small scopes
             var disposables = new List<IDisposable>();
             foreach (var p in properties) {
                 if (p.Key != "{OriginalFormat}")
@@ -45,7 +43,7 @@ internal sealed class LoggerHelperLogger : ILogger {
                      .ForContext("EventName", eventId.Name);
 
         // Extract structured properties without LINQ allocations.
-        // MEL passes state as IReadOnlyList<KVP> — enumerate once, rent an array for values.
+        // MEL passes state as IReadOnlyList<KVP> — single pass, direct array allocation.
         if (state is IReadOnlyList<KeyValuePair<string, object?>> props) {
             string? template = null;
             int valueCount = 0;
@@ -63,27 +61,16 @@ internal sealed class LoggerHelperLogger : ILogger {
             if (valueCount == 0) {
                 log.Write(serilogLevel, exception, template);
             } else {
-                // Rent from pool to avoid per-call array allocation
-                var rented = ArrayPool<object?>.Shared.Rent(valueCount);
-                try {
-                    int idx = 0;
-                    for (int i = 0; i < props.Count; i++) {
-                        if (props[i].Key != "{OriginalFormat}")
-                            rented[idx++] = props[i].Value;
-                    }
-
-                    // Serilog needs exact-length array; slice via Span to avoid copy
-                    // when rented length matches. Otherwise we must copy.
-                    if (rented.Length == valueCount) {
-                        log.Write(serilogLevel, exception, template, rented);
-                    } else {
-                        var exact = new object?[valueCount];
-                        Array.Copy(rented, exact, valueCount);
-                        log.Write(serilogLevel, exception, template, exact);
-                    }
-                } finally {
-                    ArrayPool<object?>.Shared.Return(rented, clearArray: true);
+                // Direct allocation — for typical log calls (1-5 params) this is faster
+                // than ArrayPool: Rent(N) returns size 16 minimum → forces copy anyway,
+                // plus Rent/Return/clearArray overhead. Small arrays are GC-cheap.
+                var values = new object?[valueCount];
+                int idx = 0;
+                for (int i = 0; i < props.Count; i++) {
+                    if (props[i].Key != "{OriginalFormat}")
+                        values[idx++] = props[i].Value;
                 }
+                log.Write(serilogLevel, exception, template, values);
             }
         } else if (state is IEnumerable<KeyValuePair<string, object?>> pairs) {
             // Fallback for non-list enumerables (rare)
@@ -115,7 +102,8 @@ internal sealed class LoggerHelperLogger : ILogger {
 
 internal sealed class CompositeDisposable(List<IDisposable> disposables) : IDisposable {
     public void Dispose() {
-        foreach (var d in disposables)
-            d.Dispose();
+        // LogContext uses a stack — must dispose in reverse (LIFO) order
+        for (int i = disposables.Count - 1; i >= 0; i--)
+            disposables[i].Dispose();
     }
 }
