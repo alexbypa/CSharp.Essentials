@@ -28,7 +28,9 @@
       "Bash(mkdir -p BenchmarkDotNet.Artifacts/v2-memory-optimization)",
       "Bash(cp BenchmarkDotNet.Artifacts/results/*.md BenchmarkDotNet.Artifacts/results/*.csv BenchmarkDotNet.Artifacts/results/*.html BenchmarkDotNet.Artifacts/v2-memory-optimization/)",
       "Bash(mkdir -p BenchmarkDotNet.Artifacts/v3-trace-api)",
-      "Bash(cp BenchmarkDotNet.Artifacts/results/*.md BenchmarkDotNet.Artifacts/results/*.csv BenchmarkDotNet.Artifacts/results/*.html BenchmarkDotNet.Artifacts/v3-trace-api/)"
+      "Bash(cp BenchmarkDotNet.Artifacts/results/*.md BenchmarkDotNet.Artifacts/results/*.csv BenchmarkDotNet.Artifacts/results/*.html BenchmarkDotNet.Artifacts/v3-trace-api/)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(taskkill //F //PID 31088)"
     ]
   }
 }

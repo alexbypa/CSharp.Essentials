@@ -47,24 +47,34 @@ internal sealed class FileSystemPluginDiscovery : IPluginDiscovery {
     /// not already present in the registry (prevents duplicates with [ModuleInitializer]).
     /// </summary>
     private static void RegisterPluginsFromAssembly(Assembly asm, ILogErrorStore errorStore) {
+        Type[] types;
         try {
-            var pluginTypes = asm.GetTypes()
-                .Where(t => t is { IsClass: true, IsAbstract: false }
-                            && typeof(ISinkPlugin).IsAssignableFrom(t));
-
-            foreach (var type in pluginTypes) {
-                // Skip if a plugin of this exact type is already registered
-                if (SinkPluginRegistry.All.Any(p => p.GetType() == type))
-                    continue;
-
-                if (Activator.CreateInstance(type) is ISinkPlugin plugin)
-                    SinkPluginRegistry.Register(plugin);
-            }
+            types = asm.GetTypes();
         } catch (ReflectionTypeLoadException ex) {
             errorStore.Add(new LogErrorEntry {
                 SinkName = asm.GetName().Name ?? "Unknown",
                 ErrorMessage = $"Failed to scan assembly for plugins: {ex.LoaderExceptions.FirstOrDefault()?.Message}"
             });
+            return;
+        }
+
+        foreach (var type in types) {
+            if (!type.IsClass || type.IsAbstract || !typeof(ISinkPlugin).IsAssignableFrom(type))
+                continue;
+
+            // Skip if a plugin of this exact type is already registered
+            if (SinkPluginRegistry.All.Any(p => p.GetType() == type))
+                continue;
+
+            try {
+                if (Activator.CreateInstance(type, nonPublic: true) is ISinkPlugin plugin)
+                    SinkPluginRegistry.Register(plugin);
+            } catch (Exception ex) {
+                errorStore.Add(new LogErrorEntry {
+                    SinkName = type.Name,
+                    ErrorMessage = $"Failed to instantiate plugin {type.FullName}: {ex.Message}"
+                });
+            }
         }
     }
 }

@@ -14,6 +14,36 @@ public sealed class PostgreSqlSinkOptions {
     public string TableName { get; set; } = "logs";
     public string SchemaName { get; set; } = "public";
     public bool NeedAutoCreateTable { get; set; } = true;
+
+    /// <summary>
+    /// Column definitions for the PostgreSQL table.
+    /// If null/empty, default columns are used (ApplicationName, message, level, etc.).
+    /// </summary>
+    public List<PostgreSqlColumnConfig>? Columns { get; set; }
+}
+
+/// <summary>
+/// Configuration for a PostgreSQL log column.
+/// Writer types: Rendered, Template, Level, Timestamp, Exception, Serialized, Properties, Single.
+/// </summary>
+public sealed class PostgreSqlColumnConfig {
+    /// <summary>Column name in the database table.</summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Writer type: Rendered, Template, Level, Timestamp, Exception, Serialized, Properties, Single.
+    /// </summary>
+    public string Writer { get; set; } = "Single";
+
+    /// <summary>
+    /// NpgsqlDbType as string: Text, Varchar, Jsonb, Timestamp, etc.
+    /// </summary>
+    public string Type { get; set; } = "Text";
+
+    /// <summary>
+    /// For "Single" writer: the Serilog property name to extract. Defaults to column Name.
+    /// </summary>
+    public string? Property { get; set; }
 }
 
 // ── Builder extension ─────────────────────────────────────────────
@@ -38,7 +68,9 @@ internal sealed class PostgreSqlSinkPlugin : ISinkPlugin {
             return;
         }
 
-        var columns = BuildDefaultColumns();
+        var columns = opts.Columns is { Count: > 0 }
+            ? BuildColumnsFromConfig(opts.Columns)
+            : BuildDefaultColumns();
 
         loggerConfig.WriteTo.Conditional(
             evt => routing.Matches(evt.Level),
@@ -52,6 +84,30 @@ internal sealed class PostgreSqlSinkPlugin : ISinkPlugin {
         );
     }
 
+    private static Dictionary<string, ColumnWriterBase> BuildColumnsFromConfig(List<PostgreSqlColumnConfig> columnDefs) {
+        var result = new Dictionary<string, ColumnWriterBase>();
+
+        foreach (var col in columnDefs) {
+            var dbType = ParseNpgsqlDbType(col.Type);
+            result[col.Name] = col.Writer switch {
+                "Rendered" => new RenderedMessageColumnWriter(dbType),
+                "Template" => new MessageTemplateColumnWriter(dbType),
+                "Level" => new LevelColumnWriter(true, dbType),
+                "Timestamp" or "timestamp" => new TimestampColumnWriter(dbType),
+                "Exception" => new ExceptionColumnWriter(dbType),
+                "Serialized" => new LogEventSerializedColumnWriter(dbType),
+                "Properties" => new PropertiesColumnWriter(dbType),
+                "Single" => new SinglePropertyColumnWriter(
+                    col.Property ?? col.Name,
+                    PropertyWriteMethod.ToString,
+                    dbType),
+                _ => throw new InvalidOperationException($"Writer '{col.Writer}' not supported. Use: Rendered, Template, Level, Timestamp, Exception, Serialized, Properties, Single.")
+            };
+        }
+
+        return result;
+    }
+
     private static Dictionary<string, ColumnWriterBase> BuildDefaultColumns() => new() {
         { "ApplicationName", new SinglePropertyColumnWriter("ApplicationName", PropertyWriteMethod.ToString, NpgsqlDbType.Text) },
         { "message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
@@ -63,6 +119,14 @@ internal sealed class PostgreSqlSinkPlugin : ISinkPlugin {
         { "MachineName", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text) },
         { "Action", new SinglePropertyColumnWriter("Action", PropertyWriteMethod.ToString, NpgsqlDbType.Text) },
         { "IdTransaction", new SinglePropertyColumnWriter("IdTransaction", PropertyWriteMethod.ToString, NpgsqlDbType.Text) }
+    };
+
+    private static NpgsqlDbType ParseNpgsqlDbType(string type) => type.ToLowerInvariant() switch {
+        "text" => NpgsqlDbType.Text,
+        "jsonb" => NpgsqlDbType.Jsonb,
+        "varchar" => NpgsqlDbType.Varchar,
+        "timestamp" => NpgsqlDbType.Timestamp,
+        _ => NpgsqlDbType.Text
     };
 }
 

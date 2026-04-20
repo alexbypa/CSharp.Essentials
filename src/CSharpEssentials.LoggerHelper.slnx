@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="CSharpEssentials.LoggerHelper.Benchmarks/CSharpEssentials.LoggerHelper.Benchmarks.csproj" />
+  <Project Path="CSharpEssentials.LoggerHelper.Demo/CSharpEssentials.LoggerHelper.Demo.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Console/CSharpEssentials.LoggerHelper.Sink.Console.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Elasticsearch/CSharpEssentials.LoggerHelper.Sink.Elasticsearch.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Email/CSharpEssentials.LoggerHelper.Sink.Email.csproj" />
