@@ -98,6 +98,9 @@ public static class ServiceCollectionExtensions {
 
         var serilogLogger = LoggerPipelineFactory.Build(options, errorStore, registry, discovery, customEnrichers);
 
+        // Wire legacy static API for backward compatibility
+        LegacyLoggerHolder.Instance = serilogLogger;
+
         // Register services — consumers should depend on interfaces (DIP)
         services.AddSingleton(options);
         services.AddSingleton<ILogErrorStore>(errorStore);

@@ -10,10 +10,11 @@
 - **License:** MIT
 
 ## Obiettivo Principale
-
+**IMPORTANTE** Bisogna prendere di buono quello che c'è nella cartella principale per quello che riguarda CSharpEssentials.LoggerHelper e tutti i suoi sink e portarli sulla cartella src
 **Target:** Raggiungere almeno 1000 download giornalieri di `CSharpEssentials.LoggerHelper` su nuget.org entro 2 mesi, posizionandolo come una delle principali soluzioni di logging nella community .NET.
 **Code base** Devono essere rispettati i principi SOLID, Clean Code, e le best practice di .NET. Il codice deve essere modulare, testabile, e facilmente estendibile con nuovi sink o funzionalità.
-1**Focus:** Solo `LoggerHelper` + sink + HttpHelper. Le altre librerie sono fuori scope per ora.
+**Focus:** Solo `LoggerHelper` + sink + HttpHelper. Le altre librerie sono fuori scope per ora.
+
 
 ### Piano di Esecuzione
 

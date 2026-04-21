@@ -1,3 +1,4 @@
+using CSharpEssentials.LoggerHelper;
 using CSharpEssentials.LoggerHelper.Diagnostics;
 using Microsoft.Extensions.Logging;
 

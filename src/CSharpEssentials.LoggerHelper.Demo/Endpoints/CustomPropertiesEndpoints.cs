@@ -1,3 +1,4 @@
+using CSharpEssentials.LoggerHelper;
 using Microsoft.Extensions.Logging;
 
 namespace CSharpEssentials.LoggerHelper.Demo.Endpoints;
