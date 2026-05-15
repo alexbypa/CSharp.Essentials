@@ -12,13 +12,19 @@ namespace CSharpEssentials.LoggerHelper;
 [ProviderAlias("LoggerHelper")]
 public sealed class LoggerHelperProvider : ILoggerProvider {
     private readonly Serilog.ILogger _serilogLogger;
+    private readonly IContextLogEnricher? _contextEnricher;
 
-    internal LoggerHelperProvider(Serilog.ILogger serilogLogger) {
+    internal LoggerHelperProvider(Serilog.ILogger serilogLogger, IContextLogEnricher? contextEnricher = null) {
         _serilogLogger = serilogLogger;
+        _contextEnricher = contextEnricher;
     }
 
-    public ILogger CreateLogger(string categoryName) =>
-        new LoggerHelperLogger(_serilogLogger.ForContext("SourceContext", categoryName));
+    public ILogger CreateLogger(string categoryName) {
+        var serilog = _serilogLogger.ForContext("SourceContext", categoryName);
+        if (_contextEnricher is not null)
+            serilog = _contextEnricher.Enrich(serilog, null);
+        return new LoggerHelperLogger(serilog);
+    }
 
     public void Dispose() {
         if (_serilogLogger is IDisposable disposable)

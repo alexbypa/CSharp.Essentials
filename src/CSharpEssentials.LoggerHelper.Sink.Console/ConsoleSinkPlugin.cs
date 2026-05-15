@@ -23,7 +23,8 @@ public static class ConsoleBuilderExtensions {
 
 // ── Plugin ────────────────────────────────────────────────────────
 
-internal sealed class ConsoleSinkPlugin : ISinkPlugin {
+[LoggerHelperSink]
+public sealed class ConsoleSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) =>
         string.Equals(sinkName, "Console", StringComparison.OrdinalIgnoreCase);
 

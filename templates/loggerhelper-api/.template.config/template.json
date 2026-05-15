@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Alessandro Chiodo",
+  "classifications": ["Web", "API", "Logging", "Serilog"],
+  "identity": "CSharpEssentials.LoggerHelper.Api",
+  "name": "LoggerHelper Minimal API",
+  "shortName": "loggerhelper-api",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "LoggerHelperApi",
+  "preferNameDirectory": true
+}

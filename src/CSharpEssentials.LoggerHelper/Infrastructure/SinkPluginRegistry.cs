@@ -45,7 +45,11 @@ public static class SinkPluginRegistry {
 internal sealed class DefaultSinkPluginRegistry : ISinkPluginRegistry {
     private readonly ConcurrentBag<ISinkPlugin> _plugins = [];
 
-    internal void Register(ISinkPlugin plugin) => _plugins.Add(plugin);
+    internal void Register(ISinkPlugin plugin) {
+        if (_plugins.Any(p => p.GetType() == plugin.GetType()))
+            return;
+        _plugins.Add(plugin);
+    }
 
     public ISinkPlugin? FindHandler(string sinkName) =>
         _plugins.FirstOrDefault(p => p.CanHandle(sinkName));

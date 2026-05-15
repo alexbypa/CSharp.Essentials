@@ -85,4 +85,19 @@ public static class LoggerExtensions {
         string message, params object?[] args) {
         Trace(logger, action, idTransaction, LogLevel.Information, null, message, args);
     }
+
+    /// <summary>
+    /// Logs with legacy IRequest context (IdTransaction, Action, ApplicationName).
+    /// Prefer BeginTrace or BeginScope for new code.
+    /// </summary>
+    public static void LogWithRequest(this ILogger logger, IRequest request, LogLevel level,
+        Exception? exception, string message, params object?[] args) {
+        using (logger.BeginScope(new Dictionary<string, object?> {
+            ["IdTransaction"] = request.IdTransaction,
+            ["Action"] = request.Action,
+            ["ApplicationName"] = request.ApplicationName
+        })) {
+            logger.Log(level, exception, message, args);
+        }
+    }
 }

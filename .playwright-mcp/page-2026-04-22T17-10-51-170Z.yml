@@ -1,0 +1,312 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "CSharpEssentials" [ref=e4] [cursor=pointer]:
+        - /url: "#"
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Features" [ref=e7] [cursor=pointer]:
+            - /url: "#features"
+        - listitem [ref=e8]:
+          - link "Quick Start" [ref=e9] [cursor=pointer]:
+            - /url: "#quickstart"
+        - listitem [ref=e10]:
+          - link "Sinks" [ref=e11] [cursor=pointer]:
+            - /url: "#sinks"
+        - listitem [ref=e12]:
+          - link "Playground" [ref=e13] [cursor=pointer]:
+            - /url: "#playground"
+        - listitem [ref=e14]:
+          - link "Guides" [ref=e15] [cursor=pointer]:
+            - /url: "#guides"
+        - listitem [ref=e16]:
+          - link "Benchmarks" [ref=e17] [cursor=pointer]:
+            - /url: "#benchmarks"
+        - listitem [ref=e18]:
+          - link "GitHub" [ref=e19] [cursor=pointer]:
+            - /url: https://github.com/alexbypa/CSharp.Essentials
+  - generic [ref=e21]:
+    - generic [ref=e22]: v5.0 — Now with ILogger<T> support
+    - heading "Route Serilog sinks by level, with zero code" [level=1] [ref=e24]:
+      - text: Route Serilog sinks
+      - text: by level, with zero code
+    - paragraph [ref=e25]: The easiest way to orchestrate Serilog. Send errors to Email, warnings to Telegram, info to Console — all from a simple JSON config or 5 lines of fluent C#.
+    - generic [ref=e26]:
+      - link "Get Started in 30s" [ref=e27] [cursor=pointer]:
+        - /url: "#quickstart"
+      - link "Try the Playground" [ref=e28] [cursor=pointer]:
+        - /url: "#playground"
+    - generic [ref=e29] [cursor=pointer]:
+      - generic [ref=e30]: $
+      - code [ref=e31]: dotnet add package CSharpEssentials.LoggerHelper
+      - button "📋" [ref=e32]
+    - generic [ref=e33]:
+      - generic [ref=e34]:
+        - generic [ref=e35]: "8"
+        - generic [ref=e36]: Built-in Sinks
+      - generic [ref=e37]:
+        - generic [ref=e38]: "5"
+        - generic [ref=e39]: Lines to Setup
+      - generic [ref=e40]:
+        - generic [ref=e41]: "3"
+        - generic [ref=e42]: Target Frameworks
+      - generic [ref=e43]:
+        - generic [ref=e44]: <2%
+        - generic [ref=e45]: Routing Overhead
+  - generic [ref=e47]:
+    - generic [ref=e48]: Why LoggerHelper
+    - heading "Everything you need to orchestrate logs" [level=2] [ref=e49]
+    - paragraph [ref=e50]: Built on Serilog, designed for real-world .NET applications. No boilerplate, no complexity.
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - generic [ref=e53]: 🎯
+        - heading "Per-Level Sink Routing" [level=3] [ref=e54]
+        - paragraph [ref=e55]:
+          - text: Send
+          - code [ref=e56]: Error
+          - text: to Email,
+          - code [ref=e57]: Warning
+          - text: to Telegram,
+          - code [ref=e58]: Information
+          - text: to Console — all declaratively. No custom code needed.
+      - generic [ref=e59]:
+        - generic [ref=e60]: ⚡
+        - heading "5-Line Fluent API" [level=3] [ref=e61]
+        - paragraph [ref=e62]: Full IntelliSense, compile-time safety. Or use JSON config — your choice. Switch between them or combine both.
+      - generic [ref=e63]:
+        - generic [ref=e64]: 🔌
+        - heading "ILogger<T> Native" [level=3] [ref=e65]
+        - paragraph [ref=e66]:
+          - text: Drop-in replacement for
+          - code [ref=e67]: Microsoft.Extensions.Logging
+          - text: . Your existing
+          - code [ref=e68]: ILogger<T>
+          - text: code works instantly — no refactoring.
+      - generic [ref=e69]:
+        - generic [ref=e70]: 🚀
+        - heading "8 Sinks, 1 NuGet Each" [level=3] [ref=e71]
+        - paragraph [ref=e72]: Console, File, Email, Telegram, Elasticsearch, SQL Server, PostgreSQL, Seq. Install only what you need.
+      - generic [ref=e73]:
+        - generic [ref=e74]: 📈
+        - heading "Request/Response Logging" [level=3] [ref=e75]
+        - paragraph [ref=e76]: One-line middleware captures every HTTP request and response with correlation IDs, timing, and structured data.
+      - generic [ref=e77]:
+        - generic [ref=e78]: 🔭
+        - heading "OpenTelemetry Ready" [level=3] [ref=e79]
+        - paragraph [ref=e80]: Built-in Activity correlation. Logs automatically carry trace IDs and span IDs for distributed tracing.
+  - generic [ref=e82]:
+    - generic [ref=e83]: Getting Started
+    - heading "Up and running in 30 seconds" [level=2] [ref=e84]
+    - paragraph [ref=e85]: Three steps. No configuration files, no XML, no boilerplate.
+    - generic [ref=e86]:
+      - generic [ref=e87]:
+        - generic [ref=e88]: "1"
+        - generic [ref=e89]:
+          - heading "Install the packages" [level=3] [ref=e90]
+          - paragraph [ref=e91]: Core + the sinks you need. Each sink is a separate NuGet package.
+          - generic [ref=e92]:
+            - generic [ref=e93]:
+              - generic [ref=e94]: Terminal
+              - button "Copy" [ref=e95] [cursor=pointer]
+            - generic [ref=e96]: "# Core + Console sink dotnet add package CSharpEssentials.LoggerHelper dotnet add package CSharpEssentials.LoggerHelper.Sink.Console # Add more sinks as needed dotnet add package CSharpEssentials.LoggerHelper.Sink.File dotnet add package CSharpEssentials.LoggerHelper.Sink.Email"
+      - generic [ref=e97]:
+        - generic [ref=e98]: "2"
+        - generic [ref=e99]:
+          - heading "Configure in Program.cs" [level=3] [ref=e100]
+          - paragraph [ref=e101]: Fluent API with full IntelliSense. Define which levels go to which sinks.
+          - generic [ref=e102]:
+            - button "Fluent C#" [ref=e103] [cursor=pointer]
+            - button "JSON Config" [ref=e104] [cursor=pointer]
+          - generic [ref=e106]:
+            - generic [ref=e107]:
+              - generic [ref=e108]: Program.cs
+              - button "Copy" [ref=e109] [cursor=pointer]
+            - generic [ref=e110]: builder.Services.AddLoggerHelper(b => b .WithApplicationName("MyApp") .AddRoute("Console", LogEventLevel.Information, LogEventLevel.Warning) .AddRoute("Email", LogEventLevel.Error, LogEventLevel.Fatal) .EnableRequestResponseLogging() );
+      - generic [ref=e111]:
+        - generic [ref=e112]: "3"
+        - generic [ref=e113]:
+          - heading "Use it — or don't change anything" [level=3] [ref=e114]
+          - paragraph [ref=e115]:
+            - text: If you already use
+            - code [ref=e116]: ILogger<T>
+            - text: ", your logs are automatically routed. Zero code changes."
+          - generic [ref=e117]:
+            - generic [ref=e118]:
+              - generic [ref=e119]: YourController.cs
+              - button "Copy" [ref=e120] [cursor=pointer]
+            - generic [ref=e121]: "// Your existing code works as-is. No changes needed! public class OrdersController(ILogger<OrdersController> logger) { public IActionResult Create(Order order) { logger.LogInformation(\"Order {Id} created\", order.Id); // → Console logger.LogError(\"Payment failed for {Id}\", order.Id); // → Email } }"
+  - generic [ref=e123]:
+    - generic [ref=e124]: Sink Plugins
+    - heading "8 sinks, copy-paste ready" [level=2] [ref=e125]
+    - paragraph [ref=e126]: Each sink is a separate NuGet package. Install only what you need. Click a sink to see its 5-line setup.
+    - generic [ref=e127]:
+      - generic [ref=e128] [cursor=pointer]:
+        - heading "🖥 Console" [level=4] [ref=e129]
+        - paragraph [ref=e130]: Colored output, per-level colors
+      - generic [ref=e131] [cursor=pointer]:
+        - heading "📄 File" [level=4] [ref=e132]
+        - paragraph [ref=e133]: Rolling JSON files, auto-cleanup
+      - generic [ref=e134] [cursor=pointer]:
+        - heading "✉ Email" [level=4] [ref=e135]
+        - paragraph [ref=e136]: SMTP with HTML templates, throttling
+      - generic [ref=e137] [cursor=pointer]:
+        - heading "💬 Telegram" [level=4] [ref=e138]
+        - paragraph [ref=e139]: Bot notifications with Markdown
+      - generic [ref=e140] [cursor=pointer]:
+        - heading "🔎 Elasticsearch" [level=4] [ref=e141]
+        - paragraph [ref=e142]: Full-text search, auto-indexing
+      - generic [ref=e143] [cursor=pointer]:
+        - heading "🗃 SQL Server" [level=4] [ref=e144]
+        - paragraph [ref=e145]: Structured storage, auto-create table
+      - generic [ref=e146] [cursor=pointer]:
+        - heading "🐘 PostgreSQL" [level=4] [ref=e147]
+        - paragraph [ref=e148]: JSONB columns, typed schema
+      - generic [ref=e149] [cursor=pointer]:
+        - heading "📈 Seq" [level=4] [ref=e150]
+        - paragraph [ref=e151]: Structured log server, API key auth
+    - generic [ref=e153]:
+      - generic [ref=e154]:
+        - generic [ref=e155]: Console Sink — 3 lines
+        - button "Copy" [ref=e156] [cursor=pointer]
+      - generic [ref=e157]: // dotnet add package CSharpEssentials.LoggerHelper.Sink.Console builder.Services.AddLoggerHelper(b => b .WithApplicationName("MyApp") .AddRoute("Console", LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error) );
+  - generic [ref=e159]:
+    - generic [ref=e160]: Try It Live
+    - heading "Interactive Playground" [level=2] [ref=e161]
+    - paragraph [ref=e162]: Edit the JSON config and see how logs are routed in real-time. Press Ctrl+Enter or click Run.
+    - generic [ref=e163]:
+      - generic [ref=e164]:
+        - generic [ref=e165]:
+          - generic [ref=e166]: Configuration (JSON)
+          - button "▶ Run" [ref=e167] [cursor=pointer]
+        - textbox [ref=e168]: "{ \"ApplicationName\": \"MyApp\", \"Routes\": [ { \"Sink\": \"Console\", \"Levels\": [\"Information\", \"Warning\"] }, { \"Sink\": \"File\", \"Levels\": [\"Warning\", \"Error\", \"Fatal\"] }, { \"Sink\": \"Email\", \"Levels\": [\"Error\", \"Fatal\"] } ] }"
+      - generic [ref=e169]:
+        - generic [ref=e171]: Simulated Output
+        - generic [ref=e172]: "[2026-04-22T17:10:51] MyApp — LoggerHelper v5 initialized Routes configured: 3 [Verbose ] (no route — message dropped) [Debug ] (no route — message dropped) [Information] \"Sample information message\" → Console [Warning ] \"Sample warning message\" → Console, File [Error ] \"Sample error message\" → File, Email [Fatal ] \"Sample fatal message\" → File, Email ✓ Routing simulation complete"
+  - generic [ref=e174]:
+    - generic [ref=e175]: Integration Guides
+    - heading "Works everywhere .NET runs" [level=2] [ref=e176]
+    - paragraph [ref=e177]: Step-by-step guides for the most common scenarios. Copy-paste and go.
+    - generic [ref=e178]:
+      - button "Minimal API" [ref=e179] [cursor=pointer]
+      - button "Blazor" [ref=e180] [cursor=pointer]
+      - button "Azure App Service" [ref=e181] [cursor=pointer]
+      - button "Docker" [ref=e182] [cursor=pointer]
+    - generic [ref=e184]:
+      - generic [ref=e185]:
+        - generic [ref=e186]: Program.cs — Minimal API
+        - button "Copy" [ref=e187] [cursor=pointer]
+      - generic [ref=e188]: "using CSharpEssentials.LoggerHelper; using Serilog.Events; var builder = WebApplication.CreateBuilder(args); // Add LoggerHelper — 5 lines, done builder.Services.AddLoggerHelper(b => b .WithApplicationName(\"MyMinimalApi\") .AddRoute(\"Console\", LogEventLevel.Information, LogEventLevel.Warning) .AddRoute(\"File\", LogEventLevel.Error, LogEventLevel.Fatal) .EnableRequestResponseLogging() ); var app = builder.Build(); app.UseLoggerHelper(); // Enables request/response middleware app.MapGet(\"/\", (ILogger<Program> logger) => { logger.LogInformation(\"Hello from LoggerHelper!\"); return \"It works!\"; }); app.Run();"
+  - generic [ref=e190]:
+    - generic [ref=e191]: Performance
+    - heading "Minimal overhead, maximum flexibility" [level=2] [ref=e192]
+    - paragraph [ref=e193]: LoggerHelper adds a thin routing layer on top of Serilog. The overhead is negligible compared to the I/O cost of any real sink.
+    - table [ref=e194]:
+      - rowgroup [ref=e195]:
+        - row "Scenario Raw Serilog LoggerHelper v5 Overhead" [ref=e196]:
+          - columnheader "Scenario" [ref=e197]
+          - columnheader "Raw Serilog" [ref=e198]
+          - columnheader "LoggerHelper v5" [ref=e199]
+          - columnheader "Overhead" [ref=e200]
+      - rowgroup [ref=e201]:
+        - row "Single message (NullSink) ~120 ns ~135 ns ~12%" [ref=e202]:
+          - cell "Single message (NullSink)" [ref=e203]
+          - cell "~120 ns" [ref=e204]
+          - cell "~135 ns" [ref=e205]
+          - cell "~12%" [ref=e206]: ~12%
+        - row "100 messages batch ~11 μs ~12 μs ~9%" [ref=e208]:
+          - cell "100 messages batch" [ref=e209]
+          - cell "~11 μs" [ref=e210]
+          - cell "~12 μs" [ref=e211]
+          - cell "~9%" [ref=e212]: ~9%
+        - row "Structured payload (3 props) ~180 ns ~200 ns ~11%" [ref=e214]:
+          - cell "Structured payload (3 props)" [ref=e215]
+          - cell "~180 ns" [ref=e216]
+          - cell "~200 ns" [ref=e217]
+          - cell "~11%" [ref=e218]: ~11%
+        - row "Below-min-level (filtered) ~5 ns ~15 ns +10 ns" [ref=e220]:
+          - cell "Below-min-level (filtered)" [ref=e221]
+          - cell "~5 ns" [ref=e222]
+          - cell "~15 ns" [ref=e223]
+          - cell "+10 ns" [ref=e224]: +10 ns
+        - row "Multi-route (2 sinks) n/a ~140 ns unique feature" [ref=e226]:
+          - cell "Multi-route (2 sinks)" [ref=e227]
+          - cell "n/a" [ref=e228]
+          - cell "~140 ns" [ref=e229]
+          - cell "unique feature" [ref=e230]
+        - row "Startup (full pipeline) ~2 ms ~8 ms one-time cost" [ref=e231]:
+          - cell "Startup (full pipeline)" [ref=e232]
+          - cell "~2 ms" [ref=e233]
+          - cell "~8 ms" [ref=e234]
+          - cell "one-time cost" [ref=e235]
+    - paragraph [ref=e236]:
+      - text: "* Measured with BenchmarkDotNet on .NET 10, NullSink (no I/O). Real sinks dominate the total time — routing overhead is invisible in practice."
+      - link "View benchmark source" [ref=e237] [cursor=pointer]:
+        - /url: https://github.com/alexbypa/CSharp.Essentials/tree/main/src/CSharpEssentials.LoggerHelper.Benchmarks
+  - generic [ref=e239]:
+    - generic [ref=e240]: Why LoggerHelper
+    - heading "What makes it different" [level=2] [ref=e241]
+    - table [ref=e242]:
+      - rowgroup [ref=e243]:
+        - row "Feature Raw Serilog NLog LoggerHelper v5" [ref=e244]:
+          - columnheader "Feature" [ref=e245]
+          - columnheader "Raw Serilog" [ref=e246]
+          - columnheader "NLog" [ref=e247]
+          - columnheader "LoggerHelper v5" [ref=e248]
+      - rowgroup [ref=e249]:
+        - row "Per-level sink routing (declarative) Manual filter XML rules 1 line of JSON" [ref=e250]:
+          - cell "Per-level sink routing (declarative)" [ref=e251]
+          - cell "Manual filter" [ref=e252]
+          - cell "XML rules" [ref=e253]
+          - cell "1 line of JSON" [ref=e254]
+        - row "ILogger<T> support Via Serilog.Extensions.Logging Via NLog.Extensions.Logging Built-in, automatic" [ref=e255]:
+          - cell "ILogger<T> support" [ref=e256]
+          - cell "Via Serilog.Extensions.Logging" [ref=e257]
+          - cell "Via NLog.Extensions.Logging" [ref=e258]
+          - cell "Built-in, automatic" [ref=e259]
+        - row "Fluent Builder API WriteTo.X() No Full IntelliSense" [ref=e260]:
+          - cell "Fluent Builder API" [ref=e261]
+          - cell "WriteTo.X()" [ref=e262]
+          - cell "No" [ref=e263]
+          - cell "Full IntelliSense" [ref=e264]
+        - row "Request/Response logging Serilog.AspNetCore Manual 1 line middleware" [ref=e265]:
+          - cell "Request/Response logging" [ref=e266]
+          - cell "Serilog.AspNetCore" [ref=e267]
+          - cell "Manual" [ref=e268]
+          - cell "1 line middleware" [ref=e269]
+        - row "Email/Telegram alerts 3rd-party sinks NLog.MailKit Built-in + throttling" [ref=e270]:
+          - cell "Email/Telegram alerts" [ref=e271]
+          - cell "3rd-party sinks" [ref=e272]
+          - cell "NLog.MailKit" [ref=e273]
+          - cell "Built-in + throttling" [ref=e274]
+        - row "Setup complexity 15-30 lines XML + code 5 lines" [ref=e275]:
+          - cell "Setup complexity" [ref=e276]
+          - cell "15-30 lines" [ref=e277]
+          - cell "XML + code" [ref=e278]
+          - cell "5 lines" [ref=e279]
+  - generic [ref=e281]:
+    - heading "Start routing your logs in 30 seconds" [level=2] [ref=e282]
+    - paragraph [ref=e283]: Install the package, add 5 lines of code, and you're done. No configuration files, no XML, no complexity.
+    - generic [ref=e284] [cursor=pointer]:
+      - generic [ref=e285]: $
+      - code [ref=e286]: dotnet add package CSharpEssentials.LoggerHelper
+      - button "📋" [ref=e287]
+    - generic [ref=e288]:
+      - link "View on NuGet" [ref=e289] [cursor=pointer]:
+        - /url: https://www.nuget.org/packages/CSharpEssentials.LoggerHelper
+      - link "Star on GitHub" [ref=e290] [cursor=pointer]:
+        - /url: https://github.com/alexbypa/CSharp.Essentials
+  - contentinfo [ref=e291]:
+    - generic [ref=e292]:
+      - link "GitHub" [ref=e293] [cursor=pointer]:
+        - /url: https://github.com/alexbypa/CSharp.Essentials
+      - link "NuGet" [ref=e294] [cursor=pointer]:
+        - /url: https://www.nuget.org/packages/CSharpEssentials.LoggerHelper
+      - link "Issues" [ref=e295] [cursor=pointer]:
+        - /url: https://github.com/alexbypa/CSharp.Essentials/issues
+      - link "MIT License" [ref=e296] [cursor=pointer]:
+        - /url: https://github.com/alexbypa/CSharp.Essentials/blob/main/LICENSE
+    - paragraph [ref=e297]:
+      - text: Built by
+      - link "Alessandro Chiodo" [ref=e298] [cursor=pointer]:
+        - /url: https://github.com/alexbypa
+      - text: — CSharpEssentials © 2024–2026

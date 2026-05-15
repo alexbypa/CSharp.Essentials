@@ -1,72 +1,59 @@
-# Analisi Competitiva — Logging .NET (Aprile 2026)
+# Analisi Competitiva — Logging .NET (Maggio 2026)
 
 ## Panorama del Mercato
 
-| Package | Download Totali | Download/Giorno | Posizionamento |
-|---|---|---|---|
-| Serilog (core) | 2.6B | ~7.7M | Standard de facto per structured logging |
-| Serilog.AspNetCore | 672.5M | — | Entry point per ASP.NET Core |
-| Serilog.Sinks.Console | 1.0B | — | Sink più scaricato |
-| Serilog.Sinks.File | 1.0B | — | Secondo sink più scaricato |
-| NLog | 538.7M | ~945K | Alternativa storica, forte in config XML |
-| NLog.Extensions.Logging | 213M | — | Bridge con ILogger |
-| Microsoft.Extensions.Logging | Built-in | — | Abstraction layer di default |
-| log4net | Legacy | In declino | Nessuna structured logging nativa |
-| **CSharpEssentials.LoggerHelper** | **5.1K** | **~42** | **Target: 1000/day** |
+| Package | Download Totali | Posizionamento |
+|---|---|---|
+| Serilog (core) | 2.6B+ | Standard de facto per structured logging |
+| Serilog.AspNetCore | 672M+ | Entry point ASP.NET Core |
+| NLog | 538M+ | Alternativa storica, forte in XML |
+| **CSharpEssentials.LoggerHelper v5** | Crescita target | **Serilog orchestrator** — routing per livello via JSON |
 
 ## Gap nel Mercato
 
-Nessun pacchetto offre routing dichiarativo per-livello verso sink multipli con una semplice config JSON.
+Nessun pacchetto offre routing dichiarativo per-livello verso sink multipli con setup JSON minimale + `ILogger<T>` nativo + sink modulari NuGet.
 
-### Come funziona oggi (senza LoggerHelper)
-
-**Serilog puro** — Per mandare Error via email e Info su console:
-- Configurare sub-logger con `WriteTo.Conditional()`
-- Oppure usare `serilog-expressions` (pacchetto separato)
-- Oppure scrivere codice C# manuale con `Filter.ByIncludingOnly()`
-
-**NLog** — Regole XML complesse con `FilteringTargetWrapper`
-
-**LoggerHelper** — Una riga JSON per sink e livelli (`SerilogCondition`)
-
-## Posizionamento Strategico
-
-**NON** competere come "alternativa a Serilog". Posizionamento:
+## Posizionamento v5 (shipped in `src/`)
 
 > **"The easiest way to orchestrate Serilog sinks — route logs by level with zero code, just JSON"**
 
-LoggerHelper = **Serilog orchestrator/wrapper**, non sostituto.
+### v5 — Implementato
 
-### Tagline
-> "5 righe di JSON. Tutti i sink. Ogni livello dove vuoi."
+- `ILogger<T>` nativo (MEL provider)
+- `ILoggingBuilder` integration + filtri `Logging:LogLevel`
+- `BeginScope` con propagazione Serilog
+- Config JSON `LoggerHelper` semplificata + fluent merge
+- `ILogErrorStore` + `ILoadedSinkStore` diagnostici
+- 8 sink modulari NuGet
+- Source generator per registrazione compile-time (AOT-friendly)
+- Benchmark pubblicati in [`benchmarks.md`](benchmarks.md)
+
+### In roadmap marketing
+
+- Playground live (Tier 2 WASM)
+- Dashboard sink package
+
+## Migrazione v2 → v5
+
+| Legacy | v5 |
+|---|---|
+| `Serilog:SerilogConfiguration` | `LoggerHelper` |
+| `SerilogCondition` | `Routes` |
+| `Level` | `Levels` |
+| `SerilogOption` | `Sinks` |
 
 ## Matrice Feature
 
-| Feature | LoggerHelper | Serilog Puro | NLog |
+| Feature | LoggerHelper v5 | Serilog Puro | NLog |
 |---|---|---|---|
-| Per-level sink routing via JSON | **Nativo** | Richiede sub-logger/expressions | Richiede FilteringTargetWrapper XML |
-| Plugin sinks modulari (NuGet separati) | **Sì** | Sì (ma config manuale) | Sì |
-| Dashboard integrato | **Sì** | No (serve Seq/$) | No |
-| AI log analysis | **Sì** | No | No |
-| OpenTelemetry trace correlation | **Sì** | Solo da Serilog 4.x | Via NLog.DiagnosticSource |
-| xUnit test sink | **Sì** | Via community sink | Via NLog.Targets.Memory |
-| Setup in 5 righe | **Obiettivo rewrite** | ~15-20 righe | ~10-15 righe XML |
-
-## Punti Deboli da Risolvere nel Rewrite
-
-1. **No `ILogger<T>` support** — Esclude chi usa Microsoft.Extensions.Logging
-2. **Solo config JSON** — Nessuna fluent API programmatica
-3. **Runtime reflection per sink loading** — Slow startup, non AOT-safe
-4. **README NuGet** non ottimizzato per conversione
-5. **Nessun benchmark** pubblicato
-6. **SEO NuGet** — Description troppo lunga, keywords non ottimali
+| Per-level sink routing via JSON | **Nativo** | sub-logger / expressions | FilteringTargetWrapper |
+| `ILogger<T>` senza cambiare codice | **Sì** | Via bridge | Sì |
+| Sink modulari NuGet | **Sì** | Sì (config manuale) | Sì |
+| Source generator sink registration | **Sì** | No | No |
+| OpenTelemetry trace correlation | **Sì** | Parziale | Via extension |
 
 ## Fonti
+
 - https://www.nuget.org/packages/serilog/
 - https://www.nuget.org/packages/NLog/
-- https://www.nuget.org/packages/serilog.aspnetcore
-- https://www.nuget.org/packages/CSharpEssentials.LoggerHelper/2.0.9
-- https://www.nuget.org/packages/Microsoft.Extensions.Logging/
-- https://betterstack.com/community/guides/logging/best-dotnet-logging-libraries/
-- https://blog.elmah.io/serilog-vs-nlog/
-- https://github.com/serilog/serilog-expressions
+- https://www.nuget.org/packages/CSharpEssentials.LoggerHelper/

@@ -11,13 +11,18 @@ public class DiagnosticsEndpoints : IEndpointDefinition {
         var group = app.MapGroup("/api/diagnostics").WithTags("Diagnostics");
 
         // GET /api/diagnostics/health — health check del pipeline di logging
-        group.MapGet("/health", (ILogErrorStore errorStore, LoggerHelperOptions options) => {
+        group.MapGet("/health", (ILogErrorStore errorStore, ILoadedSinkStore loadedSinks, LoggerHelperOptions options) => {
             var hasErrors = errorStore.Count > 0;
             return Results.Ok(new {
                 status = hasErrors ? "degraded" : "healthy",
                 applicationName = options.ApplicationName,
                 routeCount = options.Routes.Count,
                 sinks = options.Routes.Select(r => r.Sink),
+                loadedSinks = loadedSinks.GetAll().Select(s => new {
+                    s.SinkName,
+                    s.PluginType,
+                    levels = s.Levels
+                }),
                 internalErrors = errorStore.Count,
                 recentErrors = errorStore.GetAll().TakeLast(5).Select(e => new {
                     e.SinkName,

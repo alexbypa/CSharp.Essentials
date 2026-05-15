@@ -19,16 +19,21 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: |
+            6.0.x
+            8.0.x
+            9.0.x
+            10.0.x
 
-      - name: Restore dependencies
-        run: dotnet restore ./CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj
+      - name: Build and pack LoggerHelper v5 (core + sinks)
+        run: |
+          mkdir -p nupkgs
+          dotnet build src/CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj -c Release
+          dotnet pack src/CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj -c Release --no-build -o ./nupkgs
+          for proj in src/CSharpEssentials.LoggerHelper.Sink.*/*.csproj; do
+            dotnet build "$proj" -c Release
+            dotnet pack "$proj" -c Release --no-build -o ./nupkgs
+          done
 
-      - name: Build project
-        run: dotnet build ./CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj --configuration Release --no-restore
-
-      - name: Create NuGet package
-        run: dotnet pack ./CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj --configuration Release --no-build -o ./nupkgs
-
-      - name: Publish NuGet package
+      - name: Publish NuGet packages
         run: dotnet nuget push "./nupkgs/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

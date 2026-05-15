@@ -9,7 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 // In Development carica appsettings.LoggerHelper.Debug.json
 // In produzione carica appsettings.LoggerHelper.json
 // ══════════════════════════════════════════════════════════════════
-builder.Services.AddLoggerHelper(builder.Configuration);
+if (builder.Environment.IsEnvironment("Testing"))
+    builder.Services.AddLoggerHelper(b => b
+        .WithApplicationName("IntegrationTest")
+        .DisableOpenTelemetry()
+        .AddRoute("Console", Serilog.Events.LogEventLevel.Information));
+else
+    builder.Services.AddLoggerHelper(builder.Configuration);
 
 // Aggiunta Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -25,13 +31,13 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI(c => 
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "LoggerHelper Test API v1");
-    // Opzionale: route prefissa vuota per aprire swagger sulla root, per test e comodità
-    c.RoutePrefix = string.Empty;
-});
+if (!app.Environment.IsEnvironment("Testing")) {
+    app.UseSwagger();
+    app.UseSwaggerUI(c => {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "LoggerHelper Test API v1");
+        c.RoutePrefix = string.Empty;
+    });
+}
 
 app.UseLoggerHelper();
 

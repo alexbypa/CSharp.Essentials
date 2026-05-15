@@ -52,13 +52,15 @@ public static class MSSqlServerBuilderExtensions {
 
 // ── Plugin ────────────────────────────────────────────────────────
 
-internal sealed class MSSqlServerSinkPlugin : ISinkPlugin {
+[LoggerHelperSink]
+public sealed class MSSqlServerSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) =>
         string.Equals(sinkName, "MSSqlServer", StringComparison.OrdinalIgnoreCase);
 
     public void Configure(LoggerConfiguration loggerConfig, SinkRouting routing, LoggerHelperOptions options) {
         var opts = options.GetSinkConfig<MSSqlServerSinkOptions>("MSSqlServer")
-                   ?? options.BindSinkSection<MSSqlServerSinkOptions>("MSSqlServer");
+                   ?? options.BindSinkSection<MSSqlServerSinkOptions>("MSSqlServer")
+                   ?? BindLegacySection(options);
         if (opts is null) {
             SelfLog.WriteLine("MSSqlServer sink configured in routes but no Sinks.MSSqlServer options provided.");
             return;
@@ -116,6 +118,45 @@ internal sealed class MSSqlServerSinkPlugin : ISinkPlugin {
         }
 
         return colOptions;
+    }
+
+    private static MSSqlServerSinkOptions? BindLegacySection(LoggerHelperOptions options) {
+        var section = options.RawSinksSection?.GetSection("MSSqlServer");
+        if (section is null || !section.Exists())
+            return null;
+
+        var opts = new MSSqlServerSinkOptions {
+            ConnectionString = section["connectionString"] ?? section["ConnectionString"] ?? ""
+        };
+
+        var sinkSection = section.GetSection("sinkOptionsSection");
+        if (sinkSection.Exists()) {
+            opts.TableName = sinkSection["tableName"] ?? opts.TableName;
+            opts.SchemaName = sinkSection["schemaName"] ?? opts.SchemaName;
+            if (bool.TryParse(sinkSection["autoCreateSqlTable"], out var autoCreate))
+                opts.AutoCreateSqlTable = autoCreate;
+            if (int.TryParse(sinkSection["batchPostingLimit"], out var batch))
+                opts.BatchPostingLimit = batch;
+            opts.Period = sinkSection["period"] ?? opts.Period;
+        }
+
+        var colSection = section.GetSection("columnOptionsSection");
+        if (colSection.Exists()) {
+            opts.AddStandardColumns = colSection.GetSection("addStandardColumns").Get<string[]>()?.ToList();
+            opts.RemoveStandardColumns = colSection.GetSection("removeStandardColumns").Get<string[]>()?.ToList();
+        }
+
+        var additional = section.GetSection("additionalColumns").GetChildren().ToList();
+        if (additional.Count > 0) {
+            opts.AdditionalColumns = additional.Select(c => new AdditionalColumnConfig {
+                ColumnName = c["ColumnName"] ?? c["columnName"] ?? "",
+                DataType = c["DataType"] ?? c["dataType"] ?? "NVarChar",
+                AllowNull = !bool.TryParse(c["AllowNull"], out var allow) || allow,
+                DataLength = int.TryParse(c["DataLength"], out var len) ? len : -1
+            }).ToList();
+        }
+
+        return opts;
     }
 }
 
