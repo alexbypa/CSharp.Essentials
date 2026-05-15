@@ -12,4 +12,7 @@
   <Project Path="CSharpEssentials.LoggerHelper.TestApp/CSharpEssentials.LoggerHelper.TestApp.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Tests/CSharpEssentials.LoggerHelper.Tests.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj" />
+  <Project Path="CSharpEssentials.LoggerHelper.SourceGenerator/CSharpEssentials.LoggerHelper.SourceGenerator.csproj" />
+  <Project Path="CSharpEssentials.HttpHelper/CSharpEssentials.HttpHelper.csproj" />
+  <Project Path="CSharpEssentials.HttpHelper.Tests/CSharpEssentials.HttpHelper.Tests.csproj" />
 </Solution>

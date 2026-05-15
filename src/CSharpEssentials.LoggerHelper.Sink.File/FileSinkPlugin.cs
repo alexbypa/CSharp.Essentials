@@ -22,7 +22,8 @@ public static class FileBuilderExtensions {
 
 // ── Plugin ────────────────────────────────────────────────────────
 
-internal sealed class FileSinkPlugin : ISinkPlugin {
+[LoggerHelperSink]
+public sealed class FileSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) =>
         string.Equals(sinkName, "File", StringComparison.OrdinalIgnoreCase);
 

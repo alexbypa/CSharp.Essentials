@@ -12,6 +12,18 @@ namespace CSharpEssentials.LoggerHelper.Sink.Telegram;
 public sealed class TelegramSinkOptions {
     public string BotToken { get; set; } = string.Empty;
     public string ChatId { get; set; } = string.Empty;
+
+    /// <summary>Legacy JSON key: Api_Key</summary>
+    public string? Api_Key { set => BotToken = value ?? BotToken; }
+
+    /// <summary>Legacy JSON key: chatId</summary>
+    public string? chatId { set => ChatId = value ?? ChatId; }
+
+    /// <summary>
+    /// Minimum interval between Telegram messages. Default: 1 second.
+    /// JSON example: "00:00:20"
+    /// </summary>
+    public TimeSpan? ThrottleInterval { get; set; }
 }
 
 // ── Builder extension ─────────────────────────────────────────────
@@ -23,13 +35,15 @@ public static class TelegramBuilderExtensions {
 
 // ── Plugin ────────────────────────────────────────────────────────
 
-internal sealed class TelegramSinkPlugin : ISinkPlugin {
+[LoggerHelperSink]
+public sealed class TelegramSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) =>
         string.Equals(sinkName, "Telegram", StringComparison.OrdinalIgnoreCase);
 
     public void Configure(LoggerConfiguration loggerConfig, SinkRouting routing, LoggerHelperOptions options) {
         var opts = options.GetSinkConfig<TelegramSinkOptions>("Telegram")
-                   ?? options.BindSinkSection<TelegramSinkOptions>("Telegram");
+                   ?? options.BindSinkSection<TelegramSinkOptions>("Telegram")
+                   ?? options.BindSinkSection<TelegramSinkOptions>("TelegramOption");
         if (opts is null) {
             SelfLog.WriteLine("Telegram sink configured in routes but no Sinks.Telegram options provided.");
             return;
@@ -55,7 +69,8 @@ internal sealed class TelegramLogEventSink : ILogEventSink {
     public void Emit(LogEvent logEvent) {
         var message = FormatMessage(logEvent);
 
-        if (!SinkThrottlingManager.CanSend("Telegram", TimeSpan.FromSeconds(1))) {
+        var throttle = _opts.ThrottleInterval ?? TimeSpan.FromSeconds(1);
+        if (!SinkThrottlingManager.CanSend("Telegram", throttle)) {
             SelfLog.WriteLine($"Telegram throttled: {logEvent.RenderMessage()}");
             return;
         }

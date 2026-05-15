@@ -14,10 +14,22 @@ namespace CSharpEssentials.LoggerHelper.Sink.Email;
 public sealed class EmailSinkOptions {
     public string From { get; set; } = string.Empty;
     public string To { get; set; } = string.Empty;
+
+    /// <summary>Legacy: multiple recipients as array (joined with comma).</summary>
+    public string[]? ToList {
+        set => To = value is { Length: > 0 } ? string.Join(",", value) : To;
+    }
+
     public string Host { get; set; } = string.Empty;
     public int Port { get; set; } = 587;
     public string? Username { get; set; }
     public string? Password { get; set; }
+
+    /// <summary>Legacy JSON key: username</summary>
+    public string? username { set => Username = value ?? Username; }
+
+    /// <summary>Legacy JSON key: password</summary>
+    public string? password { set => Password = value ?? Password; }
     public bool EnableSsl { get; set; } = true;
     public string? TemplatePath { get; set; }
     public TimeSpan? ThrottleInterval { get; set; }
@@ -32,7 +44,8 @@ public static class EmailBuilderExtensions {
 
 // ── Plugin ────────────────────────────────────────────────────────
 
-internal sealed class EmailSinkPlugin : ISinkPlugin {
+[LoggerHelperSink]
+public sealed class EmailSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) =>
         string.Equals(sinkName, "Email", StringComparison.OrdinalIgnoreCase);
 

@@ -15,9 +15,11 @@ internal static class LoggerPipelineFactory {
     internal static Serilog.ILogger Build(
         LoggerHelperOptions options,
         ILogErrorStore errorStore,
+        LoadedSinkStore loadedSinkStore,
         ISinkPluginRegistry registry,
         IPluginDiscovery pluginDiscovery,
-        Action<LoggerConfiguration>? customEnrichers) {
+        Action<LoggerConfiguration>? customEnrichers,
+        IContextLogEnricher? contextEnricher = null) {
 
         // Enable SelfLog if requested
         if (options.General.EnableSelfLogging)
@@ -43,8 +45,11 @@ internal static class LoggerPipelineFactory {
         // Apply custom enrichers
         customEnrichers?.Invoke(loggerConfig);
 
+        if (contextEnricher is not null)
+            loggerConfig = contextEnricher.Enrich(loggerConfig);
+
         // Discover plugins and configure routing
-        var engine = new SinkRoutingEngine(options, errorStore, registry, pluginDiscovery);
+        var engine = new SinkRoutingEngine(options, errorStore, loadedSinkStore, registry, pluginDiscovery);
         engine.ConfigureRoutes(loggerConfig);
 
         return loggerConfig.CreateLogger();

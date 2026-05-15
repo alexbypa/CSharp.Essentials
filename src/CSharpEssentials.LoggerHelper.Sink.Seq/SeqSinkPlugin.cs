@@ -8,6 +8,10 @@ namespace CSharpEssentials.LoggerHelper.Sink.Seq;
 
 public sealed class SeqSinkOptions {
     public string ServerUrl { get; set; } = string.Empty;
+
+    /// <summary>Legacy JSON key: serverUrl</summary>
+    public string? serverUrl { set => ServerUrl = value ?? ServerUrl; }
+
     public string? ApiKey { get; set; }
 }
 
@@ -20,13 +24,15 @@ public static class SeqBuilderExtensions {
 
 // ── Plugin ────────────────────────────────────────────────────────
 
-internal sealed class SeqSinkPlugin : ISinkPlugin {
+[LoggerHelperSink]
+public sealed class SeqSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) =>
         string.Equals(sinkName, "Seq", StringComparison.OrdinalIgnoreCase);
 
     public void Configure(LoggerConfiguration loggerConfig, SinkRouting routing, LoggerHelperOptions options) {
         var opts = options.GetSinkConfig<SeqSinkOptions>("Seq")
-                   ?? options.BindSinkSection<SeqSinkOptions>("Seq");
+                   ?? options.BindSinkSection<SeqSinkOptions>("Seq")
+                   ?? options.BindSinkSection<SeqSinkOptions>("SeqOptions");
         if (opts is null) {
             SelfLog.WriteLine("Seq sink configured in routes but no Sinks.Seq options provided.");
             return;

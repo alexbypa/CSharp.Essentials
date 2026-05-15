@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CSharpEssentials.LoggerHelper;
 
@@ -20,10 +19,6 @@ public static class ServiceCollectionExtensions {
     /// </summary>
     public static ILoggingBuilder AddLoggerHelper(this ILoggingBuilder loggingBuilder, IConfiguration configuration) {
         loggingBuilder.Services.AddLoggerHelper(configuration);
-        loggingBuilder.Services.TryAddEnumerable(
-            ServiceDescriptor.Singleton<ILoggerProvider, LoggerHelperProvider>(
-                sp => (LoggerHelperProvider)sp.GetServices<ILoggerProvider>()
-                          .First(p => p is LoggerHelperProvider)));
         return loggingBuilder;
     }
 
@@ -36,10 +31,6 @@ public static class ServiceCollectionExtensions {
     /// </summary>
     public static ILoggingBuilder AddLoggerHelper(this ILoggingBuilder loggingBuilder, Action<LoggerHelperBuilder> configure) {
         loggingBuilder.Services.AddLoggerHelper(configure);
-        loggingBuilder.Services.TryAddEnumerable(
-            ServiceDescriptor.Singleton<ILoggerProvider, LoggerHelperProvider>(
-                sp => (LoggerHelperProvider)sp.GetServices<ILoggerProvider>()
-                          .First(p => p is LoggerHelperProvider)));
         return loggingBuilder;
     }
 
@@ -94,17 +85,26 @@ public static class ServiceCollectionExtensions {
     private static IServiceCollection AddLoggerHelperCore(this IServiceCollection services, LoggerHelperOptions options, Action<Serilog.LoggerConfiguration>? customEnrichers) {
         var errorStore = new LogErrorStore();
         var registry = SinkPluginRegistry.Instance;
-        var discovery = new FileSystemPluginDiscovery();
+        var discovery = new CompositePluginDiscovery(
+            new CompileTimePluginDiscovery(),
+            new FileSystemPluginDiscovery());
 
-        var serilogLogger = LoggerPipelineFactory.Build(options, errorStore, registry, discovery, customEnrichers);
+        var loadedSinkStore = new LoadedSinkStore();
+
+        // Build eagerly to avoid circular resolution (ILoggerProvider ↔ Serilog.ILogger) during DI startup.
+        var serilogLogger = LoggerPipelineFactory.Build(
+            options, errorStore, loadedSinkStore, registry, discovery, customEnrichers, contextEnricher: null);
 
         // Register services — consumers should depend on interfaces (DIP)
         services.AddSingleton(options);
         services.AddSingleton<ILogErrorStore>(errorStore);
         services.AddSingleton(errorStore); // backward compat: allow resolving concrete type
+        services.AddSingleton<ILoadedSinkStore>(loadedSinkStore);
+        services.AddSingleton(loadedSinkStore);
         services.AddSingleton<ISinkPluginRegistry>(registry);
         services.AddSingleton<Serilog.ILogger>(serilogLogger);
-        services.AddSingleton<ILoggerProvider>(new LoggerHelperProvider(serilogLogger));
+        services.AddSingleton<ILoggerProvider>(sp =>
+            new LoggerHelperProvider(serilogLogger, sp.GetService<IContextLogEnricher>()));
 
         return services;
     }
@@ -134,11 +134,16 @@ public static class ServiceCollectionExtensions {
         section.Bind(options);
 
         // Store raw "Sinks" section for plugin-side JSON binding (OCP)
-        options.RawSinksSection = section.GetSection("Sinks");
+        if (section.GetSection("Sinks").Exists())
+            options.RawSinksSection = section.GetSection("Sinks");
+
+        // Fallback: legacy Serilog:SerilogConfiguration (v2–v4 JSON)
+        if (options.Routes.Count == 0)
+            LegacyConfigurationAdapter.TryApply(finalConfig, options);
 
         if (options.Routes.Count == 0)
             throw new InvalidOperationException(
-                $"No routes configured in LoggerHelper. Add a 'LoggerHelper:Routes' section to {fileName} or use the fluent API. " +
+                $"No routes configured. Add 'LoggerHelper:Routes' to {fileName}, legacy 'Serilog:SerilogConfiguration', or use the fluent API. " +
                 "See: https://github.com/alexbypa/CSharp.Essentials");
 
         return options;

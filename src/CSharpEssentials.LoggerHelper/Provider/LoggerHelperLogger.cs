@@ -126,19 +126,50 @@ internal sealed class LoggerHelperLogger : ILogger {
 }
 
 /// <summary>LIFO disposable for exactly 2 properties (most common scope).</summary>
-internal sealed class Disposable2(IDisposable d0, IDisposable d1) : IDisposable {
-    public void Dispose() { d1.Dispose(); d0.Dispose(); }
+internal sealed class Disposable2 : IDisposable {
+    private readonly IDisposable _d0;
+    private readonly IDisposable _d1;
+
+    internal Disposable2(IDisposable d0, IDisposable d1) {
+        _d0 = d0;
+        _d1 = d1;
+    }
+
+    public void Dispose() {
+        _d1.Dispose();
+        _d0.Dispose();
+    }
 }
 
 /// <summary>LIFO disposable for exactly 3 properties (IdTransaction + Action + SpanName).</summary>
-internal sealed class Disposable3(IDisposable d0, IDisposable d1, IDisposable d2) : IDisposable {
-    public void Dispose() { d2.Dispose(); d1.Dispose(); d0.Dispose(); }
+internal sealed class Disposable3 : IDisposable {
+    private readonly IDisposable _d0;
+    private readonly IDisposable _d1;
+    private readonly IDisposable _d2;
+
+    internal Disposable3(IDisposable d0, IDisposable d1, IDisposable d2) {
+        _d0 = d0;
+        _d1 = d1;
+        _d2 = d2;
+    }
+
+    public void Dispose() {
+        _d2.Dispose();
+        _d1.Dispose();
+        _d0.Dispose();
+    }
 }
 
 /// <summary>LIFO disposable for 4+ properties (rare).</summary>
-internal sealed class CompositeDisposable(List<IDisposable> disposables) : IDisposable {
+internal sealed class CompositeDisposable : IDisposable {
+    private readonly List<IDisposable> _disposables;
+
+    internal CompositeDisposable(List<IDisposable> disposables) {
+        _disposables = disposables;
+    }
+
     public void Dispose() {
-        for (int i = disposables.Count - 1; i >= 0; i--)
-            disposables[i].Dispose();
+        for (int i = _disposables.Count - 1; i >= 0; i--)
+            _disposables[i].Dispose();
     }
 }

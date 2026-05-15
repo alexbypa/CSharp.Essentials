@@ -5,14 +5,15 @@ namespace CSharpEssentials.LoggerHelper.Tests;
 public class SinkPluginRegistryTests {
     [Fact]
     public void Register_AddsPluginToRegistry() {
-        var initialCount = SinkPluginRegistry.All.Count;
+        SinkPluginRegistry.Clear();
         SinkPluginRegistry.Register(new FakeSinkPlugin("TestSink"));
 
-        Assert.True(SinkPluginRegistry.All.Count > initialCount);
+        Assert.Single(SinkPluginRegistry.All);
     }
 
     [Fact]
     public void FindHandler_ReturnsCorrectPlugin() {
+        SinkPluginRegistry.Clear();
         SinkPluginRegistry.Register(new FakeSinkPlugin("UniqueSink_Find"));
 
         var found = SinkPluginRegistry.FindHandler("UniqueSink_Find");
@@ -50,8 +51,12 @@ public class SinkPluginRegistryTests {
         Assert.True(found!.CanHandle("File"));
     }
 
-    private sealed class FakeSinkPlugin(string name) : ISinkPlugin {
-        public bool CanHandle(string sinkName) => sinkName == name;
+    private sealed class FakeSinkPlugin : ISinkPlugin {
+        private readonly string _name;
+
+        internal FakeSinkPlugin(string name) => _name = name;
+
+        public bool CanHandle(string sinkName) => sinkName == _name;
         public void Configure(LoggerConfiguration loggerConfig, SinkRouting routing, LoggerHelperOptions options) { }
     }
 }

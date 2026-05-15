@@ -9,7 +9,14 @@ namespace CSharpEssentials.LoggerHelper.Sink.Elasticsearch;
 
 public sealed class ElasticsearchSinkOptions {
     public string NodeUris { get; set; } = string.Empty;
+
+    /// <summary>Legacy JSON key: nodeUris</summary>
+    public string? nodeUris { set => NodeUris = value ?? NodeUris; }
+
     public string? IndexFormat { get; set; }
+
+    /// <summary>Legacy JSON key: indexFormat</summary>
+    public string? indexFormat { set => IndexFormat = value ?? IndexFormat; }
 }
 
 // ── Builder extension ─────────────────────────────────────────────
@@ -21,14 +28,16 @@ public static class ElasticsearchBuilderExtensions {
 
 // ── Plugin ────────────────────────────────────────────────────────
 
-internal sealed class ElasticsearchSinkPlugin : ISinkPlugin {
+[LoggerHelperSink]
+public sealed class ElasticsearchSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) =>
         string.Equals(sinkName, "Elasticsearch", StringComparison.OrdinalIgnoreCase) ||
         string.Equals(sinkName, "ElasticSearch", StringComparison.OrdinalIgnoreCase);
 
     public void Configure(LoggerConfiguration loggerConfig, SinkRouting routing, LoggerHelperOptions options) {
         var opts = options.GetSinkConfig<ElasticsearchSinkOptions>("Elasticsearch")
-                   ?? options.BindSinkSection<ElasticsearchSinkOptions>("Elasticsearch");
+                   ?? options.BindSinkSection<ElasticsearchSinkOptions>("Elasticsearch")
+                   ?? options.BindSinkSection<ElasticsearchSinkOptions>("ElasticSearch");
         if (opts is null) {
             SelfLog.WriteLine("Elasticsearch sink configured in routes but no Sinks.Elasticsearch options provided.");
             return;
@@ -39,8 +48,7 @@ internal sealed class ElasticsearchSinkPlugin : ISinkPlugin {
             wt => wt.Elasticsearch(
                 nodeUris: opts.NodeUris,
                 indexFormat: opts.IndexFormat,
-                autoRegisterTemplate: true,
-                restrictedToMinimumLevel: LogEventLevel.Verbose
+                autoRegisterTemplate: true
             )
         );
     }

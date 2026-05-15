@@ -200,6 +200,24 @@ Sinks self-register via a plugin mechanism — the core package has zero depende
 
 ---
 
+## Migrating from v2/v4 (legacy JSON)
+
+| Legacy (`Serilog:SerilogConfiguration`) | v5 (`LoggerHelper`) |
+|---|---|
+| `SerilogCondition` | `Routes` |
+| `Level` | `Levels` |
+| `SerilogOption` | `Sinks` |
+
+See [gap analysis](../../docs/gap-analysis-original-vs-new.md) for feature parity details.
+
+---
+
+## Benchmarks
+
+See [docs/benchmarks.md](../../docs/benchmarks.md) for LoggerHelper v5 vs Serilog vs NLog comparisons.
+
+---
+
 ## Environment-aware configuration
 
 LoggerHelper automatically picks the right file based on the current environment:

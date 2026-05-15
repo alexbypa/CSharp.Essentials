@@ -12,16 +12,19 @@ namespace CSharpEssentials.LoggerHelper;
 internal sealed class SinkRoutingEngine {
     private readonly LoggerHelperOptions _options;
     private readonly ILogErrorStore _errorStore;
+    private readonly LoadedSinkStore _loadedSinkStore;
     private readonly ISinkPluginRegistry _registry;
     private readonly IPluginDiscovery _pluginDiscovery;
 
     internal SinkRoutingEngine(
         LoggerHelperOptions options,
         ILogErrorStore errorStore,
+        LoadedSinkStore loadedSinkStore,
         ISinkPluginRegistry registry,
         IPluginDiscovery pluginDiscovery) {
         _options = options;
         _errorStore = errorStore;
+        _loadedSinkStore = loadedSinkStore;
         _registry = registry;
         _pluginDiscovery = pluginDiscovery;
     }
@@ -49,6 +52,12 @@ internal sealed class SinkRoutingEngine {
 
             try {
                 plugin.Configure(loggerConfig, route, _options);
+                _loadedSinkStore.Add(new LoadedSinkInfo {
+                    SinkName = route.Sink,
+                    PluginType = plugin.GetType().FullName ?? plugin.GetType().Name,
+                    Levels = route.Levels.ToList().AsReadOnly(),
+                    Configured = true
+                });
             } catch (Exception ex) {
                 SelfLog.WriteLine($"Error configuring sink '{route.Sink}': {ex.Message}");
                 _errorStore.Add(new LogErrorEntry {

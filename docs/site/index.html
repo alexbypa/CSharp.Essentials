@@ -9,7 +9,10 @@
     <meta property="og:title" content="LoggerHelper — Route Serilog sinks by level with zero code" />
     <meta property="og:description" content="5-line setup, 8 sinks, per-level routing, ILogger&lt;T&gt; native. The Serilog orchestrator for .NET." />
     <meta property="og:type" content="website" />
-    <link rel="stylesheet" href="assets/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
@@ -24,6 +27,7 @@
             <li><a href="#features">Features</a></li>
             <li><a href="#quickstart">Quick Start</a></li>
             <li><a href="#sinks">Sinks</a></li>
+            <li><a href="#packages">Packages</a></li>
             <li><a href="#playground">Playground</a></li>
             <li><a href="#guides">Guides</a></li>
             <li><a href="#benchmarks">Benchmarks</a></li>
@@ -58,8 +62,8 @@
                 <div class="stat-label">Lines to Setup</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">3</div>
-                <div class="stat-label">Target Frameworks</div>
+                <div class="stat-value">4</div>
+                <div class="stat-label">TFMs (net6–net10)</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">&lt;2%</div>
@@ -398,6 +402,96 @@ builder.Services.<span class="method">AddLoggerHelper</span>(b => b
     </div>
 </section>
 
+<!-- ═══════════════════ PACKAGES ═══════════════════ -->
+<section id="packages">
+    <div class="container">
+        <span class="section-label">NuGet Packages</span>
+        <h2 class="section-title">Modular packages — install only what you need</h2>
+        <p class="section-subtitle">
+            The <strong>core</strong> package orchestrates routing; each <strong>sink</strong> is a separate NuGet.
+            Use the <code>Sink</code> name in routes (JSON or fluent). All packages target <code>net6.0</code>, <code>net8.0</code>, <code>net9.0</code>, and <code>net10.0</code>.
+        </p>
+
+        <table class="bench-table pkg-table" style="margin-top:2rem;">
+            <thead>
+                <tr>
+                    <th>Package</th>
+                    <th>Route key</th>
+                    <th>Purpose</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code class="pkg-id">CSharpEssentials.LoggerHelper</code></td>
+                    <td><em>—</em></td>
+                    <td>Core routing, <code>ILogger&lt;T&gt;</code> bridge, JSON/fluent config, legacy Serilog JSON adapter</td>
+                    <td><a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper" target="_blank" rel="noopener">NuGet</a></td>
+                </tr>
+                <tr>
+                    <td><code class="pkg-id">CSharpEssentials.LoggerHelper.Sink.Console</code></td>
+                    <td><code>Console</code></td>
+                    <td>Colored console output, per-level themes</td>
+                    <td><a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console" target="_blank" rel="noopener">NuGet</a></td>
+                </tr>
+                <tr>
+                    <td><code class="pkg-id">CSharpEssentials.LoggerHelper.Sink.File</code></td>
+                    <td><code>File</code></td>
+                    <td>Rolling JSON/text files, retention</td>
+                    <td><a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.File" target="_blank" rel="noopener">NuGet</a></td>
+                </tr>
+                <tr>
+                    <td><code class="pkg-id">CSharpEssentials.LoggerHelper.Sink.Email</code></td>
+                    <td><code>Email</code></td>
+                    <td>SMTP alerts, HTML templates, throttling</td>
+                    <td><a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Email" target="_blank" rel="noopener">NuGet</a></td>
+                </tr>
+                <tr>
+                    <td><code class="pkg-id">CSharpEssentials.LoggerHelper.Sink.Telegram</code></td>
+                    <td><code>Telegram</code></td>
+                    <td>Bot notifications, Markdown, throttling</td>
+                    <td><a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Telegram" target="_blank" rel="noopener">NuGet</a></td>
+                </tr>
+                <tr>
+                    <td><code class="pkg-id">CSharpEssentials.LoggerHelper.Sink.Elasticsearch</code></td>
+                    <td><code>Elasticsearch</code></td>
+                    <td>Elasticsearch / OpenSearch indexing</td>
+                    <td><a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Elasticsearch" target="_blank" rel="noopener">NuGet</a></td>
+                </tr>
+                <tr>
+                    <td><code class="pkg-id">CSharpEssentials.LoggerHelper.Sink.MSSqlServer</code></td>
+                    <td><code>MSSqlServer</code></td>
+                    <td>SQL Server table sink, extra columns</td>
+                    <td><a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer" target="_blank" rel="noopener">NuGet</a></td>
+                </tr>
+                <tr>
+                    <td><code class="pkg-id">CSharpEssentials.LoggerHelper.Sink.Postgresql</code></td>
+                    <td><code>PostgreSQL</code> / <code>Postgresql</code></td>
+                    <td>PostgreSQL structured logs, JSONB columns</td>
+                    <td><a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql" target="_blank" rel="noopener">NuGet</a></td>
+                </tr>
+                <tr>
+                    <td><code class="pkg-id">CSharpEssentials.LoggerHelper.Sink.Seq</code></td>
+                    <td><code>Seq</code></td>
+                    <td>Seq centralized log server</td>
+                    <td><a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq" target="_blank" rel="noopener">NuGet</a></td>
+                </tr>
+                <tr>
+                    <td><code class="pkg-id">CSharpEssentials.HttpHelper</code></td>
+                    <td><em>optional</em></td>
+                    <td>HTTP client helpers with structured logging (companion to LoggerHelper)</td>
+                    <td><a href="https://www.nuget.org/packages/CSharpEssentials.HttpHelper" target="_blank" rel="noopener">NuGet</a></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="pkg-notes">
+            <p><strong>v2–v4 migration:</strong> existing <code>Serilog:SerilogConfiguration</code> in <code>appsettings.json</code> is auto-mapped when <code>LoggerHelper:Routes</code> is empty — no rewrite required.</p>
+            <p><strong>Template:</strong> <code>dotnet new loggerhelper-api -n MyApi</code> scaffolds an API with LoggerHelper pre-wired.</p>
+        </div>
+    </div>
+</section>
+
 <!-- ═══════════════════ PLAYGROUND ═══════════════════ -->
 <section id="playground" style="background: rgba(124,58,237,.03);">
     <div class="container">
@@ -724,6 +818,6 @@ builder.Services.<span class="method">AddLoggerHelper</span>(b => b
     <p>Built by <a href="https://github.com/alexbypa" style="color:var(--brand-secondary);text-decoration:none;" target="_blank">Alessandro Chiodo</a> &mdash; CSharpEssentials &copy; 2024&ndash;2026</p>
 </footer>
 
-<script src="assets/app.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
