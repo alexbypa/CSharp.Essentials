@@ -1,6 +1,14 @@
+# Deploys docs/site as the public site root (/, /playground.html, …).
+#
+# One-time setup (cannot be automated from Git):
+#   1. Repo → Settings → Pages → Build and deployment → Source: "GitHub Actions"
+#   2. After the first run, the site URL is shown in the job and under Environments → github-pages
+#   (usually https://<owner>.github.io/<repo>/)
+#
 name: Deploy GitHub Pages
 
 on:
+  workflow_dispatch: # run manually: Actions → this workflow → Run workflow
   push:
     branches: [main]
     paths:
