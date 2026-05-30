@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Debugging;
 using System.Data;
@@ -106,7 +107,7 @@ public sealed class MSSqlServerSinkPlugin : ISinkPlugin {
 
         // Additional columns (custom properties → SQL columns)
         if (opts.AdditionalColumns is { Count: > 0 }) {
-            colOptions.AdditionalColumns = [];
+            colOptions.AdditionalColumns = new System.Collections.ObjectModel.Collection<Serilog.Sinks.MSSqlServer.SqlColumn>();
             foreach (var col in opts.AdditionalColumns) {
                 colOptions.AdditionalColumns.Add(new Serilog.Sinks.MSSqlServer.SqlColumn {
                     ColumnName = col.ColumnName,

@@ -125,42 +125,41 @@ internal sealed class EmailLogEventSink : ILogEventSink {
         _ => ""
     };
 
-    private static string LoadDefaultTemplate() => """
-        <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { font-size: 24px; font-weight: bold; color: green; }
-            .section { margin-top: 20px; }
-            .label { font-weight: bold; color: #555; }
-            .level-info { color: green; font-weight: bold; }
-            .level-warning { color: orange; font-weight: bold; }
-            .level-error { color: red; font-weight: bold; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            td, th { border: 1px solid #ddd; padding: 8px; }
-            th { background-color: #f2f2f2; }
-            .highlight { background-color: #e8f5e9; padding: 8px; border-radius: 5px; }
-          </style>
-        </head>
-        <body>
-          <div class='header'>LoggerHelper Notification</div>
-          <div class='section'>
-            <span class='label'>Timestamp:</span> {{Timestamp}}<br/>
-            <span class='label'>Level:</span> <span class='{{LevelClass}}'>{{Level}}</span>
-          </div>
-          <div class='section'>
-            <table>
-              <tr><th>ApplicationName</th><td>{{ApplicationName}}</td></tr>
-              <tr><th>MachineName</th><td>{{MachineName}}</td></tr>
-            </table>
-          </div>
-          <div class='section highlight'>
-            <h3>Log Message</h3>
-            <pre>{{Message}}</pre>
-          </div>
-        </body>
-        </html>
-        """;
+    private static string LoadDefaultTemplate() =>
+        @"<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .header { font-size: 24px; font-weight: bold; color: green; }
+    .section { margin-top: 20px; }
+    .label { font-weight: bold; color: #555; }
+    .level-info { color: green; font-weight: bold; }
+    .level-warning { color: orange; font-weight: bold; }
+    .level-error { color: red; font-weight: bold; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    td, th { border: 1px solid #ddd; padding: 8px; }
+    th { background-color: #f2f2f2; }
+    .highlight { background-color: #e8f5e9; padding: 8px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div class='header'>LoggerHelper Notification</div>
+  <div class='section'>
+    <span class='label'>Timestamp:</span> {{Timestamp}}<br/>
+    <span class='label'>Level:</span> <span class='{{LevelClass}}'>{{Level}}</span>
+  </div>
+  <div class='section'>
+    <table>
+      <tr><th>ApplicationName</th><td>{{ApplicationName}}</td></tr>
+      <tr><th>MachineName</th><td>{{MachineName}}</td></tr>
+    </table>
+  </div>
+  <div class='section highlight'>
+    <h3>Log Message</h3>
+    <pre>{{Message}}</pre>
+  </div>
+</body>
+</html>";
 }
 
 public static class PluginInitializer {

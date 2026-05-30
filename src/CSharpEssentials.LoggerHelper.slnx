@@ -5,6 +5,7 @@
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Elasticsearch/CSharpEssentials.LoggerHelper.Sink.Elasticsearch.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Email/CSharpEssentials.LoggerHelper.Sink.Email.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.File/CSharpEssentials.LoggerHelper.Sink.File.csproj" />
+  <Project Path="CSharpEssentials.LoggerHelper.Sink.HangfireConsole/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.MSSqlServer/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Postgresql/CSharpEssentials.LoggerHelper.Sink.Postgresql.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Seq/CSharpEssentials.LoggerHelper.Sink.Seq.csproj" />

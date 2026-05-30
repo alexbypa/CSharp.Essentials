@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LoggerHelper — Route Serilog sinks by level with zero code</title>
-    <meta name="description" content="The easiest way to orchestrate Serilog sinks. Route structured logs by level to Console, File, Email, Telegram, Elasticsearch, PostgreSQL, SQL Server, Seq and more." />
+    <meta name="description" content="The easiest way to orchestrate Serilog sinks. Route structured logs by level to Console, File, Email, Telegram, Elasticsearch, PostgreSQL, SQL Server, Seq, Hangfire Console and more." />
     <meta name="keywords" content="serilog, structured logging, log routing, multi-sink, dotnet, aspnetcore, ilogger, opentelemetry" />
     <meta property="og:title" content="LoggerHelper — Route Serilog sinks by level with zero code" />
-    <meta property="og:description" content="5-line setup, 8 sinks, per-level routing, ILogger&lt;T&gt; native. The Serilog orchestrator for .NET." />
+    <meta property="og:description" content="5-line setup, 9 sinks, per-level routing, ILogger&lt;T&gt; native. The Serilog orchestrator for .NET." />
     <meta property="og:type" content="website" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -54,7 +54,7 @@
         </div>
         <div class="stats">
             <div class="stat-card">
-                <div class="stat-value">8</div>
+                <div class="stat-value">9</div>
                 <div class="stat-label">Built-in Sinks</div>
             </div>
             <div class="stat-card">
@@ -98,8 +98,8 @@
             </div>
             <div class="feature-card">
                 <div class="feature-icon">&#128640;</div>
-                <h3>8 Sinks, 1 NuGet Each</h3>
-                <p>Console, File, Email, Telegram, Elasticsearch, SQL Server, PostgreSQL, Seq. Install only what you need.</p>
+                <h3>9 Sinks, 1 NuGet Each</h3>
+                <p>Console, File, Email, Telegram, Elasticsearch, SQL Server, PostgreSQL, Seq, Hangfire Console. Install only what you need.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">&#128200;</div>
@@ -223,7 +223,7 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.Email</pre>
 <section id="sinks">
     <div class="container">
         <span class="section-label">Sink Plugins</span>
-        <h2 class="section-title">8 sinks, copy-paste ready</h2>
+        <h2 class="section-title">9 sinks, copy-paste ready</h2>
         <p class="section-subtitle">Each sink is a separate NuGet package. Install only what you need. Click a sink to see its 5-line setup.</p>
 
         <div class="sink-grid">
@@ -258,6 +258,10 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.Email</pre>
             <div class="sink-card" data-sink="seq">
                 <h4>&#128200; Seq</h4>
                 <p>Structured log server, API key auth</p>
+            </div>
+            <div class="sink-card" data-sink="hangfireconsole">
+                <h4>&#9881; Hangfire Console</h4>
+                <p>Logs on Hangfire Dashboard during jobs</p>
             </div>
         </div>
 
@@ -399,6 +403,35 @@ builder.Services.<span class="method">AddLoggerHelper</span>(b => b
 );</pre>
             </div>
         </div>
+
+        <!-- HangfireConsole -->
+        <div class="sink-snippet" data-sink="hangfireconsole">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Hangfire Console Sink — 5 lines</span>
+                    <button class="copy-btn" data-copy="#sink-hangfireconsole">Copy</button>
+                </div>
+                <pre id="sink-hangfireconsole"><span class="cmt">// dotnet add package CSharpEssentials.LoggerHelper.Sink.HangfireConsole</span>
+
+<span class="cmt">// 1. Register the PerformContext accessor in DI</span>
+builder.Services.<span class="method">AddHangfireConsoleSink</span>();
+
+<span class="cmt">// 2. Route logs to Hangfire Dashboard</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"HangfireConsole"</span>, LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error)
+);
+
+<span class="cmt">// 3. In your Hangfire job, set the PerformContext</span>
+<span class="kw">public class</span> <span class="type">MyJob</span>(<span class="type">IPerformContextAccessor</span> accessor) {
+    <span class="kw">public void</span> <span class="method">Execute</span>(<span class="type">PerformContext</span> context) {
+        accessor.<span class="method">Set</span>(context);
+        <span class="cmt">// All ILogger calls now appear on the Hangfire Dashboard!</span>
+        accessor.<span class="method">Clear</span>();
+    }
+}</pre>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -477,6 +510,12 @@ builder.Services.<span class="method">AddLoggerHelper</span>(b => b
                     <td><a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq" target="_blank" rel="noopener">NuGet</a></td>
                 </tr>
                 <tr>
+                    <td><code class="pkg-id">CSharpEssentials.LoggerHelper.Sink.HangfireConsole</code></td>
+                    <td><code>HangfireConsole</code></td>
+                    <td>Hangfire Dashboard console output with colored log levels</td>
+                    <td><a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole" target="_blank" rel="noopener">NuGet</a></td>
+                </tr>
+                <tr>
                     <td><code class="pkg-id">CSharpEssentials.HttpHelper</code></td>
                     <td><em>optional</em></td>
                     <td>HTTP client helpers with structured logging (companion to LoggerHelper)</td>
@@ -543,6 +582,7 @@ builder.Services.<span class="method">AddLoggerHelper</span>(b => b
             <button class="tab-btn" data-tab="blazor">Blazor</button>
             <button class="tab-btn" data-tab="azure">Azure App Service</button>
             <button class="tab-btn" data-tab="docker">Docker</button>
+            <button class="tab-btn" data-tab="hangfire">Hangfire</button>
         </div>
 
         <!-- Minimal API -->
@@ -666,6 +706,45 @@ builder.Services.<span class="method">AddLoggerHelper</span>(b => b
     .<span class="method">AddRoute</span>(<span class="str">"Seq"</span>, LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
     .<span class="method">ConfigureSeq</span>(s => s.ServerUrl = <span class="str">"http://seq:5341"</span>)
 );</pre>
+            </div>
+        </div>
+        <!-- Hangfire -->
+        <div class="tab-panel" data-tab-group="guides" data-tab="hangfire">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Program.cs + Job — Hangfire with Dashboard logs</span>
+                    <button class="copy-btn" data-copy="#guide-hangfire">Copy</button>
+                </div>
+                <pre id="guide-hangfire"><span class="kw">using</span> CSharpEssentials.LoggerHelper;
+<span class="kw">using</span> CSharpEssentials.LoggerHelper.Sink.HangfireConsole;
+<span class="kw">using</span> Serilog.Events;
+
+<span class="kw">var</span> builder = WebApplication.<span class="method">CreateBuilder</span>(args);
+
+<span class="cmt">// 1. Register the PerformContext accessor</span>
+builder.Services.<span class="method">AddHangfireConsoleSink</span>();
+
+<span class="cmt">// 2. Configure LoggerHelper with HangfireConsole route</span>
+builder.Services.<span class="method">AddLoggerHelper</span>(b => b
+    .<span class="method">WithApplicationName</span>(<span class="str">"MyHangfireApp"</span>)
+    .<span class="method">AddRoute</span>(<span class="str">"Console"</span>, LogEventLevel.Information, LogEventLevel.Warning)
+    .<span class="method">AddRoute</span>(<span class="str">"HangfireConsole"</span>, LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error)
+);
+
+<span class="cmt">// 3. In your Hangfire job class</span>
+<span class="kw">public class</span> <span class="type">ProcessOrderJob</span>(
+    <span class="type">ILogger</span>&lt;<span class="type">ProcessOrderJob</span>&gt; logger,
+    <span class="type">IPerformContextAccessor</span> contextAccessor)
+{
+    <span class="kw">public void</span> <span class="method">Execute</span>(<span class="type">PerformContext</span> context, <span class="kw">int</span> orderId)
+    {
+        contextAccessor.<span class="method">Set</span>(context);        <span class="cmt">// Activate dashboard logging</span>
+        logger.<span class="method">LogInformation</span>(<span class="str">"Processing order {OrderId}"</span>, orderId);
+        <span class="cmt">// ... your job logic — all logs appear on Hangfire Dashboard ...</span>
+        logger.<span class="method">LogInformation</span>(<span class="str">"Order {OrderId} completed"</span>, orderId);
+        contextAccessor.<span class="method">Clear</span>();              <span class="cmt">// Cleanup</span>
+    }
+}</pre>
             </div>
         </div>
     </div>
