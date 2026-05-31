@@ -175,6 +175,7 @@ Each sink is a separate NuGet — install only what you need:
 | `CSharpEssentials.LoggerHelper.Sink.MSSqlServer` | SQL Server structured logs |
 | `CSharpEssentials.LoggerHelper.Sink.Elasticsearch` | Elasticsearch + Kibana |
 | `CSharpEssentials.LoggerHelper.Sink.Seq` | Seq centralized log server |
+| `CSharpEssentials.LoggerHelper.Sink.HangfireConsole` | Hangfire Dashboard console logs |
 
 Sinks self-register via a plugin mechanism — the core package has zero dependency on them.
 
@@ -333,4 +334,4 @@ to measure framework overhead independently of I/O.
 
 MIT — © Alessandro Chiodo
 
-[GitHub](https://github.com/alexbypa/CSharp.Essentials) · [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
+[Documentation](https://www.loggerhelper.com) · [GitHub](https://github.com/alexbypa/CSharp.Essentials) · [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)

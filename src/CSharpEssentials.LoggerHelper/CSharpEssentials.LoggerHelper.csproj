@@ -12,17 +12,19 @@
     <Description>Structured logging and log-level routing for .NET. Orchestrate Serilog sinks with JSON — send errors to Email, info to Console, traces to Seq. Native ILogger&lt;T&gt;, multi-sink, OpenTelemetry, zero boilerplate.</Description>
     <Version>5.0.0</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>CSharpEssentials.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <PropertyGroup>
     <RepositoryType>git</RepositoryType>
     <PackageTags>serilog;structured-logging;log-routing;multi-sink;logging;dotnet;aspnetcore;log-level-routing;ilogger;opentelemetry;observability;middleware;console-sink;file-sink;email-sink;telegram-sink;elasticsearch-sink;postgresql-sink;mssql-sink;seq-sink</PackageTags>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
+    <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 

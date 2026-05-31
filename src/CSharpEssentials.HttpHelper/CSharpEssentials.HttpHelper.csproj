@@ -9,15 +9,18 @@
     <Description>HttpClient helper with Polly retry, rate limiting, mock scenarios, and logging integration for .NET applications.</Description>
     <Version>5.0.0</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/alexbypa/CSharp.Essentials</PackageProjectUrl>
+    <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
     <PackageTags>httpclient;polly;resilience;retry;rate-limiting;aspnetcore;http;structured-logging</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

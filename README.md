@@ -1,220 +1,404 @@
-# CSharpEssentials Library
+<p align="center">
+  <img src="CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="CSharpEssentials Logo" width="120" />
+</p>
 
-CSharpEssentials is a collection of NuGet packages that provide a range of helpers and utilities for .NET development. This library includes various packages designed to simplify tasks such as HTTP operations, background job scheduling, logging, and more.
+<h1 align="center">CSharpEssentials</h1>
 
-## Package Index
+<p align="center">
+  <strong>Route Serilog sinks by log level — zero boilerplate, native <code>ILogger&lt;T&gt;</code></strong>
+</p>
 
-Below is a table listing all the current packages available in the CSharpEssentials library:
+<p align="center">
+  <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper"><img src="https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg?label=LoggerHelper&color=blue" alt="NuGet Version" /></a>
+  <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper"><img src="https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg?label=downloads&color=green" alt="NuGet Downloads" /></a>
+  <img src="https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0%20%7C%2010.0-blue?logo=dotnet" alt=".NET Versions" />
+  <a href="https://github.com/alexbypa/CSharp.Essentials/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
+  <a href="https://github.com/alexbypa/CSharp.Essentials/commits/main"><img src="https://img.shields.io/github/last-commit/alexbypa/CSharp.Essentials" alt="Last Commit" /></a>
+</p>
 
-| **Package Name**                         | **Description**                                                                              | **NuGet Link**                                                        |
-|------------------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
-| [CSharpEssentials.HttpHelper](#csharpessentialshttphelper)          | Provides helper methods and extensions for simplified HTTP client operations.               | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HttpHelper)    |
-| **CSharpEssentials.HangFireHelper** (#csharpessentialshangfirehelper)      | Contains utilities and extensions for integrating Hangfire background job processing.         | [NuGet](https://www.nuget.org/packages/CSharpEssentials.HangFireHelper)|
-| **CSharpEssentials.LoggerHelper** (#csharpessentialsloggerhelper)       | Offers logging helpers to trace requests using various Serilog sinks and logging strategies. | [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)  |
-| **...**                                  | ... (more packages coming soon)                                                              | ...                                                                   |
+---
 
-## Overview
-
-The CSharpEssentials library is designed to be modular, offering dedicated packages for distinct aspects of .NET development:
-
-- **HttpHelper:** Simplifies HTTP client usage with additional resiliency features.
-- **HangFireHelper:** Streamlines the integration and management of background jobs using Hangfire.
-- **LoggerHelper:** Enhances logging capabilities by leveraging various logging sinks (e.g., Serilog).
-
-Each package is intended to be used independently or in combination, depending on your project's needs.
-
-## Getting Started
-
-To install any of the packages, use the NuGet Package Manager or the .NET CLI. For example, to install the HttpHelper package:
+Install the NuGet, add a few lines of JSON or fluent C#, and every `ILogger<T>` in your app automatically routes logs to **Console**, **File**, **Email**, **Telegram**, **Elasticsearch**, **SQL Server**, **PostgreSQL**, **Seq**, and **Hangfire Console** — each sink receiving only the log levels you choose.
 
 ```bash
-dotnet add package CSharpEssentials.HttpHelper --version 1.2.2
+dotnet add package CSharpEssentials.LoggerHelper
+dotnet add package CSharpEssentials.LoggerHelper.Sink.Console
+dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 ```
-## [CSharpEssentials.HttpHelper](#csharpessentialshttphelper)
 
-CSharpEssentials.HttpHelper is a NuGet package that extends HttpClient functionalities by integrating resiliency and rate limiting strategies. 
-With this package, HTTP calls in your .NET applications become more robust, handling transient errors and request limitations gracefully.
+---
 
-### Configuration (appsettings.json)
-```js
+## Table of Contents
+
+- [Packages](#-packages)
+- [Quick Start](#-quick-start--30-seconds)
+- [Feature Highlights](#-feature-highlights)
+- [Sink Overview](#-sink-overview)
+- [Comparison](#-comparison)
+- [Coming Soon](#-coming-soon)
+- [Architecture](#-architecture)
+- [Documentation & Links](#-documentation--links)
+
+---
+
+## Packages
+
+| Package | Description | Version |
+|---------|-------------|---------|
+| [`CSharpEssentials.LoggerHelper`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | Core routing engine, `ILogger<T>` bridge, JSON/fluent config | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg) |
+| [`...Sink.Console`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console) | Colored console output, per-level themes | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Console.svg) |
+| [`...Sink.File`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.File) | Rolling JSON files, configurable retention | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.File.svg) |
+| [`...Sink.Email`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Email) | SMTP alerts, HTML templates, throttling | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Email.svg) |
+| [`...Sink.Telegram`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Telegram) | Bot notifications, MarkdownV2, throttling | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Telegram.svg) |
+| [`...Sink.Elasticsearch`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Elasticsearch) | Elasticsearch/OpenSearch indexing, Kibana | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Elasticsearch.svg) |
+| [`...Sink.MSSqlServer`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) | SQL Server, auto table creation, custom columns | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.svg) |
+| [`...Sink.Postgresql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) | PostgreSQL, JSONB fields, custom schema | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Postgresql.svg) |
+| [`...Sink.Seq`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) | Seq centralized log server | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Seq.svg) |
+| [`...Sink.HangfireConsole`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | Hangfire Dashboard console with colored output | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg) |
+| [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg) |
+
+---
+
+## Quick Start — 30 Seconds
+
+### Option A — JSON config (recommended)
+
+**`Program.cs`**
+```csharp
+builder.Services.AddLoggerHelper(builder.Configuration);
+app.UseLoggerHelper();
+```
+
+**`appsettings.LoggerHelper.json`**
+```json
 {
-  "HttpClientOptions": [
-    {
-      "name": "Test",
-      "certificate": {
-        "path": "YOUR_PATH",
-        "password": "YOUR_PASSWORD"
-      },
-      "RateLimitOptions": {
-        "AutoReplenishment": true,
-        "PermitLimit": 1, 
-        "QueueLimit": 1, 
-        "Window": "00:00:15",
-        "SegmentsPerWindow": 100
-      }
-    }
-  ]
+  "LoggerHelper": {
+    "ApplicationName": "MyApp",
+    "Routes": [
+      { "Sink": "Console", "Levels": ["Information", "Warning"] },
+      { "Sink": "File",    "Levels": ["Information", "Warning", "Error", "Fatal"] },
+      { "Sink": "Email",   "Levels": ["Error", "Fatal"] }
+    ],
+    "Sinks": {
+      "File":  { "Path": "Logs", "RollingInterval": "Day" },
+      "Email": { "To": "ops@example.com", "Host": "smtp.example.com", "Port": 587 }
+    },
+    "General": { "EnableRequestResponseLogging": true }
+  }
 }
 ```
-### 🌍 `HttpClientOptions`
-📌 **explanation** (The package uses the following rate limiting algorithm: Sliding window limiter)
 
-| Key | Type | Description |
-|--------|------|-------------|
-| `name` | `string` | Friendly name that encloses the settings to use with http to use a certificate for calls in https and configurations on the rate limit |
-| `certificate` | `string` | Settings to upload the certificate |
-| `certificate.path` | `string` | certificate path |
-| `certificate.password` | `string` | password path |
-| `RateLimitOptions.PermitLimit` | `int` | How many requests per window |
-| `RateLimitOptions.QueueLimit` | `int` | maximum number of requests that can be waiting in the queue |
-| `RateLimitOptions.Window` | `timestamp` | Time frame between one request and another |
-| `RateLimitOptions.SegmentsPerWindow` | `int` | Number of segments per Window |
+That's it. Every `ILogger<T>` in your app now routes through LoggerHelper.
 
+### Option B — Fluent API
 
-### Features
-
-- **Resiliency:** Implements retry and fallback policies to manage transient errors.
-- **Rate Limiting:** Controls the frequency of HTTP requests to prevent overloads and adhere to API limits.
-- **Logging:** Leverages [CSharpEssentials.LoggerHelper](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) to trace requests using various Serilog sinks.
-- **Custom Delegates:** Utilizes a custom handler to attach multiple delegates during the HTTP call for additional processing and customization.
-- **Easy Integration:** Seamlessly integrates with ASP.NET Core applications.
-- **Tested & Validated:** Verified using both an ASP.NET Core controller and `.http` file examples.
-
-### Installation
-
-Install the package via the NuGet Package Manager:
-
-```bash
-dotnet add package CSharpEssentials.HttpHelper --version 1.2.4
+```csharp
+builder.Services.AddLoggerHelper(b => b
+    .WithApplicationName("MyApp")
+    .AddRoute("Console", LogEventLevel.Information, LogEventLevel.Warning)
+    .AddRoute("File",    LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
+    .AddRoute("Email",   LogEventLevel.Error, LogEventLevel.Fatal)
+    .ConfigureFile(f => { f.Path = "Logs"; f.RollingInterval = "Day"; })
+    .ConfigureEmail(e => { e.To = "ops@example.com"; e.Host = "smtp.example.com"; })
+    .EnableRequestResponseLogging()
+);
 ```
 
-### API Examples
-#### Example 1: Simple Get without body
+### Option C — JSON + fluent merge
+
 ```csharp
-using Azure;
-using CSharpEssentials.HttpHelper;
-using CSharpEssentials.LoggerHelper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System;
-using System.Runtime.Serialization;
-using System.Xml.Linq;
+// JSON defines shared config across environments.
+// Fluent adds Development-only extras without touching JSON.
+builder.Services.AddLoggerHelper(builder.Configuration, b => b
+    .AddRoute("Console", LogEventLevel.Debug)
+);
+```
 
-namespace Test.Controllers.httphelper;
-[ApiController]
-[Route("httpHelper")]
-public class httphelperController : Controller {
-    private readonly List<httpClientOptions> httpClientOptions; // 1
-    public httphelperController(IOptions<List<httpClientOptions>> httpClientOptions) {
-        this.httpClientOptions = httpClientOptions.Value;
-    }
+---
 
-    /// <summary>
-    /// Call Simple Http Request
-    /// </summary>
-    /// <param name="testRequest"></param>
-    /// <returns></returns>
-    [HttpGet("withNoBdoy")]
-    public async Task<IActionResult> withNoBdoy(string url) {
-        List<object> responses = new List<object>();
-        List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>> actionsHttp = new List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>>();  // 2
-        Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> insertLog = (httpreq, httpres, totRetry, timeSpanRateLimit) => {
-            loggerExtension<MyRequest>.TraceAsync(
-                new MyRequest { Action = "Test Http", IdTransaction = "Alex" },
-                Serilog.Events.LogEventLevel.Information,
-                null,
-                "HTTP LOG: {totRetry} {timeSpanRateLimit} {Url}, {request} {httpStatus} {BodyResponse}",
-                totRetry, timeSpanRateLimit, url, httpreq, httpres.StatusCode.ToString(), httpres.Content.ReadAsStringAsync().GetAwaiter().GetResult()
-                );
-            responses.Add(new { httpStatus = httpres.StatusCode.ToString(), NumberRetry = totRetry, timeSpanRateLimit = timeSpanRateLimit });
-            return Task.CompletedTask;
-        };
-        actionsHttp.Add(insertLog); // 3
-        var httpsClientHelper = new httpsClientHelper(actionsHttp);
-        IContentBuilder contentBuilder = new NoBodyContentBuilder(); // 4
+## Feature Highlights
 
-        var responseMessage = await httpsClientHelper
-            .addTimeout(TimeSpan.FromSeconds(30)) 
-            .SendAsync(url, HttpMethod.Get, null, contentBuilder
-        );
-        return Ok(responses);
+### Per-Level Sink Routing
+
+Send different log levels to different destinations — declaratively:
+
+```json
+"Routes": [
+  { "Sink": "Console",       "Levels": ["Debug", "Information", "Warning"] },
+  { "Sink": "File",          "Levels": ["Information", "Warning", "Error", "Fatal"] },
+  { "Sink": "Telegram",      "Levels": ["Error", "Fatal"] },
+  { "Sink": "Email",         "Levels": ["Fatal"] },
+  { "Sink": "Elasticsearch", "Levels": ["Information", "Warning", "Error", "Fatal"] }
+]
+```
+
+### Native `ILogger<T>` — Zero Code Changes
+
+If your app already uses `ILogger<T>`, you change **nothing**. LoggerHelper plugs in as a standard `ILoggerProvider`:
+
+```csharp
+public class OrderService(ILogger<OrderService> logger) {
+    public void Process(int orderId) {
+        logger.LogInformation("Processing order {OrderId}", orderId);  // -> Console + File
+        logger.LogError("Payment failed for {OrderId}", orderId);      // -> File + Email
     }
 }
 ```
 
-#### Code Explanation
+Named parameters like `{OrderId}` are preserved as structured Serilog properties — not flattened into strings.
 
-1. **`[httpClientOptions]`**  
-  Let's load the appSettings configurations
-2. **`[actionsHttp]`**  
-  Defines the base route for the controller. The `[controller]` token is replaced with the actual class name (`Sample`), excluding the `Controller` suffix.
+### BeginScope — Context That Travels
 
-3. **`[insertLog]`**  
-  Specifies that this method handles HTTP GET requests for the `hello` endpoint. The full URL becomes `api/Sample/hello`.
-4. **`IContentBuilder`**  
-  Defines the action method that handles the request. Returning `IActionResult` allows flexibility in returning different HTTP response types.
----
-
-#### Example HTTP Request
-
-```http
-@Test_HostAddress = http://localhost:5133
-@Test_ExternalCall = https://webhook.site/YOUR-UNIQUE-ID
-
-### 1) withNoBdoy: Call Simple Http Request
-GET {{Test_HostAddress}}/httpHelper/withNoBdoy?url={{Test_ExternalCall}}
-Accept: html/text
-Content-Type: html/text
-```
-
-#### Example 2: Simple with Retries
 ```csharp
-    [HttpGet("withRetries")]
-    public async Task<IActionResult> withRetries(string url, int httpStausOnRetry, int totRetry, int secondsDelayEspOnRetry) {
-        List<object> responses = new List<object>();
-        List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>> actionsHttp = new List<Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task>>();
-        Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> traceRetry = (httpreq, httpres, totRetry, timeSpanRateLimit) => {
-            loggerExtension<MyRequest>.TraceAsync(
-                new MyRequest { Action = "Test Http", IdTransaction = "Alex" },
-                Serilog.Events.LogEventLevel.Information,
-                null,
-                "HTTP LOG: {totRetry} {timeSpanRateLimit} {Url}, {request} {httpStatus} {BodyResponse}",
-                totRetry, timeSpanRateLimit, url, httpreq, httpres.StatusCode.ToString(), httpres.Content.ReadAsStringAsync().GetAwaiter().GetResult()
-                );
-            responses.Add(new { content = httpres.Content.ReadAsStringAsync().GetAwaiter().GetResult(), httpStatus = httpres.StatusCode.ToString(), NumberRetry = totRetry, timeSpanRateLimit = timeSpanRateLimit });
-            return Task.CompletedTask;
-        };
-        actionsHttp.Add(traceRetry);
-        var httpsClientHelper = new httpsClientHelper(actionsHttp);
-        IContentBuilder contentBuilder = new NoBodyContentBuilder(); 
-
-        httpsClientHelper
-            .addTimeout(TimeSpan.FromSeconds(30))
-            .addRetryCondition((httpRes) => (int)httpRes.StatusCode == httpStausOnRetry, totRetry, secondsDelayEspOnRetry); // 2
-
-        var responseMessage = await httpsClientHelper
-            .SendAsync(url, HttpMethod.Get, null, contentBuilder
-        );
-
-        return Ok(responses);
-    }
+using (_logger.BeginScope(new Dictionary<string, object?> {
+    ["OrderId"] = orderId,
+    ["UserId"]  = userId
+}))
+{
+    _logger.LogInformation("Validation started");   // OrderId + UserId attached
+    await ValidateStock();                           // logs inside also carry them
+    _logger.LogInformation("Order confirmed");       // OrderId + UserId attached
+}
 ```
 
-#### Code Explanation
+### Automatic Enrichment
 
-2. **`[addRetryCondition]`**  
-  In this case we add the addRetryCondition method where we can choose when the retry should be performed, the number of retries (totRetry parameter), and the number of seconds in exponential mode (secondsDelayEspOnRetry parameter).
-In the example of the next call a retry is performed when the httpStatus response is 409 (of course we can always choose different rules), for a maximum of 4 retries and with a delay between each of respectively: 2 seconds, 4, 8 and 16
+Every log event automatically carries:
+
+| Property | Source |
+|----------|--------|
+| `ApplicationName` | Config / `WithApplicationName()` |
+| `MachineName` | `Environment.MachineName` |
+| `SourceContext` | Class name from `ILogger<T>` |
+| `TraceId` / `SpanId` | `System.Diagnostics.Activity` (OpenTelemetry) |
+
+### Internal Diagnostics
+
+If a sink fails (wrong connection string, unreachable SMTP), your app keeps running. Errors are captured silently:
+
+```csharp
+app.MapGet("/health/logging", (ILogErrorStore errors) =>
+    errors.Count == 0
+        ? Results.Ok("All sinks healthy")
+        : Results.Problem(string.Join("\n", errors.GetAll().Select(e => $"{e.SinkName}: {e.ErrorMessage}")))
+);
+```
+
+### Request/Response Logging Middleware
+
+```json
+"General": { "EnableRequestResponseLogging": true }
+```
+```csharp
+app.UseLoggerHelper();
+```
+
+One setting, one line — full HTTP request/response logging with correlation IDs and timing.
+
 ---
 
-#### Example HTTP Request
+## Sink Overview
 
-```http
-GET {{Test_HostAddress}}/httpHelper/withRetries?url={{Test_ExternalCall}}&httpStausOnRetry=429&totRetry=4&secondsDelayEspOnRetry=2
-Accept: html/text
-Content-Type: html/text
+Each sink is a separate NuGet package. Install only what you need.
+
+### Console
+
+Colored console output with per-level color themes.
+
+```json
+"Sinks": { }
+```
+No configuration required — just add the route.
+
+### File
+
+Rolling JSON log files with configurable retention.
+
+```json
+"Sinks": {
+  "File": { "Path": "Logs", "RollingInterval": "Day", "RetainedFileCountLimit": 7 }
+}
 ```
 
+### Email
 
+HTML email alerts with SMTP, templates, and throttling.
 
+```json
+"Sinks": {
+  "Email": {
+    "From": "alerts@myapp.com", "To": "team@myapp.com",
+    "Host": "smtp.gmail.com", "Port": 587,
+    "Username": "alerts@myapp.com", "Password": "app-password",
+    "ThrottleInterval": "00:05:00"
+  }
+}
+```
+
+### Telegram
+
+Instant bot notifications with MarkdownV2 and emoji-coded levels.
+
+```json
+"Sinks": {
+  "Telegram": { "BotToken": "123456:ABC-DEF...", "ChatId": "-100123456789" }
+}
+```
+
+### Elasticsearch
+
+Full-text search with auto-indexing for Kibana dashboards.
+
+```json
+"Sinks": {
+  "Elasticsearch": { "NodeUris": "http://localhost:9200", "IndexFormat": "myapp-{0:yyyy.MM.dd}" }
+}
+```
+
+### SQL Server
+
+Structured storage with auto table creation and custom columns.
+
+```json
+"Sinks": {
+  "MSSqlServer": {
+    "ConnectionString": "Server=.;Database=Logs;Trusted_Connection=true",
+    "TableName": "AppLogs", "AutoCreateSqlTable": true
+  }
+}
+```
+
+### PostgreSQL
+
+JSONB columns, custom schema, auto table creation.
+
+```json
+"Sinks": {
+  "Postgresql": {
+    "ConnectionString": "Host=localhost;Database=logs;Username=app;Password=secret",
+    "TableName": "app_logs", "NeedAutoCreateTable": true
+  }
+}
+```
+
+### Seq
+
+Centralized log server with search, dashboards, and alerting.
+
+```json
+"Sinks": {
+  "Seq": { "ServerUrl": "http://localhost:5341", "ApiKey": "your-api-key" }
+}
+```
+
+### Hangfire Console
+
+See structured logs directly on the Hangfire Dashboard during job execution.
+
+```csharp
+// Extra DI registration required:
+builder.Services.AddHangfireConsoleSink();
+```
+```json
+"Routes": [
+  { "Sink": "HangfireConsole", "Levels": ["Information", "Warning", "Error"] }
+]
+```
+
+---
+
+## Comparison
+
+| Feature | Serilog alone | NLog | **LoggerHelper v5** |
+|---------|:---:|:---:|:---:|
+| Per-level sink routing (declarative) | Manual per sink | Via targets | **JSON / fluent — built-in** |
+| `ILogger<T>` compatible | Via bridge pkg | Native | **Native — zero code change** |
+| Install only needed sinks | No | No | **Yes — modular NuGet** |
+| Named params preserved | Yes | Yes | **Yes** |
+| `BeginScope` structured | Yes | Yes | **Yes — propagates to Serilog** |
+| OpenTelemetry trace ID | Manual | Manual | **Built-in, auto-correlated** |
+| Internal error diagnostics | No | No | **Yes — injectable ILogErrorStore** |
+| Fluent OR JSON OR both | No | No | **All three, mergeable** |
+| Request/Response middleware | Serilog.AspNetCore | Manual | **1 line middleware** |
+| Email/Telegram alerts | 3rd-party sinks | NLog.MailKit | **Built-in + throttling** |
+| Setup complexity | 15-30 lines | XML + code | **5 lines** |
+
+---
+
+## Coming Soon
+
+These features are planned for upcoming releases — contributions welcome!
+
+| Feature | Description |
+|---------|-------------|
+| **LoggerHelper.AI** | Natural language log queries, anomaly detection, incident summarization via LLM |
+| **LoggerHelper.Dashboard** | Embedded real-time UI showing active sinks, routing rules, and recent errors |
+| **LoggerHelper.Telemetry** | OpenTelemetry metrics export — log counters per sink, error rates, latency |
+| **LoggerHelper.xUnit** | Forwards log output to xUnit test runner for integration test visibility |
+| **Source Generator** | Replace runtime reflection for sink loading — faster startup, AOT-compatible, trimming-safe |
+| **`dotnet new` template** | `dotnet new loggerhelper-api` scaffolds a pre-configured project with zero friction |
+
+---
+
+## Architecture
+
+LoggerHelper uses a **plugin architecture** for sinks. The core package has zero dependencies on any sink — they self-register at startup via `[ModuleInitializer]`.
+
+```
+Your App
+  └── CSharpEssentials.LoggerHelper (core)
+        ├── Routes logs by level
+        ├── Bridges ILogger<T> → Serilog
+        └── Discovers sink plugins automatically
+              ├── Sink.Console    (auto-registers)
+              ├── Sink.File       (auto-registers)
+              ├── Sink.Email      (auto-registers)
+              └── ... any ISinkPlugin
+```
+
+### Building a Custom Sink
+
+```csharp
+[LoggerHelperSink]
+public sealed class MyTargetSinkPlugin : ISinkPlugin {
+    public bool CanHandle(string sinkName) =>
+        sinkName.Equals("MyTarget", StringComparison.OrdinalIgnoreCase);
+
+    public void Configure(LoggerConfiguration loggerConfig, SinkRouting routing, LoggerHelperOptions options) {
+        var opts = options.GetSinkConfig<MyTargetOptions>("MyTarget")
+                   ?? options.BindSinkSection<MyTargetOptions>("MyTarget");
+
+        loggerConfig.WriteTo.Conditional(
+            evt => routing.Matches(evt.Level),
+            wt => wt.MySink(opts.ConnectionString)
+        );
+    }
+}
+
+public static class PluginInitializer {
+    [ModuleInitializer]
+    public static void Init() => SinkPluginRegistry.Register(new MyTargetSinkPlugin());
+}
+```
+
+Reference `CSharpEssentials.LoggerHelper` as a NuGet package — not a project reference. The sink auto-registers at startup with no changes to the core.
+
+---
+
+## Documentation & Links
+
+- [Documentation Site](https://www.loggerhelper.com)
+- [Interactive Playground](https://www.loggerhelper.com/playground.html)
+- [Benchmark Results](docs/benchmarks.md)
+- [Migration Guide (v2/v4 to v5)](docs/legacy-parity-v5.md)
+- [Gap Analysis](docs/gap-analysis-original-vs-new.md)
+- [NuGet — LoggerHelper](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
+- [NuGet — HttpHelper](https://www.nuget.org/packages/CSharpEssentials.HttpHelper)
+
+---
+
+## License
+
+MIT — [Alessandro Chiodo](https://github.com/alexbypa)
+
+[GitHub](https://github.com/alexbypa/CSharp.Essentials) | [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | [Issues](https://github.com/alexbypa/CSharp.Essentials/issues)
