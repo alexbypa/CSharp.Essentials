@@ -4,7 +4,7 @@
 
 **CSharp.Essentials** is a modular NuGet package ecosystem providing infrastructure and utility libraries for .NET applications. 
 The core offering is a centralized Serilog-based logging hub (`LoggerHelper`) with pluggable sinks, plus companion libraries for HTTP, encryption, serialization, reCAPTCHA, and HangFire.
-**Documetation"" La documentazione si trova sulla cartella D:\Project_Pixelo\CSharp.Essentials\docs\site e in remoto su 
+**Documetation** La documentazione si trova sulla cartella D:\Project_Pixelo\CSharp.Essentials\docs\site e in remoto su www.loggerhelper.com
 
 - **Author:** Alessandro Chiodo
 - **Architecture:** Modular library (per-package isolation, shared conventions)
@@ -14,7 +14,7 @@ The core offering is a centralized Serilog-based logging hub (`LoggerHelper`) wi
 ## Obiettivo Principale
 **Target:** Raggiungere almeno 1000 download giornalieri di `CSharpEssentials.LoggerHelper` su nuget.org entro 2 mesi, posizionandolo come una delle principali soluzioni di logging nella community .NET.
 **Code base** Devono essere rispettati i principi SOLID, Clean Code, e le best practice di .NET. Il codice deve essere modulare, testabile, e facilmente estendibile con nuovi sink o funzionalità.
-**Memory leak"" Zero problemi di memory leak 
+**Memory leak** Zero problemi di memory leak 
 
 ### Piano di Esecuzione
 
@@ -43,18 +43,17 @@ CSharpEssentials.sln
 |   |-- CSharpEssentials.LoggerHelper.Sink.MSSqlServer
 |   |-- CSharpEssentials.LoggerHelper.Sink.Postgresql
 |   |-- CSharpEssentials.LoggerHelper.Sink.Seq
-|   |-- CSharpEssentials.LoggerHelper.Sink.CSharpEssentials.LoggerHelper.Sink.HangfireConsole
+|   |-- CSharpEssentials.LoggerHelper.Sink.HangfireConsole
 |
 
 ## NuGet Packaging
 
 - All library projects have `GeneratePackageOnBuild=True`
 - Local package output paths vary per project `C:\Nuget`
-- CI publishes the core LoggerHelper to nuget.org via GitHub Actions (`.github/workflows/publish.yml`)
 - Each package manages its own `Version` in its `.csproj`
 - Check at any change on code readme.md on https://github.com/alexbypa/CSharp.Essentials/blob/main/README.md
 - Check at any change on code documentazion on https://www.loggerhelper.com/
-- When i approve you change con code send me comment for commit with git !Il c
+- When i approve your change on code send me comment for commit !
  
 ## Key Architecture Patterns
 
