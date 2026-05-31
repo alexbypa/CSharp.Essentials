@@ -128,3 +128,34 @@ When creating a new sink plugin:
 5. Add configuration class to `SerilogOption` if needed
 6. Set `GeneratePackageOnBuild=True`, add package metadata (icon at `..\..\img\CSharpEssentials.png`, readme, license)
 7. Multi-target: `net6.0;net8.0;net9.0;net10.0`
+
+
+## TODO: 
+ Step 4 — Review documentazione (Obiettivo 3)
+
+ Analisi della documentazione di CSharpEssentials.LoggerHelper.Sink.HangfireConsole:
+
+ README GitHub — Punti di forza:
+
+ - Installazione chiara (2 pacchetti NuGet)
+ - Due opzioni di config (JSON + Fluent API)
+ - Pattern Set/Clear del PerformContext spiegato
+ - Color mapping documentato
+
+ README GitHub — Punti deboli / Suggerimenti miglioramento:
+
+ 1. Manca esempio completo end-to-end — Il README mostra frammenti ma non un Program.cs completo con Host.CreateDefaultBuilder, DI, e Hangfire setup
+ 2. Manca sezione Troubleshooting — Cosa succede se non chiami accessor.Clear()? Memory leak? Log che finiscono nel job sbagliato?
+ 3. Manca prerequisito Hangfire.Console — Non dice esplicitamente che serve .UseConsole() nella configurazione Hangfire
+ 4. Versione minima .NET non chiara — Supporta net6? net8? net10?
+
+ loggerhelper.com — Punti di forza:
+
+ - Overview chiara di tutti i 9 sink
+ - Tabella comparativa
+ - Sia Fluent API che JSON config
+
+ loggerhelper.com — Punti deboli:
+
+ 1. HangfireConsole ha solo 3 righe — Rispetto agli altri sink è sottodocumentato
+ 2. Manca menzione della compatibilità con il formato legacy Serilog:SerilogConfiguration nel sito (è solo nel README)
