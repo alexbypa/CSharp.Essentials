@@ -3,36 +3,40 @@
 ## Project Overview
 
 **CSharp.Essentials** is a modular NuGet package ecosystem providing infrastructure and utility libraries for .NET applications. 
-The core offering is a centralized Serilog-based logging hub (`LoggerHelper`) with pluggable sinks, plus companion libraries for HTTP, encryption, serialization, reCAPTCHA, and HangFire.
-**Documetation** La documentazione si trova sulla cartella D:\Project_Pixelo\CSharp.Essentials\docs\site e in remoto su www.loggerhelper.com
+The core offering is a centralized Serilog-based logging hub (`LoggerHelper`) with pluggable sinks, plus a companion library for HTTP resilience (`HttpHelper`).
 
+- **Documentation:** Local at `D:\Project_Pixelo\CSharp.Essentials\docs\site`, live at https://www.loggerhelper.com/
 - **Author:** Alessandro Chiodo
 - **Architecture:** Modular library (per-package isolation, shared conventions)
 - **Repository:** https://github.com/alexbypa/CSharp.Essentials
 - **License:** MIT
+- **Current Version:** 5.0.1 (unified across all 11 packages)
+- **PackageProjectUrl:** https://www.loggerhelper.com (all packages)
 
 ## Obiettivo Principale
-**Target:** Raggiungere almeno 1000 download giornalieri di `CSharpEssentials.LoggerHelper` su nuget.org entro 2 mesi, posizionandolo come una delle principali soluzioni di logging nella community .NET.
-**Code base** Devono essere rispettati i principi SOLID, Clean Code, e le best practice di .NET. Il codice deve essere modulare, testabile, e facilmente estendibile con nuovi sink o funzionalità.
-**Memory leak** Zero problemi di memory leak 
+
+- **Target:** Raggiungere almeno 1000 download giornalieri di `CSharpEssentials.LoggerHelper` su nuget.org entro 2 mesi, posizionandolo come una delle principali soluzioni di logging nella community .NET.
+- **Code base:** Devono essere rispettati i principi SOLID, Clean Code, e le best practice di .NET. Il codice deve essere modulare, testabile, e facilmente estendibile con nuovi sink o funzionalita.
+- **Memory leak:** Zero problemi di memory leak.
 
 ### Piano di Esecuzione
 
 #### Fase 4 — Marketing e SEO
-- **SEO NuGet** — Ottimizzare Description e Tags dei pacchetti con keyword piu cercate: "structured logging", "log routing", "multi-sink logging", "log level routing"
+- ~~**SEO NuGet** — Ottimizzare Description e Tags dei pacchetti~~ (COMPLETATO v5.0.1)
 - **`dotnet new` template** — `dotnet new loggerhelper-api` che scaffolda un progetto pre-configurato. Friction di adozione a zero
 - **Content marketing** — Blog post su dev.to/Medium, video YouTube, sample project su GitHub
 - **Community** — Risposte su Stack Overflow, post su Reddit r/dotnet, engagement su Discord
 - **GitHub Actions badge + stats widget** sul sito per social proof
-- **README NuGet** ottimizzato con quick-start copy-paste e risultati benchmark
+- ~~**README NuGet** ottimizzato con quick-start copy-paste~~ (COMPLETATO v5.0.1 — ogni pacchetto ha README dedicato)
 
 ## Solution Structure
 
 ```markdown
-CSharpEssentials.sln
+CSharpEssentials.LoggerHelper.slnx
 |
 |-- Core Libraries
 |   |-- CSharpEssentials.LoggerHelper          (Serilog hub, plugin registry, middleware)
+|   |-- CSharpEssentials.HttpHelper            (HttpClient + Polly resilience)
 |
 |-- Sink Plugins (each a separate NuGet)
 |   |-- CSharpEssentials.LoggerHelper.Sink.Console
@@ -44,22 +48,25 @@ CSharpEssentials.sln
 |   |-- CSharpEssentials.LoggerHelper.Sink.Postgresql
 |   |-- CSharpEssentials.LoggerHelper.Sink.Seq
 |   |-- CSharpEssentials.LoggerHelper.Sink.HangfireConsole
-|
+```
 
 ## NuGet Packaging
 
 - All library projects have `GeneratePackageOnBuild=True`
-- Local package output paths vary per project `C:\Nuget`
-- Each package manages its own `Version` in its `.csproj`
-- Check at any change on code readme.md on https://github.com/alexbypa/CSharp.Essentials/blob/main/README.md
-- Check at any change on code documentazion on https://www.loggerhelper.com/
-- When i approve your change on code send me comment for commit !
+- Local package output path: `C:\Nuget`
+- CI publishes **all 11 packages** (core + 9 sinks + HttpHelper) to nuget.org via GitHub Actions (`.github/workflows/publish.yml`)
+- Each package manages its own `Version` in its `.csproj` (currently all at 5.0.1)
+- Icon path: `..\..\img\CSharpEssentials.png` (relative from each project)
+- Check at any change on code: update README.md on https://github.com/alexbypa/CSharp.Essentials/blob/main/README.md
+- Check at any change on code: update documentation on https://www.loggerhelper.com/
+- When user approves code changes, provide a commit message for git.
  
 ## Key Architecture Patterns
 
 ### Sink Plugin System
 The core `LoggerHelper` uses a plugin architecture for sinks:
-- **`ISinkPlugin`** — interface each sink must implement (`CanHandle`, `HandleSink`)
+- **`ISinkPlugin`** — interface each sink must implement (`CanHandle` + `Configure`)
+- **`[LoggerHelperSink]`** attribute + `[ModuleInitializer]` for auto-registration
 - **`SinkPluginRegistry`** — global static registry where plugins self-register
 - Sinks are loaded dynamically at runtime via `TolerantPluginLoadContext`
 - Configuration is JSON-based (`SerilogConfiguration`, `SerilogCondition`) allowing per-level sink routing
@@ -73,6 +80,7 @@ The core `LoggerHelper` uses a plugin architecture for sinks:
 - `SerilogConfiguration` — root config with `ApplicationName`, `SerilogCondition[]`, `SerilogOption`
 - `SerilogCondition` — maps a sink name to log levels
 - `SerilogOption` — per-sink configuration (MSSqlServer, PostgreSQL, Telegram, Email, File, Elasticsearch, Seq)
+- Config chain: `GetSinkConfig<T>()` (fluent) → `BindSinkSection<T>()` (JSON) → `new T()` (defaults)
 
 ## Coding Conventions
 
@@ -96,9 +104,9 @@ The core `LoggerHelper` uses a plugin architecture for sinks:
 ## CI/CD
 
 - **GitHub Actions** workflow at `.github/workflows/publish.yml`
-- Triggers on push to `main`
-- Currently builds and publishes only `CSharpEssentials.LoggerHelper` to nuget.org
-- Uses `NUGET_API_KEY` secret
+- Triggers on push to `main` + `workflow_dispatch` (manual run from GitHub UI)
+- Builds entire solution, packs and publishes **all 11 packages** to nuget.org
+- Uses `NUGET_API_KEY` secret (glob scope: `CSharpEssentials.*`)
 
 ## Dependencies to Know
 
@@ -114,9 +122,9 @@ The core `LoggerHelper` uses a plugin architecture for sinks:
 
 When creating a new sink plugin:
 1. Create project `CSharpEssentials.LoggerHelper.Sink.{Name}`
-2. Implement `ISinkPlugin` (CanHandle + HandleSink)
-3. Register via `SinkPluginRegistry.Register(...)` in a module initializer or static constructor
-4. Reference `CSharpEssentials.LoggerHelper` as a **NuGet package** (not project reference)
+2. Implement `ISinkPlugin` (`CanHandle` + `Configure`)
+3. Add `[LoggerHelperSink]` attribute and register via `[ModuleInitializer]`
+4. Reference `CSharpEssentials.LoggerHelper` as a **project reference**
 5. Add configuration class to `SerilogOption` if needed
-6. Set `GeneratePackageOnBuild=True`, add package metadata (icon, readme, license)
-7. Multi-target to match existing sink conventions (net6.0, net8.0, net9.0)
+6. Set `GeneratePackageOnBuild=True`, add package metadata (icon at `..\..\img\CSharpEssentials.png`, readme, license)
+7. Multi-target: `net6.0;net8.0;net9.0;net10.0`
