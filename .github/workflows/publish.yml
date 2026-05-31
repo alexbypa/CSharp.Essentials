@@ -1,16 +1,17 @@
-name: Publish NuGet Package
+name: Publish NuGet Packages
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
   packages: write
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -25,15 +26,20 @@ jobs:
             9.0.x
             10.0.x
 
-      - name: Build and pack LoggerHelper v5 (core + sinks)
+      - name: Restore & Build solution
+        run: dotnet build src/CSharpEssentials.LoggerHelper.slnx -c Release
+
+      - name: Pack all packages
         run: |
           mkdir -p nupkgs
-          dotnet build src/CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj -c Release
           dotnet pack src/CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj -c Release --no-build -o ./nupkgs
+          dotnet pack src/CSharpEssentials.HttpHelper/CSharpEssentials.HttpHelper.csproj -c Release --no-build -o ./nupkgs
           for proj in src/CSharpEssentials.LoggerHelper.Sink.*/*.csproj; do
-            dotnet build "$proj" -c Release
             dotnet pack "$proj" -c Release --no-build -o ./nupkgs
           done
 
-      - name: Publish NuGet packages
+      - name: List generated packages
+        run: ls -la nupkgs/
+
+      - name: Publish to NuGet.org
         run: dotnet nuget push "./nupkgs/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
     <Title>CSharpEssentials.HttpHelper — HttpClient with Polly resilience</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Make every HTTP call resilient in one line. Built-in retry, rate limiting, and automatic logging — so your app keeps working when APIs don't.</Description>
-    <Version>5.0.0</Version>
+    <Description>Make every HTTP call resilient in one line. Built-in retry, rate limiting, and automatic logging — so your app keeps working when APIs don't. New in 5.0.1: File sink now supports dynamic subdirectories per tenant or module.</Description>
+    <Version>5.0.1</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <PackageReadmeFile>README.md</PackageReadmeFile>

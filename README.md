@@ -212,7 +212,7 @@ No configuration required — just add the route.
 
 ### File
 
-Rolling JSON log files with configurable retention. **v5.1.0**: route logs to subdirectories by any log property — perfect for multi-tenant apps.
+Rolling JSON log files with configurable retention. **v5.0.1**: route logs to subdirectories by any log property — perfect for multi-tenant apps.
 
 ```json
 "Sinks": {

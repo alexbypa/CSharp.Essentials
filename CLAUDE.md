@@ -54,7 +54,8 @@ CSharpEssentials.sln
 - Each package manages its own `Version` in its `.csproj`
 - Check at any change on code readme.md on https://github.com/alexbypa/CSharp.Essentials/blob/main/README.md
 - Check at any change on code documentazion on https://www.loggerhelper.com/
-
+- When i approve you change con code send me comment for commit with git !Il c
+ 
 ## Key Architecture Patterns
 
 ### Sink Plugin System

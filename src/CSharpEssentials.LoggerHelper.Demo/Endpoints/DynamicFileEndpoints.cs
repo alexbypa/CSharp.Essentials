@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 namespace CSharpEssentials.LoggerHelper.Demo.Endpoints;
 
 /// <summary>
-/// Test endpoints for the File sink's FileNameProperty feature (v5.1.0).
+/// Test endpoints for the File sink's FileNameProperty feature (v5.0.1).
 /// Logs are routed to subdirectories based on the "TenantId" property value.
 /// </summary>
 public class DynamicFileEndpoints : IEndpointDefinition {

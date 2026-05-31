@@ -55,7 +55,7 @@ builder.Services.AddLoggerHelper(b => b
 
 ---
 
-## Dynamic File Routing by Property (v5.1.0)
+## Dynamic File Routing by Property (v5.0.1)
 
 Route log files into **subdirectories** based on a log event property value. Perfect for multi-tenant apps, per-module separation, or any scenario where you need logs organized by a runtime value.
 
