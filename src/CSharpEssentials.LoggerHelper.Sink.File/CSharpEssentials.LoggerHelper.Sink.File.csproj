@@ -7,7 +7,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper File Sink — JSON rolling file logs with per-level routing</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>File sink for CSharpEssentials.LoggerHelper. JSON structured rolling file logs with per-level routing, configurable retention, and shared file access.</Description>
+    <Description>Never lose a log again. Automatic rolling JSON files with daily rotation and cleanup — just set the path and forget it.</Description>
     <Version>5.0.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>

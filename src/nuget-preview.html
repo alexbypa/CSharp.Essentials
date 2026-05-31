@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NuGet.org Preview — CSharpEssentials v5.0.0</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f5f5f5; color: #333; }
+  .header { background: #004880; color: #fff; padding: 12px 0; text-align: center; font-size: 14px; letter-spacing: .5px; }
+  .header span { opacity: .7; }
+  .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+  h1 { font-size: 22px; margin-bottom: 8px; color: #004880; }
+  .subtitle { color: #666; margin-bottom: 32px; font-size: 14px; }
+  .pkg-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 20px 24px; margin-bottom: 16px; display: flex; gap: 16px; transition: box-shadow .15s; }
+  .pkg-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.1); }
+  .pkg-icon { width: 64px; height: 64px; border-radius: 4px; flex-shrink: 0; background: #e8f0fe; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .pkg-icon img { width: 100%; height: 100%; object-fit: contain; }
+  .pkg-body { flex: 1; min-width: 0; }
+  .pkg-title { font-size: 16px; font-weight: 600; color: #0068b8; margin-bottom: 2px; text-decoration: none; }
+  .pkg-title:hover { text-decoration: underline; }
+  .pkg-by { font-size: 12px; color: #888; margin-bottom: 6px; }
+  .pkg-desc { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 8px; }
+  .pkg-meta { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: #666; }
+  .pkg-meta .badge { display: inline-flex; align-items: center; gap: 4px; background: #f0f0f0; padding: 2px 8px; border-radius: 3px; font-weight: 500; }
+  .pkg-meta .badge.version { background: #004880; color: #fff; }
+  .pkg-meta .badge.mit { background: #28a745; color: #fff; }
+  .pkg-meta .badge.fw { background: #6f42c1; color: #fff; }
+  .pkg-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .pkg-tags span { font-size: 11px; color: #0068b8; background: #e8f4fd; padding: 2px 7px; border-radius: 3px; }
+  .pkg-assets { display: flex; gap: 8px; margin-top: 6px; font-size: 11px; }
+  .pkg-assets .check { color: #28a745; font-weight: bold; }
+  .pkg-assets .miss { color: #dc3545; }
+  .section-title { font-size: 18px; margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #004880; color: #004880; }
+  .readme-preview { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 24px; margin-top: 16px; }
+  .readme-preview h2 { font-size: 16px; color: #004880; margin-bottom: 12px; }
+  .readme-preview .tab-bar { display: flex; gap: 0; border-bottom: 2px solid #e0e0e0; margin-bottom: 16px; }
+  .readme-preview .tab { padding: 8px 16px; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: #666; }
+  .readme-preview .tab.active { border-bottom-color: #004880; color: #004880; font-weight: 600; }
+  .readme-content { font-size: 13px; line-height: 1.7; color: #444; }
+  .readme-content code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+  .readme-content pre { background: #1e1e1e; color: #d4d4d4; padding: 12px 16px; border-radius: 4px; overflow-x: auto; font-size: 12px; line-height: 1.5; margin: 8px 0; }
+  .install-box { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 4px; padding: 10px 14px; margin: 12px 0; font-family: "Consolas", monospace; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+  .install-box .cmd { color: #333; }
+  .install-box .copy { background: #004880; color: #fff; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; }
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 20px 0; }
+  .summary-item { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 16px; text-align: center; }
+  .summary-item .num { font-size: 28px; font-weight: 700; color: #004880; }
+  .summary-item .label { font-size: 12px; color: #888; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <strong>NuGet.org Preview</strong> <span>— How your packages will appear on nuget.org</span>
+</div>
+
+<div class="container">
+
+<h1>CSharpEssentials v5.0.0 — Package Preview</h1>
+<p class="subtitle">11 packages ready for publishing. All include icon, README, license, and tags.</p>
+
+<div class="summary-grid">
+  <div class="summary-item"><div class="num">11</div><div class="label">Packages</div></div>
+  <div class="summary-item"><div class="num">v5.0.0</div><div class="label">Version</div></div>
+  <div class="summary-item"><div class="num">4</div><div class="label">Target Frameworks</div></div>
+  <div class="summary-item"><div class="num">MIT</div><div class="label">License</div></div>
+</div>
+
+<!-- ═══ CORE ═══ -->
+<div class="section-title">Core Package</div>
+
+<div class="pkg-card">
+  <div class="pkg-icon"><img src="../CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="icon"/></div>
+  <div class="pkg-body">
+    <a class="pkg-title">CSharpEssentials.LoggerHelper</a>
+    <div class="pkg-by">by Alessandro Chiodo</div>
+    <div class="pkg-desc">Structured logging and log-level routing for .NET. Orchestrate Serilog sinks with JSON — send errors to Email, info to Console, traces to Seq. Native ILogger&lt;T&gt;, multi-sink, OpenTelemetry, zero boilerplate.</div>
+    <div class="pkg-meta">
+      <span class="badge version">5.0.0</span>
+      <span class="badge mit">MIT</span>
+      <span class="badge fw">net6.0 | net8.0 | net9.0 | net10.0</span>
+    </div>
+    <div class="pkg-assets">
+      <span class="check">&#10003; Icon</span>
+      <span class="check">&#10003; README</span>
+      <span class="check">&#10003; License</span>
+      <span class="check">&#10003; Tags (18)</span>
+    </div>
+    <div class="pkg-tags">
+      <span>serilog</span><span>structured-logging</span><span>log-routing</span><span>multi-sink</span><span>ilogger</span><span>opentelemetry</span><span>observability</span><span>aspnetcore</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SINKS ═══ -->
+<div class="section-title">Sink Plugins (9)</div>
+
+<div class="pkg-card">
+  <div class="pkg-icon"><img src="../CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="icon"/></div>
+  <div class="pkg-body">
+    <a class="pkg-title">CSharpEssentials.LoggerHelper.Sink.Console</a>
+    <div class="pkg-by">by Alessandro Chiodo</div>
+    <div class="pkg-desc">Console sink for CSharpEssentials.LoggerHelper. Colored structured logging output with per-level routing support.</div>
+    <div class="pkg-meta">
+      <span class="badge version">5.0.0</span>
+      <span class="badge mit">MIT</span>
+      <span class="badge fw">net6.0 | net8.0 | net9.0 | net10.0</span>
+    </div>
+    <div class="pkg-assets"><span class="check">&#10003; Icon</span><span class="check">&#10003; README</span><span class="check">&#10003; License</span></div>
+    <div class="pkg-tags"><span>serilog</span><span>logging</span><span>console</span><span>sink</span><span>structured-logging</span></div>
+  </div>
+</div>
+
+<div class="pkg-card">
+  <div class="pkg-icon"><img src="../CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="icon"/></div>
+  <div class="pkg-body">
+    <a class="pkg-title">CSharpEssentials.LoggerHelper.Sink.File</a>
+    <div class="pkg-by">by Alessandro Chiodo</div>
+    <div class="pkg-desc">File sink for CSharpEssentials.LoggerHelper. JSON structured rolling file logs with per-level routing, configurable retention, and shared file access.</div>
+    <div class="pkg-meta">
+      <span class="badge version">5.0.0</span>
+      <span class="badge mit">MIT</span>
+      <span class="badge fw">net6.0 | net8.0 | net9.0 | net10.0</span>
+    </div>
+    <div class="pkg-assets"><span class="check">&#10003; Icon</span><span class="check">&#10003; README</span><span class="check">&#10003; License</span></div>
+    <div class="pkg-tags"><span>serilog</span><span>file</span><span>rolling-file</span><span>json-log</span><span>structured-logging</span></div>
+  </div>
+</div>
+
+<div class="pkg-card">
+  <div class="pkg-icon"><img src="../CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="icon"/></div>
+  <div class="pkg-body">
+    <a class="pkg-title">CSharpEssentials.LoggerHelper.Sink.Email</a>
+    <div class="pkg-by">by Alessandro Chiodo</div>
+    <div class="pkg-desc">Email sink for CSharpEssentials.LoggerHelper. Real-time critical alerts with full HTML template customization, configurable throttling, and secure SMTP (SSL/TLS) delivery.</div>
+    <div class="pkg-meta">
+      <span class="badge version">5.0.0</span>
+      <span class="badge mit">MIT</span>
+      <span class="badge fw">net6.0 | net8.0 | net9.0 | net10.0</span>
+    </div>
+    <div class="pkg-assets"><span class="check">&#10003; Icon</span><span class="check">&#10003; README</span><span class="check">&#10003; License</span></div>
+    <div class="pkg-tags"><span>serilog</span><span>email</span><span>smtp</span><span>alerts</span><span>monitoring</span></div>
+  </div>
+</div>
+
+<div class="pkg-card">
+  <div class="pkg-icon"><img src="../CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="icon"/></div>
+  <div class="pkg-body">
+    <a class="pkg-title">CSharpEssentials.LoggerHelper.Sink.Telegram</a>
+    <div class="pkg-by">by Alessandro Chiodo</div>
+    <div class="pkg-desc">Telegram sink for CSharpEssentials.LoggerHelper. Instant log notifications to Telegram chats with MarkdownV2 formatting, emoji-coded log levels, and configurable throttling.</div>
+    <div class="pkg-meta">
+      <span class="badge version">5.0.0</span>
+      <span class="badge mit">MIT</span>
+      <span class="badge fw">net6.0 | net8.0 | net9.0 | net10.0</span>
+    </div>
+    <div class="pkg-assets"><span class="check">&#10003; Icon</span><span class="check">&#10003; README</span><span class="check">&#10003; License</span></div>
+    <div class="pkg-tags"><span>serilog</span><span>telegram</span><span>bot</span><span>alerts</span><span>monitoring</span></div>
+  </div>
+</div>
+
+<div class="pkg-card">
+  <div class="pkg-icon"><img src="../CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="icon"/></div>
+  <div class="pkg-body">
+    <a class="pkg-title">CSharpEssentials.LoggerHelper.Sink.Elasticsearch</a>
+    <div class="pkg-by">by Alessandro Chiodo</div>
+    <div class="pkg-desc">Elasticsearch sink for CSharpEssentials.LoggerHelper. Index structured logs for fast search, filtering, and real-time Kibana dashboards with per-level routing.</div>
+    <div class="pkg-meta">
+      <span class="badge version">5.0.0</span>
+      <span class="badge mit">MIT</span>
+      <span class="badge fw">net6.0 | net8.0 | net9.0 | net10.0</span>
+    </div>
+    <div class="pkg-assets"><span class="check">&#10003; Icon</span><span class="check">&#10003; README</span><span class="check">&#10003; License</span></div>
+    <div class="pkg-tags"><span>serilog</span><span>elasticsearch</span><span>kibana</span><span>elk-stack</span><span>observability</span></div>
+  </div>
+</div>
+
+<div class="pkg-card">
+  <div class="pkg-icon"><img src="../CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="icon"/></div>
+  <div class="pkg-body">
+    <a class="pkg-title">CSharpEssentials.LoggerHelper.Sink.MSSqlServer</a>
+    <div class="pkg-by">by Alessandro Chiodo</div>
+    <div class="pkg-desc">SQL Server sink for CSharpEssentials.LoggerHelper. Log directly to Microsoft SQL Server with automatic table creation, custom columns, batching, and per-level routing.</div>
+    <div class="pkg-meta">
+      <span class="badge version">5.0.0</span>
+      <span class="badge mit">MIT</span>
+      <span class="badge fw">net6.0 | net8.0 | net9.0 | net10.0</span>
+    </div>
+    <div class="pkg-assets"><span class="check">&#10003; Icon</span><span class="check">&#10003; README</span><span class="check">&#10003; License</span></div>
+    <div class="pkg-tags"><span>serilog</span><span>mssql</span><span>sqlserver</span><span>database</span><span>observability</span></div>
+  </div>
+</div>
+
+<div class="pkg-card">
+  <div class="pkg-icon"><img src="../CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="icon"/></div>
+  <div class="pkg-body">
+    <a class="pkg-title">CSharpEssentials.LoggerHelper.Sink.Postgresql</a>
+    <div class="pkg-by">by Alessandro Chiodo</div>
+    <div class="pkg-desc">PostgreSQL sink for CSharpEssentials.LoggerHelper. Store structured logs in PostgreSQL with support for custom schemas, JSONB fields, automatic table creation, and per-level routing.</div>
+    <div class="pkg-meta">
+      <span class="badge version">5.0.0</span>
+      <span class="badge mit">MIT</span>
+      <span class="badge fw">net6.0 | net8.0 | net9.0 | net10.0</span>
+    </div>
+    <div class="pkg-assets"><span class="check">&#10003; Icon</span><span class="check">&#10003; README</span><span class="check">&#10003; License</span></div>
+    <div class="pkg-tags"><span>serilog</span><span>postgresql</span><span>database</span><span>jsonb</span><span>observability</span></div>
+  </div>
+</div>
+
+<div class="pkg-card">
+  <div class="pkg-icon"><img src="../CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="icon"/></div>
+  <div class="pkg-body">
+    <a class="pkg-title">CSharpEssentials.LoggerHelper.Sink.Seq</a>
+    <div class="pkg-by">by Alessandro Chiodo</div>
+    <div class="pkg-desc">Seq sink for CSharpEssentials.LoggerHelper. Ship structured logs to Seq for real-time search, filtering, dashboards, and alerting with per-level routing.</div>
+    <div class="pkg-meta">
+      <span class="badge version">5.0.0</span>
+      <span class="badge mit">MIT</span>
+      <span class="badge fw">net6.0 | net8.0 | net9.0 | net10.0</span>
+    </div>
+    <div class="pkg-assets"><span class="check">&#10003; Icon</span><span class="check">&#10003; README</span><span class="check">&#10003; License</span></div>
+    <div class="pkg-tags"><span>serilog</span><span>seq</span><span>dashboards</span><span>observability</span></div>
+  </div>
+</div>
+
+<div class="pkg-card">
+  <div class="pkg-icon"><img src="../CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="icon"/></div>
+  <div class="pkg-body">
+    <a class="pkg-title">CSharpEssentials.LoggerHelper.Sink.HangfireConsole</a>
+    <div class="pkg-by">by Alessandro Chiodo</div>
+    <div class="pkg-desc">Hangfire Console sink for CSharpEssentials.LoggerHelper. Writes structured logs directly to the Hangfire Dashboard during job execution with colored output and per-level routing support.</div>
+    <div class="pkg-meta">
+      <span class="badge version">5.0.0</span>
+      <span class="badge mit">MIT</span>
+      <span class="badge fw">net6.0 | net8.0 | net9.0 | net10.0</span>
+    </div>
+    <div class="pkg-assets"><span class="check">&#10003; Icon</span><span class="check">&#10003; README</span><span class="check">&#10003; License</span></div>
+    <div class="pkg-tags"><span>serilog</span><span>hangfire</span><span>console</span><span>dashboard</span><span>structured-logging</span></div>
+  </div>
+</div>
+
+<!-- ═══ COMPANION ═══ -->
+<div class="section-title">Companion Package</div>
+
+<div class="pkg-card">
+  <div class="pkg-icon"><img src="../CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="icon"/></div>
+  <div class="pkg-body">
+    <a class="pkg-title">CSharpEssentials.HttpHelper</a>
+    <div class="pkg-by">by Alessandro Chiodo</div>
+    <div class="pkg-desc">HttpClient helper with Polly retry, rate limiting, mock scenarios, and logging integration for .NET applications.</div>
+    <div class="pkg-meta">
+      <span class="badge version">5.0.0</span>
+      <span class="badge mit">MIT</span>
+      <span class="badge fw">net8.0 | net9.0</span>
+    </div>
+    <div class="pkg-assets"><span class="check">&#10003; Icon</span><span class="check">&#10003; README</span><span class="check">&#10003; License</span></div>
+    <div class="pkg-tags"><span>httpclient</span><span>polly</span><span>resilience</span><span>retry</span><span>rate-limiting</span></div>
+  </div>
+</div>
+
+<!-- ═══ README PREVIEW ═══ -->
+<div class="section-title">README Preview (shown on package page)</div>
+
+<div class="readme-preview">
+  <h2>CSharpEssentials.LoggerHelper — README tab on NuGet.org</h2>
+  <div class="readme-preview tab-bar">
+    <div class="tab active">README</div>
+    <div class="tab">Dependencies</div>
+    <div class="tab">Used By</div>
+    <div class="tab">Versions</div>
+  </div>
+  <div class="readme-content">
+    <h3 style="font-size:18px; margin-bottom:8px;">CSharpEssentials.LoggerHelper</h3>
+    <blockquote style="border-left:3px solid #004880; padding:4px 12px; color:#555; margin:8px 0;">
+      <strong>Route Serilog sinks by log level — zero boilerplate, native <code>ILogger&lt;T&gt;</code> support.</strong>
+    </blockquote>
+    <p style="margin:8px 0;">Install the NuGet, add 5 lines of JSON, and every <code>ILogger&lt;T&gt;</code> in your app automatically routes logs to Console, File, Email, Telegram, PostgreSQL, SQL Server, Elasticsearch, Seq, and Hangfire Console — each sink receiving only the levels you want.</p>
+    <pre>dotnet add package CSharpEssentials.LoggerHelper
+dotnet add package CSharpEssentials.LoggerHelper.Sink.Console
+dotnet add package CSharpEssentials.LoggerHelper.Sink.File</pre>
+    <h4 style="margin-top:16px;">Why LoggerHelper?</h4>
+    <table style="width:100%; border-collapse:collapse; font-size:12px; margin:8px 0;">
+      <tr style="background:#f0f0f0;"><th style="padding:6px 8px; text-align:left; border:1px solid #ddd;"></th><th style="padding:6px 8px; border:1px solid #ddd;">Serilog alone</th><th style="padding:6px 8px; border:1px solid #ddd;">NLog</th><th style="padding:6px 8px; border:1px solid #ddd; color:#004880;"><strong>LoggerHelper v5</strong></th></tr>
+      <tr><td style="padding:6px 8px; border:1px solid #ddd;">Per-level sink routing</td><td style="padding:6px 8px; border:1px solid #ddd; color:#888;">Manual per sink</td><td style="padding:6px 8px; border:1px solid #ddd; color:#888;">Via targets</td><td style="padding:6px 8px; border:1px solid #ddd; color:#28a745;"><strong>JSON / fluent — built-in</strong></td></tr>
+      <tr><td style="padding:6px 8px; border:1px solid #ddd;">ILogger&lt;T&gt; compatible</td><td style="padding:6px 8px; border:1px solid #ddd; color:#888;">Via bridge pkg</td><td style="padding:6px 8px; border:1px solid #ddd;">Native</td><td style="padding:6px 8px; border:1px solid #ddd; color:#28a745;"><strong>Native — zero code change</strong></td></tr>
+      <tr><td style="padding:6px 8px; border:1px solid #ddd;">Setup complexity</td><td style="padding:6px 8px; border:1px solid #ddd; color:#888;">15-30 lines</td><td style="padding:6px 8px; border:1px solid #ddd; color:#888;">XML + code</td><td style="padding:6px 8px; border:1px solid #ddd; color:#28a745;"><strong>5 lines</strong></td></tr>
+    </table>
+    <p style="color:#888; font-size:11px; margin-top:12px;">... continues with Quick Start, Available Sinks, Configuration, Benchmarks, etc.</p>
+  </div>
+</div>
+
+<div style="text-align:center; margin:32px 0; color:#888; font-size:12px;">
+  Preview generated from actual .nupkg metadata — this is how your packages will appear on nuget.org
+</div>
+
+</div>
+</body>
+</html>

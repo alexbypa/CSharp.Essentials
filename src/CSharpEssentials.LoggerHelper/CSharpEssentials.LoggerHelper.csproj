@@ -9,7 +9,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>CSharpEssentials.LoggerHelper — Route Serilog sinks by level with zero code</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Structured logging and log-level routing for .NET. Orchestrate Serilog sinks with JSON — send errors to Email, info to Console, traces to Seq. Native ILogger&lt;T&gt;, multi-sink, OpenTelemetry, zero boilerplate.</Description>
+    <Description>Stop wiring Serilog by hand. Add 3 lines of JSON and every ILogger&lt;T&gt; in your app routes logs where they belong — errors to Email, info to Console, traces to Seq. 9 sinks, zero boilerplate, works with your existing code.</Description>
     <Version>5.0.0</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>CSharpEssentials.png</PackageIcon>

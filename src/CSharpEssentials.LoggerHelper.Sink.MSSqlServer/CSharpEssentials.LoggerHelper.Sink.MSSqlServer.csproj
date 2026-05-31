@@ -7,7 +7,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper SQL Server Sink — Log to MSSQL with auto table creation</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>SQL Server sink for CSharpEssentials.LoggerHelper. Log directly to Microsoft SQL Server with automatic table creation, custom columns, batching, and per-level routing.</Description>
+    <Description>Query your logs with SQL. Auto-creates the table, batches the writes, and lets you JOIN logs with your business data — because sometimes grep isn't enough.</Description>
     <Version>5.0.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>

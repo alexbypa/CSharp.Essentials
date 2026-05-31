@@ -8,7 +8,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper Console Sink — Colored console output with per-level routing</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Console sink for CSharpEssentials.LoggerHelper. Colored structured logging output with per-level routing support.</Description>
+    <Description>See your logs in color, instantly. Add Console to your LoggerHelper routes and get beautiful, readable output — only the levels you care about.</Description>
     <Version>5.0.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>

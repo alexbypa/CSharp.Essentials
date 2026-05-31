@@ -7,7 +7,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper Email Sink — HTML email alerts with throttling and templates</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Email sink for CSharpEssentials.LoggerHelper. Real-time critical alerts with full HTML template customization, configurable throttling, and secure SMTP (SSL/TLS) delivery.</Description>
+    <Description>Get emailed when it matters. Critical errors land in your inbox as beautiful HTML alerts — with smart throttling so you never get flooded.</Description>
     <Version>5.0.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>

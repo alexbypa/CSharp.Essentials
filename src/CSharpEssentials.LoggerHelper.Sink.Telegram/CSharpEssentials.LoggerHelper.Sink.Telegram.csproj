@@ -7,7 +7,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper Telegram Sink — Instant log notifications via Telegram Bot</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Telegram sink for CSharpEssentials.LoggerHelper. Instant log notifications to Telegram chats with MarkdownV2 formatting, emoji-coded log levels, and configurable throttling.</Description>
+    <Description>Know about errors before your users do. Instant Telegram alerts on your phone with emoji-coded severity — because email is too slow for production fires.</Description>
     <Version>5.0.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>

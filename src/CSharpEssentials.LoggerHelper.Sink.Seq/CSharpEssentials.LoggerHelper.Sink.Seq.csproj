@@ -7,7 +7,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper Seq Sink — Ship structured logs to Seq for search and analysis</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Seq sink for CSharpEssentials.LoggerHelper. Ship structured logs to Seq for real-time search, filtering, dashboards, and alerting with per-level routing.</Description>
+    <Description>Structured logs deserve a structured viewer. Ship to Seq and get instant search, live tail, dashboards, and alerts — the way .NET logging was meant to be.</Description>
     <Version>5.0.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>

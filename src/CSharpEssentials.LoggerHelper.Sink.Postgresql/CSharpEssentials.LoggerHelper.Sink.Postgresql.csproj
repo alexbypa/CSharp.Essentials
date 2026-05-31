@@ -7,7 +7,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper PostgreSQL Sink — Store structured logs with JSON fields and auto table creation</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>PostgreSQL sink for CSharpEssentials.LoggerHelper. Store structured logs in PostgreSQL with support for custom schemas, JSONB fields, automatic table creation, and per-level routing.</Description>
+    <Description>Logs meet PostgreSQL. JSONB fields you can query, auto-created tables, and the full power of SQL — perfect for teams already running Postgres.</Description>
     <Version>5.0.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
