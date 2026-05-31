@@ -426,7 +426,3 @@ yarn-error.log*
 # Altri file temporanei o di sistema
 .DS_Store
 Thumbs.db
-
-CLAUDE.md
-GEMINI.md
-/.claude

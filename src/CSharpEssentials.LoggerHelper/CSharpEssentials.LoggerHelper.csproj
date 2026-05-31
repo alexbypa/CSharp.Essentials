@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
-    <None Include="..\..\CSharpEssentials.LoggerHelper\img\CSharpEssentials.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\img\CSharpEssentials.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <PropertyGroup>

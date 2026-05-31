@@ -12,6 +12,7 @@ builder.Services.AddSingleton<IEndpointDefinition, TraceApiEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, CustomPropertiesEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, RoutingDemoEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, DiagnosticsEndpoints>();
+builder.Services.AddSingleton<IEndpointDefinition, DynamicFileEndpoints>();
 
 var app = builder.Build();
 

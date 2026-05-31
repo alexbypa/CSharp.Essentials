@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="CSharpEssentials Logo" width="120" />
+  <img src="img/CSharpEssentials.png" alt="CSharpEssentials Logo" width="120" />
 </p>
 
 <h1 align="center">CSharpEssentials</h1>
@@ -212,13 +212,15 @@ No configuration required — just add the route.
 
 ### File
 
-Rolling JSON log files with configurable retention.
+Rolling JSON log files with configurable retention. **v5.1.0**: route logs to subdirectories by any log property — perfect for multi-tenant apps.
 
 ```json
 "Sinks": {
-  "File": { "Path": "Logs", "RollingInterval": "Day", "RetainedFileCountLimit": 7 }
+  "File": { "Path": "Logs", "RollingInterval": "Day", "FileNameProperty": "TenantId" }
 }
 ```
+
+Logs with `TenantId = "acme"` go to `Logs/acme/log-.txt`. Logs without the property go to `Logs/log-.txt`.
 
 ### Email
 

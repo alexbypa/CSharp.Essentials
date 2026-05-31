@@ -288,10 +288,11 @@ builder.Services.<span class="method">AddLoggerHelper</span>(b => b
                     <button class="copy-btn" data-copy="#sink-file">Copy</button>
                 </div>
                 <pre id="sink-file"><span class="cmt">// dotnet add package CSharpEssentials.LoggerHelper.Sink.File</span>
+<span class="cmt">// v5.1.0: FileNameProperty routes to subdirectories per tenant/module</span>
 builder.Services.<span class="method">AddLoggerHelper</span>(b => b
     .<span class="method">WithApplicationName</span>(<span class="str">"MyApp"</span>)
     .<span class="method">AddRoute</span>(<span class="str">"File"</span>, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
-    .<span class="method">ConfigureFile</span>(f => f.Path = <span class="str">"logs/app-.json"</span>)
+    .<span class="method">ConfigureFile</span>(f => { f.Path = <span class="str">"Logs"</span>; f.FileNameProperty = <span class="str">"TenantId"</span>; })
 );</pre>
             </div>
         </div>

@@ -2,7 +2,9 @@
 
 ## Project Overview
 
-**CSharp.Essentials** is a modular NuGet package ecosystem providing infrastructure and utility libraries for .NET applications. The core offering is a centralized Serilog-based logging hub (`LoggerHelper`) with pluggable sinks, plus companion libraries for HTTP, encryption, serialization, reCAPTCHA, and HangFire.
+**CSharp.Essentials** is a modular NuGet package ecosystem providing infrastructure and utility libraries for .NET applications. 
+The core offering is a centralized Serilog-based logging hub (`LoggerHelper`) with pluggable sinks, plus companion libraries for HTTP, encryption, serialization, reCAPTCHA, and HangFire.
+**Documetation"" La documentazione si trova sulla cartella D:\Project_Pixelo\CSharp.Essentials\docs\site e in remoto su 
 
 - **Author:** Alessandro Chiodo
 - **Architecture:** Modular library (per-package isolation, shared conventions)
@@ -10,33 +12,11 @@
 - **License:** MIT
 
 ## Obiettivo Principale
-**IMPORTANTE** Bisogna prendere di buono quello che c'è nella cartella principale per quello che riguarda CSharpEssentials.LoggerHelper e tutti i suoi sink e portarli sulla cartella src
 **Target:** Raggiungere almeno 1000 download giornalieri di `CSharpEssentials.LoggerHelper` su nuget.org entro 2 mesi, posizionandolo come una delle principali soluzioni di logging nella community .NET.
 **Code base** Devono essere rispettati i principi SOLID, Clean Code, e le best practice di .NET. Il codice deve essere modulare, testabile, e facilmente estendibile con nuovi sink o funzionalità.
-**Focus:** Solo `LoggerHelper` + sink + HttpHelper. Le altre librerie sono fuori scope per ora.
-
+**Memory leak"" Zero problemi di memory leak 
 
 ### Piano di Esecuzione
-
-#### Fase 0 — Analisi Competitiva
-Prima del rewrite, analizzare i top 10 pacchetti di logging su NuGet (download, API design, features, punti deboli). Identificare il gap nel mercato e posizionare LoggerHelper su quel gap come differenziatore.
-
-#### Fase 1 — Rewrite del Core LoggerHelper
-Creare un progetto LoggerHelper nuovo prendendo il meglio dall'originale, con queste migliorie:
-- **JSON-first con Fluent minimale** — Il differenziatore e' la config JSON declarativa "zero code" (installi il NuGet, aggiungi JSON, funziona). L'API fluent (`AddRoute`, `ConfigureSink<T>`) esiste come complemento, non come feature primaria. Non hard-codare nomi di sink nel core per rispettare OCP
-- **Compatibilita `ILogger<T>`** — Integrazione nativa con `Microsoft.Extensions.Logging` come provider. Chi gia usa `ILogger<T>` adotta LoggerHelper senza cambiare codice
-- **Source Generator** — Sostituire il runtime reflection per il caricamento sink con source generator: piu veloce, AOT-compatible, trimming-safe. Differenziatore forte vs concorrenza
-- **Benchmark pubblicati** — Comparazioni misurate vs Serilog puro, NLog, etc. con BenchmarkDotNet
-
-#### Fase 2 — Rewrite dei Sink
-Rifare i sink seguendo la nuova architettura del core, mantenendo la modularita per-package.
-
-#### Fase 3 — Sito Frontend Promozionale
-Creare un sito accattivante con:
-- **Playground interattivo** — Mini-editor online dove provare la configurazione JSON e vedere i log in tempo reale ("Try LoggerHelper")
-- **"Copy-paste ready" snippets** — Per ogni sink, uno snippet di 5 righe che funziona subito
-- **Integration guides** — Guide specifiche per scenari comuni: "LoggerHelper + Minimal API", "LoggerHelper + Blazor", "LoggerHelper + Azure App Service", "LoggerHelper + Docker"
-- Demo dal vivo, documentazione completa, getting started in 30 secondi
 
 #### Fase 4 — Marketing e SEO
 - **SEO NuGet** — Ottimizzare Description e Tags dei pacchetti con keyword piu cercate: "structured logging", "log routing", "multi-sink logging", "log level routing"
@@ -48,17 +28,11 @@ Creare un sito accattivante con:
 
 ## Solution Structure
 
-```si
+```markdown
 CSharpEssentials.sln
 |
 |-- Core Libraries
 |   |-- CSharpEssentials.LoggerHelper          (Serilog hub, plugin registry, middleware)
-|   |-- CSharpEssentials.HttpHelper            (HttpClient + Polly resilience)
-|   |-- CSharpEssentials.EncryptHelper         (Encryption utilities)
-|   |-- CSharpEssentials.SerializerHelper      (Serialization helpers)
-|   |-- CSharpEssentials.RecaptchaHelper       (reCAPTCHA integration)
-|   |-- CSharpEssentials.HangFireHelper        (HangFire utilities)
-|   |-- CSharpEssentials.HttpContextHelper     (HttpContext helpers)
 |
 |-- Sink Plugins (each a separate NuGet)
 |   |-- CSharpEssentials.LoggerHelper.Sink.Console
@@ -69,56 +43,17 @@ CSharpEssentials.sln
 |   |-- CSharpEssentials.LoggerHelper.Sink.MSSqlServer
 |   |-- CSharpEssentials.LoggerHelper.Sink.Postgresql
 |   |-- CSharpEssentials.LoggerHelper.Sink.Seq
+|   |-- CSharpEssentials.LoggerHelper.Sink.CSharpEssentials.LoggerHelper.Sink.HangfireConsole
 |
-|-- Extensions
-|   |-- CSharpEssentials.LoggerHelper.Telemetry    (OpenTelemetry integration)
-|   |-- CSharpEssentials.LoggerHelper.Dashboard    (Interactive log dashboard)
-|   |-- CSharpEssentials.LoggerHelper.AI           (NL queries, anomaly detection)
-|   |-- CSharpEssentials.LoggerHelper.xUnit        (Test output sink)
-|
-|-- Demo / Test
-|   |-- LoggerHelperDemo/                          (Demo web app)
-|   |-- LoggerHelperDemo.Tests/                    (xUnit integration tests)
-|   |-- Test6.0/, Test8.0/                         (Framework-specific test apps)
-|   |-- CSharpEssentials.TestWebApi/               (Test web API)
-```
-
-## Target Frameworks
-
-Each package defines its own target framework(s). There is no global `Directory.Build.props`:
-
-| Package | Targets |
-|---|---|
-| LoggerHelper (core) | net6.0, net8.0, net9.0, net10.0 |
-| Most Sink plugins | net6.0, net8.0, net9.0 |
-| HttpHelper | net8.0, net9.0 |
-| EncryptHelper | net8.0 |
-| LoggerHelper.xUnit | net8.0, net9.0 |
-
-Do NOT change target frameworks without explicit request.
-
-## Build Commands
-
-```bash
-# Build entire solution
-dotnet build CSharpEssentials.sln
-
-# Build a specific project
-dotnet build CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj
-
-# Pack a specific project
-dotnet pack CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj -c Release
-
-# Run tests
-dotnet test LoggerHelperDemo.Tests/LoggerHelperDemo.Tests.csproj
-```
 
 ## NuGet Packaging
 
 - All library projects have `GeneratePackageOnBuild=True`
-- Local package output paths vary per project (e.g., `D:\Nuget`, `D:\github\alexbypa\FlowScheduler\LocalNuget`)
+- Local package output paths vary per project `C:\Nuget`
 - CI publishes the core LoggerHelper to nuget.org via GitHub Actions (`.github/workflows/publish.yml`)
 - Each package manages its own `Version` in its `.csproj`
+- Check at any change on code readme.md on https://github.com/alexbypa/CSharp.Essentials/blob/main/README.md
+- Check at any change on code documentazion on https://www.loggerhelper.com/
 
 ## Key Architecture Patterns
 
@@ -152,7 +87,7 @@ The core `LoggerHelper` uses a plugin architecture for sinks:
 
 ## Testing
 
-- **Framework:** xUnit v2 with Moq
+- **Framework:** .Net 10.0 xUnit v2 with Moq
 - **Test project:** `LoggerHelperDemo.Tests` (integration tests against LoggerHelperDemo)
 - **Additional:** `CSharpEssentials.LoggerHelper.xUnit` is a *sink package* (not a test project) that forwards logs to xUnit test output
 - **Coverage:** coverlet.collector

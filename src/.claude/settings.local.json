@@ -16,7 +16,10 @@
       "mcp__playwright__browser_navigate",
       "Bash(python:*)",
       "mcp__playwright__browser_take_screenshot",
-      "WebFetch(domain:www.loggerhelper.com)"
+      "WebFetch(domain:www.loggerhelper.com)",
+      "Bash(find:*)",
+      "Bash(taskkill //F //IM \"CSharpEssentials.LoggerHelper.Demo.exe\")",
+      "Bash(tasklist)"
     ]
   }
 }
