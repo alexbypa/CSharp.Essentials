@@ -61,7 +61,9 @@ public static class HangfireConsoleServiceCollectionExtensions {
     /// Chiamare questo metodo in fase di startup per abilitare il sink HangfireConsole.
     /// </summary>
     public static IServiceCollection AddHangfireConsoleSink(this IServiceCollection services) {
-        services.AddSingleton<IPerformContextAccessor, PerformContextAccessor>();
+        var accessor = new PerformContextAccessor();
+        services.AddSingleton<IPerformContextAccessor>(accessor);
+        HangfireConsoleSinkAccessorHolder.Accessor = accessor;
         return services;
     }
 }
