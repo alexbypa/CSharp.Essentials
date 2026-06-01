@@ -10,7 +10,7 @@ The core offering is a centralized Serilog-based logging hub (`LoggerHelper`) wi
 - **Architecture:** Modular library (per-package isolation, shared conventions)
 - **Repository:** https://github.com/alexbypa/CSharp.Essentials
 - **License:** MIT
-- **Current Version:** 5.0.1 (unified across all 11 packages)
+- **Current Version:** 5.0.2 (unified across all 11 packages)
 - **PackageProjectUrl:** https://www.loggerhelper.com (all packages)
 
 ## Obiettivo Principale
