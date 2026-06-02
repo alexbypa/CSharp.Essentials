@@ -9,7 +9,7 @@
     <Title>LoggerHelper HangfireConsole Sink — Write logs to the Hangfire Dashboard console</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>Watch your background jobs log in real time. Colored output right on the Hangfire Dashboard — no more guessing what your jobs are doing. New in 5.0.2: Fixed critical bug where AddHangfireConsoleSink() did not wire the internal accessor, causing the sink to silently skip all log events.</Description>
-    <Version>5.0.2</Version>
+    <Version>5.0.3</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>

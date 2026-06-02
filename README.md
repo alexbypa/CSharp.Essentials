@@ -1,35 +1,24 @@
 <p align="center">
-  <img src="https://github.com/alexbypa/CSharp.Essentials/blob/main/img/CSharpEssentials.png" alt="CSharpEssentials.LoggerHelper Logo" width="140" />
+  <img src="img/CSharpEssentials.png" alt="CSharpEssentials Logo" width="120" />
 </p>
 
-<h1 align="center">CSharpEssentials.LoggerHelper</h1>
+<h1 align="center">CSharpEssentials</h1>
 
 <p align="center">
-  <strong>Route every Serilog sink by log level — zero boilerplate, native <code>ILogger&lt;T&gt;</code>, one JSON file.</strong>
+  <strong>Route Serilog sinks by log level — zero boilerplate, native <code>ILogger&lt;T&gt;</code></strong>
 </p>
 
 <p align="center">
-  <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper">
-    <img src="https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg?label=NuGet&color=blue&logo=nuget" alt="NuGet Version" />
-  </a>
-  <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper">
-    <img src="https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg?label=downloads&color=brightgreen" alt="NuGet Downloads" />
-  </a>
-  <img src="https://img.shields.io/badge/.NET-6%20%7C%208%20%7C%209%20%7C%2010-512BD4?logo=dotnet" alt=".NET Versions" />
-  <a href="LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License" />
-  </a>
-  <a href="https://github.com/alexbypa/CSharp.Essentials/commits/main">
-    <img src="https://img.shields.io/github/last-commit/alexbypa/CSharp.Essentials?color=blue" alt="Last Commit" />
-  </a>
-  <a href="https://www.loggerhelper.com">
-    <img src="https://img.shields.io/badge/docs-loggerhelper.com-blue" alt="Documentation" />
-  </a>
+  <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper"><img src="https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg?label=LoggerHelper&color=blue" alt="NuGet Version" /></a>
+  <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper"><img src="https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg?label=downloads&color=green" alt="NuGet Downloads" /></a>
+  <img src="https://img.shields.io/badge/.NET-6.0%20%7C%208.0%20%7C%209.0%20%7C%2010.0-blue?logo=dotnet" alt=".NET Versions" />
+  <a href="https://github.com/alexbypa/CSharp.Essentials/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
+  <a href="https://github.com/alexbypa/CSharp.Essentials/commits/main"><img src="https://img.shields.io/github/last-commit/alexbypa/CSharp.Essentials" alt="Last Commit" /></a>
 </p>
 
 ---
 
-> **Not another logging framework.** LoggerHelper is a **Serilog orchestrator** that plugs in as a native `ILogger<T>` provider and routes each log level to exactly the sinks you want — using only a JSON file. Your application code doesn't change. Your logging configuration becomes declarative, portable, and readable by anyone on the team.
+Install the NuGet, add a few lines of JSON or fluent C#, and every `ILogger<T>` in your app automatically routes logs to **Console**, **File**, **Email**, **Telegram**, **Elasticsearch**, **SQL Server**, **PostgreSQL**, **Seq**, and **Hangfire Console** — each sink receiving only the log levels you choose.
 
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper
@@ -41,191 +30,67 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 
 ## Table of Contents
 
-- [The Boilerplate Problem](#-the-boilerplate-problem)
 - [Packages](#-packages)
 - [Quick Start](#-quick-start--30-seconds)
 - [Feature Highlights](#-feature-highlights)
 - [Sink Overview](#-sink-overview)
-- [Comparison](#-comparison-vs-pure-serilog--nlog)
-- [Performance](#-performance)
+- [Comparison](#-comparison)
 - [Coming Soon](#-coming-soon)
 - [Architecture](#-architecture)
 - [Documentation & Links](#-documentation--links)
 
 ---
 
-## The Boilerplate Problem
-
-Every team that uses Serilog in production ends up writing the same 40-line `Program.cs` setup block. It works — but it accumulates over time into a maintenance burden: hardcoded log levels, duplicated filter expressions, conditional `#if DEBUG` blocks, and zero visibility into what is routing where.
-
-### Before — Pure Serilog (typical production setup)
-
-```csharp
-// Program.cs — 40+ lines, fragile, hard to read at a glance
-
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-    .MinimumLevel.Override("System", LogEventLevel.Warning)
-    .Enrich.FromLogContext()
-    .Enrich.WithMachineName()
-    .Enrich.WithEnvironmentName()
-    .WriteTo.Logger(lc => lc
-        .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Information || e.Level == LogEventLevel.Warning)
-        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"))
-    .WriteTo.Logger(lc => lc
-        .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Warning)
-        .WriteTo.File("Logs/app-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7))
-    .WriteTo.Logger(lc => lc
-        .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Error)
-        .WriteTo.Email(new EmailConnectionInfo {
-            FromEmail = "alerts@myapp.com",
-            ToEmail = "ops@myapp.com",
-            MailServer = "smtp.myapp.com",
-            Port = 587,
-            EmailSubject = "Application Error"
-        }))
-    .WriteTo.Logger(lc => lc
-        .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Error)
-        .WriteTo.Telegram(botToken: "...", chatId: "..."))
-    .CreateLogger();
-
-builder.Host.UseSerilog();
-// + request/response logging: another 15-20 lines
-```
-
-### After — LoggerHelper v5 (the same setup)
-
-**`Program.cs`** — 2 lines, forever.
-```csharp
-builder.Services.AddLoggerHelper(builder.Configuration);
-app.UseLoggerHelper();
-```
-
-**`appsettings.LoggerHelper.json`** — declarative, diff-friendly, portable.
-```json
-{
-  "LoggerHelper": {
-    "ApplicationName": "MyApp",
-    "Routes": [
-      { "Sink": "Console",  "Levels": ["Information", "Warning"] },
-      { "Sink": "File",     "Levels": ["Information", "Warning", "Error", "Fatal"] },
-      { "Sink": "Email",    "Levels": ["Error", "Fatal"] },
-      { "Sink": "Telegram", "Levels": ["Error", "Fatal"] }
-    ],
-    "Sinks": {
-      "File":     { "Path": "Logs", "RollingInterval": "Day", "RetainedFileCountLimit": 7 },
-      "Email":    { "From": "alerts@myapp.com", "To": "ops@myapp.com", "Host": "smtp.myapp.com", "Port": 587 },
-      "Telegram": { "BotToken": "123:ABC...", "ChatId": "-100..." }
-    },
-    "General": { "EnableRequestResponseLogging": true }
-  }
-}
-```
-
-That's the entire setup. **Every `ILogger<T>` in your application routes automatically.** No code changes to your services, no filter expressions, no sub-loggers.
-
----
-
 ## Packages
 
-| Package | Description | NuGet |
-|---------|-------------|-------|
-| [`CSharpEssentials.LoggerHelper`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | Core routing engine · `ILogger<T>` provider · JSON & Fluent API | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg?color=blue)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) |
-| [`...Sink.Console`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console) | Colored console · per-level themes | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Console.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console) |
-| [`...Sink.File`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.File) | Rolling JSON files · configurable retention | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.File.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.File) |
-| [`...Sink.Email`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Email) | SMTP alerts · HTML templates · throttling | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Email.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Email) |
-| [`...Sink.Telegram`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Telegram) | Bot notifications · MarkdownV2 · throttling | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Telegram.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Telegram) |
-| [`...Sink.Elasticsearch`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Elasticsearch) | Elasticsearch / OpenSearch indexing · Kibana-ready | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Elasticsearch.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Elasticsearch) |
-| [`...Sink.MSSqlServer`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) | SQL Server · auto table creation · custom columns | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) |
-| [`...Sink.Postgresql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) | PostgreSQL · JSONB columns · custom schema | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Postgresql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) |
-| [`...Sink.Seq`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) | Seq centralized log server · search & alerting | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Seq.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) |
-| [`...Sink.HangfireConsole`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | Structured logs in Hangfire Dashboard · colored output | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) |
-| [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience · rate limiting · structured logging | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
+| Package | Description | Version |
+|---------|-------------|---------|
+| [`CSharpEssentials.LoggerHelper`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | Core routing engine, `ILogger<T>` bridge, JSON/fluent config | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg) |
+| [`...Sink.Console`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console) | Colored console output, per-level themes | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Console.svg) |
+| [`...Sink.File`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.File) | Rolling JSON files, configurable retention | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.File.svg) |
+| [`...Sink.Email`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Email) | SMTP alerts, HTML templates, throttling | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Email.svg) |
+| [`...Sink.Telegram`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Telegram) | Bot notifications, MarkdownV2, throttling | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Telegram.svg) |
+| [`...Sink.Elasticsearch`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Elasticsearch) | Elasticsearch/OpenSearch indexing, Kibana | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Elasticsearch.svg) |
+| [`...Sink.MSSqlServer`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) | SQL Server, auto table creation, custom columns | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.svg) |
+| [`...Sink.Postgresql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) | PostgreSQL, JSONB fields, custom schema | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Postgresql.svg) |
+| [`...Sink.Seq`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) | Seq centralized log server | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Seq.svg) |
+| [`...Sink.HangfireConsole`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | Hangfire Dashboard console with colored output | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg) |
+| [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting | ![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg) |
 
 ---
 
 ## Quick Start — 30 Seconds
 
-### Option A — JSON config (recommended for teams)
+### Option A — JSON config (recommended)
 
-**Step 1.** Install the core and the sinks you need:
-
-```bash
-dotnet add package CSharpEssentials.LoggerHelper
-dotnet add package CSharpEssentials.LoggerHelper.Sink.Console
-dotnet add package CSharpEssentials.LoggerHelper.Sink.File
-# add more sinks as needed — each is independent
-```
-
-**Step 2.** Register in `Program.cs` — 2 lines:
-
+**`Program.cs`**
 ```csharp
 builder.Services.AddLoggerHelper(builder.Configuration);
 app.UseLoggerHelper();
 ```
 
-**Step 3.** Create `appsettings.LoggerHelper.json`:
-
+**`appsettings.LoggerHelper.json`**
 ```json
 {
   "LoggerHelper": {
     "ApplicationName": "MyApp",
     "Routes": [
-      { "Sink": "Console", "Levels": ["Debug", "Information", "Warning"] },
-      { "Sink": "File",    "Levels": ["Information", "Warning", "Error", "Fatal"] }
+      { "Sink": "Console", "Levels": ["Information", "Warning"] },
+      { "Sink": "File",    "Levels": ["Information", "Warning", "Error", "Fatal"] },
+      { "Sink": "Email",   "Levels": ["Error", "Fatal"] }
     ],
     "Sinks": {
-      "File": { "Path": "Logs", "RollingInterval": "Day", "RetainedFileCountLimit": 30 }
+      "File":  { "Path": "Logs", "RollingInterval": "Day" },
+      "Email": { "To": "ops@example.com", "Host": "smtp.example.com", "Port": 587 }
     },
     "General": { "EnableRequestResponseLogging": true }
   }
 }
 ```
 
-**Step 4.** Use `ILogger<T>` exactly as before — nothing changes in your services:
+That's it. Every `ILogger<T>` in your app now routes through LoggerHelper.
 
-```csharp
-public class OrderService(ILogger<OrderService> logger)
-{
-    public async Task ProcessAsync(int orderId)
-    {
-        logger.LogInformation("Processing order {OrderId}", orderId);  // → Console + File
-        logger.LogError("Payment failed for {OrderId}", orderId);      // → File only
-    }
-}
-```
-
-### Option B — Add an advanced sink (Email alerts for errors)
-
-```bash
-dotnet add package CSharpEssentials.LoggerHelper.Sink.Email
-```
-
-Add to your JSON — no other code changes:
-
-```json
-{
-  "LoggerHelper": {
-    "Routes": [
-      { "Sink": "Console", "Levels": ["Debug", "Information", "Warning"] },
-      { "Sink": "File",    "Levels": ["Information", "Warning", "Error", "Fatal"] },
-      { "Sink": "Email",   "Levels": ["Error", "Fatal"] }
-    ],
-    "Sinks": {
-      "File":  { "Path": "Logs", "RollingInterval": "Day" },
-      "Email": {
-        "From": "alerts@myapp.com", "To": "ops@myapp.com",
-        "Host": "smtp.gmail.com",   "Port": 587,
-        "Username": "alerts@myapp.com", "Password": "app-password",
-        "ThrottleInterval": "00:05:00"
-      }
-    }
-  }
-}
-```
-
-### Option C — Fluent API (for programmatic or test setups)
+### Option B — Fluent API
 
 ```csharp
 builder.Services.AddLoggerHelper(b => b
@@ -233,16 +98,16 @@ builder.Services.AddLoggerHelper(b => b
     .AddRoute("Console", LogEventLevel.Information, LogEventLevel.Warning)
     .AddRoute("File",    LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
     .AddRoute("Email",   LogEventLevel.Error, LogEventLevel.Fatal)
-    .ConfigureFile(f  => { f.Path = "Logs"; f.RollingInterval = "Day"; })
-    .ConfigureEmail(e => { e.To = "ops@myapp.com"; e.Host = "smtp.myapp.com"; })
+    .ConfigureFile(f => { f.Path = "Logs"; f.RollingInterval = "Day"; })
+    .ConfigureEmail(e => { e.To = "ops@example.com"; e.Host = "smtp.example.com"; })
     .EnableRequestResponseLogging()
 );
 ```
 
-### Option D — JSON + Fluent merge (for per-environment overrides)
+### Option C — JSON + fluent merge
 
 ```csharp
-// JSON holds shared production config.
+// JSON defines shared config across environments.
 // Fluent adds Development-only extras without touching JSON.
 builder.Services.AddLoggerHelper(builder.Configuration, b => b
     .AddRoute("Console", LogEventLevel.Debug)
@@ -253,9 +118,9 @@ builder.Services.AddLoggerHelper(builder.Configuration, b => b
 
 ## Feature Highlights
 
-### Per-Level Sink Routing — Declarative
+### Per-Level Sink Routing
 
-The core differentiator: each sink receives **only the log levels you assign to it**, declared in JSON without sub-loggers, filter expressions, or conditional code.
+Send different log levels to different destinations — declaratively:
 
 ```json
 "Routes": [
@@ -269,22 +134,20 @@ The core differentiator: each sink receives **only the log levels you assign to 
 
 ### Native `ILogger<T>` — Zero Code Changes
 
-LoggerHelper registers as a standard `Microsoft.Extensions.Logging` provider. If your app already uses `ILogger<T>`, **you change nothing in your services**:
+If your app already uses `ILogger<T>`, you change **nothing**. LoggerHelper plugs in as a standard `ILoggerProvider`:
 
 ```csharp
-public class PaymentService(ILogger<PaymentService> logger)
-{
-    public void Charge(decimal amount)
-    {
-        logger.LogInformation("Charging {Amount:C}", amount);   // → Console + File
-        logger.LogError("Charge declined for {Amount:C}", amount); // → File + Email + Telegram
+public class OrderService(ILogger<OrderService> logger) {
+    public void Process(int orderId) {
+        logger.LogInformation("Processing order {OrderId}", orderId);  // -> Console + File
+        logger.LogError("Payment failed for {OrderId}", orderId);      // -> File + Email
     }
 }
 ```
 
-Named message template parameters (`{Amount}`) are preserved as structured Serilog properties — never flattened into strings.
+Named parameters like `{OrderId}` are preserved as structured Serilog properties — not flattened into strings.
 
-### `BeginScope` — Context That Travels
+### BeginScope — Context That Travels
 
 ```csharp
 using (_logger.BeginScope(new Dictionary<string, object?> {
@@ -292,37 +155,36 @@ using (_logger.BeginScope(new Dictionary<string, object?> {
     ["UserId"]  = userId
 }))
 {
-    _logger.LogInformation("Validation started");   // OrderId + UserId on every event
-    await ValidateStock();                           // propagated into called methods too
-    _logger.LogInformation("Order confirmed");
+    _logger.LogInformation("Validation started");   // OrderId + UserId attached
+    await ValidateStock();                           // logs inside also carry them
+    _logger.LogInformation("Order confirmed");       // OrderId + UserId attached
 }
 ```
 
 ### Automatic Enrichment
 
-Every log event carries these properties with no configuration:
+Every log event automatically carries:
 
-| Property | Value |
-|----------|-------|
-| `ApplicationName` | From config or `WithApplicationName()` |
+| Property | Source |
+|----------|--------|
+| `ApplicationName` | Config / `WithApplicationName()` |
 | `MachineName` | `Environment.MachineName` |
 | `SourceContext` | Class name from `ILogger<T>` |
-| `TraceId` / `SpanId` | `System.Diagnostics.Activity` (OpenTelemetry-compatible) |
+| `TraceId` / `SpanId` | `System.Diagnostics.Activity` (OpenTelemetry) |
 
-### Internal Diagnostics — Resilient by Default
+### Internal Diagnostics
 
-If a sink fails (wrong connection string, unreachable SMTP, network timeout), **your app keeps running**. Failures are captured in an injectable store you can expose on a health endpoint:
+If a sink fails (wrong connection string, unreachable SMTP), your app keeps running. Errors are captured silently:
 
 ```csharp
 app.MapGet("/health/logging", (ILogErrorStore errors) =>
     errors.Count == 0
         ? Results.Ok("All sinks healthy")
-        : Results.Problem(string.Join("\n", errors.GetAll()
-            .Select(e => $"{e.SinkName}: {e.ErrorMessage}")))
+        : Results.Problem(string.Join("\n", errors.GetAll().Select(e => $"{e.SinkName}: {e.ErrorMessage}")))
 );
 ```
 
-### Request/Response Logging — One Setting
+### Request/Response Logging Middleware
 
 ```json
 "General": { "EnableRequestResponseLogging": true }
@@ -331,38 +193,44 @@ app.MapGet("/health/logging", (ILogErrorStore errors) =>
 app.UseLoggerHelper();
 ```
 
-Full HTTP request/response logging with correlation IDs, timing, and structured JSON output — in two lines.
+One setting, one line — full HTTP request/response logging with correlation IDs and timing.
 
 ---
 
 ## Sink Overview
 
-Each sink is a **separate NuGet package**. Install only what you need; unused sinks add zero overhead.
+Each sink is a separate NuGet package. Install only what you need.
 
 ### Console
-Colored output with per-level themes. No configuration required — add the route and go.
+
+Colored console output with per-level color themes.
 
 ```json
-"Routes": [{ "Sink": "Console", "Levels": ["Debug", "Information", "Warning"] }]
+"Sinks": { }
 ```
+No configuration required — just add the route.
 
 ### File
-Rolling JSON log files with configurable retention and size limits.
+
+Rolling JSON log files with configurable retention. **v5.0.1**: route logs to subdirectories by any log property — perfect for multi-tenant apps.
 
 ```json
 "Sinks": {
-  "File": { "Path": "Logs", "RollingInterval": "Day", "RetainedFileCountLimit": 7 }
+  "File": { "Path": "Logs", "RollingInterval": "Day", "FileNameProperty": "TenantId" }
 }
 ```
 
+Logs with `TenantId = "acme"` go to `Logs/acme/log-.txt`. Logs without the property go to `Logs/log-.txt`.
+
 ### Email
-HTML email alerts with SMTP, per-event templates, and built-in throttling to prevent alert storms.
+
+HTML email alerts with SMTP, templates, and throttling.
 
 ```json
 "Sinks": {
   "Email": {
     "From": "alerts@myapp.com", "To": "team@myapp.com",
-    "Host": "smtp.gmail.com",   "Port": 587,
+    "Host": "smtp.gmail.com", "Port": 587,
     "Username": "alerts@myapp.com", "Password": "app-password",
     "ThrottleInterval": "00:05:00"
   }
@@ -370,7 +238,8 @@ HTML email alerts with SMTP, per-event templates, and built-in throttling to pre
 ```
 
 ### Telegram
-Instant bot notifications with MarkdownV2 formatting and emoji-coded severity levels.
+
+Instant bot notifications with MarkdownV2 and emoji-coded levels.
 
 ```json
 "Sinks": {
@@ -379,7 +248,8 @@ Instant bot notifications with MarkdownV2 formatting and emoji-coded severity le
 ```
 
 ### Elasticsearch
-Structured indexing with automatic index naming for Kibana dashboards and OpenSearch.
+
+Full-text search with auto-indexing for Kibana dashboards.
 
 ```json
 "Sinks": {
@@ -388,7 +258,8 @@ Structured indexing with automatic index naming for Kibana dashboards and OpenSe
 ```
 
 ### SQL Server
-Persistent log storage with auto table creation and support for custom columns.
+
+Structured storage with auto table creation and custom columns.
 
 ```json
 "Sinks": {
@@ -400,7 +271,8 @@ Persistent log storage with auto table creation and support for custom columns.
 ```
 
 ### PostgreSQL
-JSONB columns, custom schema, auto table creation — production-ready out of the box.
+
+JSONB columns, custom schema, auto table creation.
 
 ```json
 "Sinks": {
@@ -412,7 +284,8 @@ JSONB columns, custom schema, auto table creation — production-ready out of th
 ```
 
 ### Seq
-Centralized log server with full-text search, dashboards, and alerting.
+
+Centralized log server with search, dashboards, and alerting.
 
 ```json
 "Sinks": {
@@ -421,134 +294,108 @@ Centralized log server with full-text search, dashboards, and alerting.
 ```
 
 ### Hangfire Console
-See structured, colored logs directly in the Hangfire Dashboard during job execution — without leaving your monitoring UI.
+
+See structured logs directly on the Hangfire Dashboard during job execution.
 
 ```csharp
+// Extra DI registration required:
 builder.Services.AddHangfireConsoleSink();
 ```
 ```json
-"Routes": [{ "Sink": "HangfireConsole", "Levels": ["Information", "Warning", "Error"] }]
+"Routes": [
+  { "Sink": "HangfireConsole", "Levels": ["Information", "Warning", "Error"] }
+]
 ```
 
 ---
 
-## Comparison vs Pure Serilog & NLog
+## Comparison
 
-| Feature | Serilog (pure) | NLog | **LoggerHelper v5** |
-|---------|:--------------:|:----:|:-------------------:|
-| Per-level sink routing | Manual sub-loggers | `FilteringTargetWrapper` | **JSON / fluent — built-in** |
-| `ILogger<T>` compatible | Via bridge package | Native | **Native — zero code change** |
-| Modular NuGet sinks | Partial (manual config) | Yes | **Yes — auto-register via `[ModuleInitializer]`** |
-| Named params preserved as structured | Yes | Yes | **Yes** |
-| `BeginScope` propagated to sink | Yes | Yes | **Yes** |
-| OpenTelemetry TraceId correlation | Manual | Via extension | **Built-in, auto-correlated** |
-| Internal error diagnostics | No | No | **Yes — injectable `ILogErrorStore`** |
-| Fluent OR JSON OR merged | Code only | XML + code | **All three, mergeable** |
-| Request/Response middleware | `Serilog.AspNetCore` | Manual | **1 setting + 1 line** |
+| Feature | Serilog alone | NLog | **LoggerHelper v5** |
+|---------|:---:|:---:|:---:|
+| Per-level sink routing (declarative) | Manual per sink | Via targets | **JSON / fluent — built-in** |
+| `ILogger<T>` compatible | Via bridge pkg | Native | **Native — zero code change** |
+| Install only needed sinks | No | No | **Yes — modular NuGet** |
+| Named params preserved | Yes | Yes | **Yes** |
+| `BeginScope` structured | Yes | Yes | **Yes — propagates to Serilog** |
+| OpenTelemetry trace ID | Manual | Manual | **Built-in, auto-correlated** |
+| Internal error diagnostics | No | No | **Yes — injectable ILogErrorStore** |
+| Fluent OR JSON OR both | No | No | **All three, mergeable** |
+| Request/Response middleware | Serilog.AspNetCore | Manual | **1 line middleware** |
 | Email/Telegram alerts | 3rd-party sinks | NLog.MailKit | **Built-in + throttling** |
-| Source Generator registration | No | No | **Yes — AOT-compatible** |
-| Sink routing overhead | Baseline | ~−5% | **< 5% over Serilog** |
-| Setup complexity | 20–40 lines | XML + code | **2 lines + JSON** |
-
----
-
-## Performance
-
-Benchmarks run with [BenchmarkDotNet](https://benchmarkdotnet.org) on .NET 9 / Release build.
-Reproduce locally: `dotnet run -c Release --project src/CSharpEssentials.LoggerHelper.Benchmarks -- --filter *`
-
-| Scenario | Serilog (baseline) | NLog | **LoggerHelper v5** |
-|---|:---:|:---:|:---:|
-| Single log, Information | 1.00× | ~0.95× | **~1.02×** |
-| Multi-sink routing (3 routes) | 1.00× | ~0.98× | **~1.05×** |
-| Throughput (1M events, async) | ~2.1M ev/s | ~1.8M ev/s | **~2.0M ev/s** |
-| Startup (DI + 3 sinks, JSON) | ~38 ms | — | **~45 ms** |
-
-> LoggerHelper adds **under 5% routing overhead** vs Serilog for typical multi-sink setups. Startup overhead includes plugin discovery; with source-generated registration it is reduced further. Full results: [`docs/benchmarks.md`](docs/benchmarks.md).
+| Setup complexity | 15-30 lines | XML + code | **5 lines** |
 
 ---
 
 ## Coming Soon
 
-Contributions are welcome — open an issue or PR to get involved.
+These features are planned for upcoming releases — contributions welcome!
 
-| Feature | Status | Description |
-|---------|--------|-------------|
-| **LoggerHelper.Dashboard** | Planned | Embedded real-time UI showing active sinks, routing rules, and recent errors |
-| **LoggerHelper.AI** | Planned | Natural-language log queries, anomaly detection, incident summarization via LLM |
-| **LoggerHelper.Telemetry** | Planned | OpenTelemetry metrics export — log counters per sink, error rates, latency histograms |
-| **LoggerHelper.xUnit** | Planned | Forwards log output to xUnit test runner for integration test visibility |
-| **`dotnet new` template** | In progress | `dotnet new loggerhelper-api` scaffolds a pre-configured project in seconds |
+| Feature | Description |
+|---------|-------------|
+| **LoggerHelper.AI** | Natural language log queries, anomaly detection, incident summarization via LLM |
+| **LoggerHelper.Dashboard** | Embedded real-time UI showing active sinks, routing rules, and recent errors |
+| **LoggerHelper.Telemetry** | OpenTelemetry metrics export — log counters per sink, error rates, latency |
+| **LoggerHelper.xUnit** | Forwards log output to xUnit test runner for integration test visibility |
+| **Source Generator** | Replace runtime reflection for sink loading — faster startup, AOT-compatible, trimming-safe |
+| **`dotnet new` template** | `dotnet new loggerhelper-api` scaffolds a pre-configured project with zero friction |
 
 ---
 
 ## Architecture
 
-LoggerHelper uses a **plugin architecture** with zero compile-time coupling between the core and any sink.
+LoggerHelper uses a **plugin architecture** for sinks. The core package has zero dependencies on any sink — they self-register at startup via `[ModuleInitializer]`.
 
 ```
-Your Application
-  └── ILogger<T>  ──────────────────────────────────────────┐
-                                                             ▼
-  CSharpEssentials.LoggerHelper (core)
-    ├── LoggerHelperProvider  (ILoggerProvider)
-    ├── RoutingEngine         (routes by Level × Sink config)
-    ├── ILogErrorStore        (captures sink failures silently)
-    └── SinkPluginRegistry    (global auto-registration hub)
-          ├── Sink.Console    ([ModuleInitializer] → auto-registers)
-          ├── Sink.File       ([ModuleInitializer] → auto-registers)
-          ├── Sink.Email      ([ModuleInitializer] → auto-registers)
-          └── ... any ISinkPlugin (yours too)
+Your App
+  └── CSharpEssentials.LoggerHelper (core)
+        ├── Routes logs by level
+        ├── Bridges ILogger<T> → Serilog
+        └── Discovers sink plugins automatically
+              ├── Sink.Console    (auto-registers)
+              ├── Sink.File       (auto-registers)
+              ├── Sink.Email      (auto-registers)
+              └── ... any ISinkPlugin
 ```
-
-Sinks self-register via `[ModuleInitializer]` — a .NET 5+ attribute that runs before `Main()`. The core never references sinks at compile time; the plugin registry is populated at runtime by whichever sink NuGets are installed.
 
 ### Building a Custom Sink
 
 ```csharp
-// 1. Implement ISinkPlugin
 [LoggerHelperSink]
-public sealed class SlackSinkPlugin : ISinkPlugin
-{
+public sealed class MyTargetSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) =>
-        sinkName.Equals("Slack", StringComparison.OrdinalIgnoreCase);
+        sinkName.Equals("MyTarget", StringComparison.OrdinalIgnoreCase);
 
-    public void Configure(LoggerConfiguration loggerConfig, SinkRouting routing, LoggerHelperOptions options)
-    {
-        var opts = options.GetSinkConfig<SlackOptions>("Slack")
-                   ?? options.BindSinkSection<SlackOptions>("Slack");
+    public void Configure(LoggerConfiguration loggerConfig, SinkRouting routing, LoggerHelperOptions options) {
+        var opts = options.GetSinkConfig<MyTargetOptions>("MyTarget")
+                   ?? options.BindSinkSection<MyTargetOptions>("MyTarget");
 
         loggerConfig.WriteTo.Conditional(
             evt => routing.Matches(evt.Level),
-            wt  => wt.Slack(opts.WebhookUrl)
+            wt => wt.MySink(opts.ConnectionString)
         );
     }
 }
 
-// 2. Self-register — the core discovers it at startup automatically
-public static class PluginInitializer
-{
+public static class PluginInitializer {
     [ModuleInitializer]
-    public static void Init() => SinkPluginRegistry.Register(new SlackSinkPlugin());
+    public static void Init() => SinkPluginRegistry.Register(new MyTargetSinkPlugin());
 }
 ```
 
-Reference `CSharpEssentials.LoggerHelper` as a **NuGet package** (not a project reference). No changes to the core or to any other sink are required.
+Reference `CSharpEssentials.LoggerHelper` as a NuGet package — not a project reference. The sink auto-registers at startup with no changes to the core.
 
 ---
 
 ## Documentation & Links
 
-| Resource | Link |
-|----------|------|
-| Documentation Site | [loggerhelper.com](https://www.loggerhelper.com) |
-| Interactive Playground | [loggerhelper.com/playground.html](https://www.loggerhelper.com/playground.html) |
-| Benchmark Results | [docs/benchmarks.md](docs/benchmarks.md) |
-| Migration Guide (v2/v4 → v5) | [docs/legacy-parity-v5.md](docs/legacy-parity-v5.md) |
-| Gap Analysis | [docs/gap-analysis-original-vs-new.md](docs/gap-analysis-original-vs-new.md) |
-| NuGet — LoggerHelper | [nuget.org/packages/CSharpEssentials.LoggerHelper](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) |
-| NuGet — HttpHelper | [nuget.org/packages/CSharpEssentials.HttpHelper](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
-| Issues & Roadmap | [GitHub Issues](https://github.com/alexbypa/CSharp.Essentials/issues) |
+- [Documentation Site](https://www.loggerhelper.com)
+- [Interactive Playground](https://www.loggerhelper.com/playground.html)
+- [Benchmark Results](docs/benchmarks.md)
+- [Migration Guide (v2/v4 to v5)](docs/legacy-parity-v5.md)
+- [Gap Analysis](docs/gap-analysis-original-vs-new.md)
+- [NuGet — LoggerHelper](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
+- [NuGet — HttpHelper](https://www.nuget.org/packages/CSharpEssentials.HttpHelper)
 
 ---
 
@@ -556,4 +403,4 @@ Reference `CSharpEssentials.LoggerHelper` as a **NuGet package** (not a project 
 
 MIT — [Alessandro Chiodo](https://github.com/alexbypa)
 
-[Website](https://www.loggerhelper.com) · [GitHub](https://github.com/alexbypa/CSharp.Essentials) · [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) · [Issues](https://github.com/alexbypa/CSharp.Essentials/issues)
+[GitHub](https://github.com/alexbypa/CSharp.Essentials) | [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | [Issues](https://github.com/alexbypa/CSharp.Essentials/issues)

@@ -8,7 +8,7 @@
     <Title>LoggerHelper Telegram Sink — Instant log notifications via Telegram Bot</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>Know about errors before your users do. Instant Telegram alerts on your phone with emoji-coded severity — because email is too slow for production fires. New in 5.0.1: File sink now supports dynamic subdirectories per tenant or module.</Description>
-    <Version>5.0.2</Version>
+    <Version>5.0.3</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
