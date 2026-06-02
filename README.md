@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="CSharpEssentials.LoggerHelper/img/CSharpEssentials.png" alt="CSharpEssentials.LoggerHelper Logo" width="140" />
+  <img src="https://github.com/alexbypa/CSharp.Essentials/blob/main/img/CSharpEssentials.png" alt="CSharpEssentials.LoggerHelper Logo" width="140" />
 </p>
 
 <h1 align="center">CSharpEssentials.LoggerHelper</h1>
