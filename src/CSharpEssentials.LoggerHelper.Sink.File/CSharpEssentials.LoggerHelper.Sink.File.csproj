@@ -12,7 +12,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
-    <PackageTags>serilog;logging;file;sink;structured-logging;loggerhelper;rolling-file;json-log</PackageTags>
+    <PackageTags>serilog;logging;file;sink;structured-logging;loggerhelper;rolling-file;json-log,ILogger</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
