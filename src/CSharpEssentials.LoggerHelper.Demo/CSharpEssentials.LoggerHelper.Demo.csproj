@@ -16,6 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Email\CSharpEssentials.LoggerHelper.Sink.Email.csproj" />
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Telegram\CSharpEssentials.LoggerHelper.Sink.Telegram.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Console\CSharpEssentials.LoggerHelper.Sink.Console.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.File\CSharpEssentials.LoggerHelper.Sink.File.csproj" />

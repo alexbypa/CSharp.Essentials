@@ -8,11 +8,11 @@
     <Title>LoggerHelper File Sink — JSON rolling file logs with per-level routing</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>Never lose a log again. Rolling JSON files with daily rotation, cleanup, and dynamic subdirectories per log property — perfect for multi-tenant apps. Set FileNameProperty to route logs by tenant, module, or any runtime value.</Description>
-    <Version>5.0.2</Version>
+    <Version>5.0.3</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
-    <PackageTags>serilog;logging;file;sink;structured-logging;loggerhelper;rolling-file;json-log</PackageTags>
+    <PackageTags>serilog;logging;file;sink;structured-logging;loggerhelper;rolling-file;json-log,ILogger</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>

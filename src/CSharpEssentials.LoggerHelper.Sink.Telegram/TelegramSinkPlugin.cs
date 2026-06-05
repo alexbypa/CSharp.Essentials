@@ -60,7 +60,7 @@ public sealed class TelegramSinkPlugin : ISinkPlugin {
 
 internal sealed class TelegramLogEventSink : ILogEventSink {
     private readonly TelegramSinkOptions _opts;
-    private static readonly HttpClient _client = new();
+    private static readonly HttpClient _client = new() { Timeout = TimeSpan.FromSeconds(10) };
 
     internal TelegramLogEventSink(TelegramSinkOptions opts) {
         _opts = opts;
@@ -76,7 +76,8 @@ internal sealed class TelegramLogEventSink : ILogEventSink {
         }
 
         try {
-            SendMessageAsync(message).GetAwaiter().GetResult();
+            // Run on a thread-pool thread to avoid deadlocks in sync contexts (e.g. ASP.NET classic).
+            Task.Run(() => SendMessageAsync(message)).GetAwaiter().GetResult();
         } catch (Exception ex) {
             SelfLog.WriteLine($"Error sending Telegram message: {ex.Message}");
         }

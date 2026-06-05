@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Text;
-using System.Web;
 
 namespace CSharpEssentials.LoggerHelper;
 
@@ -47,7 +46,7 @@ public sealed class RequestResponseLoggingMiddleware {
                 "HTTP {Method} {Path}{QueryString} — Status {StatusCode}\nRequest: {RequestBody}\nResponse: {ResponseBody}",
                 context.Request.Method,
                 context.Request.Path.Value,
-                HttpUtility.UrlDecode(context.Request.QueryString.ToString()),
+                Uri.UnescapeDataString(context.Request.QueryString.ToString()),
                 context.Response.StatusCode,
                 string.IsNullOrWhiteSpace(requestBody) ? "(empty)" : requestBody,
                 string.IsNullOrWhiteSpace(responseBody) ? "(empty)" : responseBody);

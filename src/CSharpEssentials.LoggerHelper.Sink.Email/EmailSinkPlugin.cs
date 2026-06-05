@@ -66,13 +66,20 @@ public sealed class EmailSinkPlugin : ISinkPlugin {
 
 // ── Sink implementation ───────────────────────────────────────────
 
-internal sealed class EmailLogEventSink : ILogEventSink {
+internal sealed class EmailLogEventSink : ILogEventSink, IDisposable {
     private readonly EmailSinkOptions _opts;
     private readonly string _defaultTemplate;
+    private readonly SmtpClient _smtpClient;
+    // SmtpClient.Send is not thread-safe; protect concurrent Emit calls.
+    private readonly object _sendLock = new();
 
     internal EmailLogEventSink(EmailSinkOptions opts) {
         _opts = opts;
         _defaultTemplate = LoadDefaultTemplate();
+        _smtpClient = new SmtpClient(opts.Host, opts.Port) {
+            EnableSsl = opts.EnableSsl,
+            Credentials = new NetworkCredential(opts.Username, opts.Password)
+        };
     }
 
     public void Emit(LogEvent logEvent) {
@@ -90,16 +97,15 @@ internal sealed class EmailLogEventSink : ILogEventSink {
                 IsBodyHtml = true
             };
 
-            using var smtpClient = new SmtpClient(_opts.Host, _opts.Port) {
-                EnableSsl = _opts.EnableSsl,
-                Credentials = new NetworkCredential(_opts.Username, _opts.Password)
-            };
-
-            smtpClient.Send(message);
+            lock (_sendLock) {
+                _smtpClient.Send(message);
+            }
         } catch (Exception ex) {
             SelfLog.WriteLine($"Error sending email: {ex}");
         }
     }
+
+    public void Dispose() => _smtpClient.Dispose();
 
     private string GenerateHtmlBody(LogEvent logEvent) {
         var template = !string.IsNullOrWhiteSpace(_opts.TemplatePath) && File.Exists(_opts.TemplatePath)
