@@ -6,11 +6,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [5.0.4] � 2026-06-05
+## [5.0.4] 2026-06-05
 
 ### Performance
 
-- **`SinkRouting.Matches()` � hot path optimization**  
+- **`SinkRouting.Matches()` hot path optimization**  
   This predicate runs for every log event, once per configured sink. The previous
   implementation called `level.ToString()` (heap allocation) and
   `List<string>.Contains()` (O(n) linear scan) on each call.  
@@ -19,7 +19,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [5.0.3] � 2026-06-03
+## [5.0.3] 2026-06-03
 
 ### Added
 
@@ -31,7 +31,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [5.0.2] � 2026-05-30
+## [5.0.2] 2026-05-30
 
 ### Added
 
@@ -40,7 +40,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [5.0.1] � 2026-05-28
+## [5.0.1] 2026-05-28
 
 ### Added
 
