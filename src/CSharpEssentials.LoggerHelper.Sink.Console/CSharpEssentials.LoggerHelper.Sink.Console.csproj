@@ -9,7 +9,6 @@
     <Title>LoggerHelper Console Sink — Colored console output with per-level routing</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>See your logs in color, instantly. Add Console to your LoggerHelper routes and get beautiful, readable output — only the levels you care about. New in 5.0.1: File sink now supports dynamic subdirectories per tenant or module.</Description>
-    <Version>5.0.4</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
