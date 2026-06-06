@@ -6,6 +6,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [5.0.5] — 2026-06-06
+-  SinkThrottlingManager` CAS loop**<br>• *Correctness*<br>• Eliminates duplicate sends under concurrency | Prevents duplicate actions during concurrent burst events 
+- `SinkPluginRegistry` ConcurrentDictionary**<br>• *Correctness + Performance*<br>• Idempotent registration; $O(1)$ duplicate check | Eliminates linear scans and race conditions during startup registration 
+- `TelegramSinkPlugin` fire-and-forget**<br>• *Critical Performance*<br>• `Emit()` no longer blocks the Serilog pipeline | Eliminates multi-second blocking I/O on the logging thread 
+- `EmailSinkPlugin` constructor cache**<br>• *Performance*<br>• Removes disk I/O and `SmtpClient` allocs from hot path | Prevents file system overhead and connection churn per log event 
+
 ## [5.0.4] — 2026-06-05
 
 ### Fixed
