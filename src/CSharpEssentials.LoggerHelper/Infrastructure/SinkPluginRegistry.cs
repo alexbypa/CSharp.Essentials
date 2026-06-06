@@ -40,21 +40,19 @@ public static class SinkPluginRegistry {
 
 /// <summary>
 /// Concrete implementation of <see cref="ISinkPluginRegistry"/>.
-/// Wraps a ConcurrentBag for thread-safe plugin storage.
+/// Uses ConcurrentDictionary keyed by plugin Type for O(1) duplicate detection
+/// and guaranteed atomic idempotent registration under concurrent [ModuleInitializer] calls.
 /// </summary>
 internal sealed class DefaultSinkPluginRegistry : ISinkPluginRegistry {
-    private readonly ConcurrentBag<ISinkPlugin> _plugins = [];
+    private readonly ConcurrentDictionary<Type, ISinkPlugin> _plugins = new();
 
-    internal void Register(ISinkPlugin plugin) {
-        if (_plugins.Any(p => p.GetType() == plugin.GetType()))
-            return;
-        _plugins.Add(plugin);
-    }
+    internal void Register(ISinkPlugin plugin) =>
+        _plugins.TryAdd(plugin.GetType(), plugin);
 
     public ISinkPlugin? FindHandler(string sinkName) =>
-        _plugins.FirstOrDefault(p => p.CanHandle(sinkName));
+        _plugins.Values.FirstOrDefault(p => p.CanHandle(sinkName));
 
-    public IReadOnlyCollection<ISinkPlugin> All => _plugins;
+    public IReadOnlyCollection<ISinkPlugin> All => _plugins.Values.ToList();
 
     internal void Clear() => _plugins.Clear();
 }

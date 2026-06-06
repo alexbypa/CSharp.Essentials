@@ -10,15 +10,23 @@ public static class SinkThrottlingManager {
 
     /// <summary>
     /// Returns true if enough time has elapsed since the last send for this sink.
+    /// Thread-safe: uses compare-and-swap to prevent TOCTOU races where two concurrent
+    /// callers could both pass the time check and both proceed to send.
     /// </summary>
     public static bool CanSend(string sinkName, TimeSpan interval) {
+        if (interval <= TimeSpan.Zero)
+            return true;
+
         var now = DateTime.UtcNow;
-        var last = _lastSent.GetOrAdd(sinkName, DateTime.MinValue);
 
-        if (interval > TimeSpan.Zero && (now - last) < interval)
-            return false;
+        while (true) {
+            var last = _lastSent.GetOrAdd(sinkName, DateTime.MinValue);
+            if (now - last < interval)
+                return false;
 
-        _lastSent[sinkName] = now;
-        return true;
+            // Atomically claim the throttle slot; retry if another thread updated first.
+            if (_lastSent.TryUpdate(sinkName, now, last))
+                return true;
+        }
     }
 }

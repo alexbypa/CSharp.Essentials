@@ -10,7 +10,7 @@
     <Title>CSharpEssentials.LoggerHelper — Route Serilog sinks by level with zero code</Title>
     <Authors>Alessandro Chiodo</Authors>
     <Description>Stop wiring Serilog by hand. Add 3 lines of JSON and every ILogger&lt;T&gt; routes logs where they belong — errors to Email, info to Console, traces to Seq. 9 sinks, zero boilerplate. New in 5.0.1: File sink dynamic routing by property (multi-tenant log separation).</Description>
-    <Version>5.0.3</Version>
+    <Version>5.0.4</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
   </PropertyGroup>

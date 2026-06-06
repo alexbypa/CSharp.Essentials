@@ -68,14 +68,17 @@ public sealed class EmailSinkPlugin : ISinkPlugin {
 
 internal sealed class EmailLogEventSink : ILogEventSink, IDisposable {
     private readonly EmailSinkOptions _opts;
-    private readonly string _defaultTemplate;
+    private readonly string _template;
     private readonly SmtpClient _smtpClient;
     // SmtpClient.Send is not thread-safe; protect concurrent Emit calls.
     private readonly object _sendLock = new();
 
     internal EmailLogEventSink(EmailSinkOptions opts) {
         _opts = opts;
-        _defaultTemplate = LoadDefaultTemplate();
+        // Cache the template at construction time: File.ReadAllText on every Emit() is I/O on the hot path.
+        _template = !string.IsNullOrWhiteSpace(opts.TemplatePath) && File.Exists(opts.TemplatePath)
+            ? File.ReadAllText(opts.TemplatePath)
+            : LoadDefaultTemplate();
         _smtpClient = new SmtpClient(opts.Host, opts.Port) {
             EnableSsl = opts.EnableSsl,
             Credentials = new NetworkCredential(opts.Username, opts.Password)
@@ -108,9 +111,7 @@ internal sealed class EmailLogEventSink : ILogEventSink, IDisposable {
     public void Dispose() => _smtpClient.Dispose();
 
     private string GenerateHtmlBody(LogEvent logEvent) {
-        var template = !string.IsNullOrWhiteSpace(_opts.TemplatePath) && File.Exists(_opts.TemplatePath)
-            ? File.ReadAllText(_opts.TemplatePath)
-            : _defaultTemplate;
+        var template = _template;
 
         template = template
             .Replace("{{Timestamp}}", logEvent.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"))

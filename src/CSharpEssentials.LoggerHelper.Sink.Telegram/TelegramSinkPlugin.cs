@@ -75,12 +75,13 @@ internal sealed class TelegramLogEventSink : ILogEventSink {
             return;
         }
 
-        try {
-            // Run on a thread-pool thread to avoid deadlocks in sync contexts (e.g. ASP.NET classic).
-            Task.Run(() => SendMessageAsync(message)).GetAwaiter().GetResult();
-        } catch (Exception ex) {
-            SelfLog.WriteLine($"Error sending Telegram message: {ex.Message}");
-        }
+        // Fire-and-forget: Serilog's sink Emit() is synchronous by contract; dispatching to
+        // a thread-pool thread avoids blocking Serilog's background queue for a network round-trip.
+        // Errors are captured via SelfLog rather than surfaced to the caller!
+        _ = Task.Run(async () => {
+            try { await SendMessageAsync(message).ConfigureAwait(false); }
+            catch (Exception ex) { SelfLog.WriteLine($"Error sending Telegram message: {ex.Message}"); }
+        });
     }
 
     private async Task SendMessageAsync(string message) {

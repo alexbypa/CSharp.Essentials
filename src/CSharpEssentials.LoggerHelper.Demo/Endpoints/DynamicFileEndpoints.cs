@@ -21,7 +21,13 @@ public class DynamicFileEndpoints : IEndpointDefinition {
                 message = $"2 logs written for tenant '{name}'",
                 expectedPath = $"Logs/{name}/log-*.txt"
             });
-        });
+        })
+        .WithSummary("Write 2 logs for a named tenant")
+        .WithDescription(
+            "Sets TenantId={name} in the log scope and emits one Information and one Warning log. " +
+            "With FileNameProperty: 'TenantId' configured in the File sink, logs land in Logs/{name}/log-*.txt " +
+            "instead of the base Logs/ path. " +
+            "Try different names (e.g. /tenant/acme, /tenant/contoso) and use /verify to inspect the resulting folders.");
 
         // GET /api/file-dynamic/multi-tenant
         // Simulates 3 tenants writing logs in sequence
@@ -37,7 +43,13 @@ public class DynamicFileEndpoints : IEndpointDefinition {
                 message = "6 logs written across 3 tenants",
                 expectedPaths = tenants.Select(t => $"Logs/{t}/log-*.txt").ToArray()
             });
-        });
+        })
+        .WithSummary("Write logs for 3 tenants in sequence")
+        .WithDescription(
+            "Iterates over acme, contoso, and fabrikam — each tenant gets 2 logs (Information + Error) " +
+            "in its own isolated subdirectory. " +
+            "Demonstrates that per-tenant file isolation works correctly when scopes are sequential. " +
+            "Call /verify afterwards to see all three subdirectories created.");
 
         // GET /api/file-dynamic/no-tenant
         // Logs without TenantId — should go to base Logs/log-.txt
@@ -48,7 +60,12 @@ public class DynamicFileEndpoints : IEndpointDefinition {
                 message = "2 logs written without TenantId",
                 expectedPath = "Logs/log-*.txt (base path fallback)"
             });
-        });
+        })
+        .WithSummary("Write logs without TenantId — base path fallback")
+        .WithDescription(
+            "Emits 2 logs with no TenantId in scope. " +
+            "When FileNameProperty is configured but absent from a log entry, the File sink falls back to the base path: Logs/log-*.txt. " +
+            "Use /verify to confirm that these logs appear at the root and not in a subdirectory.");
 
         // GET /api/file-dynamic/mixed
         // Mix of tenant and no-tenant logs
@@ -74,7 +91,13 @@ public class DynamicFileEndpoints : IEndpointDefinition {
                     "Logs/contoso/log-*.txt (1 contoso log)"
                 }
             });
-        });
+        })
+        .WithSummary("Mix tenant and non-tenant logs in one request")
+        .WithDescription(
+            "Writes 5 logs in a realistic pattern: 2 global logs (no scope → base path), " +
+            "2 acme logs (Logs/acme/), and 1 contoso log (Logs/contoso/). " +
+            "Models real-world scenarios where some code paths (startup, background jobs) " +
+            "don't have a tenant context. Use /verify to confirm all three output locations.");
 
         // GET /api/file-dynamic/verify
         // Lists the actual log directories created
@@ -96,6 +119,12 @@ public class DynamicFileEndpoints : IEndpointDefinition {
                 basePathFiles = rootFiles,
                 subdirectories = dirs
             });
-        });
+        })
+        .WithSummary("List log directories and files on disk")
+        .WithDescription(
+            "Scans the Logs/ directory and returns all per-tenant subdirectories with their .txt filenames, " +
+            "plus any .txt files at the root (non-tenant logs). " +
+            "Run this after any of the other file-dynamic endpoints to confirm logs landed in the correct paths. " +
+            "Returns an empty result if no logs have been written yet.");
     }
 }

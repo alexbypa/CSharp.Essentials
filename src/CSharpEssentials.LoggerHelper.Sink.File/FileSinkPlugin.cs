@@ -155,10 +155,16 @@ internal sealed class DynamicPropertyFileSink : ILogEventSink, IDisposable {
         }
     }
 
+    // Compiled once at class load: SanitizeFileName is called on every log event
+    // when FileNameProperty is configured — the interpreted static Regex.Replace overload
+    // hits an internal LRU cache (capacity ~15) and risks re-compilation under load.
+    private static readonly Regex _unsafeChars =
+        new(@"[\\/:*?""<>|]", RegexOptions.Compiled, matchTimeout: TimeSpan.FromSeconds(1));
+
     private static string SanitizeFileName(string value) {
-        var sanitized = Regex.Replace(value, @"[\\/:*?""<>|]", "_");
+        var sanitized = _unsafeChars.Replace(value, "_");
         if (sanitized.Length > 100)
-            sanitized = sanitized.Substring(0, 100);
+            sanitized = sanitized[..100];
         return sanitized.Trim().TrimEnd('.');
     }
 

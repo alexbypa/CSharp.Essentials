@@ -44,7 +44,13 @@ public class RoutingDemoEndpoints : IEndpointDefinition {
                     PostgreSQL = new[] { "Error", "Fatal" }
                 }
             });
-        });
+        })
+        .WithSummary("Fire all 6 levels — verify per-sink routing")
+        .WithDescription(
+            "Emits one log at every level (Trace → Critical) inside a BeginTrace scope. " +
+            "Each sink should receive only the levels listed in its Routes entry in appsettings.LoggerHelper.json. " +
+            "The response body includes the expected routing table so you can cross-check against each sink output. " +
+            "With the debug config (Console + File only): Console receives Info/Warning/Error/Fatal; File receives Warning/Error/Fatal.");
 
         // GET /api/routing/errors — mostra errori interni del LoggerHelper (sink down, config errate)
         group.MapGet("/errors", (ILogErrorStore errorStore) => {
@@ -52,7 +58,13 @@ public class RoutingDemoEndpoints : IEndpointDefinition {
                 count = errorStore.Count,
                 errors = errorStore.GetAll()
             });
-        });
+        })
+        .WithSummary("List internal LoggerHelper errors")
+        .WithDescription(
+            "Returns all errors captured by the internal ILogErrorStore — " +
+            "sink initialisation failures, configuration mistakes, or write errors. " +
+            "An empty list (count: 0) means every configured sink started and is writing correctly. " +
+            "Use DELETE /api/diagnostics/errors to clear the store after investigating.");
 
         // GET /api/routing/config — mostra la configurazione corrente
         group.MapGet("/config", (LoggerHelperOptions options) => {
@@ -69,6 +81,12 @@ public class RoutingDemoEndpoints : IEndpointDefinition {
                     options.General.EnableRenderedMessage
                 }
             });
-        });
+        })
+        .WithSummary("Show active LoggerHelper configuration")
+        .WithDescription(
+            "Returns the live LoggerHelperOptions resolved from appsettings: " +
+            "application name, all sink routes with their configured levels, and the general flags " +
+            "(EnableSelfLogging, EnableRequestResponseLogging, EnableOpenTelemetry, EnableRenderedMessage). " +
+            "Useful to confirm which config file was loaded at startup (debug vs production).");
     }
 }

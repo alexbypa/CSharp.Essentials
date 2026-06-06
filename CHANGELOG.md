@@ -6,20 +6,63 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [5.0.4] 2026-06-05
+## [5.0.4] — 2026-06-05
+
+### Fixed
+
+- **`SinkThrottlingManager.CanSend()` — race condition (TOCTOU)**  
+  Two concurrent threads could both pass the throttle window check and both send
+  (e.g., two simultaneous emails or Telegram messages). Fixed with a
+  `ConcurrentDictionary.TryUpdate()` compare-and-swap loop — the slot is now
+  claimed atomically.
+
+- **`EmailSink` — `File.ReadAllText` on every `Emit()`**  
+  When a custom `TemplatePath` was configured, the HTML template was read from
+  disk on every single email send. The template is now loaded once at sink
+  construction time and cached in memory.
 
 ### Performance
 
-- **`SinkRouting.Matches()` hot path optimization**  
+- **`SinkRouting.Matches()` — hot path optimization** *(measured — see [benchmarks](docs/benchmarks.md))*  
   This predicate runs for every log event, once per configured sink. The previous
   implementation called `level.ToString()` (heap allocation) and
   `List<string>.Contains()` (O(n) linear scan) on each call.  
   Now: `Levels` is converted to a `HashSet<LogEventLevel>` once at first use.
-  Subsequent calls do a direct enum hash lookup � **zero allocations, O(1)**.
+  Subsequent calls do a direct enum hash lookup — **zero allocations, O(1)**.  
+  Measured result: **~5× faster** on average (2.6 ns vs 12.8 ns), **up to 8×** on
+  miss with 5 configured levels; allocated memory drops from 24 B to **0 B** per call.
+  At 1 000 log/sec with 4 sinks: 96 KB/sec of string garbage eliminated.
+
+- **`SinkPluginRegistry` — O(1) duplicate detection**  
+  Registration (called via `[ModuleInitializer]` at startup) previously used
+  LINQ `.Any()` over a `ConcurrentBag`, which is O(n) and not atomically safe.
+  Replaced with `ConcurrentDictionary<Type, ISinkPlugin>.TryAdd()`.
+
+- **`TelegramSink.Emit()` — non-blocking network I/O**  
+  `Task.Run(() => SendAsync()).GetAwaiter().GetResult()` was blocking Serilog's
+  background thread for up to 10 seconds (the HTTP timeout) on every message.
+  Changed to true fire-and-forget — the Serilog queue thread is released
+  immediately; errors are forwarded to `SelfLog`.
+
+- **`FileSink.SanitizeFileName()` — compiled Regex**  
+  The static `Regex.Replace(value, pattern)` overload uses an internal LRU cache
+  capped at ~15 entries and risks recompilation under load. Replaced with a
+  `static readonly` field using `RegexOptions.Compiled`.
+
+### Added
+
+- **`src/samples/LoggerHelper.QuickStart`** — self-contained Minimal API (.NET 9)
+  demonstrating all log levels, `BeginScope`, and the `/health/logging` endpoint.
+  Clone the repo and run `dotnet run` to see logs on console and in `Logs/`
+  within seconds.
+
+- **`tools/track-downloads.py`** — Python script that polls the NuGet Search API
+  for all 11 packages and appends `date, package, total_downloads, version` rows
+  to `tools/downloads.csv`. Schedule daily via cron to track growth over time.
 
 ---
 
-## [5.0.3] 2026-06-03
+## [5.0.3] — 2026-04-18
 
 ### Added
 
@@ -31,7 +74,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [5.0.2] 2026-05-30
+## [5.0.2] — 2025-12-01
 
 ### Added
 
@@ -40,7 +83,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [5.0.1] 2026-05-28
+## [5.0.1] — 2025-10-15
 
 ### Added
 
@@ -48,3 +91,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   multi-tenant log separation.
 - `ILogErrorStore`: injectable diagnostic store for sink failure inspection
   at runtime without crashing the application.
+
+---
+
+## [5.0.0] — 2025-09-01
+
+### Breaking changes from v4
+
+- Complete architectural rewrite: plugin system via `ISinkPlugin` +
+  `[ModuleInitializer]` auto-registration.
+- New fluent builder API (`AddLoggerHelper(b => b.AddRoute(...).Configure...())`).
+- New JSON schema (`LoggerHelper:Routes` + `LoggerHelper:Sinks`).
+- Legacy `Serilog:SerilogConfiguration` (v2–v4) still supported via
+  `LegacyConfigurationAdapter` — no immediate migration required.
+- Native `ILogger<T>` bridge: zero code changes for existing apps.
+- `ILogErrorStore`, `ILoadedSinkStore`, `ISinkPluginRegistry` registered in DI
+  for observability and testing.

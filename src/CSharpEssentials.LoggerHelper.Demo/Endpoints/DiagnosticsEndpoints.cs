@@ -30,12 +30,23 @@ public class DiagnosticsEndpoints : IEndpointDefinition {
                     e.Timestamp
                 })
             });
-        });
+        })
+        .WithSummary("Pipeline health check")
+        .WithDescription(
+            "Returns 'healthy' when no internal errors are recorded, 'degraded' otherwise. " +
+            "Includes the list of loaded sink plugins with their type names and configured levels, " +
+            "and the last 5 internal errors if any. " +
+            "Run this first after startup to confirm every sink loaded correctly before testing the other endpoints.");
 
         // DELETE /api/diagnostics/errors — pulisce gli errori interni
         group.MapDelete("/errors", (ILogErrorStore errorStore) => {
             errorStore.Clear();
             return Results.Ok(new { message = "Internal error store cleared" });
-        });
+        })
+        .WithSummary("Clear the internal error store")
+        .WithDescription(
+            "Empties the ILogErrorStore in-memory buffer. " +
+            "Use this to reset the error count after investigating a 'degraded' health status " +
+            "so you can detect new errors cleanly. The operation is idempotent.");
     }
 }

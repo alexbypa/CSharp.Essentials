@@ -23,7 +23,12 @@ public class CustomPropertiesEndpoints : IEndpointDefinition {
             }
 
             return Results.Ok(new { message = "2 logs enriched with CustomerId, Region, TenantId" });
-        });
+        })
+        .WithSummary("Add custom properties via BeginScope")
+        .WithDescription(
+            "Wraps two log entries in BeginScope with a KeyValuePair array containing CustomerId, Region, and TenantId. " +
+            "All three properties appear as first-class fields in structured sinks alongside the standard Serilog fields. " +
+            "This pattern is compatible with any ILogger provider — no LoggerHelper-specific APIs required.");
 
         // GET /api/properties/nested — scope annidati (BeginTrace + custom)
         group.MapGet("/nested", (ILogger<CustomPropertiesEndpoints> logger) => {
@@ -49,7 +54,13 @@ public class CustomPropertiesEndpoints : IEndpointDefinition {
                 message = "Nested scopes — inner has both trace + custom properties",
                 idTransaction = txnId
             });
-        });
+        })
+        .WithSummary("Nested scopes — combine BeginTrace with custom properties")
+        .WithDescription(
+            "Demonstrates scope nesting: the outer BeginTrace scope adds IdTransaction and Action to all inner logs; " +
+            "the inner BeginScope adds BatchId and RowCount only to the two logs inside it. " +
+            "The final 'Import completed' log carries IdTransaction + Action but not BatchId/RowCount. " +
+            "Use this pattern for batch jobs, imports, or any operation with sub-phases.");
 
         // GET /api/properties/inline — proprietà nel messaggio template
         group.MapGet("/inline", (ILogger<CustomPropertiesEndpoints> logger) => {
@@ -58,6 +69,12 @@ public class CustomPropertiesEndpoints : IEndpointDefinition {
                 "U-100", "DELETE", "/api/orders/42", "US-East");
 
             return Results.Ok(new { message = "Log with 4 inline structured properties" });
-        });
+        })
+        .WithSummary("Inline structured properties in the message template")
+        .WithDescription(
+            "Logs a single audit event with 4 named holes in the message template: " +
+            "{UserId}, {Action}, {Resource}, {Region}. " +
+            "No scope needed — each placeholder is captured as a separate searchable field. " +
+            "This is the cleanest syntax for one-off structured events where you don't need a correlation ID.");
     }
 }

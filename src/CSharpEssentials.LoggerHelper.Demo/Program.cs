@@ -1,12 +1,15 @@
 using CSharpEssentials.LoggerHelper;
 using CSharpEssentials.LoggerHelper.Demo.Endpoints;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// LoggerHelper — configurazione da appsettings.LoggerHelper.json
+// ── LoggerHelper ────────────────────────────────────────────────────────────
+// Development → appsettings.LoggerHelper.debug.json (Console + File, no DB deps)
+// Production  → appsettings.LoggerHelper.json       (Console + File + MSSqlServer + PostgreSQL)
 builder.Services.AddLoggerHelper(builder.Configuration);
 
-// Endpoint registration (SOLID — ogni endpoint in un file separato)
+// ── Endpoint modules ────────────────────────────────────────────────────────
 builder.Services.AddSingleton<IEndpointDefinition, BasicLoggingEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, TraceApiEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, CustomPropertiesEndpoints>();
@@ -14,10 +17,40 @@ builder.Services.AddSingleton<IEndpointDefinition, RoutingDemoEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, DiagnosticsEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, DynamicFileEndpoints>();
 
+// ── Swagger ─────────────────────────────────────────────────────────────────
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c => {
+    c.SwaggerDoc("v1", new OpenApiInfo {
+        Title       = "CSharpEssentials.LoggerHelper — Demo",
+        Version     = "v5",
+        Description = """
+            Interactive demo for CSharpEssentials.LoggerHelper.
+            Each endpoint triggers a different logging scenario — hit an endpoint,
+            then check the console and Logs/ to see structured output in real time.
+
+            Run with:  dotnet run --project src/CSharpEssentials.LoggerHelper.Demo
+            Docs:      https://www.loggerhelper.com
+            """,
+        Contact = new OpenApiContact {
+            Name = "Alessandro Chiodo",
+            Url  = new Uri("https://github.com/alexbypa/CSharp.Essentials")
+        }
+    });
+});
+
 var app = builder.Build();
 
-// Request/Response logging middleware
-app.UseMiddleware<RequestResponseLoggingMiddleware>();
+// ── Middleware ──────────────────────────────────────────────────────────────
+app.UseLoggerHelper();   // request/response logging + correlation ID
+app.UseSwagger();
+app.UseSwaggerUI(c => {
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "LoggerHelper Demo v5");
+    c.RoutePrefix = "swagger";
+    c.DisplayRequestDuration();
+});
+
+// Root → Swagger UI
+app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 
 app.UseEndpointDefinitions();
 
