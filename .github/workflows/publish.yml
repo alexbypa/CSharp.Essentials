@@ -24,17 +24,17 @@ jobs:
             10.0.x
 
       - name: Restore & Build solution
-        run: dotnet build src/CSharpEssentials.HttpHelper/CSharpEssentials.HttpHelper.csproj" -c Release
-        run: dotnet build src/CSharpEssentials.LoggerHelper.Sink.Console/CSharpEssentials.LoggerHelper.Sink.Console.csproj" -c Release
-        run: dotnet build src/CSharpEssentials.LoggerHelper.Sink.Elasticsearch/CSharpEssentials.LoggerHelper.Sink.Elasticsearch.csproj" -c Release
-        run: dotnet build src/CSharpEssentials.LoggerHelper.Sink.Email/CSharpEssentials.LoggerHelper.Sink.Email.csproj" -c Release
-        run: dotnet build src/CSharpEssentials.LoggerHelper.Sink.File/CSharpEssentials.LoggerHelper.Sink.File.csproj" -c Release
-        run: dotnet build src/CSharpEssentials.LoggerHelper.Sink.HangfireConsole/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.csproj" -c Release
-        run: dotnet build src/CSharpEssentials.LoggerHelper.Sink.MSSqlServer/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.csproj" -c Release
-        run: dotnet build src/CSharpEssentials.LoggerHelper.Sink.Postgresql/CSharpEssentials.LoggerHelper.Sink.Postgresql.csproj" -c Release
-        run: dotnet build src/CSharpEssentials.LoggerHelper.Sink.Seq/CSharpEssentials.LoggerHelper.Sink.Seq.csproj" -c Release
-        run: dotnet build src/CSharpEssentials.LoggerHelper.Sink.Telegram/CSharpEssentials.LoggerHelper.Sink.Telegram.csproj" -c Release
-        run: dotnet build src/CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj" -c Release
+        run: |
+          # 1. Compila i due progetti Core principali
+          dotnet build src/CSharpEssentials.HttpHelper/CSharpEssentials.HttpHelper.csproj -c Release
+          dotnet build src/CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj -c Release
+          
+          # 2. Compila dinamicamente tutti i Sink senza doverli scrivere uno per uno (evita errori futuri)
+          for proj in src/CSharpEssentials.LoggerHelper.Sink.*/*.csproj; do
+            echo "Building $proj..."
+            dotnet build "$proj" -c Release
+          done
+
       - name: Pack all packages
         run: |
           mkdir -p nupkgs
