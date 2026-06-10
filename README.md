@@ -535,6 +535,17 @@ Your App
               └── ... any ISinkPlugin
 ```
 
+### Performance Focus
+
+Every version ships a targeted performance audit. Key hot-path optimizations to date:
+
+| Version | Component | Optimization | Impact |
+|---------|-----------|-------------|--------|
+| v5.0.6 | Middleware `ReadBodySafe` | `ArrayPool<char>` replaces `new char[64K]` | −256 KB LOH per request |
+| v5.0.5 | `SinkRouting.Matches()` | `HashSet<LogEventLevel>` replaces string O(n) scan | Zero alloc per log event |
+| v5.0.5 | Telegram `Emit()` | Fire-and-forget `Task.Run` vs blocking `GetResult()` | No pipeline stall |
+| v5.0.5 | Email template | Cached at ctor vs `File.ReadAllText` per emit | No disk I/O on hot path |
+
 ### Building a Custom Sink
 
 ```csharp
