@@ -7,7 +7,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ---
 
 ## [5.0.6] — 2026-06-08
--  SinkThrottlingManager` CAS loop**<br>• *Correctness*<br>• Eliminates duplicate sends under concurrency | Prevents duplicate actions during concurrent burst events 
+-  RequestResponseLoggingMiddleware : ArrayPool<char>.Shared.Rent(MaxBodySize) returns a buffer from the shared pool—zero heap allocation. The buffer is returned in a finally block. Also replaced the legacy overload ReadAsync(char[], int, int) with the modern ReadAsync(Memory<char>).
 
 ---
 
