@@ -7,7 +7,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper Seq Sink — Ship structured logs to Seq for search and analysis</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Structured logs deserve a structured viewer. Ship to Seq and get instant search, live tail, dashboards, and alerts — the way .NET logging was meant to be. New in 5.0.1: File sink now supports dynamic subdirectories per tenant or module.</Description>
+    <Description>Structured logs deserve a structured viewer. Ship to Seq and get instant search, live tail, dashboards, and alerts — the way .NET logging was meant to be. Pairs with Seq's free single-user tier for local development — no infrastructure to stand up.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>

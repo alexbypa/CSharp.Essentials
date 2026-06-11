@@ -84,6 +84,7 @@ internal sealed class DynamicPropertyFileSink : ILogEventSink, IDisposable {
     private readonly Lazy<ILogEventSink> _defaultSink;
     private readonly ConcurrentDictionary<string, SinkEntry> _sinks = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _evictionLock = new();
+    private int _sinkCount;
     private bool _disposed;
 
     internal DynamicPropertyFileSink(FileSinkOptions opts) {
@@ -93,7 +94,8 @@ internal sealed class DynamicPropertyFileSink : ILogEventSink, IDisposable {
     }
 
     public void Emit(LogEvent logEvent) {
-        if (_disposed) return;
+        if (_disposed)
+            return;
 
         var sink = ResolveSink(logEvent);
         sink.Emit(logEvent);
@@ -109,13 +111,33 @@ internal sealed class DynamicPropertyFileSink : ILogEventSink, IDisposable {
 
         var key = SanitizeFileName(raw);
 
-        var entry = _sinks.GetOrAdd(key, k => {
-            var dir = System.IO.Path.Combine(_opts.Path, k);
-            return new SinkEntry(CreateSink(dir));
-        });
+        // Fast path (steady state): every event for an already-seen tenant hits this
+        // TryGetValue — no delegate allocation, no ConcurrentDictionary.Count.
+        if (_sinks.TryGetValue(key, out var cached)) {
+            cached.Touch();
+            return cached.Sink;
+        }
+
+        return ResolveNewSink(key);
+    }
+
+    // Slow path: only reached the first time a given property value is seen.
+    private ILogEventSink ResolveNewSink(string key) {
+        var dir = System.IO.Path.Combine(_opts.Path, key);
+        var candidate = new SinkEntry(CreateSink(dir));
+        var entry = _sinks.GetOrAdd(key, candidate);
+
+        if (ReferenceEquals(entry, candidate)) {
+            // Won the race: this is a brand-new tenant sink.
+            if (Interlocked.Increment(ref _sinkCount) > _opts.MaxOpenFiles)
+                EvictIfNeeded();
+        } else {
+            // Lost the race against another thread creating the same key:
+            // dispose the redundant Serilog logger so its file handle is released.
+            (candidate.Sink as IDisposable)?.Dispose();
+        }
 
         entry.Touch();
-        EvictIfNeeded();
         return entry.Sink;
     }
 
@@ -136,21 +158,25 @@ internal sealed class DynamicPropertyFileSink : ILogEventSink, IDisposable {
         return config.CreateLogger();
     }
 
+    // Only called from ResolveNewSink, i.e. at most once per distinct property
+    // value seen — never on the steady-state per-event hot path.
     private void EvictIfNeeded() {
-        if (_sinks.Count <= _opts.MaxOpenFiles) return;
-
         lock (_evictionLock) {
-            if (_sinks.Count <= _opts.MaxOpenFiles) return;
+            var excess = _sinks.Count - _opts.MaxOpenFiles;
+            if (excess <= 0)
+                return;
 
             var toEvict = _sinks
                 .OrderBy(kv => kv.Value.LastUsed)
-                .Take(_sinks.Count - _opts.MaxOpenFiles)
+                .Take(excess)
                 .Select(kv => kv.Key)
                 .ToList();
 
             foreach (var key in toEvict) {
-                if (_sinks.TryRemove(key, out var entry))
+                if (_sinks.TryRemove(key, out var entry)) {
+                    Interlocked.Decrement(ref _sinkCount);
                     (entry.Sink as IDisposable)?.Dispose();
+                }
             }
         }
     }
@@ -169,7 +195,8 @@ internal sealed class DynamicPropertyFileSink : ILogEventSink, IDisposable {
     }
 
     public void Dispose() {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         _disposed = true;
 
         foreach (var entry in _sinks.Values)

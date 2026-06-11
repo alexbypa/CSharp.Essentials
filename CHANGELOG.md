@@ -6,6 +6,33 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [5.0.7] — 2026-06-11
+
+### Performance
+
+- **`Sink.File` — `DynamicPropertyFileSink.ResolveSink()` hot path** *(measured — see [benchmarks](docs/benchmarks.md))*
+  When `FileNameProperty` is configured for multi-tenant log routing, this method
+  ran on **every single log event**. The previous implementation called
+  `ConcurrentDictionary.GetOrAdd(key, factoryLambda)` even on a cache hit — the
+  `Func<string, SinkEntry>` closure captures `this` and the C# compiler cannot
+  cache it, so a new delegate was allocated per event. It then called
+  `EvictIfNeeded()` unconditionally, which reads `ConcurrentDictionary.Count` —
+  an operation that acquires every internal table lock.
+  Now: a `TryGetValue` fast path returns the cached per-tenant sink with zero
+  delegate allocations, and eviction is gated by a cheap `Interlocked` counter so
+  `Count` is only touched when a brand-new tenant sink is created.
+	
+### Fixed
+
+- **`Sink.File` — leaked Serilog file logger under concurrent first-write race**
+  If two threads logged for the same brand-new `FileNameProperty` value (e.g. a
+  new tenant's first request) at the same time, `GetOrAdd`'s factory could run
+  twice; the "losing" Serilog file logger — and its open file handle — was never
+  disposed. The new code explicitly disposes the redundant logger when it loses
+  the race.
+	
+---
+
 ## [5.0.6] — 2026-06-08
 -  RequestResponseLoggingMiddleware : ArrayPool<char>.Shared.Rent(MaxBodySize) returns a buffer from the shared pool—zero heap allocation. The buffer is returned in a finally block. Also replaced the legacy overload ReadAsync(char[], int, int) with the modern ReadAsync(Memory<char>).
 

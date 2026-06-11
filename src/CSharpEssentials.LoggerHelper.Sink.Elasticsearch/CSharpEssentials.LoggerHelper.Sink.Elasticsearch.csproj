@@ -7,7 +7,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper Elasticsearch Sink — Index structured logs for search and Kibana dashboards</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Search millions of logs in milliseconds. Ship structured logs straight to Elasticsearch and build Kibana dashboards that actually tell you what's happening. New in 5.0.1: File sink now supports dynamic subdirectories per tenant or module.</Description>
+    <Description>Search millions of logs in milliseconds. Ship structured logs straight to Elasticsearch and build Kibana dashboards that actually tell you what's happening. Works with self-hosted Elasticsearch, OpenSearch, and Elastic Cloud — point IndexFormat at your ILM policy and go.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>

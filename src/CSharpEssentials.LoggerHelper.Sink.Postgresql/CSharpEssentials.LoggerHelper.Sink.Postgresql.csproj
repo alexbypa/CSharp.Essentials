@@ -7,7 +7,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper PostgreSQL Sink — Store structured logs with JSON fields and auto table creation</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Logs meet PostgreSQL. JSONB fields you can query, auto-created tables, and the full power of SQL — perfect for teams already running Postgres. New in 5.0.1: File sink now supports dynamic subdirectories per tenant or module.</Description>
+    <Description>Logs meet PostgreSQL. JSONB fields you can query, auto-created tables, and the full power of SQL — perfect for teams already running Postgres. NeedAutoCreateTable means zero migrations to get started.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
