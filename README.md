@@ -307,6 +307,40 @@ Route logs to subdirectories based on any log property:
 Logs with `TenantId = "acme"` → `Logs/acme/log-20250101.txt`.  
 Logs without the property → `Logs/log-20250101.txt`.
 
+### Sensitive Data Masking — One JSON Block Protects Every Sink
+
+Stop writing `Regex.Replace` calls before every `logger.LogInformation`. Declare what's sensitive
+once, and LoggerHelper redacts it everywhere — Console, File, SQL, Elasticsearch, Seq, Telegram —
+**before any sink ever sees it**:
+
+```jsonc
+"SensitiveDataMasking": {
+  "Enabled": true,
+  "MaskText": "***MASKED***",
+  "Presets": [ "Email", "CreditCard", "JwtToken", "BearerToken", "ConnectionStringSecret" ],
+  "SensitiveProperties": [ "Password", "ApiKey" ],
+  "Rules": [
+    { "Name": "OrderId", "Pattern": "ORD-\\d+" }
+  ]
+}
+```
+
+```csharp
+logger.LogInformation("Login for {Email} with {Password}", "alice@example.com", "Sup3rSecret!");
+// → every sink receives: Login for ***MASKED*** with ***MASKED***
+```
+
+- **Built-in presets** for the secrets that leak most often: emails, credit card numbers, JWTs,
+  `Bearer ...` tokens, and `Password=...` / `Pwd=...` in connection strings.
+- **`SensitiveProperties`** redacts named structured fields outright (e.g. `Password`, `ApiKey`),
+  regardless of content.
+- **Custom regex rules** with an optional `secret` capture group mask only part of a match —
+  `Bearer ***MASKED***` keeps the scheme visible while hiding the token.
+- **Zero overhead when disabled** (the default) — the enricher isn't added to the pipeline at all.
+
+Serilog has no first-class equivalent: redaction usually means a hand-rolled `IDestructuringPolicy`
+or a third-party enricher wired up per project. Here it's one JSON block, applied globally.
+
 ---
 
 ## 📋 Sink Overview & JSON Examples
@@ -515,6 +549,7 @@ public class MyJob(ILogger<MyJob> logger) {
 | Dynamic file routing by property | ❌ | ❌ | **✅ multi-tenant ready** |
 | Sink plugin system (custom sinks) | Manual wiring | Manual | **✅ `[ModuleInitializer]` auto-reg** |
 | Initial setup complexity | 15–30 lines | XML + code | **✅ 5 lines** |
+| Sensitive data masking (PII/secrets) | Manual `IDestructuringPolicy` | 3rd-party | **✅ JSON-driven, all sinks at once** |
 
 ---
 

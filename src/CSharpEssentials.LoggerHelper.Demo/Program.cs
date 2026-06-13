@@ -16,6 +16,7 @@ builder.Services.AddSingleton<IEndpointDefinition, CustomPropertiesEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, RoutingDemoEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, DiagnosticsEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, DynamicFileEndpoints>();
+builder.Services.AddSingleton<IEndpointDefinition, SensitiveDataMaskingEndpoints>();
 
 // ── Swagger ─────────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();

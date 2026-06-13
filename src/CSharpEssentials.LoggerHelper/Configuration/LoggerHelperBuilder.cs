@@ -97,4 +97,16 @@ public sealed class LoggerHelperBuilder {
         CustomEnrichers = configure;
         return this;
     }
+
+    /// <summary>
+    /// Enables the built-in sensitive data masking enricher — redacts PII/secrets
+    /// (emails, credit cards, JWT/Bearer tokens, connection-string passwords, and any
+    /// custom regex or named property) from every log event before it reaches a sink.
+    /// </summary>
+    /// <param name="configure">Optional callback to select presets, custom rules, and sensitive property names.</param>
+    public LoggerHelperBuilder EnableSensitiveDataMasking(Action<SensitiveDataMaskingOptions>? configure = null) {
+        Options.SensitiveDataMasking.Enabled = true;
+        configure?.Invoke(Options.SensitiveDataMasking);
+        return this;
+    }
 }

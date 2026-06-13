@@ -23,6 +23,12 @@ public sealed class LoggerHelperOptions {
     /// </summary>
     public GeneralOptions General { get; set; } = new();
 
+    /// <summary>
+    /// Configuration for the built-in sensitive data masking enricher.
+    /// Maps to JSON section "LoggerHelper:SensitiveDataMasking".
+    /// </summary>
+    public SensitiveDataMaskingOptions SensitiveDataMasking { get; set; } = new();
+
     // ── Extensible sink configuration (OCP) ──────────────────────
     // Each sink package defines its own options class and registers it here
     // via the fluent API or JSON binding. The core never knows about specific sinks.

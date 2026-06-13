@@ -6,6 +6,25 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [5.0.8] — 2026-06-13
+
+### Added
+
+- **Sensitive Data Masking — declarative, JSON-driven PII/secret redaction** *(killer feature — see [growth audit](outcomes/audits/v5.0.8-growth-audit.md))*
+  New `SensitiveDataMaskingEnricher`, opt-in via `LoggerHelper:SensitiveDataMasking` (JSON) or
+  `.EnableSensitiveDataMasking(...)` (fluent API). One configuration block protects **every**
+  configured sink — Console, File, SQL Server, PostgreSQL, Elasticsearch, Seq, Telegram, Email —
+  with zero changes at logging call sites.
+  - Built-in presets: `Email`, `CreditCard`, `JwtToken`, `BearerToken`, `ConnectionStringSecret`.
+  - `SensitiveProperties`: structured property names (e.g. `Password`, `ApiKey`) replaced outright
+    regardless of content.
+  - Custom `Rules`: arbitrary regex patterns, with an optional named `secret` capture group to mask
+    only part of a match (e.g. keep `Bearer ` / `Password=` visible, redact only the value).
+  - Disabled by default — zero overhead unless explicitly enabled.
+  - Demonstrated end-to-end in `CSharpEssentials.LoggerHelper.Demo` via `/api/masking/*` endpoints.
+
+---
+
 ## [5.0.7] — 2026-06-11
 
 ### Performance

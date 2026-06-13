@@ -181,6 +181,28 @@ Sinks self-register via a plugin mechanism — the core package has zero depende
 
 ---
 
+## Sensitive data masking — New in 5.0.8
+
+Redact PII and secrets from **every sink at once**, declaratively:
+
+```json
+"SensitiveDataMasking": {
+  "Enabled": true,
+  "Presets": [ "Email", "CreditCard", "JwtToken", "BearerToken", "ConnectionStringSecret" ],
+  "SensitiveProperties": [ "Password", "ApiKey" ],
+  "Rules": [ { "Name": "OrderId", "Pattern": "ORD-\\d+" } ]
+}
+```
+
+```csharp
+logger.LogInformation("Login for {Email} with {Password}", "alice@example.com", "Sup3rSecret!");
+// → Login for ***MASKED*** with ***MASKED***
+```
+
+Disabled by default — zero overhead unless enabled. Or via fluent API: `.EnableSensitiveDataMasking(o => o.Presets.Add("Email"))`.
+
+---
+
 ## Per-level routing — real-world example
 
 ```json

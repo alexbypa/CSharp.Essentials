@@ -9,7 +9,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>CSharpEssentials.LoggerHelper — Route Serilog sinks by level with zero code</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Stop wiring Serilog by hand. Add 3 lines of JSON and every ILogger&lt;T&gt; routes logs where they belong — errors to Email, info to Console, traces to Seq. 9 sinks, zero boilerplate. New in 5.0.6: request/response middleware now rents buffers from ArrayPool&lt;char&gt; — zero LOH allocations on large payloads.</Description>
+    <Description>Stop wiring Serilog by hand. Add 3 lines of JSON and every ILogger&lt;T&gt; routes logs where they belong — errors to Email, info to Console, traces to Seq. 9 sinks, zero boilerplate. New in 5.0.8: declarative sensitive-data masking enricher redacts emails, credit cards, JWT/Bearer tokens and connection-string passwords from every sink at once — one JSON block, zero code changes.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
   </PropertyGroup>
@@ -21,7 +21,7 @@
 
   <PropertyGroup>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>serilog;structured-logging;log-routing;multi-sink;logging;dotnet;aspnetcore;log-level-routing;ilogger;opentelemetry;observability;middleware;console-sink;file-sink;email-sink;telegram-sink;elasticsearch-sink;postgresql-sink;mssql-sink;seq-sink</PackageTags>
+    <PackageTags>serilog;structured-logging;log-routing;multi-sink;logging;dotnet;aspnetcore;log-level-routing;ilogger;opentelemetry;observability;middleware;data-masking;pii-redaction;sensitive-data;console-sink;file-sink;email-sink;telegram-sink;elasticsearch-sink;postgresql-sink;mssql-sink;seq-sink</PackageTags>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

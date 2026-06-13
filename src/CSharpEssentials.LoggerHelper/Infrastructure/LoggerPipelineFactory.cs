@@ -39,6 +39,11 @@ internal static class LoggerPipelineFactory {
         if (options.General.EnableRenderedMessage)
             loggerConfig.Enrich.With<RenderedMessageEnricher>();
 
+        // Sensitive data masking is opt-in: redacts PII/secrets from structured properties
+        // (and RenderedMessage, when enabled) before any sink receives the event.
+        if (options.SensitiveDataMasking.Enabled)
+            loggerConfig.Enrich.With(new SensitiveDataMaskingEnricher(options.SensitiveDataMasking));
+
         if (options.General.EnableOpenTelemetry)
             loggerConfig.WriteTo.Sink(new OpenTelemetryLogEventSink());
 
