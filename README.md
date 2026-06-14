@@ -9,12 +9,13 @@
 </p>
 
 <p align="center">
-  <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper"><img src="https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg?label=NuGet&color=blue" alt="NuGet Version" /></a>
-  <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper"><img src="https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg?label=downloads&color=brightgreen" alt="NuGet Downloads" /></a>
-  <img src="https://img.shields.io/badge/.NET-6%20%7C%208%20%7C%209%20%7C%2010-512BD4?logo=dotnet" alt=".NET Versions" />
-  [![Build and Test (src v5)](https://github.com/alexbypa/CSharp.Essentials.Private/actions/workflows/build-test.yml/badge.svg?branch=main)](https://github.com/alexbypa/CSharp.Essentials.Private/actions/workflows/build-test.yml)
-  <a href="https://github.com/alexbypa/CSharp.Essentials/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
-  <a href="https://github.com/alexbypa/CSharp.Essentials.Private/actions/workflows/codeqlLogger.yml"><img src="https://github.com/alexbypa/CSharp.Essentials.Private/actions/workflows/codeqlLogger.yml/badge.svg" alt="CodeQL" /></a>
+	<a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper"><img src="https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg?label=NuGet&color=blue" alt="NuGet Version" /></a>
+	<a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper"><img src="https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg?label=downloads&color=brightgreen" alt="NuGet Downloads" /></a>
+	<img src="https://img.shields.io/badge/.NET-6%20%7C%208%20%7C%209%20%7C%2010-512BD4?logo=dotnet" alt=".NET Versions" />
+	<a href="https://github.com/alexbypa/CSharp.Essentials/actions/workflows/build-test.yml"><img src="https://github.com/alexbypa/CSharp.Essentials/actions/workflows/build-test.yml/badge.svg?branch=main" alt="Build and Test (src v5)" /></a>
+	<a href="https://github.com/alexbypa/CSharp.Essentials/actions/workflows/github-code-scanning/codeql"><img src="https://github.com/alexbypa/CSharp.Essentials/actions/workflows/github-code-scanning/codeql/badge.svg" alt="CodeQL" /></a>
+	<a href="https://github.com/alexbypa/CSharp.Essentials/actions/workflows/dependabot/dependabot-updates"><img src="https://github.com/alexbypa/CSharp.Essentials/actions/workflows/dependabot/dependabot-updates/badge.svg" alt="Dependabot Updates" /></a>
+	<a href="https://github.com/alexbypa/CSharp.Essentials/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
 </p>
 
 ---

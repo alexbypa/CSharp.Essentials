@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # Scansiona le dipendenze NuGet (i tuoi pacchetti C#)
+  - package-ecosystem: "nuget"
+    directory: "/src"
+    schedule:
+      interval: "weekly" # Controlla una volta a settimana per non intasarti di PR
+    open-pull-requests-limit: 5 # Massimo 5 PR aperte in contemporanea per evitare caos
+
+  # Scansiona anche le stesse GitHub Actions per evitare falle nella pipeline
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
