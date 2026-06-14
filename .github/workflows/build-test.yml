@@ -1,0 +1,45 @@
+name: Build and Test (src v5)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - '.github/workflows/build-test.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - '.github/workflows/build-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - name: Restore and build core
+        run: dotnet build src/CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj -c Release
+
+      - name: Build sinks
+        run: |
+          for proj in src/CSharpEssentials.LoggerHelper.Sink.*/*.csproj; do
+            dotnet build "$proj" -c Release
+          done
+
+      - name: Build TestApp (Minimal API)
+        run: dotnet build src/CSharpEssentials.LoggerHelper.TestApp/CSharpEssentials.LoggerHelper.TestApp.csproj -c Release
+
+      - name: Run Unit and Integration Tests (xUnit)
+        run: dotnet test src/CSharpEssentials.LoggerHelper.Tests/CSharpEssentials.LoggerHelper.Tests.csproj -c Release --logger GitHubActions

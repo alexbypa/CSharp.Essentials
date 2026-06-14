@@ -12,11 +12,11 @@
   <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper"><img src="https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg?label=NuGet&color=blue" alt="NuGet Version" /></a>
   <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper"><img src="https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg?label=downloads&color=brightgreen" alt="NuGet Downloads" /></a>
   <img src="https://img.shields.io/badge/.NET-6%20%7C%208%20%7C%209%20%7C%2010-512BD4?logo=dotnet" alt=".NET Versions" />
-  <a href="https://github.com/alexbypa/CSharp.Essentials/security/code-scanning"><img src="https://github.com/alexbypa/CSharp.Essentials/actions/workflows/github-code-scanning/codeql/badge.svg" alt="CodeQL" /></a>
-	<br><br>
-  <a href="https://github.com/alexbypa/CSharp.Essentials/actions/workflows/dependabot/dependabot-updates"><img src="https://github.com/alexbypa/CSharp.Essentials/actions/workflows/dependabot/dependabot-updates/badge.svg" alt="Dependabot Updates" /></a>
+  [![Build and Test (src v5)](https://github.com/alexbypa/CSharp.Essentials.Private/actions/workflows/build-test.yml/badge.svg?branch=main)](https://github.com/alexbypa/CSharp.Essentials.Private/actions/workflows/build-test.yml)
   <a href="https://github.com/alexbypa/CSharp.Essentials/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
+  <a href="https://github.com/alexbypa/CSharp.Essentials.Private/actions/workflows/codeqlLogger.yml"><img src="https://github.com/alexbypa/CSharp.Essentials.Private/actions/workflows/codeqlLogger.yml/badge.svg" alt="CodeQL" /></a>
 </p>
+
 ---
 
 **LoggerHelper** is a modular logging infrastructure for .NET. Install the core + only the sink packages you need, drop in a JSON config, and your entire app's `ILogger<T>` routes to Console, File, Email, Telegram, SQL Server, PostgreSQL, Elasticsearch, Seq, and Hangfire Console — each receiving only the log levels you configure.
@@ -31,7 +31,7 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 
 ---
 
-## Table of Contents	
+## Table of Contents
 
 - [The Boilerplate Problem](#-the-boilerplate-problem)
 - [Packages](#-packages)
