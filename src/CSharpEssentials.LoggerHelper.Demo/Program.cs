@@ -1,6 +1,6 @@
 using CSharpEssentials.LoggerHelper;
 using CSharpEssentials.LoggerHelper.Demo.Endpoints;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
