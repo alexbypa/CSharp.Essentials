@@ -39,7 +39,7 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 - [Quick Start](#-quick-start)
 - [Run the Demo in 60 Seconds](#-run-the-demo-in-60-seconds)
 - [Feature Highlights](#-feature-highlights)
-- [AI Integration — MCP Server](#-ai-integration--mcp-server-new-v509)
+- [AI Integration — MCP Server](#-ai-integration--mcp-server-new-v510)
 - [Sink Overview & JSON Examples](#-sink-overview--json-examples)
 - [Comparison](#-comparison)
 - [Architecture](#-architecture)
@@ -655,7 +655,6 @@ Reference `CSharpEssentials.LoggerHelper` as a NuGet package. The sink auto-regi
 
 | Feature | Description |
 |---------|-------------|
-| **LoggerHelper.AI** | Natural language log queries, anomaly detection, incident summarization via LLM |
 | **LoggerHelper.Dashboard** | Embedded real-time UI — active sinks, routing rules, recent errors |
 | **LoggerHelper.Telemetry** | OpenTelemetry metrics export — log counters per sink, error rates, latency |
 | **LoggerHelper.xUnit** | Forwards log output to xUnit test runner for integration test visibility |
