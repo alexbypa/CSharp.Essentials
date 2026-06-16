@@ -7,11 +7,11 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper HangfireConsole Sink — Write logs to the Hangfire Dashboard console</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Watch your background jobs log in real time. Colored output right on the Hangfire Dashboard — no more guessing what your jobs are doing. New in 5.0.2: Fixed critical bug where AddHangfireConsoleSink() did not wire the internal accessor, causing the sink to silently skip all log events.</Description>
+    <Description>Watch your background jobs log in real time. Colored, severity-coded output right on the Hangfire Dashboard — no more tailing log files to debug a recurring job. Integrates with ILogger&lt;T&gt; so your existing logging calls appear on the job console without any code changes. Use the PerformContext accessor pattern to scope log output to the running job.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
-    <PackageTags>serilog;logging;hangfire;console;sink;structured-logging;loggerhelper;dashboard</PackageTags>
+    <PackageTags>serilog;logging;hangfire;hangfire-console;background-jobs;sink;structured-logging;loggerhelper;dashboard;job-monitoring;ilogger;aspnetcore;dotnet8;dotnet9;dotnet10</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 

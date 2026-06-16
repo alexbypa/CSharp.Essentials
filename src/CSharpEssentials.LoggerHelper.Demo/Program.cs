@@ -1,5 +1,6 @@
 using CSharpEssentials.LoggerHelper;
 using CSharpEssentials.LoggerHelper.Demo.Endpoints;
+using CSharpEssentials.LoggerHelper.MCP;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Development → appsettings.LoggerHelper.debug.json (Console + File, no DB deps)
 // Production  → appsettings.LoggerHelper.json       (Console + File + MSSqlServer + PostgreSQL)
 builder.Services.AddLoggerHelper(builder.Configuration);
+builder.Services.AddLoggerHelperMcp();   // MCP server: POST /mcp (JSON-RPC 2.0)
 
 // ── Endpoint modules ────────────────────────────────────────────────────────
 builder.Services.AddSingleton<IEndpointDefinition, BasicLoggingEndpoints>();
@@ -17,6 +19,7 @@ builder.Services.AddSingleton<IEndpointDefinition, RoutingDemoEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, DiagnosticsEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, DynamicFileEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, SensitiveDataMaskingEndpoints>();
+builder.Services.AddSingleton<IEndpointDefinition, McpDemoEndpoints>();
 
 // ── Swagger ─────────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
@@ -42,7 +45,8 @@ builder.Services.AddSwaggerGen(c => {
 var app = builder.Build();
 
 // ── Middleware ──────────────────────────────────────────────────────────────
-app.UseLoggerHelper();   // request/response logging + correlation ID
+app.UseLoggerHelper();              // request/response logging + correlation ID
+app.MapLoggerHelperMcp("/mcp");     // MCP server for AI assistant tool calls
 app.UseSwagger();
 app.UseSwaggerUI(c => {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "LoggerHelper Demo v5");

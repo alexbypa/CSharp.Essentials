@@ -39,6 +39,7 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 - [Quick Start](#-quick-start)
 - [Run the Demo in 60 Seconds](#-run-the-demo-in-60-seconds)
 - [Feature Highlights](#-feature-highlights)
+- [AI Integration — MCP Server](#-ai-integration--mcp-server-new-v509)
 - [Sink Overview & JSON Examples](#-sink-overview--json-examples)
 - [Comparison](#-comparison)
 - [Architecture](#-architecture)
@@ -129,6 +130,8 @@ app.UseLoggerHelper();
 | [`...Sink.Postgresql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) | PostgreSQL, JSONB columns, custom schema | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Postgresql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) |
 | [`...Sink.Seq`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) | Seq centralized log server | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Seq.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) |
 | [`...Sink.HangfireConsole`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | Structured logs in Hangfire Dashboard with color output | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) |
+| [`...Sink.HangfireConsole`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | Structured logs in Hangfire Dashboard with color output | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) |
+| [`CSharpEssentials.LoggerHelper.MCP`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | **NEW v5.1.0** — MCP server: AI assistants can query sink health, errors & config | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) |
 | [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting, auto logging | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
 
 ---
@@ -342,6 +345,42 @@ logger.LogInformation("Login for {Email} with {Password}", "alice@example.com", 
 
 Serilog has no first-class equivalent: redaction usually means a hand-rolled `IDestructuringPolicy`
 or a third-party enricher wired up per project. Here it's one JSON block, applied globally.
+
+---
+
+## 🤖 AI Integration — MCP Server *(new v5.1.0)*
+
+```bash
+dotnet add package CSharpEssentials.LoggerHelper.MCP
+```
+
+Give your AI assistant live visibility into your running app's logging state. Two lines of setup
+expose a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server at `POST /mcp`
+that Claude, Cursor, GitHub Copilot, and any MCP-compatible client can query.
+
+```csharp
+// Program.cs — add after AddLoggerHelper()
+builder.Services.AddLoggerHelperMcp();
+// ...
+app.MapLoggerHelperMcp("/mcp");
+```
+
+**AI can now ask your app:**
+- *"Are all sinks healthy?"* → `loggerhelper_get_health` (OK / WARNING / CRITICAL)
+- *"Show me the last 10 logging errors"* → `loggerhelper_get_errors`
+- *"What levels does the Email sink receive?"* → `loggerhelper_get_sinks`
+- *"Is PII masking enabled?"* → `loggerhelper_get_config`
+
+```bash
+# Example: check health via curl
+curl -X POST http://localhost:5000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"loggerhelper_get_health","arguments":{}}}'
+```
+
+**Why this matters:** Every other .NET logging library requires a separate dashboard (Seq, Kibana,
+Grafana) before an AI assistant can see log state. LoggerHelper MCP ships that built in —
+zero extra infrastructure, zero extra dependencies, one NuGet package.
 
 ---
 

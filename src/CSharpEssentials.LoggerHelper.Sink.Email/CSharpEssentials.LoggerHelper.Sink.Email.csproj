@@ -7,11 +7,11 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper Email Sink — HTML email alerts with throttling and templates</Title>
     <Authors>Alessandro Chiodo</Authors>
-		<Description>Get emailed when it matters. Critical errors land in your inbox as beautiful HTML alerts — with smart throttling so you never get flooded. New in 5.0.5: HTML template and SmtpClient are cached at startup — zero per-email disk I/O or TCP handshake overhead.</Description>
+    <Description>Get emailed when it matters. Critical errors land in your inbox as beautiful HTML alerts — with smart throttling so you never get flooded. Template and SmtpClient cached at startup: zero per-email disk I/O or TCP handshake overhead. ConcurrentDictionary throttle window prevents duplicate alerts under burst load. Zero SMTP library dependencies — uses BCL SmtpClient.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
-    <PackageTags>serilog;logging;email;smtp;sink;alerts;monitoring;loggerhelper;structured-logging</PackageTags>
+    <PackageTags>serilog;logging;email;smtp;html-email;sink;alerts;monitoring;loggerhelper;structured-logging;throttling;error-alerts;production-monitoring;dotnet8;dotnet9;dotnet10</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>

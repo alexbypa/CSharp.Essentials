@@ -6,6 +6,53 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [5.1.0] — 2026-06-16
+
+### Added
+
+- **MCP Server — AI assistant tooling via Model Context Protocol** *(killer feature — see [growth audit](outcomes/audits/v5.1.0-growth-audit.md))*  
+  New package `CSharpEssentials.LoggerHelper.MCP` adds a zero-dependency MCP server
+  (JSON-RPC 2.0, Streamable HTTP transport) to any ASP.NET Core application that already
+  uses LoggerHelper. Two lines of setup expose four tools to any MCP-compatible AI client:
+
+  ```csharp
+  builder.Services.AddLoggerHelperMcp();
+  // ...
+  app.MapLoggerHelperMcp("/mcp");
+  ```
+
+  **Exposed tools:**
+  - `loggerhelper_get_health` — overall status (OK / WARNING / CRITICAL), sink count, error count
+  - `loggerhelper_get_errors` — recent sink errors from `ILogErrorStore` (accepts `count` param)
+  - `loggerhelper_get_sinks` — all configured routes with ACTIVE/FAILED status and log levels
+  - `loggerhelper_get_config` — application name, routing rules, masking settings
+
+  **Why this matters:** Serilog, NLog, and every other .NET logging library requires a separate
+  dashboard (Seq, Kibana, Grafana) to give AI assistants visibility into log state. LoggerHelper
+  MCP ships that capability built-in — zero extra infrastructure, zero extra dependencies
+  (pure `System.Text.Json` + ASP.NET Core), one NuGet package.
+
+  Compatible with: Claude, Cursor, GitHub Copilot, any MCP HTTP client.
+
+  Demonstrated end-to-end in `CSharpEssentials.LoggerHelper.Demo` at:
+  - `POST /mcp` — full JSON-RPC 2.0 server
+  - `GET /api/mcp-demo/tools` — discovery endpoint with curl examples
+  - `POST /api/mcp-demo/call/{toolName}` — REST shortcut for manual testing
+
+### Improved (NuGet SEO — FASE 1)
+
+- **All 11 packages** — `<PackageTags>` expanded with `.NET` version targets (`dotnet8`, `dotnet9`, `dotnet10`),
+  ecosystem terms (`zero-boilerplate`, `ilogger`, `aspnetcore`, `minimal-api`), and
+  technology-specific search terms per sink (e.g., `jsonb`, `ilm`, `live-tail`, `push-notifications`).
+- **Console sink** — `<Description>` updated to remove stale "5.0.1 File sink" mention.
+- **File sink** — duplicate `<PackageTags>` entry removed; `<Description>` added with v5.0.7 perf details.
+- **Email sink** — `<Description>` clarified: highlights throttle, template caching, zero-dependency.
+- **Telegram sink** — `<Description>` highlights fire-and-forget, throttle, zero-dependency.
+- **HangfireConsole sink** — `<Description>` rewritten to remove confusing "bug fix" framing.
+- **Core package** — `<Description>` updated to headline the MCP server as the v5.1.0 feature.
+
+---
+
 ## [5.0.8] — 2026-06-13
 
 ### Added

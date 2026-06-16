@@ -11,7 +11,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
-    <PackageTags>serilog;logging;postgresql;database;jsonb;sink;loggerhelper;structured-logging;observability</PackageTags>
+    <PackageTags>serilog;logging;postgresql;postgres;npgsql;jsonb;database;sink;structured-logging;loggerhelper;observability;auto-create-table;json-query;dotnet8;dotnet9;dotnet10;zero-migrations</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
