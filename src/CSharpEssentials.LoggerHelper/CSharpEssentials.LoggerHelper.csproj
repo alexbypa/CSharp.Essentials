@@ -9,7 +9,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>CSharpEssentials.LoggerHelper — Route Serilog sinks by level with zero code</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Stop wiring Serilog by hand. Add 3 lines of JSON and every ILogger&lt;T&gt; routes logs where they belong — errors to Email, info to Console, traces to Seq. 9 sinks, zero boilerplate. New in 5.1.0: built-in MCP (Model Context Protocol) server — point Claude, Cursor, or any AI assistant at POST /mcp to query sink health, errors, and config with natural language. The only .NET logging library with native AI tooling.</Description>
+    <Description>Stop wiring Serilog by hand. Add 3 lines of JSON and every ILogger&lt;T&gt; routes logs where they belong — errors to Email, info to Console, traces to Seq. 9 sinks, zero boilerplate. New in 5.1.1: built-in MCP (Model Context Protocol) server — point Claude, Cursor, or any AI assistant at POST /mcp to query sink health, errors, and config with natural language. The only .NET logging library with native AI tooling.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
   </PropertyGroup>

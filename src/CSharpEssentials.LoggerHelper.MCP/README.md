@@ -18,7 +18,7 @@ No dashboard to stand up. No extra infrastructure. Just one POST endpoint and fo
 dotnet add package CSharpEssentials.LoggerHelper.MCP
 ```
 
-Requires: `CSharpEssentials.LoggerHelper` ≥ 5.1.0
+Requires: `CSharpEssentials.LoggerHelper` ≥ 5.1.1
 
 ---
 

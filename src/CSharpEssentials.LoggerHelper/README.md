@@ -182,7 +182,7 @@ Sinks self-register via a plugin mechanism — the core package has zero depende
 
 ---
 
-## Per-route log sampling — New in 5.2.0
+## Per-route log sampling — New in 5.1.1
 
 Control log volume per sink with probabilistic sampling. Send 100% of errors to Email but only 10% of info-level logs to Elasticsearch:
 
@@ -200,7 +200,7 @@ Zero overhead when `SamplingRate` is `null` or `1.0` (default).
 
 ---
 
-## Embedded diagnostics dashboard — New in 5.3.0
+## Embedded diagnostics dashboard — New in 5.1.1
 
 See your logging pipeline health without leaving your browser:
 
@@ -381,7 +381,7 @@ to measure framework overhead independently of I/O.
 - [ ] **Source Generator** — replace runtime reflection for sink loading with a compile-time source generator: faster startup, AOT-compatible, trimming-safe
 - [ ] **BenchmarkDotNet suite** — published performance comparisons vs Serilog pure, NLog, and Microsoft.Extensions.Logging default provider
 - [ ] **`dotnet new` template** — `dotnet new loggerhelper-api` scaffolds a pre-configured project with zero friction
-- [x] **Dashboard** — embedded real-time UI showing active sinks, routing rules, and sink errors *(shipped in v5.3.0)*
+- [x] **Dashboard** — embedded real-time UI showing active sinks, routing rules, and sink errors *(shipped in v5.1.1)*
 - [ ] **xUnit sink** — forwards log output to xUnit test runner for integration test visibility
 - [ ] **AI extension** — natural language log queries, anomaly detection, and incident summarization via LLM
 - [ ] **Telemetry extension** — OpenTelemetry metrics export (log counters per sink, error rates, latency)

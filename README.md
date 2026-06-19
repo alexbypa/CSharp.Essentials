@@ -39,8 +39,8 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 - [Quick Start](#-quick-start)
 - [Run the Demo in 60 Seconds](#-run-the-demo-in-60-seconds)
 - [Feature Highlights](#-feature-highlights)
-- [AI Integration — MCP Server](#-ai-integration--mcp-server-new-v510)
-- [Embedded Diagnostics Dashboard](#-embedded-diagnostics-dashboard-new-v530)
+- [AI Integration — MCP Server](#-ai-integration--mcp-server-new-v511)
+- [Embedded Diagnostics Dashboard](#-embedded-diagnostics-dashboard-new-v511)
 - [Sink Overview & JSON Examples](#-sink-overview--json-examples)
 - [Comparison](#-comparison)
 - [Architecture](#-architecture)
@@ -131,8 +131,8 @@ app.UseLoggerHelper();
 | [`...Sink.Postgresql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) | PostgreSQL, JSONB columns, custom schema | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Postgresql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) |
 | [`...Sink.Seq`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) | Seq centralized log server | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Seq.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) |
 | [`...Sink.HangfireConsole`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | Structured logs in Hangfire Dashboard with color output | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) |
-| [`CSharpEssentials.LoggerHelper.MCP`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | **NEW v5.1.0** — MCP server: AI assistants can query sink health, errors & config | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) |
-| [`CSharpEssentials.LoggerHelper.Dashboard`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) | **NEW v5.3.0** — Embedded diagnostics UI: sink health, errors, routing — zero infrastructure | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Dashboard.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) |
+| [`CSharpEssentials.LoggerHelper.MCP`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | **NEW v5.1.1** — MCP server: AI assistants can query sink health, errors & config | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) |
+| [`CSharpEssentials.LoggerHelper.Dashboard`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) | **NEW v5.1.1** — Embedded diagnostics UI: sink health, errors, routing — zero infrastructure | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Dashboard.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) |
 | [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting, auto logging | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
 
 ---
@@ -313,7 +313,7 @@ Route logs to subdirectories based on any log property:
 Logs with `TenantId = "acme"` → `Logs/acme/log-20250101.txt`.  
 Logs without the property → `Logs/log-20250101.txt`.
 
-### Per-Route Log Sampling — Control Volume on Expensive Sinks *(new v5.2.0)*
+### Per-Route Log Sampling — Control Volume on Expensive Sinks *(new v5.1.1)*
 
 High-throughput apps generate millions of logs. You want 100% of errors in your database, but sending
 every single `Information` event to Elasticsearch burns cluster resources. With per-route sampling,
@@ -380,7 +380,7 @@ or a third-party enricher wired up per project. Here it's one JSON block, applie
 
 ---
 
-## 🤖 AI Integration — MCP Server *(new v5.1.0)*
+## 🤖 AI Integration — MCP Server *(new v5.1.1)*
 
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper.MCP
@@ -416,7 +416,7 @@ zero extra infrastructure, zero extra dependencies, one NuGet package.
 
 ---
 
-## 📊 Embedded Diagnostics Dashboard *(new v5.3.0)*
+## 📊 Embedded Diagnostics Dashboard *(new v5.1.1)*
 
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper.Dashboard
@@ -691,7 +691,7 @@ Every version ships a targeted performance audit. Key hot-path optimizations to 
 | v5.0.5 | `SinkRouting.Matches()` | `HashSet<LogEventLevel>` replaces string O(n) scan | Zero alloc per log event |
 | v5.0.5 | Telegram `Emit()` | Fire-and-forget `Task.Run` vs blocking `GetResult()` | No pipeline stall |
 | v5.0.5 | Email template | Cached at ctor vs `File.ReadAllText` per emit | No disk I/O on hot path |
-| v5.2.0 | `SinkRouting.ShouldEmit()` | `Random.Shared` (zero alloc); null-rate fast path | Zero overhead when sampling disabled |
+| v5.1.1 | `SinkRouting.ShouldEmit()` | `Random.Shared` (zero alloc); null-rate fast path | Zero overhead when sampling disabled |
 
 ### Building a Custom Sink
 

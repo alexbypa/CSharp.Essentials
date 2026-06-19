@@ -74,7 +74,7 @@ public static class McpExtensions {
                 Result = new {
                     protocolVersion = "2024-11-05",
                     capabilities    = new { tools = new { } },
-                    serverInfo      = new { name = "CSharpEssentials.LoggerHelper.MCP", version = "5.0.9" }
+                    serverInfo      = new { name = "CSharpEssentials.LoggerHelper.MCP", version = "5.1.1" }
                 }
             },
             "tools/list" => new McpResponse {

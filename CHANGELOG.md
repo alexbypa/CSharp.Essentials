@@ -6,7 +6,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [5.3.0] — 2026-06-18
+## [5.1.1] — 2026-06-19
 
 ### Added
 
@@ -35,13 +35,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
   Demonstrated in `CSharpEssentials.LoggerHelper.Demo` at `/loggerhelper-dashboard`.
 
----
-
-## [5.2.0] — 2026-06-18
-
-### Added
-
-- **Per-Route Log Sampling — probabilistic volume control per sink** *(killer feature — see [growth audit](outcomes/audits/v5.2.0-growth-audit.md))*
+- **Per-Route Log Sampling — probabilistic volume control per sink** *(killer feature)*
   New `SamplingRate` property on `SinkRouting` (0.0–1.0) controls what fraction of matching
   log events reach each sink. Serilog has no per-sink sampling — you'd need a custom
   `ILogEventFilter` wired per sink by hand.
