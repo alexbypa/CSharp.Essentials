@@ -58,7 +58,7 @@ public sealed class EmailSinkPlugin : ISinkPlugin {
         }
 
         loggerConfig.WriteTo.Conditional(
-            evt => routing.Matches(evt.Level),
+            evt => routing.ShouldEmit(evt.Level),
             wt => wt.Sink(new EmailLogEventSink(opts))
         );
     }

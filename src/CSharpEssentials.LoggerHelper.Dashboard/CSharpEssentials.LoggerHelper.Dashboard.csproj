@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageOutputPath>C:\Nuget</PackageOutputPath>
+    <Title>LoggerHelper Dashboard — Embedded real-time diagnostics UI for sink health and errors</Title>
+    <Authors>Alessandro Chiodo</Authors>
+    <Description>Zero-dependency embedded dashboard for CSharpEssentials.LoggerHelper. Add one line — app.MapLoggerHelperDashboard() — and get a live HTML page showing active/failed sinks, startup errors, routing configuration, and health status. No Seq, no Kibana, no Grafana required. The first .NET logging library with a built-in diagnostics UI. Auto-refreshes every 30 seconds.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
+    <PackageIcon>CSharpEssentials.png</PackageIcon>
+    <PackageTags>serilog;logging;dashboard;diagnostics;health-check;sink;loggerhelper;structured-logging;observability;monitoring;dotnet8;dotnet9;dotnet10;aspnetcore;embedded-ui;zero-dependency;real-time</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CSharpEssentials.LoggerHelper.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\img\CSharpEssentials.png" Pack="true" PackagePath="\" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -33,7 +33,7 @@ public sealed class ConsoleSinkPlugin : ISinkPlugin {
                    ?? options.BindSinkSection<ConsoleSinkOptions>("Console");
 
         loggerConfig.WriteTo.Conditional(
-            evt => routing.Matches(evt.Level),
+            evt => routing.ShouldEmit(evt.Level),
             wt => wt.Sink(new ColoredConsoleSink(opts?.OutputTemplate))
         );
     }

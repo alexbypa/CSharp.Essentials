@@ -39,7 +39,7 @@ public sealed class SeqSinkPlugin : ISinkPlugin {
         }
 
         loggerConfig.WriteTo.Conditional(
-            evt => routing.Matches(evt.Level),
+            evt => routing.ShouldEmit(evt.Level),
             wt => wt.Seq(
                 serverUrl: opts.ServerUrl,
                 apiKey: opts.ApiKey

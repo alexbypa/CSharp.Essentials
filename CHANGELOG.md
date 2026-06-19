@@ -6,6 +6,88 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [5.3.0] — 2026-06-18
+
+### Added
+
+- **Embedded Diagnostics Dashboard — real-time sink health UI with zero external dependencies** *(killer feature)*
+  New package `CSharpEssentials.LoggerHelper.Dashboard` serves a self-contained HTML dashboard
+  at any path you choose. One line of setup — no Seq, no Kibana, no Grafana required.
+
+  ```csharp
+  app.MapLoggerHelperDashboard();  // serves at /loggerhelper-dashboard
+  ```
+
+  **What the dashboard shows:**
+  - **Status cards** — overall health (OK / WARNING / CRITICAL), active sinks, failed sinks, error count
+  - **Sink Errors** — every error that prevented a sink from starting, with timestamp, message, stack trace, and context. Click a row to expand details
+  - **Sinks** — all configured sinks with ACTIVE/FAILED status, plugin type, and assigned log levels
+  - **Routing Configuration** — complete routing rules: which levels go to which sinks
+
+  **Features:**
+  - Zero external dependencies — self-contained HTML/CSS/JS served inline
+  - Auto-refresh every 30 seconds
+  - Dark theme, responsive on mobile
+  - Click-to-expand error rows with full stack trace
+  - Custom endpoint path: `app.MapLoggerHelperDashboard("/admin/logging")`
+
+  No other .NET logging library ships a built-in diagnostics dashboard.
+
+  Demonstrated in `CSharpEssentials.LoggerHelper.Demo` at `/loggerhelper-dashboard`.
+
+---
+
+## [5.2.0] — 2026-06-18
+
+### Added
+
+- **Per-Route Log Sampling — probabilistic volume control per sink** *(killer feature — see [growth audit](outcomes/audits/v5.2.0-growth-audit.md))*
+  New `SamplingRate` property on `SinkRouting` (0.0–1.0) controls what fraction of matching
+  log events reach each sink. Serilog has no per-sink sampling — you'd need a custom
+  `ILogEventFilter` wired per sink by hand.
+
+  ```jsonc
+  "Routes": [
+    { "Sink": "Console",       "Levels": ["Information", "Error"] },
+    { "Sink": "Elasticsearch", "Levels": ["Information"], "SamplingRate": 0.1 },
+    { "Sink": "Email",         "Levels": ["Error", "Fatal"] }
+  ]
+  ```
+
+  **Fluent API:**
+  ```csharp
+  builder.AddRoute("Elasticsearch", 0.1, LogEventLevel.Information, LogEventLevel.Warning);
+  ```
+
+  **Zero overhead when disabled:** when `SamplingRate` is `null` or `1.0` (the default),
+  `ShouldEmit()` skips the `Random.Shared.NextDouble()` call entirely — identical hot-path
+  performance to `Matches()` (zero allocations, O(1) hash lookup).
+
+  **MCP tools updated:** `loggerhelper_get_config` and `loggerhelper_get_sinks` now report
+  each route's sampling rate so AI assistants can identify under-sampled sinks.
+
+  Demonstrated end-to-end in `CSharpEssentials.LoggerHelper.Demo` at:
+  - `GET /api/sampling/burst` — emits 100 logs; cross-check counts per sink
+  - `GET /api/sampling/config` — shows effective sampling rate per route
+
+### Improved (NuGet SEO — FASE 1 continued)
+
+- **All 9 sink packages** — added `<RepositoryUrl>` and `<RepositoryType>` to `.csproj`
+  (previously only the core and MCP had them). GitHub now links each NuGet page to the source.
+- **HttpHelper** — added `net10.0` target framework and `<RepositoryType>`.
+- **All 9 sink plugins** — predicate updated from `routing.Matches(evt.Level)` to
+  `routing.ShouldEmit(evt.Level)` to honour sampling configuration.
+
+### Added (Developer Experience)
+
+- **`test-all-endpoints.http`** — 31-request `.http` file in the Demo project covering every
+  endpoint group (Basic, Trace, Properties, Routing, Diagnostics, File Dynamic, Masking, MCP,
+  Sampling). Open in VS Code REST Client or Rider HTTP Client for 1-click local validation.
+- **`SamplingDemoEndpoints`** — new endpoint module in the Demo app with burst test and config view.
+- **`SamplingSinkBenchmark`** — BenchmarkDotNet benchmark proving zero overhead when sampling is disabled.
+
+---
+
 ## [5.1.0] — 2026-06-16
 
 ### Added

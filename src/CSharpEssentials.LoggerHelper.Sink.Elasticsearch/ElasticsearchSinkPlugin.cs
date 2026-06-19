@@ -44,7 +44,7 @@ public sealed class ElasticsearchSinkPlugin : ISinkPlugin {
         }
 
         loggerConfig.WriteTo.Conditional(
-            evt => routing.Matches(evt.Level),
+            evt => routing.ShouldEmit(evt.Level),
             wt => wt.Elasticsearch(
                 nodeUris: opts.NodeUris,
                 indexFormat: opts.IndexFormat,

@@ -56,7 +56,7 @@ public sealed class FileSinkPlugin : ISinkPlugin {
             Directory.CreateDirectory(logDirectory);
 
             loggerConfig.WriteTo.Conditional(
-                evt => routing.Matches(evt.Level),
+                evt => routing.ShouldEmit(evt.Level),
                 wt => wt.File(
                     new JsonFormatter(),
                     logFilePath,
@@ -68,7 +68,7 @@ public sealed class FileSinkPlugin : ISinkPlugin {
         } else {
             var dynamicSink = new DynamicPropertyFileSink(opts);
             loggerConfig.WriteTo.Conditional(
-                evt => routing.Matches(evt.Level),
+                evt => routing.ShouldEmit(evt.Level),
                 wt => wt.Sink(dynamicSink)
             );
         }

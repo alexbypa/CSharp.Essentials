@@ -1,4 +1,5 @@
 using CSharpEssentials.LoggerHelper;
+using CSharpEssentials.LoggerHelper.Dashboard;
 using CSharpEssentials.LoggerHelper.Demo.Endpoints;
 using CSharpEssentials.LoggerHelper.MCP;
 using Microsoft.OpenApi;
@@ -20,6 +21,7 @@ builder.Services.AddSingleton<IEndpointDefinition, DiagnosticsEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, DynamicFileEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, SensitiveDataMaskingEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, McpDemoEndpoints>();
+builder.Services.AddSingleton<IEndpointDefinition, SamplingDemoEndpoints>();
 
 // ── Swagger ─────────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
@@ -47,6 +49,7 @@ var app = builder.Build();
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.UseLoggerHelper();              // request/response logging + correlation ID
 app.MapLoggerHelperMcp("/mcp");     // MCP server for AI assistant tool calls
+app.MapLoggerHelperDashboard();     // embedded diagnostics UI at /loggerhelper-dashboard
 app.UseSwagger();
 app.UseSwaggerUI(c => {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "LoggerHelper Demo v5");

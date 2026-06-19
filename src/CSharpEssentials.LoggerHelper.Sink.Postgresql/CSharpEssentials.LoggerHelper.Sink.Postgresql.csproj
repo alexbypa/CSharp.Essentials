@@ -9,6 +9,8 @@
     <Authors>Alessandro Chiodo</Authors>
     <Description>Logs meet PostgreSQL. JSONB fields you can query, auto-created tables, and the full power of SQL — perfect for teams already running Postgres. NeedAutoCreateTable means zero migrations to get started.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageTags>serilog;logging;postgresql;postgres;npgsql;jsonb;database;sink;structured-logging;loggerhelper;observability;auto-create-table;json-query;dotnet8;dotnet9;dotnet10;zero-migrations</PackageTags>

@@ -1,0 +1,132 @@
+### ═══════════════════════════════════════════════════════════════
+### CSharpEssentials.LoggerHelper Demo — 1-Click API Test Suite
+### Run with:  dotnet run --project src/CSharpEssentials.LoggerHelper.Demo
+### Then fire each request to exercise every endpoint.
+### ═══════════════════════════════════════════════════════════════
+
+@baseUrl = http://localhost:5000
+
+### ── Basic Logging ─────────────────────────────────────────────
+
+### 1. Simple Information log
+GET {{baseUrl}}/api/basic/info
+
+### 2. All 6 log levels
+GET {{baseUrl}}/api/basic/levels
+
+### 3. Structured properties (OrderId, Customer, Amount)
+GET {{baseUrl}}/api/basic/structured
+
+### 4. Exception logged at Error level
+GET {{baseUrl}}/api/basic/exception
+
+### ── Trace API ─────────────────────────────────────────────────
+
+### 5. BeginTrace scope — multi-step operation
+GET {{baseUrl}}/api/trace/scope
+
+### 6. Single-shot trace with exception
+GET {{baseUrl}}/api/trace/single-shot
+
+### 7. Shorthand trace (Information, no exception)
+GET {{baseUrl}}/api/trace/shorthand
+
+### ── Custom Properties ─────────────────────────────────────────
+
+### 8. Custom scope properties (CustomerId, Region, TenantId)
+GET {{baseUrl}}/api/properties/scope
+
+### 9. Nested scopes (BeginTrace + custom)
+GET {{baseUrl}}/api/properties/nested
+
+### 10. Inline structured properties
+GET {{baseUrl}}/api/properties/inline
+
+### ── Routing Demo ──────────────────────────────────────────────
+
+### 11. Fire all levels — verify per-sink routing
+GET {{baseUrl}}/api/routing/test
+
+### 12. Show internal errors
+GET {{baseUrl}}/api/routing/errors
+
+### 13. Show active configuration
+GET {{baseUrl}}/api/routing/config
+
+### ── Diagnostics ───────────────────────────────────────────────
+
+### 14. Pipeline health check
+GET {{baseUrl}}/api/diagnostics/health
+
+### 15. Clear internal error store
+DELETE {{baseUrl}}/api/diagnostics/errors
+
+### ── Dynamic File Routing ──────────────────────────────────────
+
+### 16. Single tenant logs
+GET {{baseUrl}}/api/file-dynamic/tenant/acme
+
+### 17. Multi-tenant logs (3 tenants)
+GET {{baseUrl}}/api/file-dynamic/multi-tenant
+
+### 18. No tenant (base path fallback)
+GET {{baseUrl}}/api/file-dynamic/no-tenant
+
+### 19. Mixed tenant / no-tenant
+GET {{baseUrl}}/api/file-dynamic/mixed
+
+### 20. Verify log files on disk
+GET {{baseUrl}}/api/file-dynamic/verify
+
+### ── Sensitive Data Masking ────────────────────────────────────
+
+### 21. Mask email, password, credit card
+GET {{baseUrl}}/api/masking/login
+
+### 22. Mask Bearer token, connection string, custom regex
+GET {{baseUrl}}/api/masking/api-error
+
+### ── MCP Server ────────────────────────────────────────────────
+
+### 23. List available MCP tools
+GET {{baseUrl}}/api/mcp-demo/tools
+
+### 24. Call MCP tool — health
+POST {{baseUrl}}/api/mcp-demo/call/get-health
+
+### 25. Call MCP tool — errors
+POST {{baseUrl}}/api/mcp-demo/call/get-errors
+
+### 26. Call MCP tool — sinks
+POST {{baseUrl}}/api/mcp-demo/call/get-sinks
+
+### 27. Call MCP tool — config
+POST {{baseUrl}}/api/mcp-demo/call/get-config
+
+### 28. Raw MCP JSON-RPC — list tools
+POST {{baseUrl}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}
+
+### 29. Raw MCP JSON-RPC — get health
+POST {{baseUrl}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"loggerhelper_get_health","arguments":{}}}
+
+### ── Sampling (v5.2.0) ─────────────────────────────────────────
+
+### 30. Emit 100 logs — observe sampling per sink
+GET {{baseUrl}}/api/sampling/burst
+
+### 31. Show sampling config for all routes
+GET {{baseUrl}}/api/sampling/config
+
+### ── Dashboard (v5.3.0) ────────────────────────────────────────
+
+### 32. Open embedded diagnostics dashboard (HTML page)
+GET {{baseUrl}}/loggerhelper-dashboard
+
+### 33. Dashboard JSON API — raw diagnostics data
+GET {{baseUrl}}/loggerhelper-dashboard/api/data

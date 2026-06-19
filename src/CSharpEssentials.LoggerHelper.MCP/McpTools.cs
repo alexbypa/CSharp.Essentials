@@ -49,11 +49,14 @@ public sealed class LoggerHelperMcpTools {
         if (sinks.Count == 0)
             return "No sinks are currently loaded.";
 
+        var routeLookup = _options.Routes.ToDictionary(r => r.Sink, r => r, StringComparer.OrdinalIgnoreCase);
         var sb = new StringBuilder();
         sb.AppendLine($"Loaded LoggerHelper sinks ({sinks.Count}):");
         foreach (var s in sinks) {
             var status = s.Configured ? "ACTIVE" : "FAILED";
-            sb.AppendLine($"  [{status}] {s.SinkName} | Levels: [{string.Join(", ", s.Levels)}]");
+            var sampling = routeLookup.TryGetValue(s.SinkName, out var route) && route.SamplingRate is not null and < 1.0
+                ? $" | Sampling: {route.SamplingRate:P0}" : "";
+            sb.AppendLine($"  [{status}] {s.SinkName} | Levels: [{string.Join(", ", s.Levels)}]{sampling}");
         }
         return sb.ToString();
     }
@@ -68,8 +71,10 @@ public sealed class LoggerHelperMcpTools {
         sb.AppendLine($"  Application : {_options.ApplicationName}");
         sb.AppendLine($"  Masking     : {(_options.SensitiveDataMasking.Enabled ? "enabled" : "disabled")}");
         sb.AppendLine($"  Routes ({_options.Routes.Count}):");
-        foreach (var r in _options.Routes)
-            sb.AppendLine($"    -> {r.Sink}: [{string.Join(", ", r.Levels)}]");
+        foreach (var r in _options.Routes) {
+            var sampling = r.SamplingRate is null or >= 1.0 ? "" : $" | Sampling: {r.SamplingRate:P0}";
+            sb.AppendLine($"    -> {r.Sink}: [{string.Join(", ", r.Levels)}]{sampling}");
+        }
         return sb.ToString();
     }
 

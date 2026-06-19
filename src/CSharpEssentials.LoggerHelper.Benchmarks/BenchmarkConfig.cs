@@ -7,24 +7,16 @@ using BenchmarkDotNet.Jobs;
 namespace CSharpEssentials.LoggerHelper.Benchmarks;
 
 /// <summary>
-/// Benchmark configuration that limits CPU and memory usage.
-///
-/// Usage:
-///   Quick run (low resource, ~2 min per benchmark class):
-///     dotnet run -c Release --framework net9.0 -- --filter * --job short
-///
-///   Full run (accurate results, takes longer):
-///     dotnet run -c Release --framework net9.0 -- --filter *
-///
-///   Single benchmark only:
-///     dotnet run -c Release --framework net9.0 -- --filter *Throughput*
+/// CI-friendly benchmark configuration: short runs, GitHub Markdown export, memory diagnostics.
+/// Applied as the default config in Program.cs so all benchmarks inherit it automatically.
 /// </summary>
-public class LightConfig : ManualConfig {
-    public LightConfig() {
+public class CIConfig : ManualConfig {
+    public CIConfig() {
+        AddColumnProvider(DefaultColumnProviders.Instance);
         AddJob(Job.ShortRun
             .WithLaunchCount(1)
             .WithWarmupCount(3)
-            .WithIterationCount(3));
+            .WithIterationCount(5));
         AddDiagnoser(MemoryDiagnoser.Default);
         AddExporter(MarkdownExporter.GitHub);
         AddColumn(RankColumn.Arabic);

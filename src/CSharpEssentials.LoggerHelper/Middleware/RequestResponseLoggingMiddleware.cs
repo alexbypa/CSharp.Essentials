@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System.Buffers;
 using System.Text;
 
 namespace CSharpEssentials.LoggerHelper;
@@ -61,6 +62,7 @@ public sealed class RequestResponseLoggingMiddleware {
 
     /// <summary>
     /// Reads a stream body with size limit to prevent memory exhaustion.
+    /// Uses ArrayPool&lt;char&gt; to avoid a 128 KB heap allocation on every request.
     /// </summary>
     private static async Task<string> ReadBodySafe(Stream stream) {
         if (!stream.CanRead)
@@ -77,18 +79,24 @@ public sealed class RequestResponseLoggingMiddleware {
             bufferSize: 1024,
             leaveOpen: true);
 
-        var buffer = new char[MaxBodySize];
-        var charsRead = await reader.ReadAsync(buffer, 0, MaxBodySize);
+        // Rent a shared buffer instead of allocating 128 KB per request on the heap.
+        // ArrayPool.Shared returns a thread-local or pooled array — GC-free hot path.
+        var buffer = ArrayPool<char>.Shared.Rent(MaxBodySize);
+        try {
+            var charsRead = await reader.ReadAsync(buffer.AsMemory(0, MaxBodySize));
 
-        if (charsRead == 0)
-            return string.Empty;
+            if (charsRead == 0)
+                return string.Empty;
 
-        var result = new string(buffer, 0, charsRead);
+            var result = new string(buffer, 0, charsRead);
 
-        // Check if there's more data (truncated)
-        if (charsRead == MaxBodySize && reader.Peek() >= 0)
-            return result + "... (truncated)";
+            // Check if there's more data (truncated)
+            if (charsRead == MaxBodySize && reader.Peek() >= 0)
+                return result + "... (truncated)";
 
-        return result;
+            return result;
+        } finally {
+            ArrayPool<char>.Shared.Return(buffer);
+        }
     }
 }

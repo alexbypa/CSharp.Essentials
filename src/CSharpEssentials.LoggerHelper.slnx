@@ -14,5 +14,6 @@
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Telegram/CSharpEssentials.LoggerHelper.Sink.Telegram.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.TestApp/CSharpEssentials.LoggerHelper.TestApp.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Tests/CSharpEssentials.LoggerHelper.Tests.csproj" />
+  <Project Path="CSharpEssentials.LoggerHelper.Dashboard/CSharpEssentials.LoggerHelper.Dashboard.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj" />
 </Solution>
