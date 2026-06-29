@@ -50,7 +50,7 @@ public sealed class TelegramSinkPlugin : ISinkPlugin {
         }
 
         loggerConfig.WriteTo.Conditional(
-            evt => routing.ShouldEmit(evt.Level),
+            evt => routing.Matches(evt.Level),
             wt => wt.Sink(new TelegramLogEventSink(opts))
         );
     }

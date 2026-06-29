@@ -19,7 +19,10 @@ internal static class LoggerPipelineFactory {
         ISinkPluginRegistry registry,
         IPluginDiscovery pluginDiscovery,
         Action<LoggerConfiguration>? customEnrichers,
+        out ContextualLogBuffer? contextBuffer,
         IContextLogEnricher? contextEnricher = null) {
+
+        contextBuffer = null;
 
         // Enable SelfLog if requested
         if (options.General.EnableSelfLogging)
@@ -57,6 +60,21 @@ internal static class LoggerPipelineFactory {
         var engine = new SinkRoutingEngine(options, errorStore, loadedSinkStore, registry, pluginDiscovery);
         engine.ConfigureRoutes(loggerConfig);
 
-        return loggerConfig.CreateLogger();
+        // Contextual error logging: ring buffer for crash context
+        LoggerHolder? contextLoggerHolder = null;
+        if (options.General.EnableContextualLogging) {
+            contextBuffer = new ContextualLogBuffer(options.General.ContextualBufferCapacity);
+            contextLoggerHolder = new LoggerHolder();
+            var contextSink = new ContextualLogSink(contextBuffer, contextLoggerHolder);
+            loggerConfig.WriteTo.Sink(contextSink, Serilog.Events.LogEventLevel.Debug);
+        }
+
+        var logger = loggerConfig.CreateLogger();
+
+        // Set the flush target now that the logger is built
+        if (contextLoggerHolder is not null)
+            contextLoggerHolder.Logger = logger;
+
+        return logger;
     }
 }

@@ -10,8 +10,6 @@
     <Authors>Alessandro Chiodo</Authors>
     <Description>See your logs in color, instantly. Add Console to your LoggerHelper routes and get beautiful, level-filtered colored output — zero configuration beyond a single JSON entry. Auto-registered via [ModuleInitializer]: no code changes, just add the NuGet. Part of the CSharpEssentials.LoggerHelper ecosystem with 9 pluggable sinks and now a built-in MCP server for AI assistant integration.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageTags>serilog;logging;console;colored-console;sink;structured-logging;loggerhelper;ilogger;level-routing;aspnetcore;minimal-api;dotnet8;dotnet9;dotnet10;zero-boilerplate</PackageTags>

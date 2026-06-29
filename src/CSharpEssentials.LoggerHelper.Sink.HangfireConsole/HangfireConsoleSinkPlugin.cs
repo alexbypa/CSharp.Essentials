@@ -88,7 +88,7 @@ public sealed class HangfireConsoleSinkPlugin : ISinkPlugin {
         }
 
         loggerConfig.WriteTo.Conditional(
-            evt => routing.ShouldEmit(evt.Level),
+            evt => routing.Matches(evt.Level),
             wt => wt.Sink(new HangfireConsoleSerilogSink(accessor, opts?.FormatProvider))
         );
     }

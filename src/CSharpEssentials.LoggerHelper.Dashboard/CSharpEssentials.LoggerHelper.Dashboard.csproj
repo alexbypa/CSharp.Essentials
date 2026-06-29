@@ -7,21 +7,17 @@
     <LangVersion>12</LangVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
-    <Title>LoggerHelper Dashboard — Embedded real-time diagnostics UI for sink health and errors</Title>
+    <Title>LoggerHelper Dashboard — Embedded diagnostics UI for your .NET app</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Zero-dependency embedded dashboard for CSharpEssentials.LoggerHelper. Add one line — app.MapLoggerHelperDashboard() — and get a live HTML page showing active/failed sinks, startup errors, routing configuration, and health status. No Seq, no Kibana, no Grafana required. The first .NET logging library with a built-in diagnostics UI. Auto-refreshes every 30 seconds.</Description>
+    <Description>Add a real-time diagnostics dashboard to any ASP.NET Core app with one line of code. CSharpEssentials.LoggerHelper.Dashboard embeds a zero-dependency HTML UI at /loggerhelper that shows sink health, live log stream, error history, routing config, and performance metrics — no Seq, Kibana, or external tools needed. Toggle sinks and change log levels from the browser. Dark theme, auto-refresh, mobile-friendly.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
-    <PackageTags>serilog;logging;dashboard;diagnostics;health-check;sink;loggerhelper;structured-logging;observability;monitoring;dotnet8;dotnet9;dotnet10;aspnetcore;embedded-ui;zero-dependency;real-time</PackageTags>
+    <PackageTags>serilog;logging;dashboard;diagnostics;monitoring;health-check;log-viewer;real-time;embedded-ui;aspnetcore;dotnet;observability;sink-management;zero-dependency;dark-theme;dotnet8;dotnet9;dotnet10</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
   </PropertyGroup>
-
-  <ItemGroup>
-    <InternalsVisibleTo Include="CSharpEssentials.LoggerHelper.Tests" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\img\CSharpEssentials.png" Pack="true" PackagePath="\" />

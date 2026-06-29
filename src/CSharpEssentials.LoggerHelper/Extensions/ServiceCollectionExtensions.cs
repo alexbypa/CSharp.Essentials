@@ -93,7 +93,8 @@ public static class ServiceCollectionExtensions {
 
         // Build eagerly to avoid circular resolution (ILoggerProvider ↔ Serilog.ILogger) during DI startup.
         var serilogLogger = LoggerPipelineFactory.Build(
-            options, errorStore, loadedSinkStore, registry, discovery, customEnrichers, contextEnricher: null);
+            options, errorStore, loadedSinkStore, registry, discovery, customEnrichers,
+            out var contextBuffer, contextEnricher: null);
 
         // Wire legacy static API for backward compatibility
         LegacyLoggerHolder.Instance = serilogLogger;
@@ -108,6 +109,10 @@ public static class ServiceCollectionExtensions {
         services.AddSingleton<Serilog.ILogger>(serilogLogger);
         services.AddSingleton<ILoggerProvider>(sp =>
             new LoggerHelperProvider(serilogLogger, sp.GetService<IContextLogEnricher>()));
+
+        // Register the contextual log buffer if enabled
+        if (contextBuffer is not null)
+            services.AddSingleton(contextBuffer);
 
         return services;
     }

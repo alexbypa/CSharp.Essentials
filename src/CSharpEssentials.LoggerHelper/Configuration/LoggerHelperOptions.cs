@@ -107,4 +107,15 @@ public sealed class GeneralOptions {
     /// Disabled by default to reduce per-log allocations.
     /// </summary>
     public bool EnableRenderedMessage { get; set; }
+
+    /// <summary>
+    /// Enable contextual error logging: retains recent Debug/Info/Warning logs in a ring buffer
+    /// and flushes them when an Error/Fatal occurs, providing crash context.
+    /// </summary>
+    public bool EnableContextualLogging { get; set; }
+
+    /// <summary>
+    /// Number of log entries to retain in the contextual ring buffer. Default: 100.
+    /// </summary>
+    public int ContextualBufferCapacity { get; set; } = 100;
 }

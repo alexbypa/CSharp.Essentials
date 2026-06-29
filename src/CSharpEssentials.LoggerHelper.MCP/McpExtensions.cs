@@ -1,3 +1,4 @@
+using CSharpEssentials.LoggerHelper.Diagnostics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -30,7 +31,12 @@ public static class McpExtensions {
     /// Call this before <c>builder.Build()</c>.
     /// </summary>
     public static IServiceCollection AddLoggerHelperMcp(this IServiceCollection services) {
-        services.AddTransient<LoggerHelperMcpTools>();
+        services.AddTransient<LoggerHelperMcpTools>(sp => new LoggerHelperMcpTools(
+            sp.GetRequiredService<ILogErrorStore>(),
+            sp.GetRequiredService<ILoadedSinkStore>(),
+            sp.GetRequiredService<LoggerHelperOptions>(),
+            sp.GetService<ContextualLogBuffer>()
+        ));
         return services;
     }
 
@@ -62,7 +68,8 @@ public static class McpExtensions {
             "Exposes LoggerHelper diagnostics to any MCP-compatible AI client. " +
             "Supported methods: initialize, tools/list, tools/call. " +
             "Available tools: loggerhelper_get_health, loggerhelper_get_errors, " +
-            "loggerhelper_get_sinks, loggerhelper_get_config.");
+            "loggerhelper_get_sinks, loggerhelper_get_config, loggerhelper_set_log_level, " +
+            "loggerhelper_search_logs, loggerhelper_toggle_sink.");
 
         return endpoints;
     }
@@ -74,7 +81,7 @@ public static class McpExtensions {
                 Result = new {
                     protocolVersion = "2024-11-05",
                     capabilities    = new { tools = new { } },
-                    serverInfo      = new { name = "CSharpEssentials.LoggerHelper.MCP", version = "5.1.1" }
+                    serverInfo      = new { name = "CSharpEssentials.LoggerHelper.MCP", version = "5.2.0" }
                 }
             },
             "tools/list" => new McpResponse {
@@ -102,10 +109,13 @@ public static class McpExtensions {
         string text;
         try {
             text = toolName switch {
-                "loggerhelper_get_errors" => tools.GetErrors(GetInt(args, "count", 20)),
-                "loggerhelper_get_sinks"  => tools.GetSinks(),
-                "loggerhelper_get_config" => tools.GetConfig(),
-                "loggerhelper_get_health" => tools.GetHealth(),
+                "loggerhelper_get_errors"    => tools.GetErrors(GetInt(args, "count", 20)),
+                "loggerhelper_get_sinks"     => tools.GetSinks(),
+                "loggerhelper_get_config"    => tools.GetConfig(),
+                "loggerhelper_get_health"    => tools.GetHealth(),
+                "loggerhelper_set_log_level" => tools.SetLogLevel(GetString(args, "sink", "")!, GetString(args, "levels", "")!),
+                "loggerhelper_search_logs"   => tools.SearchLogs(GetString(args, "query", null), GetString(args, "level", null), GetInt(args, "count", 50)),
+                "loggerhelper_toggle_sink"   => tools.ToggleSink(GetString(args, "sink", "")!, GetBool(args, "enabled", true)),
                 _ => throw new InvalidOperationException($"Unknown tool: {toolName}")
             };
         } catch (Exception ex) {
@@ -146,6 +156,42 @@ public static class McpExtensions {
             Name        = "loggerhelper_get_config",
             Description = "Returns the current LoggerHelper configuration: application name, routing rules, and sensitive data masking settings.",
             InputSchema = new { type = "object", properties = new { } }
+        },
+        new McpToolDefinition {
+            Name        = "loggerhelper_set_log_level",
+            Description = "Changes the log level routing for a specific sink at runtime. No restart required.",
+            InputSchema = new {
+                type       = "object",
+                properties = new {
+                    sink   = new { type = "string", description = "Sink name (e.g., Console, File, Email)" },
+                    levels = new { type = "string", description = "Comma-separated log levels (e.g., 'Error,Fatal' or 'Debug,Information,Warning,Error')" }
+                },
+                required = new[] { "sink", "levels" }
+            }
+        },
+        new McpToolDefinition {
+            Name        = "loggerhelper_search_logs",
+            Description = "Searches recent log entries in the in-memory contextual ring buffer. Filter by text query and/or log level.",
+            InputSchema = new {
+                type       = "object",
+                properties = new {
+                    query = new { type = "string", description = "Text to search for in log messages (case-insensitive)" },
+                    level = new { type = "string", description = "Filter by log level (Verbose, Debug, Information, Warning, Error, Fatal)" },
+                    count = new { type = "integer", description = "Maximum number of entries to return (default: 50)" }
+                }
+            }
+        },
+        new McpToolDefinition {
+            Name        = "loggerhelper_toggle_sink",
+            Description = "Enables or disables a sink at runtime without application restart. Disabled sinks stop receiving log events; re-enabling restores previous levels.",
+            InputSchema = new {
+                type       = "object",
+                properties = new {
+                    sink    = new { type = "string", description = "Sink name to toggle (e.g., Console, Email, Telegram)" },
+                    enabled = new { type = "boolean", description = "true to enable, false to disable" }
+                },
+                required = new[] { "sink", "enabled" }
+            }
         }
     };
 
@@ -154,6 +200,25 @@ public static class McpExtensions {
             && j.TryGetProperty(key, out var prop)
             && prop.TryGetInt32(out var val))
             return val;
+        return fallback;
+    }
+
+    private static string? GetString(JsonElement? el, string key, string? fallback) {
+        if (el is { ValueKind: JsonValueKind.Object } j
+            && j.TryGetProperty(key, out var prop)
+            && prop.ValueKind == JsonValueKind.String)
+            return prop.GetString();
+        return fallback;
+    }
+
+    private static bool GetBool(JsonElement? el, string key, bool fallback) {
+        if (el is { ValueKind: JsonValueKind.Object } j
+            && j.TryGetProperty(key, out var prop))
+            return prop.ValueKind switch {
+                JsonValueKind.True => true,
+                JsonValueKind.False => false,
+                _ => fallback
+            };
         return fallback;
     }
 }

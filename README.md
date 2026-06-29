@@ -39,8 +39,9 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 - [Quick Start](#-quick-start)
 - [Run the Demo in 60 Seconds](#-run-the-demo-in-60-seconds)
 - [Feature Highlights](#-feature-highlights)
-- [AI Integration — MCP Server](#-ai-integration--mcp-server-new-v511)
-- [Embedded Diagnostics Dashboard](#-embedded-diagnostics-dashboard-new-v511)
+- [Contextual Error Logging](#-contextual-error-logging--zero-allocation-ring-buffer-new-v520)
+- [AI Integration — MCP Server](#-ai-integration--mcp-server-v520--7-tools)
+- [Embedded Dashboard](#-embedded-dashboard-new-v520)
 - [Sink Overview & JSON Examples](#-sink-overview--json-examples)
 - [Comparison](#-comparison)
 - [Architecture](#-architecture)
@@ -131,8 +132,8 @@ app.UseLoggerHelper();
 | [`...Sink.Postgresql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) | PostgreSQL, JSONB columns, custom schema | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Postgresql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) |
 | [`...Sink.Seq`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) | Seq centralized log server | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Seq.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) |
 | [`...Sink.HangfireConsole`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | Structured logs in Hangfire Dashboard with color output | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) |
-| [`CSharpEssentials.LoggerHelper.MCP`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | **NEW v5.1.1** — MCP server: AI assistants can query sink health, errors & config | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) |
-| [`CSharpEssentials.LoggerHelper.Dashboard`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) | **NEW v5.1.1** — Embedded diagnostics UI: sink health, errors, routing — zero infrastructure | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Dashboard.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) |
+| [`CSharpEssentials.LoggerHelper.MCP`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | MCP server: 7 tools — AI can query, search, and **control** your logging | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) |
+| [`CSharpEssentials.LoggerHelper.Dashboard`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) | **NEW v5.2.0** — Embedded diagnostics UI at /loggerhelper, live log stream | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Dashboard.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) |
 | [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting, auto logging | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
 
 ---
@@ -313,37 +314,6 @@ Route logs to subdirectories based on any log property:
 Logs with `TenantId = "acme"` → `Logs/acme/log-20250101.txt`.  
 Logs without the property → `Logs/log-20250101.txt`.
 
-### Per-Route Log Sampling — Control Volume on Expensive Sinks *(new v5.1.1)*
-
-High-throughput apps generate millions of logs. You want 100% of errors in your database, but sending
-every single `Information` event to Elasticsearch burns cluster resources. With per-route sampling,
-one JSON property solves it:
-
-```jsonc
-"Routes": [
-  { "Sink": "Console",       "Levels": ["Information", "Warning", "Error", "Fatal"] },
-  { "Sink": "Elasticsearch", "Levels": ["Information", "Warning"], "SamplingRate": 0.1 },
-  { "Sink": "Email",         "Levels": ["Error", "Fatal"] }
-]
-```
-
-`SamplingRate: 0.1` means ~10% of matching events reach Elasticsearch. Errors still go to Email at 100%.
-Serilog has no per-sink sampling — you'd need a custom `ILogEventFilter` per sink.
-
-**Fluent API:**
-```csharp
-builder.Services.AddLoggerHelper(b => b
-    .AddRoute("Console", LogEventLevel.Information, LogEventLevel.Error)
-    .AddRoute("Elasticsearch", 0.1, LogEventLevel.Information, LogEventLevel.Warning)
-    .AddRoute("Email", LogEventLevel.Error, LogEventLevel.Fatal)
-);
-```
-
-**Zero overhead when disabled:** when `SamplingRate` is `null` or `1.0` (the default), `ShouldEmit()`
-is identical to `Matches()` — no random call, no branch, no allocation.
-
----
-
 ### Sensitive Data Masking — One JSON Block Protects Every Sink
 
 Stop writing `Regex.Replace` calls before every `logger.LogInformation`. Declare what's sensitive
@@ -380,15 +350,42 @@ or a third-party enricher wired up per project. Here it's one JSON block, applie
 
 ---
 
-## 🤖 AI Integration — MCP Server *(new v5.1.1)*
+## 🧠 Contextual Error Logging — Zero-Allocation Ring Buffer *(new v5.2.0)*
+
+Ever had a production error and wished you could see the Debug/Info logs that led up to it? Contextual logging solves this without keeping verbose logging on permanently.
+
+**How it works:** A pre-allocated, lock-free ring buffer retains the last N log entries (Debug, Info, Warning). When an Error or Fatal occurs, the buffer automatically flushes all context entries to your configured sinks with `IsContextualHistory = true`.
+
+```jsonc
+"General": {
+  "EnableContextualLogging": true,
+  "ContextualBufferCapacity": 200
+}
+```
+
+**What you get on crash:**
+```
+[Error] PaymentService: Payment failed for order ORD-42
+  ↳ [Context] [Debug]       OrderService: Loading order ORD-42 from cache
+  ↳ [Context] [Information] OrderService: Order validated, total: $149.99
+  ↳ [Context] [Information] PaymentService: Initiating payment with gateway
+  ↳ [Context] [Warning]     PaymentService: Gateway response slow (2.3s)
+```
+
+- **Zero allocations** after startup — pre-allocated array, `Interlocked` operations
+- **Thread-safe** — no locks, O(1) push
+- **Non-destructive `Snapshot()`** for MCP search and Dashboard live view
+- **Serilog/NLog equivalent:** None. This requires custom middleware and manual buffer management.
+
+---
+
+## 🤖 AI Integration — MCP Server *(v5.2.0 — 7 tools)*
 
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper.MCP
 ```
 
-Give your AI assistant live visibility into your running app's logging state. Two lines of setup
-expose a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server at `POST /mcp`
-that Claude, Cursor, GitHub Copilot, and any MCP-compatible client can query.
+Give your AI assistant live visibility **and control** over your running app's logging. Two lines of setup expose a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server at `POST /mcp` with 7 tools.
 
 ```csharp
 // Program.cs — add after AddLoggerHelper()
@@ -398,56 +395,60 @@ app.MapLoggerHelperMcp("/mcp");
 ```
 
 **AI can now ask your app:**
-- *"Are all sinks healthy?"* → `loggerhelper_get_health` (OK / WARNING / CRITICAL)
-- *"Show me the last 10 logging errors"* → `loggerhelper_get_errors`
-- *"What levels does the Email sink receive?"* → `loggerhelper_get_sinks`
-- *"Is PII masking enabled?"* → `loggerhelper_get_config`
+
+| Tool | What it does | Example prompt |
+|------|-------------|----------------|
+| `loggerhelper_get_health` | Overall status (OK/WARNING/CRITICAL) | *"Are all sinks healthy?"* |
+| `loggerhelper_get_errors` | Recent sink errors | *"Show me the last 10 logging errors"* |
+| `loggerhelper_get_sinks` | All sinks with ACTIVE/FAILED status | *"What levels does Email receive?"* |
+| `loggerhelper_get_config` | App name, routes, masking, buffer | *"Is PII masking enabled?"* |
+| `loggerhelper_set_log_level` | **Change log levels at runtime** | *"Set Console to Error only"* |
+| `loggerhelper_search_logs` | **Query the ring buffer** | *"Find logs mentioning Payment"* |
+| `loggerhelper_toggle_sink` | **Enable/disable a sink** | *"Disable Email sink for now"* |
 
 ```bash
-# Example: check health via curl
+# Example: search logs via MCP
 curl -X POST http://localhost:5000/mcp \
   -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"loggerhelper_get_health","arguments":{}}}'
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"loggerhelper_search_logs","arguments":{"query":"Payment","level":"Error"}}}'
 ```
 
-**Why this matters:** Every other .NET logging library requires a separate dashboard (Seq, Kibana,
-Grafana) before an AI assistant can see log state. LoggerHelper MCP ships that built in —
-zero extra infrastructure, zero extra dependencies, one NuGet package.
+**The only .NET logging library where AI can control logging, not just read it.**
+No Seq, no Kibana, no Grafana — zero extra infrastructure.
 
 ---
 
-## 📊 Embedded Diagnostics Dashboard *(new v5.1.1)*
+## 📊 Embedded Dashboard *(new v5.2.0)*
 
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper.Dashboard
 ```
 
-See your logging pipeline health **without leaving your browser**. One line of code gives you a
-live dashboard showing active/failed sinks, startup errors with full stack traces, and routing
-configuration.
+Add a real-time diagnostics dashboard to any ASP.NET Core app with one line of code:
 
 ```csharp
-// Program.cs — add after UseLoggerHelper()
-app.MapLoggerHelperDashboard();  // serves at /loggerhelper-dashboard
+builder.Services.AddLoggerHelperDashboard();
+// ...
+app.MapLoggerHelperDashboard();  // → /loggerhelper
 ```
 
-**What you see:**
+Navigate to `https://localhost:5001/loggerhelper` and see:
 
-| Section | Details |
-|---------|---------|
-| **Status cards** | Overall health (OK / WARNING / CRITICAL), active sinks, failed sinks, error count |
-| **Sink Errors** | Every error that prevented a sink from starting — click to expand stack trace |
-| **Sinks** | All configured sinks with ACTIVE/FAILED status, plugin type, and assigned log levels |
-| **Routing** | Complete routing configuration: which levels go to which sinks |
+- **Health cards** — Status, active sinks, error count, buffer state at a glance
+- **Sink table** — ACTIVE/FAILED badges, log levels, toggle controls
+- **Live log stream** — Server-Sent Events with level/text filters (like `tail -f` in the browser)
+- **Error history** — Click-to-expand with stack traces
+- **Context Before Error** — Shows ring buffer entries that preceded the last crash, with level coloring
+- **Routing config** — Visual map of which levels go where
 
-- **Zero dependencies** — self-contained HTML served inline, no npm, no static files
-- **Auto-refresh** every 30 seconds, or click Refresh manually
-- **Dark theme** — GitHub-inspired dark UI, responsive on mobile
-- **Custom path** — `app.MapLoggerHelperDashboard("/admin/logging")`
+Dark theme, mobile-responsive, auto-refresh, zero external dependencies. No npm, no bundler — pure embedded HTML/CSS/JS.
 
-**Why this matters:** Serilog needs Seq ($) or Kibana (complex infrastructure) for sink visibility.
-NLog has no built-in dashboard. LoggerHelper gives you this for free — one NuGet, one line of code,
-zero infrastructure.
+```csharp
+// Protect with auth in production
+builder.Services.AddLoggerHelperDashboard(o => o.RequireAuthorization = true);
+```
+
+**Serilog/NLog equivalent:** Seq ($), Kibana (cluster), Grafana (setup). LoggerHelper Dashboard is built in and free.
 
 ---
 
@@ -658,9 +659,10 @@ public class MyJob(ILogger<MyJob> logger) {
 | Sink plugin system (custom sinks) | Manual wiring | Manual | **✅ `[ModuleInitializer]` auto-reg** |
 | Initial setup complexity | 15–30 lines | XML + code | **✅ 5 lines** |
 | Sensitive data masking (PII/secrets) | Manual `IDestructuringPolicy` | 3rd-party | **✅ JSON-driven, all sinks at once** |
-| Per-sink log sampling | Custom `ILogEventFilter` per sink | ❌ | **✅ `SamplingRate` per route** |
-| AI assistant integration (MCP) | ❌ | ❌ | **✅ built-in MCP server** |
-| Built-in diagnostics dashboard | ❌ (needs Seq/Kibana) | ❌ | **✅ embedded UI, zero infra** |
+| Contextual error logging (crash context) | ❌ | ❌ | **✅ zero-alloc ring buffer** |
+| AI integration (MCP) | ❌ | ❌ | **✅ 7 tools — read + control** |
+| Embedded diagnostics dashboard | ❌ (Seq $$$) | ❌ (Kibana) | **✅ /loggerhelper — free** |
+| Runtime log level changes | Manual | Manual | **✅ via MCP or Dashboard** |
 
 ---
 
@@ -691,7 +693,6 @@ Every version ships a targeted performance audit. Key hot-path optimizations to 
 | v5.0.5 | `SinkRouting.Matches()` | `HashSet<LogEventLevel>` replaces string O(n) scan | Zero alloc per log event |
 | v5.0.5 | Telegram `Emit()` | Fire-and-forget `Task.Run` vs blocking `GetResult()` | No pipeline stall |
 | v5.0.5 | Email template | Cached at ctor vs `File.ReadAllText` per emit | No disk I/O on hot path |
-| v5.1.1 | `SinkRouting.ShouldEmit()` | `Random.Shared` (zero alloc); null-rate fast path | Zero overhead when sampling disabled |
 
 ### Building a Custom Sink
 
@@ -706,7 +707,7 @@ public sealed class MyTargetSinkPlugin : ISinkPlugin {
                    ?? options.BindSinkSection<MyTargetOptions>("MyTarget");
 
         loggerConfig.WriteTo.Conditional(
-            evt => routing.ShouldEmit(evt.Level),
+            evt => routing.Matches(evt.Level),
             wt => wt.MySink(opts?.ConnectionString)
         );
     }
@@ -730,6 +731,8 @@ Reference `CSharpEssentials.LoggerHelper` as a NuGet package. The sink auto-regi
 | **LoggerHelper.xUnit** | Forwards log output to xUnit test runner for integration test visibility |
 | **Source Generator** | Replace runtime reflection for sink loading — faster startup, AOT-compatible |
 | **`dotnet new` template** | `dotnet new loggerhelper-api` scaffolds a pre-configured project |
+| **Log anomaly detection** | Spike detection on error rate with configurable thresholds |
+| **Auto-recovery sinks** | Automatic retry with exponential backoff for failed sinks |
 
 Contributions welcome — open an issue or PR on [GitHub](https://github.com/alexbypa/CSharp.Essentials).
 

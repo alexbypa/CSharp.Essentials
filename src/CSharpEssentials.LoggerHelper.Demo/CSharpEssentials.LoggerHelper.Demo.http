@@ -1,6 +1,225 @@
-@CSharpEssentials.LoggerHelper.Demo_HostAddress = http://localhost:5123
+@host = http://localhost:5123
 
-GET {{CSharpEssentials.LoggerHelper.Demo_HostAddress}}/weatherforecast/
+### ═══════════════════════════════════════════════════════════════
+### Basic Logging
+### ═══════════════════════════════════════════════════════════════
+
+### Log at every level (Debug → Fatal)
+GET {{host}}/api/logging/all-levels
+Accept: application/json
+
+###
+
+### Log with exception stack trace
+GET {{host}}/api/logging/exception
+Accept: application/json
+
+###
+
+### ═══════════════════════════════════════════════════════════════
+### Diagnostics
+### ═══════════════════════════════════════════════════════════════
+
+### Pipeline health check
+GET {{host}}/api/diagnostics/health
+Accept: application/json
+
+###
+
+### Clear internal error store
+DELETE {{host}}/api/diagnostics/errors
+Accept: application/json
+
+###
+
+### ═══════════════════════════════════════════════════════════════
+### Routing Demo
+### ═══════════════════════════════════════════════════════════════
+
+### Show routing rules
+GET {{host}}/api/routing/rules
+Accept: application/json
+
+###
+
+### ═══════════════════════════════════════════════════════════════
+### Custom Properties / Structured Logging
+### ═══════════════════════════════════════════════════════════════
+
+### Log with custom properties
+GET {{host}}/api/properties/with-scope
+Accept: application/json
+
+###
+
+### ═══════════════════════════════════════════════════════════════
+### Dynamic File Routing
+### ═══════════════════════════════════════════════════════════════
+
+### Log to tenant-specific file
+GET {{host}}/api/dynamic-file/log?tenantId=ACME
+Accept: application/json
+
+###
+
+### ═══════════════════════════════════════════════════════════════
+### Sensitive Data Masking
+### ═══════════════════════════════════════════════════════════════
+
+### Log with PII (should be masked)
+GET {{host}}/api/masking/demo
+Accept: application/json
+
+###
+
+### ═══════════════════════════════════════════════════════════════
+### Trace API / OpenTelemetry
+### ═══════════════════════════════════════════════════════════════
+
+### Create trace span
+GET {{host}}/api/trace/span
+Accept: application/json
+
+###
+
+### ═══════════════════════════════════════════════════════════════
+### MCP Server (JSON-RPC 2.0)
+### ═══════════════════════════════════════════════════════════════
+
+### Initialize MCP session
+POST {{host}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}
+
+###
+
+### List all MCP tools
+POST {{host}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
+
+###
+
+### Get health status
+POST {{host}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"loggerhelper_get_health","arguments":{}}}
+
+###
+
+### Get recent errors
+POST {{host}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"loggerhelper_get_errors","arguments":{"count":10}}}
+
+###
+
+### Get sink status
+POST {{host}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"loggerhelper_get_sinks","arguments":{}}}
+
+###
+
+### Get configuration
+POST {{host}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"loggerhelper_get_config","arguments":{}}}
+
+###
+
+### [NEW v5.2.0] Set log level — change Console to Error+Fatal only
+POST {{host}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"loggerhelper_set_log_level","arguments":{"sink":"Console","levels":"Error,Fatal"}}}
+
+###
+
+### [NEW v5.2.0] Search logs — find all entries containing "User"
+POST {{host}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":8,"method":"tools/call","params":{"name":"loggerhelper_search_logs","arguments":{"query":"User","count":20}}}
+
+###
+
+### [NEW v5.2.0] Search logs — filter by Warning level
+POST {{host}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"loggerhelper_search_logs","arguments":{"level":"Warning"}}}
+
+###
+
+### [NEW v5.2.0] Toggle sink — disable Email sink
+POST {{host}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":10,"method":"tools/call","params":{"name":"loggerhelper_toggle_sink","arguments":{"sink":"Email","enabled":false}}}
+
+###
+
+### [NEW v5.2.0] Toggle sink — re-enable Email sink
+POST {{host}}/mcp
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":11,"method":"tools/call","params":{"name":"loggerhelper_toggle_sink","arguments":{"sink":"Email","enabled":true}}}
+
+###
+
+### ═══════════════════════════════════════════════════════════════
+### MCP Demo REST Shortcuts
+### ═══════════════════════════════════════════════════════════════
+
+### List available MCP tools
+GET {{host}}/api/mcp-demo/tools
+Accept: application/json
+
+###
+
+### Call get-health via REST
+POST {{host}}/api/mcp-demo/call/get-health
+Accept: application/json
+
+###
+
+### ═══════════════════════════════════════════════════════════════
+### Dashboard
+### ═══════════════════════════════════════════════════════════════
+
+### Open Dashboard UI (open in browser)
+GET {{host}}/loggerhelper
+Accept: text/html
+
+###
+
+### Dashboard API — status
+GET {{host}}/loggerhelper/api/status
+Accept: application/json
+
+###
+
+### Dashboard API — recent logs
+GET {{host}}/loggerhelper/api/logs
+Accept: application/json
+
+###
+
+### Dashboard API — filtered logs (by level)
+GET {{host}}/loggerhelper/api/logs?level=Warning
+Accept: application/json
+
+###
+
+### Dashboard API — filtered logs (by query)
+GET {{host}}/loggerhelper/api/logs?query=Payment
 Accept: application/json
 
 ###

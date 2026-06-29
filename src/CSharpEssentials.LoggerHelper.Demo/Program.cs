@@ -10,10 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Development → appsettings.LoggerHelper.debug.json (Console + File, no DB deps)
 // Production  → appsettings.LoggerHelper.json       (Console + File + MSSqlServer + PostgreSQL)
 builder.Services.AddLoggerHelper(builder.Configuration);
-builder.Services.AddLoggerHelperMcp();   // MCP server: POST /mcp (JSON-RPC 2.0)
+builder.Services.AddLoggerHelperMcp();        // MCP server: POST /mcp (JSON-RPC 2.0)
+builder.Services.AddLoggerHelperDashboard();  // Dashboard: /loggerhelper
 
 // ── Endpoint modules ────────────────────────────────────────────────────────
 builder.Services.AddSingleton<IEndpointDefinition, BasicLoggingEndpoints>();
+builder.Services.AddSingleton<IEndpointDefinition, ContextualLoggingEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, TraceApiEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, CustomPropertiesEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, RoutingDemoEndpoints>();
@@ -21,7 +23,6 @@ builder.Services.AddSingleton<IEndpointDefinition, DiagnosticsEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, DynamicFileEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, SensitiveDataMaskingEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, McpDemoEndpoints>();
-builder.Services.AddSingleton<IEndpointDefinition, SamplingDemoEndpoints>();
 
 // ── Swagger ─────────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
@@ -47,9 +48,9 @@ builder.Services.AddSwaggerGen(c => {
 var app = builder.Build();
 
 // ── Middleware ──────────────────────────────────────────────────────────────
-app.UseLoggerHelper();              // request/response logging + correlation ID
-app.MapLoggerHelperMcp("/mcp");     // MCP server for AI assistant tool calls
-app.MapLoggerHelperDashboard();     // embedded diagnostics UI at /loggerhelper-dashboard
+app.UseLoggerHelper();                 // request/response logging + correlation ID
+app.MapLoggerHelperMcp("/mcp");        // MCP server for AI assistant tool calls
+app.MapLoggerHelperDashboard();        // Dashboard UI at /loggerhelper
 app.UseSwagger();
 app.UseSwaggerUI(c => {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "LoggerHelper Demo v5");

@@ -2,6 +2,7 @@
   <Project Path="CSharpEssentials.HttpHelper/CSharpEssentials.HttpHelper.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Benchmarks/CSharpEssentials.LoggerHelper.Benchmarks.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Demo/CSharpEssentials.LoggerHelper.Demo.csproj" />
+  <Project Path="CSharpEssentials.LoggerHelper.Dashboard/CSharpEssentials.LoggerHelper.Dashboard.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.MCP/CSharpEssentials.LoggerHelper.MCP.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Console/CSharpEssentials.LoggerHelper.Sink.Console.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Elasticsearch/CSharpEssentials.LoggerHelper.Sink.Elasticsearch.csproj" />
@@ -14,6 +15,5 @@
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Telegram/CSharpEssentials.LoggerHelper.Sink.Telegram.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.TestApp/CSharpEssentials.LoggerHelper.TestApp.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Tests/CSharpEssentials.LoggerHelper.Tests.csproj" />
-  <Project Path="CSharpEssentials.LoggerHelper.Dashboard/CSharpEssentials.LoggerHelper.Dashboard.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj" />
 </Solution>

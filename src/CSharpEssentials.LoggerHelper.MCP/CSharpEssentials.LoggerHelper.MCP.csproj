@@ -9,7 +9,7 @@
     <PackageOutputPath>C:\Nuget</PackageOutputPath>
     <Title>LoggerHelper MCP Server — AI-powered log inspection via Model Context Protocol</Title>
     <Authors>Alessandro Chiodo</Authors>
-    <Description>Give your AI assistant eyes into your logs. CSharpEssentials.LoggerHelper.MCP exposes a zero-dependency Model Context Protocol (MCP) server over HTTP — letting Claude, Cursor, Copilot, and any MCP-compatible client inspect sink health, recent errors, routing config, and live diagnostics with natural language. The first .NET logging library with native AI tooling built in. New in 5.1.0: zero-allocation JSON-RPC 2.0 handler; call POST /mcp from any MCP client to query your running app.</Description>
+    <Description>Give your AI assistant eyes AND hands on your logs. CSharpEssentials.LoggerHelper.MCP exposes 7 MCP tools over HTTP — letting Claude, Cursor, Copilot, and any MCP-compatible client inspect sink health, search logs, change log levels, and toggle sinks at runtime with natural language. New in 5.2.0: loggerhelper_set_log_level, loggerhelper_search_logs (queries the in-memory ring buffer), loggerhelper_toggle_sink — the only .NET logging library where AI can control logging, not just read it.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>

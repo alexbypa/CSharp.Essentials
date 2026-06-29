@@ -9,8 +9,6 @@
     <Authors>Alessandro Chiodo</Authors>
     <Description>Query your logs with SQL. Auto-creates the table, batches the writes, and lets you JOIN logs with your business data — because sometimes grep isn't enough. AutoCreateSqlTable means zero migrations to get started.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageTags>serilog;logging;mssql;sqlserver;sql-server;database;sink;structured-logging;loggerhelper;observability;auto-create-table;batch-writes;sql-query;joins;dotnet8;dotnet9;dotnet10;t-sql</PackageTags>

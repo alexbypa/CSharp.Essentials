@@ -32,7 +32,19 @@ public class McpDemoEndpoints : IEndpointDefinition {
                 },
                 new {
                     name = "loggerhelper_get_config",
-                    description = "App name, routing rules, and masking settings"
+                    description = "App name, routing rules, masking and contextual logging settings"
+                },
+                new {
+                    name = "loggerhelper_set_log_level",
+                    description = "Change log level routing for a sink at runtime (no restart)"
+                },
+                new {
+                    name = "loggerhelper_search_logs",
+                    description = "Search recent logs in the contextual ring buffer by text/level"
+                },
+                new {
+                    name = "loggerhelper_toggle_sink",
+                    description = "Enable or disable a sink at runtime without restart"
                 }
             },
             curlExamples = new {
@@ -50,18 +62,21 @@ public class McpDemoEndpoints : IEndpointDefinition {
 
         group.MapPost("/call/{toolName}", (string toolName, LoggerHelperMcpTools tools) => {
             var text = toolName switch {
-                "get-health" => tools.GetHealth(),
-                "get-errors" => tools.GetErrors(),
-                "get-sinks"  => tools.GetSinks(),
-                "get-config" => tools.GetConfig(),
-                _            => $"Unknown tool '{toolName}'. Valid: get-health, get-errors, get-sinks, get-config"
+                "get-health"    => tools.GetHealth(),
+                "get-errors"    => tools.GetErrors(),
+                "get-sinks"     => tools.GetSinks(),
+                "get-config"    => tools.GetConfig(),
+                "search-logs"   => tools.SearchLogs(),
+                "toggle-sink"   => "Use POST /mcp with JSON-RPC for toggle-sink (requires sink + enabled params)",
+                "set-log-level" => "Use POST /mcp with JSON-RPC for set-log-level (requires sink + levels params)",
+                _               => $"Unknown tool '{toolName}'. Valid: get-health, get-errors, get-sinks, get-config, search-logs, set-log-level, toggle-sink"
             };
             return Results.Ok(new { tool = toolName, result = text });
         })
         .WithSummary("Call a LoggerHelper MCP tool directly (REST shortcut)")
         .WithDescription(
             "REST shortcut for calling LoggerHelper MCP tools without the full JSON-RPC 2.0 envelope. " +
-            "Valid toolName values: get-health, get-errors, get-sinks, get-config. " +
+            "Valid toolName values: get-health, get-errors, get-sinks, get-config, search-logs, set-log-level, toggle-sink. " +
             "For production AI integration use POST /mcp instead.");
     }
 }

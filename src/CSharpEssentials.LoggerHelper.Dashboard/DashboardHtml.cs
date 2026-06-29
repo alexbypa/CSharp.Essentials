@@ -1,260 +1,343 @@
+using System.Data.Common;
+using System.Drawing;
+using System.Reflection.Metadata;
+using System.Security.Cryptography.Xml;
+using static System.Net.Mime.MediaTypeNames;
+
 namespace CSharpEssentials.LoggerHelper.Dashboard;
 
 internal static class DashboardHtml {
-    internal static string GetPage(string basePath) => $$"""
+    internal static string Render(string basePath, int refreshInterval) => $$"""
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="dashboard-refresh" content="{refreshInterval}"/>
 <title>LoggerHelper Dashboard</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#0d1117;--surface:#161b22;--border:#30363d;
-  --text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;
-  --green:#3fb950;--red:#f85149;--orange:#d29922;--purple:#bc8cff;
+:root {--bg: #0f1117; --surface: #1a1d27; --surface2: #242836;
+  --border: #2e3348; --text: #e4e6f0; --text2: #8b8fa8;
+  --accent: #6366f1; --accent2: #818cf8;
+  --ok: #22c55e; --warn: #f59e0b; --err: #ef4444;
+  --radius: 8px; --shadow: 0 2px 8px rgba(0,0,0,.3);
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
-  background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
-.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;
-  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.header h1{font-size:20px;font-weight:600;display:flex;align-items:center;gap:10px}
-.header h1 .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
-.header .meta{color:var(--muted);font-size:13px;display:flex;gap:16px;flex-wrap:wrap}
-.header .meta span{display:flex;align-items:center;gap:4px}
-.container{max-width:1200px;margin:0 auto;padding:24px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px}
-.card .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
-.card .value{font-size:28px;font-weight:700}
-.card .value.green{color:var(--green)}.card .value.red{color:var(--red)}
-.card .value.orange{color:var(--orange)}.card .value.accent{color:var(--accent)}
-.section{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:24px;overflow:hidden}
-.section-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;
-  align-items:center;justify-content:space-between}
-.section-header h2{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
-.section-header .badge{background:var(--border);color:var(--text);font-size:11px;padding:2px 8px;
-  border-radius:10px;font-weight:500}
-.section-header .badge.red{background:rgba(248,81,73,.15);color:var(--red)}
-.section-header .badge.green{background:rgba(63,185,80,.15);color:var(--green)}
-table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:10px 20px;font-size:12px;color:var(--muted);text-transform:uppercase;
-  letter-spacing:0.5px;background:rgba(110,118,129,.05);border-bottom:1px solid var(--border)}
-td{padding:12px 20px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:top}
-tr:last-child td{border-bottom:none}
-.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
-.status-dot.active{background:var(--green)}.status-dot.failed{background:var(--red)}
-.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;
-  margin:2px;background:rgba(88,166,255,.1);color:var(--accent)}
-.tag.verbose{color:var(--muted);background:rgba(139,148,158,.1)}
-.tag.debug{color:var(--muted);background:rgba(139,148,158,.1)}
-.tag.information{color:var(--green);background:rgba(63,185,80,.1)}
-.tag.warning{color:var(--orange);background:rgba(210,153,34,.1)}
-.tag.error{color:var(--red);background:rgba(248,81,73,.1)}
-.tag.fatal{color:#ff6b6b;background:rgba(255,107,107,.1)}
-.error-row{cursor:pointer}.error-row:hover{background:rgba(88,166,255,.04)}
-.error-detail{display:none;padding:12px 20px;background:rgba(0,0,0,.2);border-bottom:1px solid var(--border)}
-.error-detail.open{display:block}
-.error-detail pre{font-size:12px;color:var(--muted);white-space:pre-wrap;word-break:break-all;
-  font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;
-  background:rgba(0,0,0,.3);padding:12px;border-radius:4px;margin-top:8px;max-height:300px;overflow:auto}
-.error-detail .ctx{color:var(--orange);font-size:13px;margin-top:4px}
-.empty{padding:40px;text-align:center;color:var(--muted);font-size:14px}
-.empty .icon{font-size:32px;margin-bottom:8px}
-.refresh-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 12px;
-  border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s}
-.refresh-btn:hover{border-color:var(--accent);color:var(--accent)}
-.auto-refresh{color:var(--muted);font-size:12px;margin-left:8px}
-.footer{text-align:center;padding:24px;color:var(--muted);font-size:12px}
-.footer a{color:var(--accent);text-decoration:none}
-.footer a:hover{text-decoration:underline}
-@media(max-width:640px){
-  .container{padding:12px}.grid{grid-template-columns:1fr 1fr}
-  .header{padding:12px 16px}.header h1{font-size:16px}
-  td,th{padding:8px 12px;font-size:12px}
-}
-.loading{text-align:center;padding:60px;color:var(--muted)}
-.loading .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);
-  border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
-@keyframes spin { to { transform:rotate(360deg) } }
+* {margin:0; padding:0; box-sizing:border-box; }
+body {font - family: 'Segoe UI',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
+.container {max - width:1400px; margin:0 auto; padding:16px; }
+
+/* Header */
+header {display:flex; align-items:center; justify-content:space-between; padding:16px 0; border-bottom:1px solid var(--border); margin-bottom:24px; }
+header h1 {font - size:1.5rem; font-weight:600; }
+header h1 span {color:var(--accent2); }
+.badge {padding:4px 12px; border-radius:12px; font-size:.75rem; font-weight:600; text-transform:uppercase; }
+.badge-ok {background:rgba(34,197,94,.15); color:var(--ok); }
+.badge-warn {background:rgba(245,158,11,.15); color:var(--warn); }
+.badge-err {background:rgba(239,68,68,.15); color:var(--err); }
+.badge-active {background:rgba(99,102,241,.15); color:var(--accent2); }
+
+/* Cards Grid */
+.cards {display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:24px; }
+.card {background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
+.card-label {font - size:.75rem; color:var(--text2); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+.card-value {font - size:1.75rem; font-weight:700; }
+
+/* Panels */
+.panels {display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+@media(max-width:900px) { .panels { grid-template-columns:1fr; } }
+.panel {background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+.panel-header {padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:var(--surface2); }
+.panel-header h2 {font - size:.9rem; font-weight:600; }
+.panel-body {padding:16px; max-height:400px; overflow-y:auto; }
+.panel-full {grid - column:1/-1; }
+
+/* Table */
+table {width:100%; border-collapse:collapse; font-size:.85rem; }
+th, td {padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+th {color:var(--text2); font-weight:500; font-size:.75rem; text-transform:uppercase; }
+tr:hover {background:var(--surface2); }
+
+/* Log stream */
+.log-entry {font - family:'Cascadia Code','Fira Code',monospace; font-size:.8rem; padding:4px 8px; border-bottom:1px solid rgba(46,51,72,.5); white-space:pre-wrap; word-break:break-all; }
+.log-entry:hover {background:var(--surface2); }
+.log-time {color:var(--text2); }
+.log-debug {color:#a78bfa; }
+.log-info {color:#60a5fa; }
+.log-warn {color:var(--warn); }
+.log-error {color:var(--err); }
+.log-fatal {color:#f87171; font-weight:700; }
+
+/* Error row */
+.error-row {cursor:pointer; }
+.error-detail {display:none; padding:8px 12px; background:var(--surface2); font-family:monospace; font-size:.8rem; white-space:pre-wrap; color:var(--text2); }
+.error-row.open + .error-detail {display:table-row; }
+
+/* Controls */
+.controls {display:flex; gap:8px; align-items:center; }
+input[type="text"],select {background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:6px 10px; border-radius:4px; font-size:.8rem; }
+input[type="text"]:focus,select:focus {outline:none; border-color:var(--accent); }
+button {background:var(--accent); color:white; border:none; padding:6px 14px; border-radius:4px; cursor:pointer; font-size:.8rem; font-weight:500; }
+button:hover {background:var(--accent2); }
+button.btn-sm {padding:3px 8px; font-size:.75rem; }
+button.btn-danger {background:var(--err); }
+button.btn-outline {background:transparent; border:1px solid var(--border); color:var(--text2); }
+
+/* Toggle */
+.toggle {position:relative; width:36px; height:20px; display:inline-block; }
+.toggle input {opacity:0; width:0; height:0; }
+.toggle .slider {position:absolute; inset:0; background:var(--surface2); border-radius:10px; border:1px solid var(--border); cursor:pointer; transition:.2s; }
+.toggle .slider::before {content:''; position:absolute; height:14px; width:14px; left:2px; bottom:2px; background:var(--text2); border-radius:50%; transition:.2s; }
+.toggle input:checked + .slider {background:var(--accent); border-color:var(--accent); }
+.toggle input:checked + .slider::before {transform:translateX(16px); background:white; }
+
+.footer {text - align:center; padding:24px 0; color:var(--text2); font-size:.8rem; border-top:1px solid var(--border); margin-top:24px; }
+.footer a {color:var(--accent2); text-decoration:none; }
 </style>
 </head>
 <body>
-<div class="header">
-  <h1><span class="dot" id="status-dot"></span> LoggerHelper Dashboard</h1>
-  <div class="meta">
-    <span id="app-name"></span>
-    <span id="uptime"></span>
-    <span><button class="refresh-btn" onclick="loadData()">Refresh</button>
-          <span class="auto-refresh" id="countdown"></span></span>
-  </div>
-</div>
 <div class="container">
-  <div id="loading" class="loading"><div class="spinner"></div>Loading diagnostics...</div>
-  <div id="content" style="display:none">
-    <div class="grid">
-      <div class="card"><div class="label">Status</div><div class="value" id="status-val"></div></div>
-      <div class="card"><div class="label">Active Sinks</div><div class="value green" id="active-val"></div></div>
-      <div class="card"><div class="label">Failed Sinks</div><div class="value" id="failed-val"></div></div>
-      <div class="card"><div class="label">Errors</div><div class="value" id="errors-val"></div></div>
+  <header>
+    <h1>Logger<span>Helper</span> Dashboard</h1>
+    <div>
+      <span id="health-badge" class="badge badge-ok">Loading...</span>
+      <span id="last-refresh" style="margin-left:12px;font-size:.75rem;color:var(--text2)"></span>
     </div>
+  </header>
 
-    <div class="section" id="errors-section">
-      <div class="section-header">
-        <h2>Sink Errors <span class="badge" id="errors-badge"></span></h2>
-      </div>
-      <div id="errors-body"></div>
+  <div class="cards" id="cards">
+    <div class="card"><div class="card-label">Health</div><div class="card-value" id="c-health">&mdash;</div></div>
+    <div class="card"><div class="card-label">Active Sinks</div><div class="card-value" id="c-sinks">&mdash;</div></div>
+    <div class="card"><div class="card-label">Errors</div><div class="card-value" id="c-errors">&mdash;</div></div>
+    <div class="card"><div class="card-label">Buffer</div><div class="card-value" id="c-buffer">&mdash;</div></div>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <div class="panel-header"><h2>Sinks</h2></div>
+      <div class="panel-body"><table><thead><tr><th>Sink</th><th>Status</th><th>Levels</th><th>Toggle</th></tr></thead><tbody id="sinks-body"></tbody></table></div>
     </div>
-
-    <div class="section">
-      <div class="section-header">
-        <h2>Sinks <span class="badge" id="sinks-badge"></span></h2>
-      </div>
-      <div id="sinks-body"></div>
-    </div>
-
-    <div class="section">
-      <div class="section-header">
-        <h2>Routing Configuration <span class="badge" id="routes-badge"></span></h2>
-      </div>
-      <div id="routes-body"></div>
+    <div class="panel">
+      <div class="panel-header"><h2>Routing Configuration</h2></div>
+      <div class="panel-body"><table><thead><tr><th>Sink</th><th>Levels</th></tr></thead><tbody id="routes-body"></tbody></table></div>
     </div>
   </div>
+
+  <div class="panels">
+    <div class="panel panel-full">
+      <div class="panel-header">
+        <h2>Error History</h2>
+        <span id="error-count" style="font-size:.8rem;color:var(--text2)"></span>
+      </div>
+      <div class="panel-body"><table><thead><tr><th>Time</th><th>Sink</th><th>Message</th></tr></thead><tbody id="errors-body"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="panels" id="context-panel" style="display:none">
+    <div class="panel panel-full">
+      <div class="panel-header" style="background:rgba(239,68,68,.08)">
+        <h2 style="color:var(--err)">&#9888; Context Before Error</h2>
+        <span id="context-flush-time" style="font-size:.8rem;color:var(--text2)"></span>
+      </div>
+      <div class="panel-body" id="context-body" style="max-height:400px;font-family:monospace;"></div>
+    </div>
+  </div>
+
+  <div class="panels">
+    <div class="panel panel-full">
+      <div class="panel-header">
+        <h2>Live Log Stream</h2>
+        <div class="controls">
+          <select id="log-level-filter"><option value="">All Levels</option><option>Debug</option><option>Information</option><option>Warning</option><option>Error</option><option>Fatal</option></select>
+          <input type="text" id="log-query" placeholder="Filter logs..." style="width:200px"/>
+          <button class="btn-outline btn-sm" onclick="clearLogs()">Clear</button>
+          <label class="toggle"><input type="checkbox" id="stream-toggle" checked/><span class="slider"></span></label>
+          <span style="font-size:.75rem;color:var(--text2)">Live</span>
+        </div>
+      </div>
+      <div class="panel-body" id="log-stream" style="max-height:500px;font-family:monospace;"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="https://www.loggerhelper.com" target="_blank">loggerhelper.com</a> &middot;
+    CSharpEssentials.LoggerHelper v5.2.0 &middot;
+    Dashboard auto-refreshes every <span id="refresh-seconds">30</span>s
+  </div>
 </div>
-<div class="footer">
-  LoggerHelper v5 &mdash;
-  <a href="https://www.loggerhelper.com" target="_blank">Documentation</a> &middot;
-  <a href="https://github.com/alexbypa/CSharp.Essentials" target="_blank">GitHub</a> &middot;
-  <a href="https://www.nuget.org/packages/CSharpEssentials.LoggerHelper" target="_blank">NuGet</a>
-</div>
+
 <script>
-const API = '{{basePath}}/api/data';
-const INTERVAL = 30;
-let timer = INTERVAL;
-let intervalId;
+// Derive config from the page URL and meta tags — no server-side interpolation in JS
+const BASE = window.location.pathname.replace(/\/$/, '');
+const REFRESH = (parseInt(document.querySelector('meta[name="dashboard-refresh"]')?.content, 10) || 30) * 1000;
+let eventSource = null;
 
-function levelClass(l) { return l.toLowerCase(); }
+// Update footer with actual refresh interval
+const rs = document.getElementById('refresh-seconds');
+if (rs) rs.textContent = REFRESH / 1000;
 
-function renderLevels(levels) {
-  return levels.map(l => `<span class="tag ${levelClass(l)}">${l}</span>`).join('');
-}
+console.log('[Dashboard] BASE=' + BASE + ' REFRESH=' + REFRESH + 'ms');
 
-function renderSinks(sinks) {
-  if (!sinks.length) return '<div class="empty"><div class="icon">&#9898;</div>No sinks configured</div>';
-  let html = '<table><thead><tr><th>Status</th><th>Sink</th><th>Plugin</th><th>Levels</th></tr></thead><tbody>';
-  sinks.forEach(s => {
-    const dot = s.active ? 'active' : 'failed';
-    const label = s.active ? 'Active' : 'Failed';
-    html += `<tr>
-      <td><span class="status-dot ${dot}"></span>${label}</td>
-      <td><strong>${esc(s.name)}</strong></td>
-      <td style="color:var(--muted);font-size:12px">${esc(s.pluginType)}</td>
-      <td>${renderLevels(s.levels)}</td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  return html;
-}
-
-function renderErrors(errors) {
-  if (!errors.length) return '<div class="empty"><div class="icon">&#10004;</div>No errors recorded — all sinks started successfully</div>';
-  let html = '<table><thead><tr><th>Time</th><th>Sink</th><th>Error</th></tr></thead><tbody>';
-  errors.forEach((e, i) => {
-    html += `<tr class="error-row" onclick="toggleDetail(${i})">
-      <td style="white-space:nowrap;color:var(--muted)">${esc(e.timestamp)}</td>
-      <td><strong style="color:var(--red)">${esc(e.sinkName)}</strong></td>
-      <td>${esc(e.message)}</td>
-    </tr>`;
-    const hasExtra = e.stackTrace || e.context;
-    html += `<tr><td colspan="3" style="padding:0"><div class="error-detail" id="detail-${i}">`;
-    if (e.context) html += `<div class="ctx">Context: ${esc(e.context)}</div>`;
-    if (e.stackTrace) html += `<pre>${esc(e.stackTrace)}</pre>`;
-    if (!hasExtra) html += `<div style="color:var(--muted);padding:8px 0;font-size:13px">No additional details available</div>`;
-    html += '</div></td></tr>';
-  });
-  html += '</tbody></table>';
-  return html;
-}
-
-function renderRoutes(routes) {
-  if (!routes.length) return '<div class="empty"><div class="icon">&#128268;</div>No routes configured</div>';
-  let html = '<table><thead><tr><th>Sink</th><th>Levels</th></tr></thead><tbody>';
-  routes.forEach(r => {
-    html += `<tr><td><strong>${esc(r.sink)}</strong></td><td>${renderLevels(r.levels)}</td></tr>`;
-  });
-  html += '</tbody></table>';
-  return html;
-}
-
-function toggleDetail(i) {
-  const el = document.getElementById('detail-' + i);
-  if (el) el.classList.toggle('open');
-}
-
-function esc(s) {
-  if (!s) return '';
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-function setStatus(data) {
-  const dot = document.getElementById('status-dot');
-  const val = document.getElementById('status-val');
-  val.textContent = data.status;
-  if (data.status === 'OK') { dot.style.background = 'var(--green)'; val.className = 'value green'; }
-  else if (data.status === 'WARNING') { dot.style.background = 'var(--orange)'; val.className = 'value orange'; }
-  else { dot.style.background = 'var(--red)'; val.className = 'value red'; }
-}
-
-async function loadData() {
+async function refresh() {
   try {
-    const res = await fetch(API);
-    const data = await res.json();
+    const url = BASE + '/api/status';
+    console.log('[Dashboard] Fetching ' + url);
+    const r = await fetch(url);
+    if (!r.ok) {
+      document.getElementById('health-badge').textContent = 'API Error ' + r.status;
+      document.getElementById('health-badge').className = 'badge badge-err';
+      document.getElementById('c-health').textContent = 'ERR';
+      document.getElementById('c-health').style.color = 'var(--err)';
+      console.error('[Dashboard] API returned:', r.status, r.statusText);
+      return;
+    }
+    const text = await r.text();
+    let d;
+    try {
+      d = JSON.parse(text);
+    } catch (parseErr) {
+      document.getElementById('health-badge').textContent = 'Parse Error';
+      document.getElementById('health-badge').className = 'badge badge-err';
+      console.error('[Dashboard] Invalid JSON:', text.substring(0, 500), parseErr);
+      return;
+    }
 
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('content').style.display = 'block';
+    // Health badge
+    const hb = document.getElementById('health-badge');
+    hb.textContent = d.health || 'Unknown';
+    hb.className = 'badge badge-' + (d.health === 'OK' ? 'ok' : d.health === 'WARNING' ? 'warn' : 'err');
 
-    setStatus(data);
-    document.getElementById('app-name').textContent = data.applicationName || 'Unknown';
-    document.getElementById('uptime').textContent = 'Uptime: ' + (data.uptime || '-');
-    document.getElementById('active-val').textContent = data.activeSinks;
-    const failedEl = document.getElementById('failed-val');
-    failedEl.textContent = data.failedSinks;
-    failedEl.className = 'value ' + (data.failedSinks > 0 ? 'red' : 'green');
-    const errEl = document.getElementById('errors-val');
-    errEl.textContent = data.errorCount;
-    errEl.className = 'value ' + (data.errorCount > 0 ? 'red' : 'green');
+    // Cards
+    document.getElementById('c-health').textContent = d.health || '?';
+    document.getElementById('c-health').style.color = d.health === 'OK' ? 'var(--ok)' : d.health === 'WARNING' ? 'var(--warn)' : 'var(--err)';
+    const sinksList = Array.isArray(d.sinks) ? d.sinks : [];
+    const activeSinks = sinksList.filter(s => s.status === 'ACTIVE').length;
+    document.getElementById('c-sinks').textContent = activeSinks + '/' + sinksList.length;
+    const errTotal = d.errors?.total ?? 0;
+    document.getElementById('c-errors').textContent = errTotal;
+    document.getElementById('c-errors').style.color = errTotal > 0 ? 'var(--err)' : 'var(--ok)';
+    document.getElementById('c-buffer').textContent = d.contextualLogging ? 'ON' : 'OFF';
+    document.getElementById('c-buffer').style.color = d.contextualLogging ? 'var(--ok)' : 'var(--text2)';
 
-    const eb = document.getElementById('errors-badge');
-    eb.textContent = data.errorCount + ' error' + (data.errorCount !== 1 ? 's' : '');
-    eb.className = 'badge ' + (data.errorCount > 0 ? 'red' : 'green');
+    // Sinks table
+    const sb = document.getElementById('sinks-body');
+    sb.innerHTML = '';
+    sinksList.forEach(s => {
+      const tr = document.createElement('tr');
+      const badge = s.status === 'ACTIVE' ? '<span class="badge badge-ok">ACTIVE</span>' : '<span class="badge badge-err">FAILED</span>';
+      tr.innerHTML = '<td><strong>' + s.name + '</strong></td><td>' + badge + '</td><td>' + (s.levels||[]).join(', ') + '</td><td><label class="toggle"><input type="checkbox" ' + (s.status==='ACTIVE'?'checked':'') + ' onchange="toggleSink(\'' + s.name + '\',this.checked)"/><span class="slider"></span></label></td>';
+      sb.appendChild(tr);
+    });
 
-    document.getElementById('sinks-badge').textContent = data.sinks.length + ' sink' + (data.sinks.length !== 1 ? 's' : '');
-    document.getElementById('routes-badge').textContent = data.routes.length + ' route' + (data.routes.length !== 1 ? 's' : '');
+    // Routes table
+    const rb = document.getElementById('routes-body');
+    rb.innerHTML = '';
+    const routesList = Array.isArray(d.routes) ? d.routes : [];
+    routesList.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + r.sink + '</td><td>' + (r.levels||[]).join(', ') + '</td>';
+      rb.appendChild(tr);
+    });
 
-    document.getElementById('errors-body').innerHTML = renderErrors(data.errors);
-    document.getElementById('sinks-body').innerHTML = renderSinks(data.sinks);
-    document.getElementById('routes-body').innerHTML = renderRoutes(data.routes);
+    // Errors
+    const eb = document.getElementById('errors-body');
+    eb.innerHTML = '';
+    document.getElementById('error-count').textContent = errTotal + ' total';
+    if (d.errors?.recent) {
+      d.errors.recent.forEach((e, i) => {
+        const tr = document.createElement('tr');
+        tr.className = 'error-row';
+        tr.onclick = () => tr.classList.toggle('open');
+        tr.innerHTML = '<td>' + e.timestamp + '</td><td><span class="badge badge-err">' + e.sink + '</span></td><td>' + e.message + '</td>';
+        eb.appendChild(tr);
+        if (e.stackTrace) {
+          const detail = document.createElement('tr');
+          detail.className = 'error-detail';
+          detail.innerHTML = '<td colspan="3"><pre>' + e.stackTrace + '</pre></td>';
+          eb.appendChild(detail);
+        }
+      });
+    }
 
-    timer = INTERVAL;
-  } catch (err) {
-    document.getElementById('loading').innerHTML =
-      '<div style="color:var(--red)">Failed to load dashboard data.<br>' +
-      '<span style="color:var(--muted);font-size:12px">' + esc(err.message) + '</span></div>';
+    // Context Before Error
+    const cp = document.getElementById('context-panel');
+    const cb = document.getElementById('context-body');
+    if (d.lastFlush && d.lastFlush.entries && d.lastFlush.entries.length > 0) {
+      cp.style.display = '';
+      document.getElementById('context-flush-time').textContent = 'Flushed at ' + d.lastFlush.flushedAt;
+      cb.innerHTML = '';
+      d.lastFlush.entries.forEach(e => {
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        const levelClass = 'log-' + (e.level||'info').toLowerCase();
+        div.innerHTML = '<span class="log-time">' + e.timestamp + '</span> <span class="' + levelClass + '">[' + (e.level||'?').padEnd(11) + ']</span> <span style="color:var(--text2)">[' + (e.source||'?') + ']</span> ' + (e.message||'');
+        cb.appendChild(div);
+      });
+    } else {
+      cp.style.display = 'none';
+    }
+
+    document.getElementById('last-refresh').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    console.log('[Dashboard] Refresh OK — health=' + d.health + ' sinks=' + sinksList.length);
+  } catch(ex) {
+    document.getElementById('health-badge').textContent = 'Connection Error';
+    document.getElementById('health-badge').className = 'badge badge-err';
+    document.getElementById('c-health').textContent = 'ERR';
+    document.getElementById('c-health').style.color = 'var(--err)';
+    console.error('[Dashboard] Refresh failed:', ex);
   }
 }
 
-function tick() {
-  timer--;
-  if (timer <= 0) { loadData(); return; }
-  const cd = document.getElementById('countdown');
-  if (cd) cd.textContent = 'auto-refresh in ' + timer + 's';
+function startStream() {
+  if (eventSource) eventSource.close();
+  const toggle = document.getElementById('stream-toggle');
+  if (!toggle.checked) return;
+
+  const url = BASE + '/api/stream';
+  console.log('[Dashboard] Starting SSE stream:', url);
+  eventSource = new EventSource(url);
+  eventSource.onmessage = (e) => {
+    try {
+      const entry = JSON.parse(e.data);
+      addLogEntry(entry);
+    } catch {}
+  };
+  eventSource.onerror = () => {
+    console.warn('[Dashboard] SSE connection lost, reconnecting in 5s...');
+    setTimeout(startStream, 5000);
+  };
 }
 
-loadData();
-intervalId = setInterval(tick, 1000);
+function addLogEntry(entry) {
+  const levelFilter = document.getElementById('log-level-filter').value;
+  const queryFilter = document.getElementById('log-query').value.toLowerCase();
+
+  if (levelFilter && entry.level !== levelFilter) return;
+  if (queryFilter && !(entry.message||'').toLowerCase().includes(queryFilter) && !(entry.source||'').toLowerCase().includes(queryFilter)) return;
+
+  const container = document.getElementById('log-stream');
+  const div = document.createElement('div');
+  div.className = 'log-entry';
+  const levelClass = 'log-' + (entry.level||'info').toLowerCase();
+  div.innerHTML = '<span class="log-time">' + entry.timestamp + '</span> <span class="' + levelClass + '">[' + (entry.level||'?').padEnd(11) + ']</span> <span style="color:var(--text2)">[' + (entry.source||'?') + ']</span> ' + (entry.message||'');
+  container.appendChild(div);
+
+  while (container.childElementCount > 500) container.removeChild(container.firstChild);
+  container.scrollTop = container.scrollHeight;
+}
+
+function clearLogs() {document.getElementById('log-stream').innerHTML = '';
+}
+
+async function toggleSink(name, enabled) {await refresh();
+}
+
+// Init
+refresh();
+setInterval(refresh, REFRESH);
+startStream();
+document.getElementById('stream-toggle').addEventListener('change', startStream);
+document.getElementById('log-level-filter').addEventListener('change', () => {clearLogs();
+});
 </script>
 </body>
 </html>

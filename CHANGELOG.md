@@ -6,79 +6,42 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [5.1.1] — 2026-06-19
+## [5.2.0] — 2026-06-27
 
 ### Added
 
-- **Embedded Diagnostics Dashboard — real-time sink health UI with zero external dependencies** *(killer feature)*
-  New package `CSharpEssentials.LoggerHelper.Dashboard` serves a self-contained HTML dashboard
-  at any path you choose. One line of setup — no Seq, no Kibana, no Grafana required.
+- **Contextual Error Logging — Zero-Allocation Ring Buffer** *(killer feature)*
+  New `ContextualLogBuffer` retains the last N log entries (Debug/Info/Warning) in a pre-allocated,
+  lock-free ring buffer. When an Error/Fatal occurs, the buffer automatically flushes all context
+  entries to your configured sinks with `IsContextualHistory = true` — giving you the "what happened
+  before the crash" without keeping verbose logging on permanently.
+  - Thread-safe via `Interlocked` — zero locks, zero allocations after startup
+  - Configurable capacity (default: 100 entries)
+  - Non-destructive `Snapshot()` for MCP search and Dashboard display
+  - Enable via JSON: `"General": { "EnableContextualLogging": true, "ContextualBufferCapacity": 200 }`
 
-  ```csharp
-  app.MapLoggerHelperDashboard();  // serves at /loggerhelper-dashboard
-  ```
+- **3 New MCP Tools — AI-controlled logging** *(7 tools total)*
+  - `loggerhelper_set_log_level` — change log level routing for any sink at runtime via AI
+  - `loggerhelper_search_logs` — query the contextual ring buffer with text/level filters
+  - `loggerhelper_toggle_sink` — enable/disable a sink without application restart
+  The only .NET logging library where AI can **control** logging, not just read it.
 
-  **What the dashboard shows:**
-  - **Status cards** — overall health (OK / WARNING / CRITICAL), active sinks, failed sinks, error count
-  - **Sink Errors** — every error that prevented a sink from starting, with timestamp, message, stack trace, and context. Click a row to expand details
-  - **Sinks** — all configured sinks with ACTIVE/FAILED status, plugin type, and assigned log levels
-  - **Routing Configuration** — complete routing rules: which levels go to which sinks
+- **Embedded Dashboard** *(new package: `CSharpEssentials.LoggerHelper.Dashboard`)*
+  Zero-dependency HTML UI served at `/loggerhelper` — no Seq, Kibana, or external tools needed.
+  - Real-time status cards (health, sink count, errors, buffer)
+  - Sink table with ACTIVE/FAILED badges and toggle controls
+  - Live log stream via Server-Sent Events with level/text filters
+  - Click-to-expand error history with stack traces
+  - Routing configuration display
+  - Dark theme, mobile-responsive, auto-refresh
+  - Optional `RequireAuthorization` for production use
 
-  **Features:**
-  - Zero external dependencies — self-contained HTML/CSS/JS served inline
-  - Auto-refresh every 30 seconds
-  - Dark theme, responsive on mobile
-  - Click-to-expand error rows with full stack trace
-  - Custom endpoint path: `app.MapLoggerHelperDashboard("/admin/logging")`
+### Improved
 
-  No other .NET logging library ships a built-in diagnostics dashboard.
-
-  Demonstrated in `CSharpEssentials.LoggerHelper.Demo` at `/loggerhelper-dashboard`.
-
-- **Per-Route Log Sampling — probabilistic volume control per sink** *(killer feature)*
-  New `SamplingRate` property on `SinkRouting` (0.0–1.0) controls what fraction of matching
-  log events reach each sink. Serilog has no per-sink sampling — you'd need a custom
-  `ILogEventFilter` wired per sink by hand.
-
-  ```jsonc
-  "Routes": [
-    { "Sink": "Console",       "Levels": ["Information", "Error"] },
-    { "Sink": "Elasticsearch", "Levels": ["Information"], "SamplingRate": 0.1 },
-    { "Sink": "Email",         "Levels": ["Error", "Fatal"] }
-  ]
-  ```
-
-  **Fluent API:**
-  ```csharp
-  builder.AddRoute("Elasticsearch", 0.1, LogEventLevel.Information, LogEventLevel.Warning);
-  ```
-
-  **Zero overhead when disabled:** when `SamplingRate` is `null` or `1.0` (the default),
-  `ShouldEmit()` skips the `Random.Shared.NextDouble()` call entirely — identical hot-path
-  performance to `Matches()` (zero allocations, O(1) hash lookup).
-
-  **MCP tools updated:** `loggerhelper_get_config` and `loggerhelper_get_sinks` now report
-  each route's sampling rate so AI assistants can identify under-sampled sinks.
-
-  Demonstrated end-to-end in `CSharpEssentials.LoggerHelper.Demo` at:
-  - `GET /api/sampling/burst` — emits 100 logs; cross-check counts per sink
-  - `GET /api/sampling/config` — shows effective sampling rate per route
-
-### Improved (NuGet SEO — FASE 1 continued)
-
-- **All 9 sink packages** — added `<RepositoryUrl>` and `<RepositoryType>` to `.csproj`
-  (previously only the core and MCP had them). GitHub now links each NuGet page to the source.
-- **HttpHelper** — added `net10.0` target framework and `<RepositoryType>`.
-- **All 9 sink plugins** — predicate updated from `routing.Matches(evt.Level)` to
-  `routing.ShouldEmit(evt.Level)` to honour sampling configuration.
-
-### Added (Developer Experience)
-
-- **`test-all-endpoints.http`** — 31-request `.http` file in the Demo project covering every
-  endpoint group (Basic, Trace, Properties, Routing, Diagnostics, File Dynamic, Masking, MCP,
-  Sampling). Open in VS Code REST Client or Rider HTTP Client for 1-click local validation.
-- **`SamplingDemoEndpoints`** — new endpoint module in the Demo app with burst test and config view.
-- **`SamplingSinkBenchmark`** — BenchmarkDotNet benchmark proving zero overhead when sampling is disabled.
+- **SinkRouting** — added `InvalidateLevelCache()`, `StashAndClearLevels()`, `RestoreStashedLevels()`
+  for runtime log level mutation by MCP tools and Dashboard controls
+- **MCP GetConfig** — now includes contextual logging status in output
+- **Demo app** — all v5.2.0 features are demonstrated and testable
 
 ---
 

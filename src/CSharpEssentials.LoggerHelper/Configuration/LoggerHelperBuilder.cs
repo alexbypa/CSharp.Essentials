@@ -42,23 +42,6 @@ public sealed class LoggerHelperBuilder {
     }
 
     /// <summary>
-    /// Adds a routing rule with probabilistic sampling: forward only a fraction
-    /// of matching log events to the named sink. Use this to reduce volume on
-    /// expensive sinks (Elasticsearch, SQL) in high-throughput apps.
-    /// </summary>
-    /// <param name="sinkName">Target sink (e.g., "Elasticsearch").</param>
-    /// <param name="samplingRate">Fraction to forward (0.0–1.0). 1.0 = 100%, 0.1 = 10%.</param>
-    /// <param name="levels">Log levels to route.</param>
-    public LoggerHelperBuilder AddRoute(string sinkName, double samplingRate, params LogEventLevel[] levels) {
-        Options.Routes.Add(new SinkRouting {
-            Sink = sinkName,
-            Levels = levels.Select(l => l.ToString()).ToList(),
-            SamplingRate = samplingRate
-        });
-        return this;
-    }
-
-    /// <summary>
     /// Adds a routing rule for all levels to the named sink.
     /// </summary>
     public LoggerHelperBuilder AddRouteAll(string sinkName) {

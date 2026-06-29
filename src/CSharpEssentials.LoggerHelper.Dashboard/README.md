@@ -1,60 +1,47 @@
 # CSharpEssentials.LoggerHelper.Dashboard
 
-> **Embedded real-time diagnostics UI for LoggerHelper — zero external dependencies.**
-
-Add one line to your ASP.NET Core app and get a live dashboard showing sink health, startup errors, routing configuration, and system status. No Seq, no Kibana, no Grafana required.
+Embedded real-time diagnostics dashboard for LoggerHelper — no external tools needed.
 
 ## Quick Start
 
 ```bash
-dotnet add package CSharpEssentials.LoggerHelper
 dotnet add package CSharpEssentials.LoggerHelper.Dashboard
-dotnet add package CSharpEssentials.LoggerHelper.Sink.Console  # add sinks you need
 ```
 
 ```csharp
 // Program.cs
 builder.Services.AddLoggerHelper(builder.Configuration);
+builder.Services.AddLoggerHelperDashboard();
 
 var app = builder.Build();
-
 app.UseLoggerHelper();
-app.MapLoggerHelperDashboard();  // serves at /loggerhelper-dashboard
+app.MapLoggerHelperDashboard();  // → /loggerhelper
 
 app.Run();
 ```
 
-Open `https://localhost:5001/loggerhelper-dashboard` in your browser.
-
-## What You See
-
-| Section | Details |
-|---------|---------|
-| **Status cards** | Overall health (OK / WARNING / CRITICAL), active sinks, failed sinks, error count |
-| **Sink Errors** | Every error that prevented a sink from starting — with timestamp, message, stack trace, and context. Click a row to expand details |
-| **Sinks** | All configured sinks with ACTIVE/FAILED status, plugin type, and assigned log levels |
-| **Routing** | Complete routing configuration: which levels go to which sinks |
+Navigate to `https://localhost:5001/loggerhelper` to see your dashboard.
 
 ## Features
 
-- **Zero dependencies** — self-contained HTML served inline, no npm, no static files
-- **Auto-refresh** — updates every 30 seconds, or click Refresh manually
-- **Dark theme** — GitHub-inspired dark UI, responsive on mobile
-- **Startup error visibility** — see exactly WHY a sink failed to initialize (wrong connection string, unreachable host, missing config)
-- **Click-to-expand** — error rows expand to show full stack trace and context
+- **Sink Health Cards** — See which sinks are active/failed at a glance
+- **Live Log Stream** — Tail your logs in the browser via Server-Sent Events
+- **Error History** — Click-to-expand recent sink errors with stack traces
+- **Context Before Error** — When an Error/Fatal triggers a context flush, a dedicated panel shows all ring buffer entries that preceded the crash (timestamp, level, source, message) with level-appropriate coloring
+- **Routing Config** — Visual map of which levels go where
+- **Runtime Controls** — Toggle sinks and change log levels without restart
+- **Dark Theme** — Easy on the eyes during late-night debugging
+- **Zero Dependencies** — Pure HTML/CSS/JS, no npm, no bundler
+- **Mobile Friendly** — Responsive layout works on any screen
 
-## Custom Path
+## Configuration
 
 ```csharp
-app.MapLoggerHelperDashboard("/admin/logging");
+builder.Services.AddLoggerHelperDashboard(options => {
+    options.RequireAuthorization = true;  // protect with ASP.NET auth
+});
 ```
 
-## Why This Matters
+## License
 
-Serilog has no built-in dashboard. To see sink health you need Seq ($), Kibana (complex), or Grafana (infrastructure). LoggerHelper gives you this for free — one line of code, zero infrastructure.
-
----
-
-MIT — © Alessandro Chiodo
-
-[Documentation](https://www.loggerhelper.com) · [GitHub](https://github.com/alexbypa/CSharp.Essentials) · [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
+MIT — [loggerhelper.com](https://www.loggerhelper.com)

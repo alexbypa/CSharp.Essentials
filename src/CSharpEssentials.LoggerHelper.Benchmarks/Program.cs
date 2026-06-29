@@ -2,10 +2,12 @@ using BenchmarkDotNet.Running;
 using CSharpEssentials.LoggerHelper.Benchmarks;
 
 // Usage:
-//   CI run (fast, GitHub export):   dotnet run -c Release -- --filter *
-//   Single class only:              dotnet run -c Release -- --filter *Throughput*
-//   Memory leak soak test (30m):    dotnet run -c Release -- --leak-test
-//   Memory leak soak test (5m):     dotnet run -c Release -- --leak-test --duration 5
+//   Full run (accurate, heavy):    dotnet run -c Release --framework net9.0 -- --filter *
+//   Light run (fast, low CPU):     dotnet run -c Release --framework net9.0 -- --filter * --job short
+//   Single class only:             dotnet run -c Release --framework net9.0 -- --filter *Throughput*
+//   Light + single class:          dotnet run -c Release --framework net9.0 -- --filter *Routing* --job short
+//   Memory leak soak test (30m):   dotnet run -c Release --framework net9.0 -- --leak-test
+//   Memory leak soak test (5m):    dotnet run -c Release --framework net9.0 -- --leak-test --duration 5
 
 if (args.Contains("--leak-test")) {
     int duration = 30;
@@ -16,5 +18,5 @@ if (args.Contains("--leak-test")) {
     return await MemoryLeakTest.RunAsync(duration);
 }
 
-BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, new CIConfig());
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 return 0;

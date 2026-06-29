@@ -70,7 +70,7 @@ public sealed class MSSqlServerSinkPlugin : ISinkPlugin {
         var colOptions = BuildColumnOptions(opts);
 
         loggerConfig.WriteTo.Conditional(
-            evt => routing.ShouldEmit(evt.Level),
+            evt => routing.Matches(evt.Level),
             wt => wt.MSSqlServer(
                 connectionString: opts.ConnectionString,
                 sinkOptions: new SerilogMSSqlOptions {

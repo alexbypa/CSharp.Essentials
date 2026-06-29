@@ -102,7 +102,7 @@ public sealed class PostgreSqlSinkPlugin : ISinkPlugin {
             SelfLog.WriteLine("PostgreSQL: addAutoIncrementColumn is recognized; ensure your table defines id SERIAL PRIMARY KEY when using custom columns.");
 
         loggerConfig.WriteTo.Conditional(
-            evt => routing.ShouldEmit(evt.Level),
+            evt => routing.Matches(evt.Level),
             wt => wt.PostgreSQL(
                 connectionString: opts.ConnectionString,
                 tableName: opts.TableName,

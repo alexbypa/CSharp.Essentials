@@ -25,6 +25,14 @@ public sealed class RequestResponseLoggingMiddleware {
     }
 
     public async Task InvokeAsync(HttpContext context) {
+        // SSE and WebSocket endpoints produce long-lived streaming responses
+        // that cannot be buffered — skip response body capture entirely.
+        var accept = context.Request.Headers.Accept.ToString();
+        if (accept.Contains("text/event-stream", StringComparison.OrdinalIgnoreCase)) {
+            await _next(context);
+            return;
+        }
+
         var originalBodyStream = context.Response.Body;
         using var responseBodyStream = new MemoryStream();
         context.Response.Body = responseBodyStream;

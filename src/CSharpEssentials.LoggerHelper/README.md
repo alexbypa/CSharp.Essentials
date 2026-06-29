@@ -26,7 +26,10 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.Email   # add only what yo
 | OpenTelemetry trace ID | Manual | Manual | **Built-in, auto-correlated** |
 | Internal error diagnostics | No | No | **Yes — injectable ILogErrorStore** |
 | Fluent OR JSON OR both | No | No | **All three, mergeable** |
-| Built-in diagnostics dashboard | No (needs Seq/Kibana) | No | **Yes — embedded UI, zero infra** |
+| Contextual crash logging | No | No | **Zero-alloc ring buffer** |
+| AI/MCP integration | Requires Seq/Grafana | Not supported | **7 tools, 2-line setup** |
+| Embedded dashboard | No | No | **Built-in at `/loggerhelper`** |
+| Runtime log level changes | Restart required | Restart required | **Live, via MCP or Dashboard** |
 
 ---
 
@@ -182,42 +185,6 @@ Sinks self-register via a plugin mechanism — the core package has zero depende
 
 ---
 
-## Per-route log sampling — New in 5.1.1
-
-Control log volume per sink with probabilistic sampling. Send 100% of errors to Email but only 10% of info-level logs to Elasticsearch:
-
-```json
-"Routes": [
-  { "Sink": "Console",       "Levels": ["Information", "Error"] },
-  { "Sink": "Elasticsearch", "Levels": ["Information"], "SamplingRate": 0.1 },
-  { "Sink": "Email",         "Levels": ["Error", "Fatal"] }
-]
-```
-
-Fluent API: `builder.AddRoute("Elasticsearch", 0.1, LogEventLevel.Information)`.
-
-Zero overhead when `SamplingRate` is `null` or `1.0` (default).
-
----
-
-## Embedded diagnostics dashboard — New in 5.1.1
-
-See your logging pipeline health without leaving your browser:
-
-```bash
-dotnet add package CSharpEssentials.LoggerHelper.Dashboard
-```
-
-```csharp
-app.MapLoggerHelperDashboard();  // serves at /loggerhelper-dashboard
-```
-
-The dashboard shows active/failed sinks, startup errors with full stack traces, routing configuration, and real-time health status. Zero external dependencies — no Seq, no Kibana, no Grafana required. Auto-refreshes every 30 seconds.
-
-Custom path: `app.MapLoggerHelperDashboard("/admin/logging")`.
-
----
-
 ## Sensitive data masking — New in 5.0.8
 
 Redact PII and secrets from **every sink at once**, declaratively:
@@ -237,6 +204,70 @@ logger.LogInformation("Login for {Email} with {Password}", "alice@example.com", 
 ```
 
 Disabled by default — zero overhead unless enabled. Or via fluent API: `.EnableSensitiveDataMasking(o => o.Presets.Add("Email"))`.
+
+---
+
+## Contextual Error Logging — New in 5.2.0
+
+When an error occurs, you always want to know "what happened just before the crash." LoggerHelper's zero-allocation ring buffer retains the last N log entries (Debug/Info/Warning) in memory. When an Error or Fatal event fires, all buffered context is flushed automatically — giving you crash context without keeping verbose logging on permanently.
+
+```json
+"General": {
+  "EnableContextualLogging": true,
+  "ContextualBufferCapacity": 200
+}
+```
+
+When an error occurs, you get output like:
+```
+[INF] [CONTEXT] User alice logged in                    ← was in buffer
+[INF] [CONTEXT] Loading dashboard for tenant ACME       ← was in buffer
+[WRN] [CONTEXT] Slow query: 2340ms on GetOrders         ← was in buffer
+[ERR] NullReferenceException in OrderService.Process()  ← triggered the flush
+```
+
+Thread-safe via `Interlocked` — zero locks, zero allocations after startup.
+
+---
+
+## MCP Server — AI-Controlled Logging — New in 5.2.0
+
+Two lines of setup expose **7 MCP tools** to Claude, Cursor, GitHub Copilot, or any MCP-compatible client:
+
+```csharp
+builder.Services.AddLoggerHelperMcp();
+app.MapLoggerHelperMcp("/mcp");
+```
+
+| Tool | Description |
+|---|---|
+| `loggerhelper_get_health` | Overall status (OK / WARNING / CRITICAL) |
+| `loggerhelper_get_errors` | Recent sink errors with details |
+| `loggerhelper_get_sinks` | All sinks with ACTIVE/FAILED status |
+| `loggerhelper_get_config` | Running configuration + masking settings |
+| `loggerhelper_set_log_level` | Change log levels for any sink at runtime |
+| `loggerhelper_search_logs` | Query the contextual ring buffer |
+| `loggerhelper_toggle_sink` | Enable/disable a sink without restart |
+
+The only .NET logging library where AI can **control** logging, not just read it.
+
+---
+
+## Embedded Dashboard — New in 5.2.0
+
+Zero-dependency HTML UI served at `/loggerhelper` — no Seq, Kibana, or external tools needed:
+
+```csharp
+builder.Services.AddLoggerHelperDashboard();
+app.MapLoggerHelperDashboard();
+```
+
+- Real-time status cards (health, sink count, errors, buffer)
+- Sink table with ACTIVE/FAILED badges and toggle controls
+- Live log stream via Server-Sent Events with level/text filters
+- Error history with stack traces
+- Context Before Error panel — shows ring buffer entries that preceded the last crash
+- Dark theme, mobile-responsive, auto-refresh
 
 ---
 
@@ -334,7 +365,7 @@ internal sealed class MyTargetSinkPlugin : ISinkPlugin {
                    ?? new MyTargetOptions();
 
         loggerConfig.WriteTo.Conditional(
-            evt => routing.ShouldEmit(evt.Level),
+            evt => routing.Matches(evt.Level),
             wt => wt.MySink(opts.ConnectionString)
         );
     }
@@ -378,12 +409,15 @@ to measure framework overhead independently of I/O.
 
 > Planned for upcoming releases — contributions welcome.
 
+- [x] ~~**Dashboard** — embedded real-time UI at `/loggerhelper`~~ (shipped in v5.2.0)
+- [x] ~~**AI/MCP — 7 tools for AI-controlled logging**~~ (shipped in v5.2.0)
+- [x] ~~**Contextual Error Logging — zero-allocation ring buffer**~~ (shipped in v5.2.0)
 - [ ] **Source Generator** — replace runtime reflection for sink loading with a compile-time source generator: faster startup, AOT-compatible, trimming-safe
 - [ ] **BenchmarkDotNet suite** — published performance comparisons vs Serilog pure, NLog, and Microsoft.Extensions.Logging default provider
 - [ ] **`dotnet new` template** — `dotnet new loggerhelper-api` scaffolds a pre-configured project with zero friction
-- [x] **Dashboard** — embedded real-time UI showing active sinks, routing rules, and sink errors *(shipped in v5.1.1)*
 - [ ] **xUnit sink** — forwards log output to xUnit test runner for integration test visibility
-- [ ] **AI extension** — natural language log queries, anomaly detection, and incident summarization via LLM
+- [ ] **Anomaly detection** — AI-powered pattern recognition for log anomalies with configurable alert thresholds
+- [ ] **Auto-recovery** — automatic sink restart with exponential backoff when failures are detected
 - [ ] **Telemetry extension** — OpenTelemetry metrics export (log counters per sink, error rates, latency)
 - [ ] **Interactive playground** — browser-based editor to test JSON routing config and see live output
 
