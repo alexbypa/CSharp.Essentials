@@ -137,7 +137,7 @@ The JavaScript derives its base path from `window.location.pathname` at runtime.
 - If contextual logging is disabled, the panel is hidden
 
 ### Context Before Error shows only the triggering event, no preceding entries
-Verify you are on version **≥ 5.2.1**. Earlier builds had a feedback loop where re-emitted context entries (with `IsContextualHistory = true`) looped back through the pipeline as new Error events, overwriting `_lastFlush` and clearing the context entries.
+Verify you are on version **≥ 5.2.2**. Earlier builds had a feedback loop where re-emitted context entries (with `IsContextualHistory = true`) looped back through the pipeline as new Error events, overwriting `_lastFlush` and clearing the context entries.
 
 ### SSE stream disconnects on client close
 Normal behavior — `OperationCanceledException` on disconnect is caught internally. The browser reconnects automatically within 5 seconds.
