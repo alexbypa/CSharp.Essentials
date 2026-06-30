@@ -261,17 +261,33 @@ async function refresh() {
     // Context Before Error
     const cp = document.getElementById('context-panel');
     const cb = document.getElementById('context-body');
-    if (d.lastFlush && d.lastFlush.entries && d.lastFlush.entries.length > 0) {
+    const hasFlush = d.lastFlush && (d.lastFlush.triggeringError || (d.lastFlush.entries && d.lastFlush.entries.length > 0));
+    if (hasFlush) {
       cp.style.display = '';
       document.getElementById('context-flush-time').textContent = 'Flushed at ' + d.lastFlush.flushedAt;
       cb.innerHTML = '';
-      d.lastFlush.entries.forEach(e => {
+      // Context entries (Debug/Info/Warning that preceded the error)
+      (d.lastFlush.entries || []).forEach(e => {
         const div = document.createElement('div');
         div.className = 'log-entry';
         const levelClass = 'log-' + (e.level||'info').toLowerCase();
         div.innerHTML = '<span class="log-time">' + e.timestamp + '</span> <span class="' + levelClass + '">[' + (e.level||'?').padEnd(11) + ']</span> <span style="color:var(--text2)">[' + (e.source||'?') + ']</span> ' + (e.message||'');
         cb.appendChild(div);
       });
+      // Triggering Error/Fatal — shown last with a visual separator
+      if (d.lastFlush.triggeringError) {
+        const sep = document.createElement('div');
+        sep.style = 'border-top:2px solid var(--err);margin:8px 0 4px;padding-top:4px;font-size:.7rem;color:var(--err);letter-spacing:.05em;text-transform:uppercase;';
+        sep.textContent = '▼ Triggering event';
+        cb.appendChild(sep);
+        const te = d.lastFlush.triggeringError;
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        const levelClass = 'log-' + (te.level||'error').toLowerCase();
+        div.style = 'background:rgba(239,68,68,.07);border-left:3px solid var(--err);';
+        div.innerHTML = '<span class="log-time">' + te.timestamp + '</span> <span class="' + levelClass + '"><strong>[' + (te.level||'?').padEnd(11) + ']</strong></span> <span style="color:var(--text2)">[' + (te.source||'?') + ']</span> <strong>' + (te.message||'') + '</strong>';
+        cb.appendChild(div);
+      }
     } else {
       cp.style.display = 'none';
     }

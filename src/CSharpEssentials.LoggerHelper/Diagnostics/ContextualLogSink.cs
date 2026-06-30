@@ -21,6 +21,13 @@ internal sealed class ContextualLogSink : ILogEventSink {
     }
 
     public void Emit(LogEvent logEvent) {
+        // Skip re-emitted contextual history entries — they flow back through the pipeline
+        // at Error level and would trigger a second spurious flush, overwriting _lastFlush
+        // and making the original context entries disappear from the Dashboard.
+        if (logEvent.Properties.TryGetValue("IsContextualHistory", out var flag)
+            && flag is ScalarValue { Value: true })
+            return;
+
         if (_capturedLevels.Contains(logEvent.Level)) {
             var sourceContext = logEvent.Properties.TryGetValue("SourceContext", out var sc)
                 ? sc.ToString().Trim('"')
@@ -29,9 +36,21 @@ internal sealed class ContextualLogSink : ILogEventSink {
             _buffer.Push(logEvent.Level, logEvent.RenderMessage(), sourceContext, logEvent.Timestamp.UtcDateTime);
         }
 
-        // On Error or Fatal, flush the buffer context
+        // On Error or Fatal, flush the buffer context.
+        // Build a LogBufferEntry for the triggering event so the Dashboard can show
+        // which Error/Fatal caused the flush, separate from the preceding context.
         if (logEvent.Level >= LogEventLevel.Error && _loggerHolder.Logger is { } flushTarget) {
-            var context = _buffer.FlushAndClear();
+            var sourceContext = logEvent.Properties.TryGetValue("SourceContext", out var sc)
+                ? sc.ToString().Trim('"')
+                : null;
+            var triggeringError = new LogBufferEntry {
+                Level = logEvent.Level,
+                Message = logEvent.RenderMessage(),
+                SourceContext = sourceContext,
+                Timestamp = logEvent.Timestamp.UtcDateTime,
+                IsOccupied = true
+            };
+            var context = _buffer.FlushAndClear(triggeringError);
             if (context.Count > 0) {
                 foreach (var entry in context) {
                     flushTarget

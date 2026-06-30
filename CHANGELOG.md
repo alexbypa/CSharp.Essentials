@@ -5,7 +5,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
+## [5.2.1] — 2026-06-30
 
+### Fixed
+
+- **Dashboard — Context Before Error panel missing the triggering event**
+  The panel showed only the preceding Debug/Info/Warning entries but never displayed
+  the Error or Fatal that actually caused the flush. Root cause: `_capturedLevels` in
+  `ContextualLogSink` defaults to `[Debug, Information, Warning]` — Error/Fatal events
+  were never pushed into the ring buffer, so `FlushAndClear()` had no visibility of them.
+
+  Fix: `ContextualLogSink` now builds a `LogBufferEntry` for the triggering Error/Fatal
+  and passes it to `FlushAndClear(triggeringError)`. The entry is stored separately in
+  `ContextFlushEvent.TriggeringError` (not in `Entries`) to avoid duplication — Error
+  and Fatal remain outside `_capturedLevels` by design, since they are flush triggers,
+  not context builders.
+
+  The Dashboard `/api/status` response now includes `triggeringError` inside `lastFlush`,
+  and the UI renders it below the context entries with a red separator line
+  **"▼ Triggering event"**, a red left border, and bold text — giving a complete
+  before-and-cause picture in a single panel.
+  
 ## [5.2.0] — 2026-06-27
 
 ### Added

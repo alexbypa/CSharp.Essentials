@@ -48,8 +48,11 @@ public sealed class ContextualLogBuffer {
     /// <summary>
     /// Returns all buffered entries in chronological order and clears the buffer.
     /// Called when an error/fatal is detected to flush context.
+    /// Pass <paramref name="triggeringError"/> to record the event that caused the flush —
+    /// stored separately in <see cref="ContextFlushEvent.TriggeringError"/> so the
+    /// Dashboard can display it as the cause, visually distinct from the preceding context.
     /// </summary>
-    public IReadOnlyList<LogBufferEntry> FlushAndClear() {
+    public IReadOnlyList<LogBufferEntry> FlushAndClear(LogBufferEntry? triggeringError = null) {
         var snapshot = new List<LogBufferEntry>();
         var currentHead = (int)(_head % _capacity);
         if (currentHead < 0)
@@ -75,8 +78,8 @@ public sealed class ContextualLogBuffer {
         }
 
         _count = 0;
-        if (snapshot.Count > 0)
-            _lastFlush = new ContextFlushEvent(DateTime.UtcNow, snapshot);
+        if (snapshot.Count > 0 || triggeringError is not null)
+            _lastFlush = new ContextFlushEvent(DateTime.UtcNow, snapshot, triggeringError);
         return snapshot;
     }
 
@@ -137,13 +140,22 @@ public sealed class LogBufferEntry {
 /// <summary>
 /// Immutable record of a context flush event — the entries that were in the ring buffer
 /// when an error/fatal was detected, plus the timestamp of the flush.
+/// <see cref="TriggeringError"/> holds the Error/Fatal event that caused the flush,
+/// stored separately so the Dashboard can display it as the cause.
 /// </summary>
 public sealed class ContextFlushEvent {
     public DateTime FlushedAt { get; }
     public IReadOnlyList<LogBufferEntry> Entries { get; }
 
-    internal ContextFlushEvent(DateTime flushedAt, IReadOnlyList<LogBufferEntry> entries) {
+    /// <summary>
+    /// The Error or Fatal event that triggered this flush. Never buffered in the ring
+    /// (captured levels are Debug/Info/Warning only), so stored here explicitly.
+    /// </summary>
+    public LogBufferEntry? TriggeringError { get; }
+
+    internal ContextFlushEvent(DateTime flushedAt, IReadOnlyList<LogBufferEntry> entries, LogBufferEntry? triggeringError = null) {
         FlushedAt = flushedAt;
         Entries = entries;
+        TriggeringError = triggeringError;
     }
 }

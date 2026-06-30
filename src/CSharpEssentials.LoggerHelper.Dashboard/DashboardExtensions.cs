@@ -79,6 +79,12 @@ public static class DashboardExtensions {
                     },
                     lastFlush = lastFlush is null ? null : new {
                         flushedAt = lastFlush.FlushedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+                        triggeringError = lastFlush.TriggeringError is null ? null : new {
+                            timestamp = lastFlush.TriggeringError.Timestamp.ToString("HH:mm:ss.fff"),
+                            level = lastFlush.TriggeringError.Level.ToString(),
+                            source = lastFlush.TriggeringError.SourceContext,
+                            message = lastFlush.TriggeringError.Message
+                        },
                         entries = lastFlush.Entries.Select(e => new {
                             timestamp = e.Timestamp.ToString("HH:mm:ss.fff"),
                             level = e.Level.ToString(),
