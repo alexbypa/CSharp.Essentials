@@ -26,7 +26,6 @@
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Telegram\CSharpEssentials.LoggerHelper.Sink.Telegram.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.MCP\CSharpEssentials.LoggerHelper.MCP.csproj" />
-    <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Dashboard\CSharpEssentials.LoggerHelper.Dashboard.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Console\CSharpEssentials.LoggerHelper.Sink.Console.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.File\CSharpEssentials.LoggerHelper.Sink.File.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.MSSqlServer\CSharpEssentials.LoggerHelper.Sink.MSSqlServer.csproj" />

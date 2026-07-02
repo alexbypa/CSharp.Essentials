@@ -1,5 +1,4 @@
 using CSharpEssentials.LoggerHelper;
-using CSharpEssentials.LoggerHelper.Dashboard;
 using CSharpEssentials.LoggerHelper.Demo.Endpoints;
 using CSharpEssentials.LoggerHelper.MCP;
 using Microsoft.OpenApi;
@@ -10,12 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Development → appsettings.LoggerHelper.debug.json (Console + File, no DB deps)
 // Production  → appsettings.LoggerHelper.json       (Console + File + MSSqlServer + PostgreSQL)
 builder.Services.AddLoggerHelper(builder.Configuration);
-builder.Services.AddLoggerHelperMcp();        // MCP server: POST /mcp (JSON-RPC 2.0)
-builder.Services.AddLoggerHelperDashboard();  // Dashboard: /loggerhelper
+builder.Services.AddLoggerHelperMcp();   // MCP server: POST /mcp (JSON-RPC 2.0)
 
 // ── Endpoint modules ────────────────────────────────────────────────────────
 builder.Services.AddSingleton<IEndpointDefinition, BasicLoggingEndpoints>();
-builder.Services.AddSingleton<IEndpointDefinition, ContextualLoggingEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, TraceApiEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, CustomPropertiesEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, RoutingDemoEndpoints>();
@@ -48,9 +45,9 @@ builder.Services.AddSwaggerGen(c => {
 var app = builder.Build();
 
 // ── Middleware ──────────────────────────────────────────────────────────────
-app.UseLoggerHelper();                 // request/response logging + correlation ID
-app.MapLoggerHelperMcp("/mcp");        // MCP server for AI assistant tool calls
-app.MapLoggerHelperDashboard();        // Dashboard UI at /loggerhelper
+app.UseLoggerHelper();              // request/response logging + correlation ID
+app.MapLoggerHelperMcp("/mcp");     // MCP Streamable HTTP — POST /mcp  (Claude Code, Cursor, Copilot)
+app.MapLoggerHelperMcpSse();        // MCP HTTP+SSE        — GET /mcp/sse + POST /mcp/messages (Claude Desktop)
 app.UseSwagger();
 app.UseSwaggerUI(c => {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "LoggerHelper Demo v5");

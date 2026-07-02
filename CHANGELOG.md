@@ -5,63 +5,36 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
-## [5.2.1] — 2026-06-30
 
-### Fixed
+## [5.2.2] — 2026-07-02
 
-- **Dashboard — Context Before Error panel missing the triggering event**
-  The panel showed only the preceding Debug/Info/Warning entries but never displayed
-  the Error or Fatal that actually caused the flush. Root cause: `_capturedLevels` in
-  `ContextualLogSink` defaults to `[Debug, Information, Warning]` — Error/Fatal events
-  were never pushed into the ring buffer, so `FlushAndClear()` had no visibility of them.
+### Documentation
 
-  Fix: `ContextualLogSink` now builds a `LogBufferEntry` for the triggering Error/Fatal
-  and passes it to `FlushAndClear(triggeringError)`. The entry is stored separately in
-  `ContextFlushEvent.TriggeringError` (not in `Entries`) to avoid duplication — Error
-  and Fatal remain outside `_capturedLevels` by design, since they are flush triggers,
-  not context builders.
+- **Spoke READMEs — full rewrite for Console, File, Elasticsearch, MSSqlServer, Seq sinks**
+  Every spoke README now includes: targets header (`net8.0 · net9.0 · net10.0`), the
+  required `app.UseLoggerHelper()` call (previously missing from all five), a "What You'll
+  See" section with actual output format, platform path examples (Windows + Linux for File),
+  an OpenSearch compatibility note (Elasticsearch), and a Troubleshooting table.
 
-  The Dashboard `/api/status` response now includes `triggeringError` inside `lastFlush`,
-  and the UI renders it below the context entries with a red separator line
-  **"▼ Triggering event"**, a red left border, and bold text — giving a complete
-  before-and-cause picture in a single panel.
-  
-## [5.2.0] — 2026-06-27
+  Key accuracy fixes:
+  - **Console** — documented real output format from `ColoredConsoleSink.Emit()`:
+    `[HH:mm:ss Level] message`
+  - **Elasticsearch** — removed non-existent `Username`/`Password` from config table;
+    clarified `autoRegisterTemplate` is hardcoded (not user-configurable)
+  - **MSSqlServer** — documented `Period` format (`d.hh:mm:ss`), listed valid
+    `AddStandardColumns` enum values, added `AdditionalColumns` end-to-end example
+  - **File** — documented `FileNameProperty` multi-tenant subdirectory routing with
+    path examples and `@t`/`@mt`/`@l`/`@x` field reference table
+  - **Seq** — added Docker quickstart, Seq query language examples, clarified `ApiKey`
+    is optional for local single-user Seq
 
-### Added
-
-- **Contextual Error Logging — Zero-Allocation Ring Buffer** *(killer feature)*
-  New `ContextualLogBuffer` retains the last N log entries (Debug/Info/Warning) in a pre-allocated,
-  lock-free ring buffer. When an Error/Fatal occurs, the buffer automatically flushes all context
-  entries to your configured sinks with `IsContextualHistory = true` — giving you the "what happened
-  before the crash" without keeping verbose logging on permanently.
-  - Thread-safe via `Interlocked` — zero locks, zero allocations after startup
-  - Configurable capacity (default: 100 entries)
-  - Non-destructive `Snapshot()` for MCP search and Dashboard display
-  - Enable via JSON: `"General": { "EnableContextualLogging": true, "ContextualBufferCapacity": 200 }`
-
-- **3 New MCP Tools — AI-controlled logging** *(7 tools total)*
-  - `loggerhelper_set_log_level` — change log level routing for any sink at runtime via AI
-  - `loggerhelper_search_logs` — query the contextual ring buffer with text/level filters
-  - `loggerhelper_toggle_sink` — enable/disable a sink without application restart
-  The only .NET logging library where AI can **control** logging, not just read it.
-
-- **Embedded Dashboard** *(new package: `CSharpEssentials.LoggerHelper.Dashboard`)*
-  Zero-dependency HTML UI served at `/loggerhelper` — no Seq, Kibana, or external tools needed.
-  - Real-time status cards (health, sink count, errors, buffer)
-  - Sink table with ACTIVE/FAILED badges and toggle controls
-  - Live log stream via Server-Sent Events with level/text filters
-  - Click-to-expand error history with stack traces
-  - Routing configuration display
-  - Dark theme, mobile-responsive, auto-refresh
-  - Optional `RequireAuthorization` for production use
-
-### Improved
-
-- **SinkRouting** — added `InvalidateLevelCache()`, `StashAndClearLevels()`, `RestoreStashedLevels()`
-  for runtime log level mutation by MCP tools and Dashboard controls
-- **MCP GetConfig** — now includes contextual logging status in output
-- **Demo app** — all v5.2.0 features are demonstrated and testable
+- **Hub README (root) — sync with spoke guides**
+  Fixed Italian text in "Run the Demo" section (→ English), removed duplicate
+  HangfireConsole row from Packages table, added `[guide →]` links to the five updated
+  spoke READMEs, fixed Elasticsearch JSON example (removed non-existent `Username`/`Password`
+  fields), updated MCP section to document `app.MapLoggerHelperMcpSse()` and the
+  `diagnose-logging` predefined prompt, replaced verbose `<details>` Sink Overview blocks
+  with a clean navigable table.
 
 ---
 

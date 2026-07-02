@@ -63,3 +63,32 @@ public sealed class McpToolDefinition {
     [JsonPropertyName("inputSchema")]
     public object InputSchema { get; init; } = new { type = "object", properties = new { } };
 }
+
+/// <summary>
+/// Describes an MCP prompt exposed by the server (returned by prompts/list).
+/// </summary>
+public sealed class McpPromptDefinition {
+    [JsonPropertyName("name")]
+    public string Name { get; init; } = "";
+
+    [JsonPropertyName("description")]
+    public string Description { get; init; } = "";
+
+    [JsonPropertyName("arguments")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public McpPromptArgument[]? Arguments { get; init; }
+}
+
+/// <summary>
+/// Describes an optional or required argument accepted by an MCP prompt.
+/// </summary>
+public sealed class McpPromptArgument {
+    [JsonPropertyName("name")]
+    public string Name { get; init; } = "";
+
+    [JsonPropertyName("description")]
+    public string Description { get; init; } = "";
+
+    [JsonPropertyName("required")]
+    public bool Required { get; init; }
+}

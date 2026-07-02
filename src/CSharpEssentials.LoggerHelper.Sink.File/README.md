@@ -1,8 +1,8 @@
 # CSharpEssentials.LoggerHelper.Sink.File
 
-> Rolling JSON log files with configurable retention for [CSharpEssentials.LoggerHelper](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper).
+> Rolling JSON log files with configurable retention and dynamic per-property routing for [CSharpEssentials.LoggerHelper](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper).
 
-Part of the **CSharpEssentials.LoggerHelper** ecosystem — install only the sinks you need.
+**Targets:** `net8.0` · `net9.0` · `net10.0` — Part of the **CSharpEssentials.LoggerHelper** ecosystem. Install only the sinks you need.
 
 ---
 
@@ -17,6 +17,8 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 
 ## Quick Setup — JSON
 
+Add to `appsettings.json`:
+
 ```json
 {
   "LoggerHelper": {
@@ -26,7 +28,7 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
     ],
     "Sinks": {
       "File": {
-        "Path": "C:\\Logs\\MyApp",
+        "Path": "Logs",
         "RollingInterval": "Day",
         "RetainedFileCountLimit": 14
       }
@@ -36,8 +38,18 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 ```
 
 ```csharp
+// Program.cs
 builder.Services.AddLoggerHelper(builder.Configuration);
+
+var app = builder.Build();
+app.UseLoggerHelper();   // ← required: activates sinks and registers middleware
 ```
+
+> **Absolute paths** work on both Windows and Linux:
+> - Windows: `"C:\\Logs\\MyApp"` or `"C:/Logs/MyApp"`
+> - Linux / Docker: `"/var/log/myapp"` or `"logs"` (relative to the working directory)
+
+---
 
 ## Quick Setup — Fluent API
 
@@ -46,18 +58,43 @@ builder.Services.AddLoggerHelper(b => b
     .WithApplicationName("MyApp")
     .AddRoute("File", LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
     .ConfigureFile(f => {
-        f.Path = "C:\\Logs\\MyApp";
-        f.RollingInterval = "Day";
+        f.Path                  = "Logs";
+        f.RollingInterval       = "Day";
         f.RetainedFileCountLimit = 14;
     })
 );
+
+var app = builder.Build();
+app.UseLoggerHelper();   // ← required
 ```
 
 ---
 
-## Dynamic File Routing by Property (v5.0.1)
+## What You'll See
 
-Route log files into **subdirectories** based on a log event property value. Perfect for multi-tenant apps, per-module separation, or any scenario where you need logs organized by a runtime value.
+Each log event is written as a **single JSON line**:
+
+```json
+{"@t":"2026-06-01T14:23:01.1230000Z","@mt":"Order {OrderId} placed by {UserId}","@l":"Information","OrderId":42,"UserId":"usr_99","ApplicationName":"MyApp","SourceContext":"OrdersController"}
+```
+
+Fields at a glance:
+
+| Field | Description |
+|---|---|
+| `@t` | UTC timestamp (ISO 8601) |
+| `@mt` | Raw message template |
+| `@l` | Log level (omitted when `Information`) |
+| `@x` | Exception string (present on errors) |
+| Any extra key | Structured property pushed via scope or call-site |
+
+Files are named `log-YYYYMMDD.txt` by default and roll at midnight.
+
+---
+
+## Dynamic File Routing by Property
+
+Route logs into **separate subdirectories** based on any runtime property — ideal for multi-tenant apps, per-module separation, or environment-based routing.
 
 ### JSON config
 
@@ -74,15 +111,15 @@ Route log files into **subdirectories** based on a log event property value. Per
 ### How it works
 
 ```csharp
-// Logs with TenantId → Logs/acme/log-20260531.txt
+// Logs with TenantId="acme" → Logs/acme/log-20260601.txt
 using (_logger.BeginScope(new Dictionary<string, object?> { ["TenantId"] = "acme" }))
 {
-    _logger.LogInformation("Order processed");   // → Logs/acme/log-.txt
-    _logger.LogError("Payment failed");           // → Logs/acme/log-.txt
+    _logger.LogInformation("Order processed");
+    _logger.LogError("Payment failed");
 }
 
-// Logs without TenantId → Logs/log-20260531.txt (base path)
-_logger.LogInformation("App started");            // → Logs/log-.txt
+// Logs without TenantId → Logs/log-20260601.txt  (base path, no subdirectory)
+_logger.LogInformation("App started");
 ```
 
 ### Fluent API
@@ -91,9 +128,9 @@ _logger.LogInformation("App started");            // → Logs/log-.txt
 builder.Services.AddLoggerHelper(b => b
     .AddRoute("File", LogEventLevel.Information, LogEventLevel.Error)
     .ConfigureFile(f => {
-        f.Path = "Logs";
+        f.Path             = "Logs";
         f.FileNameProperty = "TenantId";
-        f.MaxOpenFiles = 128;   // LRU pool limit (default: 64)
+        f.MaxOpenFiles     = 128;   // LRU pool limit for open file handles (default: 64)
     })
 );
 ```
@@ -103,15 +140,27 @@ builder.Services.AddLoggerHelper(b => b
 ## Configuration Options
 
 | Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `Path` | `string` | `"Logs"` | Directory path for log files |
-| `RollingInterval` | `string` | `"Day"` | Rolling interval: `Minute`, `Hour`, `Day`, `Month`, `Year`, `Infinite` |
-| `RetainedFileCountLimit` | `int` | `7` | Number of log files to retain before cleanup |
-| `Shared` | `bool` | `true` | Allow multiple processes to write to the same file |
-| `FileNameProperty` | `string?` | `null` | Log event property used to create subdirectories (e.g. `"TenantId"`) |
-| `MaxOpenFiles` | `int` | `64` | Max open file handles when using `FileNameProperty` (LRU eviction) |
+|---|---|---|---|
+| `Path` | `string` | `"Logs"` | Base directory for log files. Relative paths are resolved from the app working directory. |
+| `RollingInterval` | `string` | `"Day"` | When to start a new file: `Minute`, `Hour`, `Day`, `Month`, `Year`, `Infinite` (single file, never rolls). |
+| `RetainedFileCountLimit` | `int` | `7` | How many rolled files to keep before the oldest is deleted. |
+| `Shared` | `bool` | `true` | Allow multiple processes (e.g. multiple app instances) to write to the same file. |
+| `FileNameProperty` | `string?` | `null` | Log event property used to create per-value subdirectories (e.g. `"TenantId"`). See section above. |
+| `MaxOpenFiles` | `int` | `64` | Maximum number of simultaneously open file handles when using `FileNameProperty`. Oldest handles are closed on LRU eviction. |
 
-Logs are written in **JSON format** using Serilog's `JsonFormatter` for structured log analysis.
+> All logs are written in **structured JSON format** using Serilog's `JsonFormatter`. There is no plain-text mode for this sink — use the Console sink for human-readable output.
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely Cause | Fix |
+|---|---|---|
+| No file created | `app.UseLoggerHelper()` missing, or write permission denied | Add `app.UseLoggerHelper()` and verify the process has write access to `Path` |
+| All logs in base folder (no subdirectory) | `FileNameProperty` not set in scope before logging | Wrap log calls with `BeginScope` containing the property |
+| `Too many open files` OS error | `MaxOpenFiles` too high for the OS limit | Reduce `MaxOpenFiles` or raise the OS `ulimit -n` |
+| Old files not deleted | `RetainedFileCountLimit` reached but files are locked | Check for other processes holding file handles |
+| Logs from different log levels mixed | All levels route to the same file | Use separate `File` sink instances with different `Path` values and different `Routes` |
 
 ---
 
