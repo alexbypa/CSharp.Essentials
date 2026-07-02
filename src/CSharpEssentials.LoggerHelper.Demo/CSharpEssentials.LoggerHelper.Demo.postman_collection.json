@@ -1,0 +1,1194 @@
+{
+  "info": {
+    "_postman_id": "c1f76d49-4bd6-4c48-b4b1-cf5b42d385a8",
+    "name": "CSharpEssentials.LoggerHelper Demo",
+    "description": "Postman test suite for CSharpEssentials.LoggerHelper Minimal API Demo endpoints. Contains assertion scripts for verifying correctness of each action.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5123",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Basic Logging",
+      "item": [
+        {
+          "name": "Simple Information log",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/basic/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "basic", "info"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Logged message is correct\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"Logged Information level\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "All 6 log levels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/basic/levels",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "basic", "levels"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Verification message is correct\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include(\"All 6 levels logged\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Structured properties",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/basic/structured",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "basic", "structured"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Verification message is correct\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include(\"OrderId, Customer, Amount\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Exception logged at Error level",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/basic/exception",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "basic", "exception"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Exception message logged correctly\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"Exception logged at Error level\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Trace API",
+      "item": [
+        {
+          "name": "BeginTrace scope",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trace/scope",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trace", "scope"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Transaction ID is generated correctly\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.idTransaction).to.not.be.undefined;",
+                  "    pm.expect(jsonData.idTransaction).to.match(/^TXN-/);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Single-shot trace",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trace/single-shot",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trace", "single-shot"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Transaction ID is returned\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.idTransaction).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Shorthand trace",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trace/shorthand",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trace", "shorthand"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Transaction ID is returned\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.idTransaction).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Custom Properties",
+      "item": [
+        {
+          "name": "Custom scope properties",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/properties/scope",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "properties", "scope"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Enriched properties verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include(\"CustomerId, Region, TenantId\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nested scopes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/properties/nested",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "properties", "nested"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Transaction ID is generated\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.idTransaction).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Inline structured properties",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/properties/inline",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "properties", "inline"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Inline logging verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include(\"4 inline structured properties\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Routing Demo",
+      "item": [
+        {
+          "name": "Fire all levels (Routing check)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/routing/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "routing", "test"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Routing table returned correctly\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.txnId).to.not.be.undefined;",
+                  "    pm.expect(jsonData.expectedRouting).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Show internal errors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/routing/errors",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "routing", "errors"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Error schema is verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.count).to.be.a(\"number\");",
+                  "    pm.expect(jsonData.errors).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Show active configuration",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/routing/config",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "routing", "config"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Config schema is verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.applicationName).to.not.be.undefined;",
+                  "    pm.expect(jsonData.routes).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Diagnostics",
+      "item": [
+        {
+          "name": "Pipeline health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/diagnostics/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "diagnostics", "health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Health status is correct\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect([\"healthy\", \"degraded\"]).to.include(jsonData.status);",
+                  "    pm.expect(jsonData.loadedSinks).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Clear internal error store",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/diagnostics/errors",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "diagnostics", "errors"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Clearing errors confirmed\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"Internal error store cleared\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Dynamic File Routing",
+      "item": [
+        {
+          "name": "Single tenant logs (acme)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/file-dynamic/tenant/acme",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "file-dynamic", "tenant", "acme"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Tenant isolation verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"2 logs written for tenant 'acme'\");",
+                  "    pm.expect(jsonData.expectedPath).to.eql(\"Logs/acme/log-*.txt\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Multi-tenant logs (3 tenants)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/file-dynamic/multi-tenant",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "file-dynamic", "multi-tenant"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Logs written for multiple tenants\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include(\"6 logs written across 3 tenants\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "No tenant fallback",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/file-dynamic/no-tenant",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "file-dynamic", "no-tenant"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Fallback logic verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"2 logs written without TenantId\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mixed tenant / no-tenant",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/file-dynamic/mixed",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "file-dynamic", "mixed"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Mixed routes logs verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include(\"5 logs: 2 global\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verify files on disk",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/file-dynamic/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "file-dynamic", "verify"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Files listed successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.basePathFiles).to.be.an(\"array\");",
+                  "    pm.expect(jsonData.subdirectories).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7. Sensitive Data Masking",
+      "item": [
+        {
+          "name": "Mask email, password, credit card",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/masking/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "masking", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Masking logic instructions verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include(\"Email, Password and CardNumber are masked\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mask Bearer token, connection string, custom regex",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/masking/api-error",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "masking", "api-error"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Regex and presets masking verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include(\"Bearer token, connection-string password\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8. Contextual Logging",
+      "item": [
+        {
+          "name": "Generate normal activity (fill buffer)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/contextual/generate-activity",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contextual", "generate-activity"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Ring buffer populated\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include(\"added to the contextual ring buffer\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buffer status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/contextual/buffer-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contextual", "buffer-status"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Buffer schema verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.enabled).to.be.a(\"boolean\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Simulate error (trigger flush)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/contextual/simulate-error",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contextual", "simulate-error"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Error flushed to sinks\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include(\"Error simulated\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Simulate multiple errors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/contextual/multi-error",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contextual", "multi-error"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Multi-error sequences verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include(\"Two errors simulated\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "9. MCP Server",
+      "item": [
+        {
+          "name": "List MCP Tools (REST Shortcut)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp-demo/tools",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mcp-demo", "tools"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"MCP tools structure verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.availableTools).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List MCP Prompts (REST Shortcut)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp-demo/prompts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mcp-demo", "prompts"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Call health tool directly (REST)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp-demo/call/get-health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mcp-demo", "call", "get-health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"MCP Direct REST result matches\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.tool).to.eql(\"get-health\");",
+                  "    pm.expect(jsonData.result).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "JSON-RPC Initialize",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{}}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["mcp"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"JSON-RPC schema verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.jsonrpc).to.eql(\"2.0\");",
+                  "    pm.expect(jsonData.result).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "JSON-RPC List Tools",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\",\"params\":{}}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["mcp"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Tools list returned in JSON-RPC\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.result.tools).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "JSON-RPC Call get-health Tool",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"loggerhelper_get_health\",\"arguments\":{}}}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["mcp"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Tool result payload check\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.result.content).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "10. Dashboard",
+      "item": [
+        {
+          "name": "Open HTML Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "text/html",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/loggerhelper",
+              "host": ["{{baseUrl}}"],
+              "path": ["loggerhelper"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"HTML content type verified\", function () {",
+                  "    pm.response.to.have.header(\"Content-Type\");",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/html\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard status API",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/loggerhelper/api/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["loggerhelper", "api", "status"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Dashboard status elements checked\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.health).to.not.be.undefined;",
+                  "    pm.expect(jsonData.sinks).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard raw logs API",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/loggerhelper/api/logs",
+              "host": ["{{baseUrl}}"],
+              "path": ["loggerhelper", "api", "logs"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Logs returned from contextual buffer\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.enabled).to.be.a(\"boolean\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard filtered logs API (Warning)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/loggerhelper/api/logs?level=Warning",
+              "host": ["{{baseUrl}}"],
+              "path": ["loggerhelper", "api", "logs"],
+              "query": [
+                {
+                  "key": "level",
+                  "value": "Warning"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Filtered results verified\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.entries).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -23,6 +23,7 @@ builder.Services.AddSingleton<IEndpointDefinition, DiagnosticsEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, DynamicFileEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, SensitiveDataMaskingEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, McpDemoEndpoints>();
+builder.Services.AddSingleton<IEndpointDefinition, ContextualLoggingEndpoints>();
 
 // ── Swagger ─────────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
