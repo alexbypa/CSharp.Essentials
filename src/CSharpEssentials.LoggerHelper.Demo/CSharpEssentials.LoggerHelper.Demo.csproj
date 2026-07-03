@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Dashboard\CSharpEssentials.LoggerHelper.Dashboard.csproj" />
+    <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Elasticsearch\CSharpEssentials.LoggerHelper.Sink.Elasticsearch.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Email\CSharpEssentials.LoggerHelper.Sink.Email.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper.Sink.Telegram\CSharpEssentials.LoggerHelper.Sink.Telegram.csproj" />
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />

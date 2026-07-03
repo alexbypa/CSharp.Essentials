@@ -1,6 +1,7 @@
 using Serilog;
 using Serilog.Debugging;
 using Serilog.Events;
+using Serilog.Sinks.Elasticsearch;
 using System.Runtime.CompilerServices;
 
 namespace CSharpEssentials.LoggerHelper.Sink.Elasticsearch;
@@ -48,7 +49,9 @@ public sealed class ElasticsearchSinkPlugin : ISinkPlugin {
             wt => wt.Elasticsearch(
                 nodeUris: opts.NodeUris,
                 indexFormat: opts.IndexFormat,
-                autoRegisterTemplate: true
+                autoRegisterTemplate: true,
+                detectElasticsearchVersion: false,
+                autoRegisterTemplateVersion : AutoRegisterTemplateVersion.ESv7
             )
         );
     }

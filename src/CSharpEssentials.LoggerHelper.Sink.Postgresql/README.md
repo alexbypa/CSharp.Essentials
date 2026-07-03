@@ -37,6 +37,9 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.Postgresql
 
 ```csharp
 builder.Services.AddLoggerHelper(builder.Configuration);
+
+var app = builder.Build();
+app.UseLoggerHelper();   // ← required: activates sinks and registers middleware
 ```
 
 ## Quick Setup — Fluent API
@@ -68,18 +71,107 @@ builder.Services.AddLoggerHelper(b => b
 
 ### Default Columns
 
-When `Columns` is not specified, the sink creates these columns automatically:
+When `Columns` is omitted the sink creates this table automatically:
 
-`ApplicationName`, `message`, `message_template`, `level`, `raise_date`, `exception`, `properties`, `MachineName`, `Action`, `IdTransaction`
+| Column | Writer | PostgreSQL type | Notes |
+|---|---|---|---|
+| `ApplicationName` | `Single` | `Text` | Value of the `ApplicationName` log property |
+| `message` | `Rendered` | `Text` | Final rendered log message |
+| `message_template` | `Template` | `Text` | Raw Serilog template with `{placeholders}` |
+| `level` | `Level` | `Varchar` | e.g. `Information`, `Error` |
+| `raise_date` | `Timestamp` | `Timestamp` | UTC timestamp of the event |
+| `exception` | `Exception` | `Text` | Full exception string (nullable) |
+| `properties` | `Serialized` | `Jsonb` | All structured properties as JSONB — queryable with `->` operator |
+| `MachineName` | `Single` | `Text` | Host name |
+| `Action` | `Single` | `Text` | Custom `Action` property from scope |
+| `IdTransaction` | `Single` | `Text` | Correlation ID from scope |
 
-### PostgreSqlColumnConfig
+---
+
+## Custom Columns — Replicate or Extend the Default Schema
+
+Use `Columns` to define exactly which columns the sink writes.
+When `Columns` is present it **replaces** the default set entirely.
+
+### Example A — Replicating the default schema via JSON
+
+```json
+"Sinks": {
+  "Postgresql": {
+    "ConnectionString": "Host=localhost;Database=logs;Username=app;Password=secret",
+    "TableName": "app_logs",
+    "NeedAutoCreateTable": true,
+    "Columns": [
+      { "Name": "ApplicationName", "Writer": "Single",    "Type": "Text",      "Property": "ApplicationName" },
+      { "Name": "message",         "Writer": "Rendered",  "Type": "Text" },
+      { "Name": "message_template","Writer": "Template",  "Type": "Text" },
+      { "Name": "level",           "Writer": "Level",     "Type": "Varchar" },
+      { "Name": "raise_date",      "Writer": "Timestamp", "Type": "Timestamp" },
+      { "Name": "exception",       "Writer": "Exception", "Type": "Text" },
+      { "Name": "properties",      "Writer": "Serialized","Type": "Jsonb" },
+      { "Name": "MachineName",     "Writer": "Single",    "Type": "Text",      "Property": "MachineName" },
+      { "Name": "Action",          "Writer": "Single",    "Type": "Text",      "Property": "Action" },
+      { "Name": "IdTransaction",   "Writer": "Single",    "Type": "Text",      "Property": "IdTransaction" }
+    ]
+  }
+}
+```
+
+### Example B — Custom schema with application-specific properties
+
+Add only the columns you need, including custom properties pushed via `BeginScope`:
+
+```json
+"Columns": [
+  { "Name": "message",    "Writer": "Rendered",  "Type": "Text" },
+  { "Name": "level",      "Writer": "Level",     "Type": "Varchar" },
+  { "Name": "raise_date", "Writer": "Timestamp", "Type": "Timestamp" },
+  { "Name": "exception",  "Writer": "Exception", "Type": "Text" },
+  { "Name": "properties", "Writer": "Serialized","Type": "Jsonb" },
+  { "Name": "TenantId",   "Writer": "Single",    "Type": "Text",  "Property": "TenantId" },
+  { "Name": "UserId",     "Writer": "Single",    "Type": "Text",  "Property": "UserId" },
+  { "Name": "RequestId",  "Writer": "Single",    "Type": "Text",  "Property": "RequestId" }
+]
+```
+
+Populate the custom properties at runtime with `BeginScope`:
+
+```csharp
+using (_logger.BeginScope(new Dictionary<string, object?> {
+    ["TenantId"]  = "acme",
+    ["UserId"]    = "usr_99",
+    ["RequestId"] = HttpContext.TraceIdentifier
+}))
+{
+    _logger.LogWarning("Payment failed for order {OrderId}", orderId);
+}
+```
+
+> `Property` is required only for `Writer: "Single"` when the column name differs from the Serilog property name. If `Name` and the property name match, you can omit `Property`.
+
+---
+
+### PostgreSqlColumnConfig reference
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `Name` | `string` | `""` | Column name |
-| `Writer` | `string` | `"Single"` | Writer type: `Rendered`, `Template`, `Level`, `Timestamp`, `Exception`, `Serialized`, `Properties`, `Single` |
-| `Type` | `string` | `"Text"` | PostgreSQL type: `Text`, `Jsonb`, `Varchar`, `Timestamp` |
-| `Property` | `string?` | `null` | Serilog property name to map |
+| `Name` | `string` | `""` | Column name in the database table |
+| `Writer` | `string` | `"Single"` | How the value is extracted — see table below |
+| `Type` | `string` | `"Text"` | PostgreSQL column type: `Text`, `Jsonb`, `Varchar`, `Timestamp` |
+| `Property` | `string?` | `null` | Serilog property name for `Single` writer (defaults to `Name`) |
+
+**Writer values:**
+
+| Writer | Maps to | Use for |
+|---|---|---|
+| `Rendered` | Rendered log message | Human-readable message |
+| `Template` | Raw message template | Grouping / searching by template |
+| `Level` | Log level | `Information`, `Warning`, `Error`, `Fatal` |
+| `Timestamp` | Event UTC timestamp | Time-range queries |
+| `Exception` | Full exception string | Error analysis |
+| `Serialized` | All properties as JSON | Catch-all JSONB blob |
+| `Properties` | All properties (key-value) | Alternative to Serialized |
+| `Single` | One named property | Custom scope/enricher values |
 
 ---
 

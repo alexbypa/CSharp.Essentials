@@ -132,6 +132,8 @@ OpenSearch exposes the same REST API as Elasticsearch 7.x on port 9200 by defaul
 | `connection refused` on port 9200 | Elasticsearch is not running or wrong port | Start Elasticsearch and verify the node URL |
 | Index not visible in Kibana | `IndexFormat` date mismatch or wrong data view pattern | Check the index name in Elasticsearch: `GET /_cat/indices?v` |
 | Template registration error at startup | Insufficient Elasticsearch permissions | Grant `manage_index_templates` privilege to the connecting user |
+| `No connection could be made` on WSL | `localhost` resolves to IPv6, Docker only listens on IPv4 | Use `http://127.0.0.1:9200` instead of `http://localhost:9200` in `NodeUris` |
+| Index created but no documents | Elasticsearch 8.x version detection fails with the Serilog sink | This sink sets `DetectElasticsearchVersion = false` and `AutoRegisterTemplateVersion = ESv7` internally — no action needed on your side |
 
 ---
 
@@ -153,6 +155,48 @@ docker run -d --name kibana \
 ```
 
 Then set `NodeUris` to `"http://localhost:9200"` and open Kibana at `http://localhost:5601`.
+
+> **WSL users:** if the connection times out, use `http://127.0.0.1:9200` instead of `http://localhost:9200`.
+> WSL can route `localhost` to an IPv6 address that Docker does not expose, causing silent failures.
+
+---
+
+## Viewing Logs in Kibana — Step by Step
+
+Once your app is running and sending logs, follow these steps to visualize them.
+
+### Step 1 — Verify the index exists
+
+1. Open Kibana at `http://localhost:5601`
+2. Open the left menu (☰) → **Stack Management** (gear icon at the bottom)
+3. Under **Data** → click **Index Management**
+4. Look for your index (e.g. `myapp-logs-2026.07.03`) — the **Docs count** column must be greater than zero
+
+If the index is missing, the sink is not writing. Check `NodeUris` and confirm `app.UseLoggerHelper()` is called.
+
+### Step 2 — Create a Data View
+
+A Data View is how Kibana maps an index pattern to its query engine.
+
+1. Still in **Stack Management** → under **Kibana** → click **Data Views**
+2. Click **Create data view**
+3. In the **Index pattern** field enter: `myapp-logs-*` (the `*` wildcard covers all daily indices)
+4. Kibana confirms the matched indices in real time
+5. In the **Timestamp field** dropdown select **`@timestamp`**
+6. Click **Save data view**
+
+### Step 3 — Browse logs in Discover
+
+1. Open the left menu (☰) → **Analytics** → **Discover**
+2. Select your data view from the dropdown in the top-left (e.g. `myapp-logs-*`)
+3. Set the **time filter** in the top-right to *Last 15 minutes* (or the period when your app ran)
+4. Log events appear in the table — click any row to expand the full JSON document
+
+![Kibana Discover — LoggerHelper logs](../../img/kibana-discover-loggerhelper.png)
+
+Each document exposes all structured properties set via `BeginScope` or call-site parameters
+(e.g. `fields.ApplicationName`, `fields.RenderedMessage`, `fields.MachineName`) and is fully
+searchable with KQL: `fields.ApplicationName : "MyApp" and level : "Error"`.
 
 ---
 
