@@ -337,21 +337,6 @@ to measure framework overhead independently of I/O.
 
 ---
 
-## TODO
-
-> Planned for upcoming releases — contributions welcome.
-
-- [ ] **Source Generator** — replace runtime reflection for sink loading with a compile-time source generator: faster startup, AOT-compatible, trimming-safe
-- [ ] **BenchmarkDotNet suite** — published performance comparisons vs Serilog pure, NLog, and Microsoft.Extensions.Logging default provider
-- [ ] **`dotnet new` template** — `dotnet new loggerhelper-api` scaffolds a pre-configured project with zero friction
-- [ ] **Dashboard sink** — embedded real-time UI showing active sinks, routing rules, and recent sink errors
-- [ ] **xUnit sink** — forwards log output to xUnit test runner for integration test visibility
-- [ ] **AI extension** — natural language log queries, anomaly detection, and incident summarization via LLM
-- [ ] **Telemetry extension** — OpenTelemetry metrics export (log counters per sink, error rates, latency)
-- [ ] **Interactive playground** — browser-based editor to test JSON routing config and see live output
-
----
-
 ## License
 
 MIT — © Alessandro Chiodo

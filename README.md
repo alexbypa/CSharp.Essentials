@@ -498,20 +498,6 @@ Reference `CSharpEssentials.LoggerHelper` as a NuGet package. The sink auto-regi
 
 ---
 
-## 🔮 Coming Soon
-
-| Feature | Description |
-|---------|-------------|
-| **LoggerHelper.Dashboard** | Embedded real-time UI — active sinks, routing rules, recent errors |
-| **LoggerHelper.Telemetry** | OpenTelemetry metrics export — log counters per sink, error rates, latency |
-| **LoggerHelper.xUnit** | Forwards log output to xUnit test runner for integration test visibility |
-| **Source Generator** | Replace runtime reflection for sink loading — faster startup, AOT-compatible |
-| **`dotnet new` template** | `dotnet new loggerhelper-api` scaffolds a pre-configured project |
-
-Contributions welcome — open an issue or PR on [GitHub](https://github.com/alexbypa/CSharp.Essentials).
-
----
-
 ## 📚 Documentation & Links
 
 - [**Documentation Site**](https://www.loggerhelper.com) — full reference, guides, and playground
