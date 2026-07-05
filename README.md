@@ -398,13 +398,13 @@ Click **guide →** for the full configuration reference, sample output, and tro
 |---|---|---|---|
 | **Console** | Colored terminal output, per-level themes | `dotnet add package CSharpEssentials.LoggerHelper.Sink.Console` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.Console/README.md) |
 | **File** | Rolling JSON files, per-property subdirectories, configurable retention | `dotnet add package CSharpEssentials.LoggerHelper.Sink.File` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.File/README.md) |
-| **Email** | SMTP alerts, HTML templates, throttling | `dotnet add package CSharpEssentials.LoggerHelper.Sink.Email` | — |
-| **Telegram** | Bot notifications, MarkdownV2, throttling | `dotnet add package CSharpEssentials.LoggerHelper.Sink.Telegram` | — |
+| **Email** | SMTP alerts, HTML templates, throttling | `dotnet add package CSharpEssentials.LoggerHelper.Sink.Email` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.Email/README.md) |
+| **Telegram** | Bot notifications, MarkdownV2, throttling | `dotnet add package CSharpEssentials.LoggerHelper.Sink.Telegram` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.Telegram/README.md) |
 | **Elasticsearch** | Elasticsearch / OpenSearch indexing, auto template, Kibana-ready | `dotnet add package CSharpEssentials.LoggerHelper.Sink.Elasticsearch` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.Elasticsearch/README.md) |
 | **SQL Server** | Structured log table, auto creation, custom columns | `dotnet add package CSharpEssentials.LoggerHelper.Sink.MSSqlServer` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.MSSqlServer/README.md) |
-| **PostgreSQL** | JSONB properties column, custom schema | `dotnet add package CSharpEssentials.LoggerHelper.Sink.Postgresql` | — |
+| **PostgreSQL** | JSONB properties column, custom schema | `dotnet add package CSharpEssentials.LoggerHelper.Sink.Postgresql` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.Postgresql/README.md) |
 | **Seq** | Centralized log server with search, alerts, and dashboards | `dotnet add package CSharpEssentials.LoggerHelper.Sink.Seq` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.Seq/README.md) |
-| **Hangfire Console** | Structured logs inside the Hangfire Dashboard | `dotnet add package CSharpEssentials.LoggerHelper.Sink.HangfireConsole` | — |
+| **Hangfire Console** | Structured logs inside the Hangfire Dashboard | `dotnet add package CSharpEssentials.LoggerHelper.Sink.HangfireConsole` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.HangfireConsole/README.md) |
 
 Every sink uses the same routing pattern — just add the sink name to `Routes`:
 
