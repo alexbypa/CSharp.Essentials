@@ -106,6 +106,8 @@ app.UseLoggerHelper();
 
 Done. Every `ILogger<T>` in your app now routes through LoggerHelper.
 
+> 💡 **PRO TIP: Environment-Specific Configs**  
+> LoggerHelper automatically detects your environment! Create an `appsettings.LoggerHelper.debug.json` file alongside the main config, and LoggerHelper will **automatically** load it when running in **Development** mode. This is perfect for enabling verbose Console logging locally while keeping `appsettings.LoggerHelper.json` strictly for Production settings (like Databases and Email).
 ---
 
 ### Option B — Fluent API
