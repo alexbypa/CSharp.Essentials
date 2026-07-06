@@ -36,7 +36,7 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 
 - [Quick Start](#-quick-start)
 - [Run the Demo in 60 Seconds](#-run-the-demo-in-60-seconds)
-- [The Boilerplate Problem](#-the-boilerplate-problem)
+- [Why choose LoggerHelper?](#-why-choose-loggerhelper)
 - [Packages](#-packages)
 - [Feature Highlights](#-feature-highlights)
 - [AI Integration — MCP Server](#-ai-integration--mcp-server-new-v510)
@@ -75,11 +75,29 @@ app.UseLoggerHelper();
   "LoggerHelper": {
     "ApplicationName": "MyApp",
     "Routes": [
-      { "Sink": "Console", "Levels": ["Debug", "Information", "Warning"] },
-      { "Sink": "File",    "Levels": ["Information", "Warning", "Error", "Fatal"] }
+      { "Sink": "Console", "Levels": ["Information", "Warning"] },
+      { "Sink": "File", "Levels": ["Information", "Warning", "Error", "Fatal"] },
+      { "Sink": "Email", "Levels": ["Error", "Fatal"] },
+      { "Sink": "MSSqlServer", "Levels": ["Information", "Warning", "Error", "Fatal"] }
     ],
     "Sinks": {
-      "File": { "Path": "Logs", "RollingInterval": "Day", "RetainedFileCountLimit": 7 }
+      "File": {
+        "Path": "Logs",
+        "RollingInterval": "Day",
+        "RetainedFileCountLimit": 7,
+        "FileNameProperty": "TenantId"
+      },
+      "Email": {
+        "From": "alerts@myapp.com",
+        "To": "team@myapp.com",
+        "Host": "smtp.myapp.com",
+        "Port": 587
+      },
+      "MSSqlServer": {
+        "ConnectionString": "Server=localhost;Database=LogsDb;Trusted_Connection=true;",
+        "TableName": "Logs",
+        "AutoCreateSqlTable": true
+      }
     },
     "General": { "EnableRequestResponseLogging": true }
   }
@@ -133,71 +151,13 @@ Open **[http://localhost:5000/swagger](http://localhost:5000/swagger)** — the 
 
 ---
 
-## 🔥 The Boilerplate Problem
+## 🎯 Why choose LoggerHelper?
 
-Setting up Serilog with multiple sinks, per-level routing, and enrichment means repeating the same
-infrastructure code in every project. Here's what it typically looks like:
-
-### ❌ Before — Vanilla Serilog (30+ lines, repeated per project)
-
-```csharp
-// Program.cs — Vanilla Serilog setup
-Log.Logger = new LoggerConfiguration()
-    .Enrich.WithProperty("ApplicationName", "MyApp")
-    .Enrich.WithProperty("MachineName", Environment.MachineName)
-    .Enrich.FromLogContext()
-    .WriteTo.Conditional(
-        e => e.Level is LogEventLevel.Information or LogEventLevel.Warning,
-        cfg => cfg.Console())
-    .WriteTo.Conditional(
-        e => e.Level >= LogEventLevel.Information,
-        cfg => cfg.File("Logs/log-.txt", rollingInterval: RollingInterval.Day,
-                        retainedFileCountLimit: 7, shared: true,
-                        formatter: new JsonFormatter()))
-    .WriteTo.Conditional(
-        e => e.Level >= LogEventLevel.Error,
-        cfg => cfg.Email(new EmailConnectionInfo {
-            FromEmail = "alerts@myapp.com",
-            ToEmail   = "team@myapp.com",
-            MailServer = "smtp.myapp.com",
-            Port = 587,
-            EnableSsl = true,
-            EmailSubject = "[MyApp] Error"
-        }))
-    .CreateLogger();
-
-builder.Host.UseSerilog();
-// Repeat for every project. Adjust. Break on typos. Re-test from scratch.
-```
-
-### ✅ After — LoggerHelper (5 lines of C# + declarative JSON)
-
-```csharp
-// Program.cs — that's it
-builder.Services.AddLoggerHelper(builder.Configuration);
-app.UseLoggerHelper();
-```
-
-```jsonc
-// appsettings.LoggerHelper.json
-{
-  "LoggerHelper": {
-    "ApplicationName": "MyApp",
-    "Routes": [
-      { "Sink": "Console", "Levels": ["Information", "Warning"] },
-      { "Sink": "File",    "Levels": ["Information", "Warning", "Error", "Fatal"] },
-      { "Sink": "Email",   "Levels": ["Error", "Fatal"] }
-    ],
-    "Sinks": {
-      "File":  { "Path": "Logs", "RollingInterval": "Day" },
-      "Email": { "From": "alerts@myapp.com", "To": "team@myapp.com",
-                 "Host": "smtp.myapp.com", "Port": 587 }
-    }
-  }
-}
-```
-
-**Every `ILogger<T>` in your app now routes through LoggerHelper. No other changes needed.**
+- 🔌 **Native `ILogger<T>`**: Zero vendor lock-in. Uses standard Microsoft abstractions.
+- 🧩 **Zero Unnecessary Dependencies**: Highly modular. Install the core package and *only* the specific sinks you need.
+- 🛠️ **JSON-First Configuration**: Route any log level to any sink without writing a single line of C# conditional logic.
+- 🛡️ **PII Data Masking**: Automatically redact passwords, JWTs, and sensitive fields across *all* sinks globally.
+- 🤖 **AI-Ready**: Includes a native MCP Server to let AI assistants query log health and configuration out-of-the-box.
 
 ---
 
