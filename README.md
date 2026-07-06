@@ -34,17 +34,102 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 
 ## Table of Contents
 
-- [The Boilerplate Problem](#-the-boilerplate-problem)
-- [Packages](#-packages)
 - [Quick Start](#-quick-start)
 - [Run the Demo in 60 Seconds](#-run-the-demo-in-60-seconds)
+- [The Boilerplate Problem](#-the-boilerplate-problem)
+- [Packages](#-packages)
 - [Feature Highlights](#-feature-highlights)
 - [AI Integration — MCP Server](#-ai-integration--mcp-server-new-v510)
 - [Sink Overview & JSON Examples](#-sink-overview--json-examples)
 - [Comparison](#-comparison)
 - [Architecture](#-architecture)
 - [Coming Soon](#-coming-soon)
+- [View Source & Contribute](#-view-source--contribute)
 - [Documentation & Links](#-documentation--links)
+
+---
+
+## 🚀 Quick Start
+
+### Option A — JSON config (recommended)
+
+**1. Install packages**
+
+```bash
+dotnet add package CSharpEssentials.LoggerHelper
+dotnet add package CSharpEssentials.LoggerHelper.Sink.Console
+dotnet add package CSharpEssentials.LoggerHelper.Sink.File
+```
+
+**2. Wire up in `Program.cs`**
+
+```csharp
+builder.Services.AddLoggerHelper(builder.Configuration);
+app.UseLoggerHelper();
+```
+
+**3. Create `appsettings.LoggerHelper.json`** in your project root
+
+```jsonc
+{
+  "LoggerHelper": {
+    "ApplicationName": "MyApp",
+    "Routes": [
+      { "Sink": "Console", "Levels": ["Debug", "Information", "Warning"] },
+      { "Sink": "File",    "Levels": ["Information", "Warning", "Error", "Fatal"] }
+    ],
+    "Sinks": {
+      "File": { "Path": "Logs", "RollingInterval": "Day", "RetainedFileCountLimit": 7 }
+    },
+    "General": { "EnableRequestResponseLogging": true }
+  }
+}
+```
+
+Done. Every `ILogger<T>` in your app now routes through LoggerHelper.
+
+---
+
+### Option B — Fluent API
+
+```csharp
+builder.Services.AddLoggerHelper(b => b
+    .WithApplicationName("MyApp")
+    .AddRoute("Console", LogEventLevel.Information, LogEventLevel.Warning)
+    .AddRoute("File",    LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
+    .AddRoute("Email",   LogEventLevel.Error, LogEventLevel.Fatal)
+    .ConfigureFile(f => { f.Path = "Logs"; f.RollingInterval = "Day"; })
+    .ConfigureEmail(e => { e.To = "ops@example.com"; e.Host = "smtp.example.com"; })
+    .EnableRequestResponseLogging()
+);
+```
+
+### Option C — JSON + Fluent merge
+
+```csharp
+// JSON defines shared config across environments.
+// Fluent adds development-only extras without touching JSON.
+builder.Services.AddLoggerHelper(builder.Configuration, b => b
+    .AddRoute("Console", LogEventLevel.Debug)
+);
+```
+
+---
+
+## ⚡ Run the Demo in 60 Seconds
+
+Clone the repo and start the interactive demo app — **no database required**, runs on Console + File only:
+
+```bash
+git clone https://github.com/alexbypa/CSharp.Essentials.git
+cd CSharp.Essentials/src/CSharpEssentials.LoggerHelper.Demo
+dotnet run
+```
+
+Open **[http://localhost:5000/swagger](http://localhost:5000/swagger)** — the Swagger UI lists all available demo scenarios. Each endpoint produces structured logs visible immediately in the terminal and in the `Logs/` folder.
+
+> In Development mode (`dotnet run` always uses Development), the project automatically loads `appsettings.LoggerHelper.debug.json`, which configures only **Console + File** — no SQL Server or PostgreSQL required.  
+> To activate all four sinks (Console, File, MSSqlServer, PostgreSQL) set `ASPNETCORE_ENVIRONMENT=Production`.
 
 ---
 
@@ -134,89 +219,6 @@ app.UseLoggerHelper();
 | [`CSharpEssentials.LoggerHelper.MCP`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | MCP server: AI assistants can query sink health, errors & config | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) |
 | [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting, auto logging | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
 
----
-
-## 🚀 Quick Start
-
-### Option A — JSON config (recommended)
-
-**1. Install packages**
-
-```bash
-dotnet add package CSharpEssentials.LoggerHelper
-dotnet add package CSharpEssentials.LoggerHelper.Sink.Console
-dotnet add package CSharpEssentials.LoggerHelper.Sink.File
-```
-
-**2. Wire up in `Program.cs`**
-
-```csharp
-builder.Services.AddLoggerHelper(builder.Configuration);
-app.UseLoggerHelper();
-```
-
-**3. Create `appsettings.LoggerHelper.json`** in your project root
-
-```jsonc
-{
-  "LoggerHelper": {
-    "ApplicationName": "MyApp",
-    "Routes": [
-      { "Sink": "Console", "Levels": ["Debug", "Information", "Warning"] },
-      { "Sink": "File",    "Levels": ["Information", "Warning", "Error", "Fatal"] }
-    ],
-    "Sinks": {
-      "File": { "Path": "Logs", "RollingInterval": "Day", "RetainedFileCountLimit": 7 }
-    },
-    "General": { "EnableRequestResponseLogging": true }
-  }
-}
-```
-
-Done. Every `ILogger<T>` in your app now routes through LoggerHelper.
-
----
-
-### Option B — Fluent API
-
-```csharp
-builder.Services.AddLoggerHelper(b => b
-    .WithApplicationName("MyApp")
-    .AddRoute("Console", LogEventLevel.Information, LogEventLevel.Warning)
-    .AddRoute("File",    LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
-    .AddRoute("Email",   LogEventLevel.Error, LogEventLevel.Fatal)
-    .ConfigureFile(f => { f.Path = "Logs"; f.RollingInterval = "Day"; })
-    .ConfigureEmail(e => { e.To = "ops@example.com"; e.Host = "smtp.example.com"; })
-    .EnableRequestResponseLogging()
-);
-```
-
-### Option C — JSON + Fluent merge
-
-```csharp
-// JSON defines shared config across environments.
-// Fluent adds development-only extras without touching JSON.
-builder.Services.AddLoggerHelper(builder.Configuration, b => b
-    .AddRoute("Console", LogEventLevel.Debug)
-);
-```
-
----
-
-## ⚡ Run the Demo in 60 Seconds
-
-Clone the repo and start the interactive demo app — **no database required**, runs on Console + File only:
-
-```bash
-git clone https://github.com/alexbypa/CSharp.Essentials.git
-cd CSharp.Essentials/src/CSharpEssentials.LoggerHelper.Demo
-dotnet run
-```
-
-Open **[http://localhost:5000/swagger](http://localhost:5000/swagger)** — the Swagger UI lists all available demo scenarios. Each endpoint produces structured logs visible immediately in the terminal and in the `Logs/` folder.
-
-> In Development mode (`dotnet run` always uses Development), the project automatically loads `appsettings.LoggerHelper.debug.json`, which configures only **Console + File** — no SQL Server or PostgreSQL required.  
-> To activate all four sinks (Console, File, MSSqlServer, PostgreSQL) set `ASPNETCORE_ENVIRONMENT=Production`.
 
 ---
 
@@ -495,6 +497,18 @@ public static class PluginInitializer {
 ```
 
 Reference `CSharpEssentials.LoggerHelper` as a NuGet package. The sink auto-registers with no changes to the core.
+
+---
+
+## 🤝 View Source & Contribute
+
+If you're reading this on **NuGet**, we highly recommend visiting our **[GitHub Repository](https://github.com/alexbypa/CSharp.Essentials)**!
+
+By visiting the repository you can:
+- 👀 **Explore the source code** and evaluate the code quality.
+- 🐛 **Check open issues** or report new ones.
+- 🛠️ **Contribute** to the project via Pull Requests.
+- ⭐ **Drop a star** to support the project's growth!
 
 ---
 
