@@ -136,7 +136,7 @@ builder.Services.AddLoggerHelper(builder.Configuration, b => b
 
 ## ⚡ Run the Demo in 60 Seconds
 
-Clone the repo and start the interactive demo app — **no database required**, runs on Console + File only:
+Clone the repo and start the interactive demo app. The demo comes pre-configured with Console, File, MSSqlServer, and PostgreSQL sinks.
 
 ```bash
 git clone https://github.com/alexbypa/CSharp.Essentials.git
@@ -144,10 +144,9 @@ cd CSharp.Essentials/src/CSharpEssentials.LoggerHelper.Demo
 dotnet run
 ```
 
-Open **[http://localhost:5000/swagger](http://localhost:5000/swagger)** — the Swagger UI lists all available demo scenarios. Each endpoint produces structured logs visible immediately in the terminal and in the `Logs/` folder.
+Open the URL shown in your terminal (usually **`http://localhost:<port>/swagger/index.html`**) — the Swagger UI lists all available demo scenarios. Each endpoint produces structured logs visible immediately in the terminal and in the `Logs/` folder.
 
-> In Development mode (`dotnet run` always uses Development), the project automatically loads `appsettings.LoggerHelper.debug.json`, which configures only **Console + File** — no SQL Server or PostgreSQL required.  
-> To activate all four sinks (Console, File, MSSqlServer, PostgreSQL) set `ASPNETCORE_ENVIRONMENT=Production`.
+> 💡 **No database required to run it:** Even if you don't have SQL Server or PostgreSQL running locally, LoggerHelper gracefully ignores the connection errors. Your app won't crash, and logs will still appear perfectly in the Console and File sinks!
 
 ---
 
