@@ -1,4 +1,4 @@
-![CSharpEssentials Logo](img/icon.png)
+![CSharpEssentials Logo](img/CSharpEssentials.ico)
 # CSharpEssentials — LoggerHelper
 
 **Stop writing Serilog boilerplate. Route any log level to any sink — in one JSON file.**
