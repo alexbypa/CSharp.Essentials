@@ -38,6 +38,7 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 - [Why choose LoggerHelper?](#-why-choose-loggerhelper)
 - [Packages](#-packages)
 - [Feature Highlights](#-feature-highlights)
+- [Built-in UI — Dashboard](#-built-in-ui--dashboard)
 - [AI Integration — MCP Server](#-ai-integration--mcp-server-new-v510)
 - [Sink Overview & JSON Examples](#-sink-overview--json-examples)
 - [Comparison](#-comparison)
@@ -174,7 +175,7 @@ Open the URL shown in your terminal (usually **`http://localhost:<port>/swagger/
 | [`...Sink.Seq`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) | Seq centralized log server — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Seq/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Seq.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) |
 | [`...Sink.HangfireConsole`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | Structured logs in Hangfire Dashboard with color output — [guide →](src/CSharpEssentials.LoggerHelper.Sink.HangfireConsole/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) |
 | [`...Sink.Dashboard`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) | Dashboard LoggerHelper — [guide →](src/CSharpEssentials.LoggerHelper.Dashboard/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) |
-| [`CSharpEssentials.LoggerHelper.MCP`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | MCP server: AI assistants can query sink health, errors & config | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) |
+| [`CSharpEssentials.LoggerHelper.MCP`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | MCP server: AI assistants can query sink health, errors & config [guide →](src/CSharpEssentials.LoggerHelper.Sink.MCP/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) |
 | [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting, auto logging | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
 
 
@@ -305,6 +306,29 @@ logger.LogInformation("Login for {Email} with {Password}", "alice@example.com", 
 
 Serilog has no first-class equivalent: redaction usually means a hand-rolled `IDestructuringPolicy`
 or a third-party enricher wired up per project. Here it's one JSON block, applied globally.
+
+---
+
+## 📊 Built-in UI — Dashboard
+
+```bash
+dotnet add package CSharpEssentials.LoggerHelper.Dashboard
+```
+
+Embedded real-time diagnostics dashboard for ASP.NET Core — **no Seq, no Kibana, no extra infrastructure required.**
+Navigate to `/loggerhelper` to see the health of your logging pipeline at a glance:
+
+- 📡 **Live Log Stream:** Browser-based `tail -f` via Server-Sent Events. Filter by level or text in real time.
+- 🩺 **Sink Health Cards:** At-a-glance status for every configured sink (ACTIVE / FAILED) and their assigned log levels.
+- ⚠️ **Error History:** Click-to-expand table of recent sink errors (SMTP failures, DB write errors) with full stack traces.
+- ⏪ **Context Before Error:** The killer feature. A zero-allocation ring buffer automatically flushes all preceding Debug/Info/Warning entries *only* when an Error or Fatal event fires. You see **exactly what happened before the crash** without keeping verbose logging on permanently!
+
+```csharp
+// Program.cs
+builder.Services.AddLoggerHelperDashboard();
+// ...
+app.MapLoggerHelperDashboard(); // Exposes the UI at /loggerhelper
+```
 
 ---
 
