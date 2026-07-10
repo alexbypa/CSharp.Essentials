@@ -12,7 +12,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
+    <PackageProjectUrl>https://www.loggerhelper.it</PackageProjectUrl>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
     <PackageTags>httpclient;polly;resilience;retry;rate-limiting;aspnetcore;http;structured-logging</PackageTags>
   </PropertyGroup>

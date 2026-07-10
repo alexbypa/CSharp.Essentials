@@ -9,7 +9,7 @@
     <Authors>Alessandro Chiodo</Authors>
     <Description>Know about errors before your users do. Instant Telegram alerts on your phone with emoji-coded severity — because email is too slow for production fires. Fire-and-forget delivery: Emit() never blocks the Serilog pipeline. ConcurrentDictionary throttle prevents duplicate messages under burst load. Zero Telegram SDK dependencies — uses BCL HttpClient with configurable timeout.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
+    <PackageProjectUrl>https://www.loggerhelper.it</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageTags>serilog;logging;telegram;bot;telegram-bot;sink;alerts;monitoring;loggerhelper;structured-logging;push-notifications;real-time-alerts;dotnet8;dotnet9;dotnet10;zero-dependency</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

@@ -202,7 +202,7 @@ searchable with KQL: `fields.ApplicationName : "MyApp" and level : "Error"`.
 
 ## Links
 
-- [Documentation](https://www.loggerhelper.com)
+- [Documentation](https://www.loggerhelper.it)
 - [Elasticsearch](https://www.elastic.co/elasticsearch)
 - [CSharpEssentials.LoggerHelper (core)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 - [GitHub Repository](https://github.com/alexbypa/CSharp.Essentials)

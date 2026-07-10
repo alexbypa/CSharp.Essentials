@@ -11,7 +11,7 @@
     <Authors>Alessandro Chiodo</Authors>
     <Description>Give your AI assistant eyes AND hands on your logs. CSharpEssentials.LoggerHelper.MCP exposes 7 MCP tools over HTTP — letting Claude, Cursor, Copilot, and any MCP-compatible client inspect sink health, search logs, change log levels, and toggle sinks at runtime with natural language. New in 5.2.0: loggerhelper_set_log_level, loggerhelper_search_logs (queries the in-memory ring buffer), loggerhelper_toggle_sink — the only .NET logging library where AI can control logging, not just read it.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
+    <PackageProjectUrl>https://www.loggerhelper.it</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageTags>serilog;logging;mcp;model-context-protocol;ai-tools;claude;cursor;github-copilot;sink;loggerhelper;structured-logging;observability;diagnostics;dotnet8;dotnet9;dotnet10;aspnetcore;ai-agent;json-rpc;zero-dependency</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

@@ -152,4 +152,4 @@ Pure HTML/CSS/JS served as an embedded string resource. No npm, no bundler, no C
 
 ## License
 
-MIT — [loggerhelper.com](https://www.loggerhelper.com) · [GitHub](https://github.com/alexbypa/CSharp.Essentials)
+MIT — [loggerhelper.it](https://www.loggerhelper.it) · [GitHub](https://github.com/alexbypa/CSharp.Essentials)

@@ -11,7 +11,7 @@
     <Authors>Alessandro Chiodo</Authors>
     <Description>Add a real-time diagnostics dashboard to any ASP.NET Core app with one line of code. CSharpEssentials.LoggerHelper.Dashboard embeds a zero-dependency HTML UI at /loggerhelper that shows sink health, live log stream, error history, routing config, and performance metrics — no Seq, Kibana, or external tools needed. Toggle sinks and change log levels from the browser. Dark theme, auto-refresh, mobile-friendly.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
+    <PackageProjectUrl>https://www.loggerhelper.it</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageTags>serilog;logging;dashboard;diagnostics;monitoring;health-check;log-viewer;real-time;embedded-ui;aspnetcore;dotnet;observability;sink-management;zero-dependency;dark-theme;dotnet8;dotnet9;dotnet10</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

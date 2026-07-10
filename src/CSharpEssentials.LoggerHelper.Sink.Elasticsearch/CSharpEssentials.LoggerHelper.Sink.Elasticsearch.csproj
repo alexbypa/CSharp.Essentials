@@ -9,7 +9,7 @@
     <Authors>Alessandro Chiodo</Authors>
     <Description>Search millions of logs in milliseconds. Ship structured logs straight to Elasticsearch and build Kibana dashboards that actually tell you what's happening. Works with self-hosted Elasticsearch, OpenSearch, and Elastic Cloud — point IndexFormat at your ILM policy and go.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
+    <PackageProjectUrl>https://www.loggerhelper.it</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageTags>serilog;logging;elasticsearch;opensearch;kibana;elk-stack;sink;structured-logging;loggerhelper;observability;search;index;ilm;elastic-cloud;dotnet8;dotnet9;dotnet10;full-text-search</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

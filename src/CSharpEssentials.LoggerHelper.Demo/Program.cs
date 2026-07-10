@@ -37,7 +37,7 @@ builder.Services.AddSwaggerGen(c => {
             then check the console and Logs/ to see structured output in real time.
 
             Run with:  dotnet run --project src/CSharpEssentials.LoggerHelper.Demo
-            Docs:      https://www.loggerhelper.com
+            Docs:      https://www.loggerhelper.it
             """,
         Contact = new OpenApiContact {
             Name = "Alessandro Chiodo",

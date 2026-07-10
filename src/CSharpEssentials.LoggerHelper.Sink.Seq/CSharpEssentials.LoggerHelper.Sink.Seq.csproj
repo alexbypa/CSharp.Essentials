@@ -9,7 +9,7 @@
     <Authors>Alessandro Chiodo</Authors>
     <Description>Structured logs deserve a structured viewer. Ship to Seq and get instant search, live tail, dashboards, and alerts — the way .NET logging was meant to be. Pairs with Seq's free single-user tier for local development — no infrastructure to stand up.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
+    <PackageProjectUrl>https://www.loggerhelper.it</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageTags>serilog;logging;seq;seq-server;sink;structured-logging;loggerhelper;observability;live-tail;dashboards;search;alerts;free-tier;dotnet8;dotnet9;dotnet10;datalust</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

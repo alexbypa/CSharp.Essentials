@@ -42,7 +42,7 @@ It provides convenient methods for request customization, retries, timeouts, aut
 
 The full documentation and usage examples (GET requests, retries, authentication, and more) are available here:
 
-👉 [Using HttpHelper – Examples & Demo](https://www.loggerhelper.com)
+👉 [Using HttpHelper – Examples & Demo](https://www.loggerhelper.it)
 
 ---
 

@@ -9,7 +9,7 @@
     <Authors>Alessandro Chiodo</Authors>
     <Description>Get emailed when it matters. Critical errors land in your inbox as beautiful HTML alerts — with smart throttling so you never get flooded. Template and SmtpClient cached at startup: zero per-email disk I/O or TCP handshake overhead. ConcurrentDictionary throttle window prevents duplicate alerts under burst load. Zero SMTP library dependencies — uses BCL SmtpClient.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
+    <PackageProjectUrl>https://www.loggerhelper.it</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageTags>serilog;logging;email;smtp;html-email;sink;alerts;monitoring;loggerhelper;structured-logging;throttling;error-alerts;production-monitoring;dotnet8;dotnet9;dotnet10</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

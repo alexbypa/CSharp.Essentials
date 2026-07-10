@@ -9,7 +9,7 @@
     <Authors>Alessandro Chiodo</Authors>
     <Description>Logs meet PostgreSQL. JSONB fields you can query, auto-created tables, and the full power of SQL — perfect for teams already running Postgres. NeedAutoCreateTable means zero migrations to get started.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
+    <PackageProjectUrl>https://www.loggerhelper.it</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageTags>serilog;logging;postgresql;postgres;npgsql;jsonb;database;sink;structured-logging;loggerhelper;observability;auto-create-table;json-query;dotnet8;dotnet9;dotnet10;zero-migrations</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

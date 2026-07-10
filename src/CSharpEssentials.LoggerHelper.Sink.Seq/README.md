@@ -130,7 +130,7 @@ For **Seq Cloud** or a production server, generate an API key in *Settings → A
 
 - [Seq — Structured log server](https://datalust.co/seq)
 - [Seq Documentation](https://docs.datalust.co)
-- [Documentation](https://www.loggerhelper.com)
+- [Documentation](https://www.loggerhelper.it)
 - [CSharpEssentials.LoggerHelper (core)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 - [GitHub Repository](https://github.com/alexbypa/CSharp.Essentials)
 - [MIT License](https://github.com/alexbypa/CSharp.Essentials/blob/main/LICENSE)

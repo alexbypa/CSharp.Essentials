@@ -9,7 +9,7 @@
     <Authors>Alessandro Chiodo</Authors>
     <Description>Persist structured logs to rolling JSON files with zero configuration. One JSON entry routes the exact log levels you care about to file. New in 5.0.7: TryGetValue fast path in multi-tenant DynamicPropertyFileSink — 3-4x faster on steady-state hits, zero delegate allocations. Supports FileNameProperty for per-tenant log separation: different tenants write to different files automatically.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://www.loggerhelper.com</PackageProjectUrl>
+    <PackageProjectUrl>https://www.loggerhelper.it</PackageProjectUrl>
     <PackageIcon>CSharpEssentials.png</PackageIcon>
     <PackageTags>serilog;logging;file;rolling-file;sink;structured-logging;loggerhelper;json-logs;ilogger;multi-tenant;dynamic-routing;aspnetcore;dotnet8;dotnet9;dotnet10</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

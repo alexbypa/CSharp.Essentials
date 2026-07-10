@@ -159,7 +159,7 @@ button.btn-outline {background:transparent; border:1px solid var(--border); colo
   </div>
 
   <div class="footer">
-    <a href="https://www.loggerhelper.com" target="_blank">loggerhelper.com</a> &middot;
+    <a href="https://www.loggerhelper.it" target="_blank">loggerhelper.it</a> &middot;
     CSharpEssentials.LoggerHelper v5.2.0 &middot;
     Dashboard auto-refreshes every <span id="refresh-seconds">30</span>s
   </div>

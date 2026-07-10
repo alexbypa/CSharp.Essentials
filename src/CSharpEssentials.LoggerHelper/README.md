@@ -497,8 +497,8 @@ By visiting the repository you can:
 
 ## 📚 Documentation & Links
 
-- [**Documentation Site**](https://www.loggerhelper.com) — full reference, guides, and playground
-- [**Interactive Playground**](https://www.loggerhelper.com/playground.html)
+- [**Documentation Site**](https://www.loggerhelper.it) — full reference, guides, and playground
+- [**Interactive Playground**](https://www.loggerhelper.it/playground.html)
 - [**Changelog**](CHANGELOG.md)
 - [**Benchmark Results**](docs/benchmarks.md)
 - [**Migration Guide v2/v4 → v5**](docs/legacy-parity-v5.md)
@@ -512,4 +512,4 @@ By visiting the repository you can:
 
 MIT — [Alessandro Chiodo](https://github.com/alexbypa)
 
-[GitHub](https://github.com/alexbypa/CSharp.Essentials) · [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) · [loggerhelper.com](https://www.loggerhelper.com)
+[GitHub](https://github.com/alexbypa/CSharp.Essentials) · [NuGet](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) · [loggerhelper.it](https://www.loggerhelper.it)

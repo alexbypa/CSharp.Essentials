@@ -267,6 +267,6 @@ Serilog and NLog have no built-in AI tooling. With LoggerHelper MCP:
 
 ## Docs
 
-- [loggerhelper.com](https://www.loggerhelper.com)
+- [loggerhelper.it](https://www.loggerhelper.it)
 - [GitHub](https://github.com/alexbypa/CSharp.Essentials)
 - [Full Changelog](https://github.com/alexbypa/CSharp.Essentials/blob/main/CHANGELOG.md)
