@@ -426,3 +426,4 @@ yarn-error.log*
 # Altri file temporanei o di sistema
 .DS_Store
 Thumbs.db
+/src/CSharpEssentials.LoggerHelper.Demo/Tests
