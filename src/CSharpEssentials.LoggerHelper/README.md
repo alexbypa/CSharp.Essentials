@@ -1,3 +1,4 @@
+<a name="top"></a>
 # CSharpEssentials — LoggerHelper
 
 **Stop writing Serilog boilerplate. Route any log level to any sink — in one JSON file.**
@@ -32,22 +33,22 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 
 ## Table of Contents
 
-- [Quick Start](#-quick-start)
-- [Run the Demo in 60 Seconds](#-run-the-demo-in-60-seconds)
-- [Why choose LoggerHelper?](#-why-choose-loggerhelper)
-- [Packages](#-packages)
-- [Feature Highlights](#-feature-highlights)
-- [Built-in UI — Dashboard](#-built-in-ui--dashboard)
-- [AI Integration — MCP Server](#-ai-integration--mcp-server-new-v510)
-- [Sink Overview & JSON Examples](#-sink-overview--json-examples)
-- [Comparison](#-comparison)
-- [Architecture](#-architecture)
-- [Coming Soon](#-coming-soon)
-- [View Source & Contribute](#-view-source--contribute)
-- [Documentation & Links](#-documentation--links)
+- [Quick Start](#quick-start)
+- [Run the Demo in 60 Seconds](#run-the-demo-in-60-seconds)
+- [Why choose LoggerHelper?](#why-choose-loggerhelper)
+- [Packages](#packages)
+- [Feature Highlights](#feature-highlights)
+- [Built-in UI — Dashboard](#built-in-ui-dashboard)
+- [AI Integration — MCP Server](#ai-integration-mcp-server)
+- [Sink Overview](#sink-overview)
+- [Comparison](#comparison)
+- [Architecture](#architecture)
+- [View Source & Contribute](#view-source-contribute)
+- [Documentation & Links](#documentation-links)
 
 ---
 
+<a name="quick-start"></a>
 ## 🚀 Quick Start
 
 ### Option A — JSON config (recommended)
@@ -75,33 +76,22 @@ app.UseLoggerHelper();
     "ApplicationName": "MyApp",
     "Routes": [
       { "Sink": "Console", "Levels": ["Information", "Warning"] },
-      { "Sink": "File", "Levels": ["Information", "Warning", "Error", "Fatal"] },
-      { "Sink": "Email", "Levels": ["Error", "Fatal"] },
-      { "Sink": "MSSqlServer", "Levels": ["Information", "Warning", "Error", "Fatal"] }
+      { "Sink": "File", "Levels": ["Information", "Warning", "Error", "Fatal"] }
     ],
     "Sinks": {
       "File": {
         "Path": "Logs",
         "RollingInterval": "Day",
-        "RetainedFileCountLimit": 7,
-        "FileNameProperty": "TenantId"
-      },
-      "Email": {
-        "From": "alerts@myapp.com",
-        "To": "team@myapp.com",
-        "Host": "smtp.myapp.com",
-        "Port": 587
-      },
-      "MSSqlServer": {
-        "ConnectionString": "Server=localhost;Database=LogsDb;Trusted_Connection=true;",
-        "TableName": "Logs",
-        "AutoCreateSqlTable": true
+        "RetainedFileCountLimit": 7
       }
     },
     "General": { "EnableRequestResponseLogging": true }
   }
 }
 ```
+
+> 🔌 **Adding more sinks is effortless:** Want to route logs to SQL Server, PostgreSQL, Email, Seq, or Telegram? 
+> Just install the specific sink NuGet package (e.g. `CSharpEssentials.LoggerHelper.Sink.Email`) and add its configuration block and route to the JSON. No C# code changes required.
 
 Done. Every `ILogger<T>` in your app now routes through LoggerHelper.
 
@@ -133,8 +123,11 @@ builder.Services.AddLoggerHelper(builder.Configuration, b => b
 );
 ```
 
+[↑ Back to Top](#top)
+
 ---
 
+<a name="run-the-demo-in-60-seconds"></a>
 ## ⚡ Run the Demo in 60 Seconds
 
 Clone the repo and start the interactive demo app. The demo comes pre-configured with Console, File, MSSqlServer, and PostgreSQL sinks.
@@ -149,8 +142,11 @@ Open the URL shown in your terminal (usually **`http://localhost:<port>/swagger/
 
 > 💡 **No database required to run it:** Even if you don't have SQL Server or PostgreSQL running locally, LoggerHelper gracefully ignores the connection errors. Your app won't crash, and logs will still appear perfectly in the Console and File sinks!
 
+[↑ Back to Top](#top)
+
 ---
 
+<a name="why-choose-loggerhelper"></a>
 ## 🎯 Why choose LoggerHelper?
 
 - 🔌 **Native `ILogger<T>`**: Zero vendor lock-in. Uses standard Microsoft abstractions.
@@ -159,8 +155,11 @@ Open the URL shown in your terminal (usually **`http://localhost:<port>/swagger/
 - 🛡️ **PII Data Masking**: Automatically redact passwords, JWTs, and sensitive fields across *all* sinks globally.
 - 🤖 **AI-Ready**: Includes a native MCP Server to let AI assistants query log health and configuration out-of-the-box.
 
+[↑ Back to Top](#top)
+
 ---
 
+<a name="packages"></a>
 ## 📦 Packages
 
 | Package | Description | Version |
@@ -179,9 +178,11 @@ Open the URL shown in your terminal (usually **`http://localhost:<port>/swagger/
 | [`CSharpEssentials.LoggerHelper.MCP`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | MCP server: AI assistants can query sink health, errors & config — [guide →](src/CSharpEssentials.LoggerHelper.MCP/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) |
 | [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting, auto logging | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
 
+[↑ Back to Top](#top)
 
 ---
 
+<a name="feature-highlights"></a>
 ## ✨ Feature Highlights
 
 ### Per-Level Sink Routing — Declarative
@@ -308,13 +309,18 @@ logger.LogInformation("Login for {Email} with {Password}", "alice@example.com", 
 Serilog has no first-class equivalent: redaction usually means a hand-rolled `IDestructuringPolicy`
 or a third-party enricher wired up per project. Here it's one JSON block, applied globally.
 
+[↑ Back to Top](#top)
+
 ---
 
+<a name="built-in-ui-dashboard"></a>
 ## 📊 Built-in UI — Dashboard
 
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper.Dashboard
 ```
+
+![LoggerHelper Dashboard Preview](/img/Dashboard.png)
 
 Embedded real-time diagnostics dashboard for ASP.NET Core — **no Seq, no Kibana, no extra infrastructure required.**
 Navigate to `/loggerhelper` to see the health of your logging pipeline at a glance:
@@ -331,13 +337,20 @@ builder.Services.AddLoggerHelperDashboard();
 app.MapLoggerHelperDashboard(); // Exposes the UI at /loggerhelper
 ```
 
+[↑ Back to Top](#top)
+
 ---
 
+<a name="ai-integration-mcp-server"></a>
 ## 🤖 AI Integration — MCP Server
 
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper.MCP
 ```
+
+> 🤖 **AI Diagnostics in Action:** Here is an example of an AI assistant querying the running application's logging state in real-time, instantly identifying offline sinks (like Elasticsearch and Seq), and proposing actionable fixes directly in the chat:
+
+![LoggerHelper MCP Preview](img/mcp-preview.png)
 
 Give your AI assistant live visibility into your running app's logging state. Two lines of setup
 expose a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that Claude,
@@ -372,8 +385,11 @@ with **Overall Status**, **Failed Sinks**, **Configuration Issues**, and **Recom
 Grafana) before an AI assistant can see log state. LoggerHelper MCP ships that built in —
 zero extra infrastructure, zero extra dependencies, one NuGet package.
 
+[↑ Back to Top](#top)
+
 ---
 
+<a name="sink-overview"></a>
 ## 📋 Sink Overview
 
 Each sink is a separate NuGet package — install only what you need.
@@ -403,8 +419,11 @@ Every sink uses the same routing pattern — just add the sink name to `Routes`:
 
 For per-sink configuration options (connection strings, paths, retention, custom columns), see the **guide →** linked in the table above.
 
+[↑ Back to Top](#top)
+
 ---
 
+<a name="comparison"></a>
 ## 📊 Comparison
 
 | Feature | Serilog alone | NLog | **LoggerHelper v5** |
@@ -424,8 +443,11 @@ For per-sink configuration options (connection strings, paths, retention, custom
 | Initial setup complexity | 15–30 lines | XML + code | **✅ 5 lines** |
 | Sensitive data masking (PII/secrets) | Manual `IDestructuringPolicy` | 3rd-party | **✅ JSON-driven, all sinks at once** |
 
+[↑ Back to Top](#top)
+
 ---
 
+<a name="architecture"></a>
 ## 🏗️ Architecture
 
 LoggerHelper uses a **zero-dependency plugin architecture**. The core package has no knowledge of any specific sink — they self-register at startup via `[ModuleInitializer]`.
@@ -481,8 +503,11 @@ public static class PluginInitializer {
 
 Reference `CSharpEssentials.LoggerHelper` as a NuGet package. The sink auto-registers with no changes to the core.
 
+[↑ Back to Top](#top)
+
 ---
 
+<a name="view-source-contribute"></a>
 ## 🤝 View Source & Contribute
 
 If you're reading this on **NuGet**, we highly recommend visiting our **[GitHub Repository](https://github.com/alexbypa/CSharp.Essentials)**!
@@ -493,8 +518,11 @@ By visiting the repository you can:
 - 🛠️ **Contribute** to the project via Pull Requests.
 - ⭐ **Drop a star** to support the project's growth!
 
+[↑ Back to Top](#top)
+
 ---
 
+<a name="documentation-links"></a>
 ## 📚 Documentation & Links
 
 - [**Documentation Site**](https://www.loggerhelper.it) — full reference, guides, and playground
@@ -505,6 +533,8 @@ By visiting the repository you can:
 - [**NuGet — LoggerHelper**](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 - [**NuGet — HttpHelper**](https://www.nuget.org/packages/CSharpEssentials.HttpHelper)
 - [**GitHub Issues**](https://github.com/alexbypa/CSharp.Essentials/issues)
+
+[↑ Back to Top](#top)
 
 ---
 

@@ -21,8 +21,8 @@
 
   <PropertyGroup>
     <RepositoryType>git</RepositoryType>
-			<PackageTags>serilog;structured-logging;log-routing;multi-sink;logging;dotnet;aspnetcore;log-level-routing;ilogger;opentelemetry;observability;middleware;data-masking;pii-redaction;sensitive-data;console-sink;file-sink;email-sink;telegram-sink;elasticsearch-sink;postgresql-sink;mssql-sink;seq-sink;mcp;model-context-protocol;ai-tools;ai-agent;zero-boilerplate;plugin;dotnet8;dotnet9;dotnet10</PackageTags>
-    <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
+			<PackageTags>serilog;logging;structured-logging;ilogger;log-routing;multi-sink;sinks;dotnet;aspnetcore;middleware;opentelemetry;otel;observability;data-masking;pii;redaction;sensitive-data;mcp;model-context-protocol;ai-agent;ai-tools;zero-boilerplate;net8;net9;net10;dotnet8;dotnet9;dotnet10;aot;native-aot;trimming;json;appsettings</PackageTags>
+			<RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
     <PackageProjectUrl>https://www.loggerhelper.it</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>

@@ -11,6 +11,7 @@
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper
 dotnet add package CSharpEssentials.LoggerHelper.Sink.Console
+
 ```
 
 ---
@@ -33,10 +34,20 @@ Add to `appsettings.json`:
     }
   }
 }
+
 ```
+
+### 2. Initialization in C#
+
+Keep your `Program.cs` exceptionally clean. Register the helper and activate the pipeline in just two lines of code:
 
 ```csharp
 // Program.cs
+using CSharpEssentials.LoggerHelper.Extensions;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Register the LoggerHub using your configuration provider
 builder.Services.AddLoggerHelper(builder.Configuration);
 
 var app = builder.Build();

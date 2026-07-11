@@ -48,11 +48,12 @@ builder.Services.AddSwaggerGen(c => {
 
 var app = builder.Build();
 
+app.MapLoggerHelperDashboard();  // Dashboard: GET /dashboard + GET /dashboard/api/status + GET /dashboard/sse
+
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.UseLoggerHelper();              // request/response logging + correlation ID
 app.MapLoggerHelperMcp("/mcp");     // MCP Streamable HTTP — POST /mcp  (Claude Code, Cursor, Copilot)
 app.MapLoggerHelperMcpSse();        // MCP HTTP+SSE        — GET /mcp/sse + POST /mcp/messages (Claude Desktop)
-app.MapLoggerHelperDashboard();     // Dashboard UI at /loggerhelper
 
 app.UseSwagger();
 app.UseSwaggerUI(c => {
