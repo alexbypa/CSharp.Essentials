@@ -321,7 +321,7 @@ or a third-party enricher wired up per project. Here it's one JSON block, applie
 dotnet add package CSharpEssentials.LoggerHelper.Dashboard
 ```
 
-![LoggerHelper Dashboard Preview](/img/Dashboard.png)
+![LoggerHelper Dashboard Preview](https://raw.githubusercontent.com/alexbypa/CSharp.Essentials/main/img/Dashboard.png)
 
 Embedded real-time diagnostics dashboard for ASP.NET Core — **no Seq, no Kibana, no extra infrastructure required.**
 Navigate to `/loggerhelper` to see the health of your logging pipeline at a glance:
@@ -351,7 +351,7 @@ dotnet add package CSharpEssentials.LoggerHelper.MCP
 
 > 🤖 **AI Diagnostics in Action:** Here is an example of an AI assistant querying the running application's logging state in real-time, instantly identifying offline sinks (like Elasticsearch and Seq), and proposing actionable fixes directly in the chat:
 
-![LoggerHelper MCP Preview](img/mcp-preview.png)
+![LoggerHelper MCP Preview](https://raw.githubusercontent.com/alexbypa/CSharp.Essentials/main/img/mcp-preview.png)
 
 Give your AI assistant live visibility into your running app's logging state. Two lines of setup
 expose a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that Claude,
