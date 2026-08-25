@@ -2,7 +2,10 @@
 
 > MySQL and MariaDB structured log storage with JSON support and custom columns for [CSharpEssentials.LoggerHelper](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper).
 
-Part of the **CSharpEssentials.LoggerHelper** ecosystem — install only the sinks you need.
+**Targets:** `net8.0` · `net9.0` · `net10.0` — Part of the **CSharpEssentials.LoggerHelper** ecosystem. Install only the sinks you need.
+
+[![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.MySql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MySql)
+[![Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.MySql.svg?label=downloads&color=brightgreen)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MySql)
 
 Your structured fields land in **real, queryable columns** — not buried inside a JSON blob — so this sink stays at feature parity with the PostgreSQL sink.
 
@@ -18,7 +21,6 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.MySql
 Built directly on [MySqlConnector](https://mysqlconnector.net/) — fully async, no `MySql.Data` dependency.
 
 **Compatibility:** MySQL 5.7.8+, MySQL 8.x, MariaDB 10.2+
-**Target frameworks:** `net8.0`, `net9.0`, `net10.0`
 
 ---
 
@@ -64,6 +66,51 @@ builder.Services.AddLoggerHelper(b => b
 ```
 
 > The sink name is matched case-insensitively and also accepts `MySQL` and `MariaDB`, so `{ "Sink": "MariaDB" }` routes here too.
+
+---
+
+## What You'll See
+
+Events are batched and inserted as rows into the configured table. With `AutoCreateTable: true` the sink issues this DDL on the first write:
+
+```sql
+CREATE TABLE IF NOT EXISTS `app_logs` (
+  `Id`               BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `ApplicationName`  VARCHAR(255),
+  `message`          TEXT,
+  `message_template` TEXT,
+  `level`            VARCHAR(32),
+  `raise_date`       DATETIME(6),
+  `exception`        TEXT,
+  `properties`       JSON,
+  `MachineName`      VARCHAR(255),
+  `Action`           VARCHAR(255),
+  `IdTransaction`    VARCHAR(255)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+A single `logger.LogError("Payment failed for order {OrderId}", 4711)` becomes:
+
+| level | message | message_template | raise_date | properties |
+|---|---|---|---|---|
+| `Error` | `Payment failed for order 4711` | `Payment failed for order {OrderId}` | `2025-11-04 09:12:33.412870` | `{"OrderId":4711,"SourceContext":"Api.PaymentService","TraceId":"a3f…"}` |
+
+Because `properties` is a native `JSON` column, structured fields stay queryable even when they have no dedicated column:
+
+```sql
+-- Errors of the last hour, grouped by template
+SELECT message_template, COUNT(*) AS hits
+FROM app_logs
+WHERE level IN ('Error','Fatal')
+  AND raise_date >= NOW() - INTERVAL 1 HOUR
+GROUP BY message_template
+ORDER BY hits DESC;
+
+-- Drill into a single structured property inside the JSON column
+SELECT raise_date, message
+FROM app_logs
+WHERE properties->>'$.OrderId' = '4711';
+```
 
 ---
 
@@ -264,9 +311,53 @@ The `Writer` values are identical across both sinks, so an existing `Columns` bl
 
 ---
 
+## Quick Local Setup with Docker
+
+The fastest way to get a MySQL instance to log into:
+
+```bash
+docker run -d --name mysql-logs   -e MYSQL_ROOT_PASSWORD=secret   -e MYSQL_DATABASE=logs   -p 3306:3306   mysql:8
+```
+
+```json
+"MySql": {
+  "ConnectionString": "Server=localhost;Port=3306;Database=logs;Uid=root;Pwd=secret;",
+  "TableName": "app_logs",
+  "AutoCreateTable": true,
+  "StoreTimestampInUtc": true
+}
+```
+
+MariaDB works the same way — swap the image for `mariadb:11` and keep the connection string as is.
+
+Inspect what arrived:
+
+```bash
+docker exec -it mysql-logs mysql -uroot -psecret logs -e "SELECT level, message, raise_date FROM app_logs ORDER BY raise_date DESC LIMIT 10;"
+```
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely Cause | Fix |
+|---|---|---|
+| No output at all | `app.UseLoggerHelper()` missing | Add it after `builder.Build()` |
+| Sink silently does nothing | `ConnectionString` empty — the sink skips itself with a `SelfLog` warning | Set `Sinks.MySql.ConnectionString`, then enable `Serilog.Debugging.SelfLog.Enable(Console.Error)` to see the diagnostics |
+| Table not created | `AutoCreateTable: false`, or the user lacks `CREATE` permission | Grant `CREATE` on the schema, or create the table manually and declare matching `Columns` |
+| Rows appear with delay | Events are batched — flushed every `Period` or when `BatchPostingLimit` is reached | Lower `Period` (e.g. `"0.00:00:02"`) or `BatchPostingLimit` |
+| A custom column is always `NULL` | `Writer: "Single"` property name doesn't match the log property | Check casing: `TenantId` in `Columns` ↔ `["TenantId"]` in `BeginScope` |
+| `ERROR 1406: Data too long for column` | MySQL strict mode rejects over-long `VARCHAR` values — the whole batch is lost | Increase `Length` on that column, or switch its `Type` to `Text` |
+| Timestamps off by hours | `StoreTimestampInUtc: false` writes the app server local clock | Set `StoreTimestampInUtc: true` |
+| `Unknown column 'x' in 'field list'` | Existing table doesn't match the declared `Columns` | Align the `Columns` block with the real schema — the sink never alters an existing table |
+| Emoji stored as `?` | Table created outside the sink without `utf8mb4` | `ALTER TABLE app_logs CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` |
+| `SSL Connection error` on MySQL 8 | Server requires TLS the client isn't negotiating | Add `SslMode=Required;` (or `SslMode=None;` for a local dev container) to the connection string |
+
+---
+
 ## Links
 
-- [Documentation](https://www.loggerhelper.com)
+- [Documentation](https://www.loggerhelper.it)
 - [CSharpEssentials.LoggerHelper (core)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 - [GitHub Repository](https://github.com/alexbypa/CSharp.Essentials)
 - [MIT License](https://github.com/alexbypa/CSharp.Essentials/blob/main/LICENSE)

@@ -19,7 +19,7 @@
 > 💡 *Explore the source code, check open issues, or contribute.*
 ---
 
-**LoggerHelper** is a modular logging infrastructure for .NET. Install the core + only the sink packages you need, drop in a JSON config, and your entire app's `ILogger<T>` routes to Console, File, Email, Telegram, SQL Server, PostgreSQL, Elasticsearch, Seq, and Hangfire Console — each receiving only the log levels you configure.
+**LoggerHelper** is a modular logging infrastructure for .NET. Install the core + only the sink packages you need, drop in a JSON config, and your entire app's `ILogger<T>` routes to Console, File, Email, Telegram, SQL Server, PostgreSQL, MySQL/MariaDB, Elasticsearch, Seq, and Hangfire Console — each receiving only the log levels you configure.
 
 **Zero code changes required** if you already use `ILogger<T>`. LoggerHelper registers as a standard `ILoggerProvider`.
 
@@ -91,7 +91,7 @@ app.UseLoggerHelper();
 }
 ```
 
-> 🔌 **Adding more sinks is effortless:** Want to route logs to SQL Server, PostgreSQL, Email, Seq, or Telegram? 
+> 🔌 **Adding more sinks is effortless:** Want to route logs to SQL Server, PostgreSQL, MySQL/MariaDB, Email, Seq, or Telegram? 
 > Just install the specific sink NuGet package (e.g. `CSharpEssentials.LoggerHelper.Sink.Email`) and add its configuration block and route to the JSON. No C# code changes required.
 
 Done. Every `ILogger<T>` in your app now routes through LoggerHelper.
@@ -173,6 +173,7 @@ Open the URL shown in your terminal (usually **`http://localhost:<port>/swagger/
 | [`...Sink.Elasticsearch`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Elasticsearch) | Elasticsearch/OpenSearch indexing, Kibana-ready — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Elasticsearch/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Elasticsearch.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Elasticsearch) |
 | [`...Sink.MSSqlServer`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) | SQL Server structured logs, auto table creation — [guide →](src/CSharpEssentials.LoggerHelper.Sink.MSSqlServer/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) |
 | [`...Sink.Postgresql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) | PostgreSQL, JSONB columns, custom schema — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Postgresql/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Postgresql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) |
+| [`...Sink.MySql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MySql) | MySQL & MariaDB, real typed columns + native `JSON`, auto table creation — [guide →](src/CSharpEssentials.LoggerHelper.Sink.MySql/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.MySql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MySql) |
 | [`...Sink.Seq`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) | Seq centralized log server — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Seq/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Seq.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) |
 | [`...Sink.HangfireConsole`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | Structured logs in Hangfire Dashboard with color output — [guide →](src/CSharpEssentials.LoggerHelper.Sink.HangfireConsole/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) |
 | [`...Sink.Dashboard`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) | Dashboard LoggerHelper — [guide →](src/CSharpEssentials.LoggerHelper.Dashboard/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Dashboard.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) |
@@ -405,6 +406,7 @@ Click **guide →** for the full configuration reference, sample output, and tro
 | **Elasticsearch** | Elasticsearch / OpenSearch indexing, auto template, Kibana-ready | `dotnet add package CSharpEssentials.LoggerHelper.Sink.Elasticsearch` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.Elasticsearch/README.md) |
 | **SQL Server** | Structured log table, auto creation, custom columns | `dotnet add package CSharpEssentials.LoggerHelper.Sink.MSSqlServer` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.MSSqlServer/README.md) |
 | **PostgreSQL** | JSONB properties column, custom schema | `dotnet add package CSharpEssentials.LoggerHelper.Sink.Postgresql` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.Postgresql/README.md) |
+| **MySQL / MariaDB** | Typed columns, native `JSON` column, auto table creation, batched writes | `dotnet add package CSharpEssentials.LoggerHelper.Sink.MySql` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.MySql/README.md) |
 | **Seq** | Centralized log server with search, alerts, and dashboards | `dotnet add package CSharpEssentials.LoggerHelper.Sink.Seq` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.Seq/README.md) |
 | **Hangfire Console** | Structured logs inside the Hangfire Dashboard | `dotnet add package CSharpEssentials.LoggerHelper.Sink.HangfireConsole` | [guide →](src/CSharpEssentials.LoggerHelper.Sink.HangfireConsole/README.md) |
 
