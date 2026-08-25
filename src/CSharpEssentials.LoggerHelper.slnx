@@ -11,6 +11,7 @@
   <Project Path="CSharpEssentials.LoggerHelper.Sink.HangfireConsole/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.MSSqlServer/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Postgresql/CSharpEssentials.LoggerHelper.Sink.Postgresql.csproj" />
+  <Project Path="CSharpEssentials.LoggerHelper.Sink.MySql/CSharpEssentials.LoggerHelper.Sink.MySql.csproj" /> 
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Seq/CSharpEssentials.LoggerHelper.Sink.Seq.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.Sink.Telegram/CSharpEssentials.LoggerHelper.Sink.Telegram.csproj" />
   <Project Path="CSharpEssentials.LoggerHelper.TestApp/CSharpEssentials.LoggerHelper.TestApp.csproj" />

@@ -6,6 +6,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [5.2.3] — 2026-08-25
+
+### Added
+
+- **MySQL / MariaDB sink — structured logs in real columns**
+  New package `CSharpEssentials.LoggerHelper.Sink.MySql` brings the tenth sink to the
+  ecosystem. Routes accept `MySql`, `MySQL` or `MariaDB` (case-insensitive).
+
+---
+
 ## [5.2.2] — 2026-07-02
 
 ### Documentation

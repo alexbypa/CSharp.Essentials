@@ -50,6 +50,7 @@ internal static class LegacySinksSectionFactory {
         AddSink(sinks, serilogOption, "Email", "Email");
         AddSink(sinks, serilogOption, "MSSqlServer", "MSSqlServer");
         AddSink(sinks, serilogOption, "PostgreSQL", "PostgreSql");
+		AddSink(sinks, serilogOption, "MySql", "MySql");						
         AddSink(sinks, serilogOption, "ElasticSearch", "Elasticsearch");
         AddSink(sinks, serilogOption, "SeqOptions", "Seq");
         AddTelegram(sinks, serilogOption.GetSection("TelegramOption"));
