@@ -54,18 +54,27 @@ public sealed class RequestResponseLoggingMiddleware {
             _logger.Log(logLevel,
                 "HTTP {Method} {Path}{QueryString} — Status {StatusCode}\nRequest: {RequestBody}\nResponse: {ResponseBody}",
                 context.Request.Method,
-                context.Request.Path.Value,
-                Uri.UnescapeDataString(context.Request.QueryString.ToString()),
+                SanitizeLogValue(context.Request.Path.Value),
+                SanitizeLogValue(Uri.UnescapeDataString(context.Request.QueryString.ToString())),
                 context.Response.StatusCode,
-                string.IsNullOrWhiteSpace(requestBody) ? "(empty)" : requestBody,
-                string.IsNullOrWhiteSpace(responseBody) ? "(empty)" : responseBody);
+                string.IsNullOrWhiteSpace(requestBody) ? "(empty)" : SanitizeLogValue(requestBody),
+                string.IsNullOrWhiteSpace(responseBody) ? "(empty)" : SanitizeLogValue(responseBody));
         } catch (Exception ex) {
             _logger.LogError(ex, "Error processing HTTP {Method} {Path}",
-                context.Request.Method, context.Request.Path.Value);
+                context.Request.Method, SanitizeLogValue(context.Request.Path.Value));
             throw;
         } finally {
             await responseBodyStream.CopyToAsync(originalBodyStream);
         }
+    }
+
+    /// <summary>
+    /// Strips CR/LF and other control characters from user-supplied values
+    /// to prevent log-forging attacks (CodeQL cs/log-forging).
+    /// </summary>
+    private static string? SanitizeLogValue(string? value) {
+        if (value is null) return null;
+        return value.Replace("\r", "").Replace("\n", " ");
     }
 
     /// <summary>

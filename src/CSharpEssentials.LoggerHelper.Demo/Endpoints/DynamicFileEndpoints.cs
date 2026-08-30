@@ -13,9 +13,10 @@ public class DynamicFileEndpoints : IEndpointDefinition {
         // GET /api/file-dynamic/tenant/{name}
         // Logs go to: Logs/{name}/log-.txt
         group.MapGet("/tenant/{name}", (string name, ILogger<DynamicFileEndpoints> logger) => {
-            using (logger.BeginScope(new Dictionary<string, object?> { ["TenantId"] = name })) {
-                logger.LogInformation("Request processed for tenant {TenantId}", name);
-                logger.LogWarning("Slow query detected for tenant {TenantId}", name);
+            var safeName = name.Replace("\r", "").Replace("\n", " ");
+            using (logger.BeginScope(new Dictionary<string, object?> { ["TenantId"] = safeName })) {
+                logger.LogInformation("Request processed for tenant {TenantId}", safeName);
+                logger.LogWarning("Slow query detected for tenant {TenantId}", safeName);
             }
             return Results.Ok(new {
                 message = $"2 logs written for tenant '{name}'",
