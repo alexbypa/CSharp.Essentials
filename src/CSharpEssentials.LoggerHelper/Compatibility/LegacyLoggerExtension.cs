@@ -52,9 +52,9 @@ public class loggerExtension<T> where T : IRequest {
         if (args is not null)
             arguments.AddRange(args);
 
-        arguments.Add(request?.IdTransaction ?? Guid.NewGuid().ToString());
+        arguments.Add(SanitizeLogValue(request?.IdTransaction ?? Guid.NewGuid().ToString()));
         arguments.Add(Environment.MachineName);
-        arguments.Add(request?.Action ?? "UNKNOWN");
+        arguments.Add(SanitizeLogValue(request?.Action ?? "UNKNOWN"));
 
         var logger = log;
         var spanName = Activity.Current?.DisplayName;
@@ -63,6 +63,13 @@ public class loggerExtension<T> where T : IRequest {
 
         logger.Write(level, ex, message, arguments.ToArray());
     }
+
+    /// <summary>
+    /// Strips CR/LF and control characters from user-supplied values
+    /// to prevent log-forging attacks (CodeQL cs/log-forging).
+    /// </summary>
+    private static string SanitizeLogValue(string value) =>
+        value.Replace("\r", "").Replace("\n", " ");
 
     /// <summary>
     /// Logs a message asynchronously with a "Dashboard" target sink marker.

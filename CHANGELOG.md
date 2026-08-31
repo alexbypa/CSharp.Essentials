@@ -6,6 +6,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [5.2.6] — 2026-08-31
+
+### new Patch
+  fix(security): sanitize all user-controllable values in log calls (CodeQL cs/log-forging)
+
+  - RequestResponseLoggingMiddleware: wrap context.Request.Method with SanitizeLogValue()
+  - LegacyLoggerExtension: sanitize request.IdTransaction and request.Action, add SanitizeLogValue method
+---
+
 ## [5.2.3] — 2026-08-25
 
 ### Added

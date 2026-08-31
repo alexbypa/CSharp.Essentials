@@ -53,7 +53,7 @@ public sealed class RequestResponseLoggingMiddleware {
 
             _logger.Log(logLevel,
                 "HTTP {Method} {Path}{QueryString} — Status {StatusCode}\nRequest: {RequestBody}\nResponse: {ResponseBody}",
-                context.Request.Method,
+                SanitizeLogValue(context.Request.Method),
                 SanitizeLogValue(context.Request.Path.Value),
                 SanitizeLogValue(Uri.UnescapeDataString(context.Request.QueryString.ToString())),
                 context.Response.StatusCode,
@@ -61,7 +61,7 @@ public sealed class RequestResponseLoggingMiddleware {
                 string.IsNullOrWhiteSpace(responseBody) ? "(empty)" : SanitizeLogValue(responseBody));
         } catch (Exception ex) {
             _logger.LogError(ex, "Error processing HTTP {Method} {Path}",
-                context.Request.Method, SanitizeLogValue(context.Request.Path.Value));
+                SanitizeLogValue(context.Request.Method), SanitizeLogValue(context.Request.Path.Value));
             throw;
         } finally {
             await responseBodyStream.CopyToAsync(originalBodyStream);
