@@ -4,8 +4,10 @@ on:
     branches: [main]
   schedule:
     - cron: "30 1 * * 6"   # settimanale
-permissions: read-all
-
+permissions:
+  contents: read
+  security-events: write   # per upload-sarif
+  id-token: write          # per firmare e pubblicare i risultati
 jobs:
   analysis:
     runs-on: ubuntu-latest
