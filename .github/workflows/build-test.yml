@@ -6,18 +6,24 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/build-test.yml'
+      - 'tools/trx-summary.ps1'
+
   pull_request:
     branches: [main]
     paths:
       - 'src/**'
       - '.github/workflows/build-test.yml'
+      - 'tools/trx-summary.ps1'
 
 permissions:
   contents: read
+  checks: write
+  pull-requests: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,7 +36,8 @@ jobs:
             10.0.x
 
       - name: Restore and build core
-        run: dotnet build src/CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj -c Release
+        run: |
+          dotnet build src/CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj -c Release
 
       - name: Build sinks
         run: |
@@ -39,7 +46,45 @@ jobs:
           done
 
       - name: Build TestApp (Minimal API)
-        run: dotnet build src/CSharpEssentials.LoggerHelper.TestApp/CSharpEssentials.LoggerHelper.TestApp.csproj -c Release
+        run: |
+          dotnet build src/CSharpEssentials.LoggerHelper.TestApp/CSharpEssentials.LoggerHelper.TestApp.csproj -c Release
 
       - name: Run Unit and Integration Tests (xUnit)
-        run: dotnet test src/CSharpEssentials.LoggerHelper.Tests/CSharpEssentials.LoggerHelper.Tests.csproj -c Release --logger GitHubActions
+        run: |
+          dotnet test src/CSharpEssentials.LoggerHelper.Tests/CSharpEssentials.LoggerHelper.Tests.csproj \
+            -c Release \
+            --logger "console;verbosity=detailed" \
+            --logger "trx;LogFileName=test-results.trx"
+
+      - name: Run HttpHelper Tests
+        run: |
+          dotnet test src/CSharpEssentials.HttpHelper.Tests/CSharpEssentials.HttpHelper.Tests.csproj \
+            -c Release \
+            --logger "console;verbosity=detailed"
+
+      - name: Publish xUnit Test Results Dashboard
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: xUnit Test Results Dashboard
+          path: 'src/CSharpEssentials.LoggerHelper.Tests/TestResults/test-results.trx'
+          reporter: dotnet-trx
+          pass-emoji: ':heavy_check_mark:'
+          fail-emoji: ':x:'
+          skip-emoji: ':warning:'
+          show-duration: true
+
+      # Output dei test (ITestOutputHelper) nel summary del job: dorny/test-reporter mostra solo i nomi
+      - name: Publish test output to job summary
+        if: always()
+        shell: pwsh
+        run: |
+          $trx = 'src/CSharpEssentials.LoggerHelper.Tests/TestResults/test-results.trx'
+          if (Test-Path $trx) { ./tools/trx-summary.ps1 -Path $trx >> $env:GITHUB_STEP_SUMMARY }
+
+      - name: Upload Test Results Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: xunit-trx-results
+          path: 'src/CSharpEssentials.LoggerHelper.Tests/TestResults/test-results.trx'
