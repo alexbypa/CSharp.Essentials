@@ -41,7 +41,7 @@ Navigate to `https://localhost:5001/loggerhelper`.
 ## Features
 
 ### Sink Health Cards
-At-a-glance status for every configured sink: **ACTIVE** / **FAILED** badges, assigned log levels, toggle controls. The overall health indicator (OK / WARNING / CRITICAL) updates automatically on each refresh.
+At-a-glance status for every configured sink: **ACTIVE** / **FAILED** badges, assigned log levels, toggle controls. The overall health indicator (OK / WARNING / CRITICAL) updates automatically on each refresh. A sink whose configuration is missing or incomplete (e.g. empty `ConnectionString`) is shown as **FAILED**.
 
 ### Live Log Stream
 Browser-based `tail -f` via Server-Sent Events. Filter by level or free-text in real time. Toggle the Live switch to pause without disconnecting.

@@ -89,10 +89,10 @@ public sealed class PostgreSqlSinkPlugin : ISinkPlugin {
         var opts = options.GetSinkConfig<PostgreSqlSinkOptions>("PostgreSql")
                    ?? options.BindSinkSection<PostgreSqlSinkOptions>("PostgreSql")
                    ?? options.BindSinkSection<PostgreSqlSinkOptions>("PostgreSQL");
-        if (opts is null) {
-            SelfLog.WriteLine("PostgreSQL sink configured in routes but no Sinks.PostgreSql options provided.");
-            return;
-        }
+        if (opts is null)
+            throw new InvalidOperationException("PostgreSQL sink configured in routes but no Sinks.PostgreSql options provided (LoggerHelper:Sinks:PostgreSql).");
+        if (string.IsNullOrWhiteSpace(opts.ConnectionString))
+            throw new InvalidOperationException("PostgreSQL sink: ConnectionString is required (LoggerHelper:Sinks:PostgreSql:ConnectionString).");
 
         var columns = opts.Columns is { Count: > 0 }
             ? BuildColumnsFromConfig(opts.Columns)

@@ -15,18 +15,18 @@ public sealed class SinkRouting {
     /// <summary>
     /// The log levels to route to this sink (e.g., ["Error", "Fatal"]).
     /// Populated at startup from JSON config or fluent API; treat as read-only after the
-    /// logger pipeline is built — mutating it after first <see cref="Matches"/> call has no effect.
+    /// logger pipeline is built â€” mutating it after first <see cref="Matches"/> call has no effect.
     /// </summary>
     public List<string> Levels { get; set; } = [];
 
     // Lazily built from Levels on first Matches() call.
-    // volatile: the null-check in Matches() is safe without a lock — worst case two threads
+    // volatile: the null-check in Matches() is safe without a lock â€” worst case two threads
     // both build equivalent sets; the assignment of a reference type is atomic.
     private volatile HashSet<LogEventLevel>? _levelSet;
 
     /// <summary>
     /// Checks if the given log event level matches this routing rule.
-    /// Called inside every Serilog Conditional predicate on the hot path — zero allocations.
+    /// Called inside every Serilog Conditional predicate on the hot path â€” zero allocations.
     /// </summary>
     public bool Matches(LogEventLevel level) =>
         (_levelSet ?? BuildLevelSet()).Contains(level);

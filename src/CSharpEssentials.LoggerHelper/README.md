@@ -43,7 +43,6 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 - [Sink Overview](#sink-overview)
 - [Comparison](#comparison)
 - [Architecture](#architecture)
-															
 - [View Source & Contribute](#view-source-contribute)
 - [Documentation & Links](#documentation-links)
 
@@ -98,6 +97,11 @@ Done. Every `ILogger<T>` in your app now routes through LoggerHelper.
 
 > 💡 **PRO TIP: Environment-Specific Configs**  
 > LoggerHelper automatically detects your environment! Create an `appsettings.LoggerHelper.debug.json` file alongside the main config, and LoggerHelper will **automatically** load it when running in **Development** mode. This is perfect for enabling verbose Console logging locally while keeping `appsettings.LoggerHelper.json` strictly for Production settings (like Databases and Email).
+
+> ⚠️ **File in the working directory wins.** If an `appsettings.LoggerHelper*.json` exists in the current directory, `AddLoggerHelper(...)` reads it and it **fully replaces** the `IConfiguration` you passed (no merge). With `AddLoggerHelper(config, fluent)`, routes may come from the fluent API alone: the "no routes" check runs after the fluent merge.
+
+> ⚠️ **Misconfigured sinks are reported, not hidden.** A sink with missing required settings (e.g. empty `ConnectionString`, `Host`, `BotToken`, `ServerUrl`, `NodeUris`) fails to configure; the other sinks keep working and the Dashboard / MCP `loggerhelper_get_sinks` show it as **FAILED**.
+
 ---
 
 ### Option B — Fluent API
@@ -123,6 +127,8 @@ builder.Services.AddLoggerHelper(builder.Configuration, b => b
     .AddRoute("Console", LogEventLevel.Debug)
 );
 ```
+
+Fluent `General` flags and `SensitiveDataMasking` are merged over the JSON: `EnableSelfLogging`, `EnableRequestResponseLogging` and `EnableRenderedMessage` are OR-ed; `EnableOpenTelemetry` is AND-ed (fluent `DisableOpenTelemetry` can only turn it off); masking presets/properties are unioned and rules appended.
 
 [↑ Back to Top](#top)
 
@@ -163,22 +169,22 @@ Open the URL shown in your terminal (usually **`http://localhost:<port>/swagger/
 <a name="packages"></a>
 ## 📦 Packages
 
-| Package | Description | Version |
-|---------|-------------|---------|
-| [`CSharpEssentials.LoggerHelper`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | Core routing engine, `ILogger<T>` bridge, JSON/fluent config | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) |
-| [`...Sink.Console`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console) | Colored console output, per-level themes — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Console/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Console.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console) |
-| [`...Sink.File`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.File) | Rolling JSON files, per-property subdirectories, configurable retention — [guide →](src/CSharpEssentials.LoggerHelper.Sink.File/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.File.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.File) |
-| [`...Sink.Email`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Email) | SMTP alerts, HTML templates, throttling — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Email/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Email.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Email) |
-| [`...Sink.Telegram`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Telegram) | Bot notifications, MarkdownV2, throttling — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Telegram/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Telegram.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Telegram) |
-| [`...Sink.Elasticsearch`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Elasticsearch) | Elasticsearch/OpenSearch indexing, Kibana-ready — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Elasticsearch/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Elasticsearch.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Elasticsearch) |
-| [`...Sink.MSSqlServer`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) | SQL Server structured logs, auto table creation — [guide →](src/CSharpEssentials.LoggerHelper.Sink.MSSqlServer/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) |
-| [`...Sink.Postgresql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) | PostgreSQL, JSONB columns, custom schema — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Postgresql/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Postgresql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) |
-| [`...Sink.MySql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MySql) | MySQL & MariaDB, real typed columns + native `JSON`, auto table creation — [guide →](src/CSharpEssentials.LoggerHelper.Sink.MySql/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.MySql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MySql) |
-| [`...Sink.Seq`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) | Seq centralized log server — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Seq/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Seq.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) |
-| [`...Sink.HangfireConsole`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | Structured logs in Hangfire Dashboard with color output — [guide →](src/CSharpEssentials.LoggerHelper.Sink.HangfireConsole/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) |
-| [`...Sink.Dashboard`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) | Dashboard LoggerHelper — [guide →](src/CSharpEssentials.LoggerHelper.Dashboard/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Dashboard.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) |
-| [`CSharpEssentials.LoggerHelper.MCP`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | MCP server: AI assistants can query sink health, errors & config — [guide →](src/CSharpEssentials.LoggerHelper.MCP/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) |
-| [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting, auto logging | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
+| Package | Description | Version | Downloads |
+|---------|-------------|---------|-----------|
+| [`CSharpEssentials.LoggerHelper`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | Core routing engine, `ILogger<T>` bridge, JSON/fluent config | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) |
+| [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting, auto logging | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
+| [`...Sink.Console`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console) | Colored console output, per-level themes — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Console/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Console.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.Console.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console) |
+| [`...Sink.MSSqlServer`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) | SQL Server structured logs, auto table creation — [guide →](src/CSharpEssentials.LoggerHelper.Sink.MSSqlServer/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) |
+| [`...Sink.Postgresql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) | PostgreSQL, JSONB columns, custom schema — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Postgresql/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Postgresql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.Postgresql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) |
+| [`...Sink.MySql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MySql) | MySQL & MariaDB, real typed columns + native `JSON`, auto table creation — [guide →](src/CSharpEssentials.LoggerHelper.Sink.MySql/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.MySql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MySql) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.MySql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MySql) |
+| [`...Sink.Elasticsearch`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Elasticsearch) | Elasticsearch/OpenSearch indexing, Kibana-ready — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Elasticsearch/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Elasticsearch.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Elasticsearch) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.Elasticsearch.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Elasticsearch) |
+| [`...Sink.File`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.File) | Rolling JSON files, per-property subdirectories, configurable retention — [guide →](src/CSharpEssentials.LoggerHelper.Sink.File/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.File.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.File) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.File.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.File) |
+| [`...Sink.Telegram`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Telegram) | Bot notifications, MarkdownV2, throttling — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Telegram/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Telegram.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Telegram) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.Telegram.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Telegram) |
+| [`...Sink.Email`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Email) | SMTP alerts, HTML templates, throttling — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Email/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Email.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Email) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.Email.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Email) |
+| [`...Sink.Dashboard`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) | Dashboard LoggerHelper — [guide →](src/CSharpEssentials.LoggerHelper.Dashboard/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Dashboard.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Dashboard.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) |
+| [`...Sink.HangfireConsole`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | Structured logs in Hangfire Dashboard with color output — [guide →](src/CSharpEssentials.LoggerHelper.Sink.HangfireConsole/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) |
+| [`...Sink.Seq`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) | Seq centralized log server — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Seq/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Seq.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.Seq.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Seq) |
+| [`CSharpEssentials.LoggerHelper.MCP`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | MCP server: AI assistants can query sink health, errors & config — [guide →](src/CSharpEssentials.LoggerHelper.MCP/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) |
 
 [↑ Back to Top](#top)
 
@@ -243,7 +249,7 @@ Every log event automatically carries:
 
 ### Internal Diagnostics
 
-If a sink fails (wrong connection string, unreachable SMTP), your app keeps running. Errors are captured silently and inspectable at runtime:
+If a sink fails (wrong connection string, unreachable SMTP), your app keeps running. Errors are captured (not thrown) and inspectable at runtime:
 
 ```csharp
 app.MapGet("/health/logging", (ILogErrorStore errors) =>
@@ -503,6 +509,8 @@ public static class PluginInitializer {
     public static void Init() => SinkPluginRegistry.Register(new MyTargetSinkPlugin());
 }
 ```
+
+If required options are missing or empty, **throw `InvalidOperationException` from `Configure`**: the engine catches it, skips your sink and records it as not configured (FAILED in Dashboard/MCP). Do not silently `return`.
 
 Reference `CSharpEssentials.LoggerHelper` as a NuGet package. The sink auto-registers with no changes to the core.
 

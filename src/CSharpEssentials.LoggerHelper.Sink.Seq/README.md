@@ -119,6 +119,7 @@ For **Seq Cloud** or a production server, generate an API key in *Settings → A
 | Symptom | Likely Cause | Fix |
 |---|---|---|
 | No output at all | `app.UseLoggerHelper()` missing | Add it after `builder.Build()` |
+| Sink shows FAILED in Dashboard/MCP | `ServerUrl` empty or `Seq` section missing: the sink throws `InvalidOperationException` at configure time and is recorded as not configured | Set `Sinks.Seq.ServerUrl` |
 | No events appear in Seq UI | `ServerUrl` not reachable | Check the URL and ensure Seq is running; `curl http://localhost:5341/api` should return JSON |
 | `401 Unauthorized` in logs | Wrong or missing `ApiKey` | Verify the key in Seq *Settings → API Keys* |
 | Properties not visible in Seq | `EnableRenderedMessage` masking them | Set `General.EnableSelfLogging: true` to see internal sink diagnostics |

@@ -52,16 +52,26 @@ public static class ServiceCollectionExtensions {
     /// <summary>
     /// Adds LoggerHelper with JSON configuration from appsettings.LoggerHelper.json.
     ///
+    /// Note: if appsettings.LoggerHelper.json (or .debug.json in Development) exists in the current directory,
+    /// it fully replaces the passed <see cref="IConfiguration"/>.
+    ///
     /// Example:
     ///   builder.Services.AddLoggerHelper(builder.Configuration);
     /// </summary>
     public static IServiceCollection AddLoggerHelper(this IServiceCollection services, IConfiguration configuration) {
         var options = ResolveOptionsFromJson(configuration);
+        EnsureRoutes(options);
         return services.AddLoggerHelperCore(options, customEnrichers: null);
     }
 
     /// <summary>
     /// Adds LoggerHelper with both JSON configuration and fluent overrides.
+    /// Fluent routes are additive; fluent sink configs and application name override JSON;
+    /// General flags (SelfLogging, RequestResponseLogging, RenderedMessage) are OR-ed with JSON,
+    /// OpenTelemetry is AND-ed, and sensitive data masking is merged when enabled via fluent.
+    ///
+    /// Note: if appsettings.LoggerHelper.json (or .debug.json in Development) exists in the current directory,
+    /// it fully replaces the passed <see cref="IConfiguration"/>.
     ///
     /// Example:
     ///   builder.Services.AddLoggerHelper(builder.Configuration, b => b
@@ -74,20 +84,18 @@ public static class ServiceCollectionExtensions {
         var builder = new LoggerHelperBuilder();
         configure(builder);
 
-        // Merge: fluent routes are additive, fluent application name overrides JSON
-        options.Routes.AddRange(builder.Options.Routes);
-        if (!string.IsNullOrEmpty(builder.Options.ApplicationName))
-            options.ApplicationName = builder.Options.ApplicationName;
+        // Merge: fluent routes are additive; sink configs and application name override JSON;
+        // General flags and sensitive data masking are merged (see MergeFluentFrom)
+        options.MergeFluentFrom(builder.Options);
 
+        EnsureRoutes(options);
         return services.AddLoggerHelperCore(options, builder.CustomEnrichers);
     }
 
     private static IServiceCollection AddLoggerHelperCore(this IServiceCollection services, LoggerHelperOptions options, Action<Serilog.LoggerConfiguration>? customEnrichers) {
         var errorStore = new LogErrorStore();
         var registry = SinkPluginRegistry.Instance;
-        var discovery = new CompositePluginDiscovery(
-            new CompileTimePluginDiscovery(),
-            new FileSystemPluginDiscovery());
+        var discovery = new FileSystemPluginDiscovery();
 
         var loadedSinkStore = new LoadedSinkStore();
 
@@ -129,8 +137,11 @@ public static class ServiceCollectionExtensions {
 
         IConfiguration finalConfig;
         if (File.Exists(configPath)) {
+            // No reload: options are bound once at startup and sinks are already built, so a watcher would
+            // only leak a FileSystemWatcher handle. The provider is disposed once Build() has loaded the file.
+            using var fileProvider = new PhysicalFileProvider(Directory.GetCurrentDirectory());
             finalConfig = new ConfigurationBuilder()
-                .AddJsonFile(new PhysicalFileProvider(Directory.GetCurrentDirectory()), fileName, optional: false, reloadOnChange: true)
+                .AddJsonFile(fileProvider, fileName, optional: false, reloadOnChange: false)
                 .AddEnvironmentVariables()
                 .Build();
         } else {
@@ -149,11 +160,13 @@ public static class ServiceCollectionExtensions {
         if (options.Routes.Count == 0)
             LegacyConfigurationAdapter.TryApply(finalConfig, options);
 
+        return options;
+    }
+
+    private static void EnsureRoutes(LoggerHelperOptions options) {
         if (options.Routes.Count == 0)
             throw new InvalidOperationException(
-                $"No routes configured. Add 'LoggerHelper:Routes' to {fileName}, legacy 'Serilog:SerilogConfiguration', or use the fluent API. " +
+                "No routes configured. Add 'LoggerHelper:Routes' to appsettings.LoggerHelper.json (or appsettings.LoggerHelper.debug.json), legacy 'Serilog:SerilogConfiguration', or use the fluent API. " +
                 "See: https://github.com/alexbypa/CSharp.Essentials");
-
-        return options;
     }
 }

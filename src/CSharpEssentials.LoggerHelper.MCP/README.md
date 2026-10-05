@@ -51,7 +51,7 @@ app.Run();
 |---|---|
 | `loggerhelper_get_health` | Overall status: **OK** / **WARNING** / **CRITICAL**, active sink count, error count |
 | `loggerhelper_get_errors` | Recent sink errors with timestamp, message, and stack trace. Accepts optional `count` parameter |
-| `loggerhelper_get_sinks` | All configured sinks with **ACTIVE** / **FAILED** status and assigned log levels |
+| `loggerhelper_get_sinks` | All configured sinks with **ACTIVE** / **FAILED** status and assigned log levels (a sink with missing required settings is reported **FAILED**) |
 | `loggerhelper_get_config` | Application name, routing rules, sensitive data masking settings, contextual logging status |
 
 ### Action tools — new in v5.2.0 (3 tools)

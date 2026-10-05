@@ -157,6 +157,7 @@ using (Serilog.Context.LogContext.PushProperty("UserId", userId))
 | Symptom | Likely Cause | Fix |
 |---|---|---|
 | No output at all | `app.UseLoggerHelper()` missing | Add it after `builder.Build()` |
+| Sink shows FAILED in Dashboard/MCP | `ConnectionString` empty or `MSSqlServer` section missing: the sink throws `InvalidOperationException` at configure time and is recorded as not configured | Set `Sinks.MSSqlServer.ConnectionString` |
 | Table not created | Insufficient DB permissions or `AutoCreateSqlTable: false` | Grant `CREATE TABLE` permission or create the table manually |
 | Rows appear with delay | Events are batched — flushed every `Period` or when `BatchPostingLimit` is reached | Reduce `Period` (e.g. `"0.00:00:02"`) or `BatchPostingLimit` for faster writes |
 | `AdditionalColumns` column always `NULL` | Log property name doesn't match `ColumnName` | Check casing: `TenantId` in config ↔ `["TenantId"]` in `BeginScope` |

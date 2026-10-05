@@ -62,12 +62,14 @@ builder.Services.AddLoggerHelper(b => b
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `ConnectionString` | `string` | `""` | PostgreSQL connection string |
+| `ConnectionString` | `string` | `""` | **Required.** PostgreSQL connection string |
 | `TableName` | `string` | `"logs"` | Target table name |
 | `SchemaName` | `string` | `"public"` | Table schema |
 | `NeedAutoCreateTable` | `bool` | `true` | Automatically create the log table |
 | `AddAutoIncrementColumn` | `bool` | `false` | Add an auto-increment primary key column |
 | `Columns` | `List<PostgreSqlColumnConfig>?` | `null` | Custom column definitions (overrides defaults) |
+
+> **Required:** `ConnectionString`. If the `Postgresql` section is missing or it is empty, the sink fails to configure (`InvalidOperationException`), LoggerHelper records it as not configured (FAILED in the Dashboard/MCP) and the other sinks keep working.
 
 ### Default Columns
 

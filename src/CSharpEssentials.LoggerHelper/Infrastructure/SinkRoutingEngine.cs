@@ -50,15 +50,11 @@ internal sealed class SinkRoutingEngine {
                 continue;
             }
 
+            var configured = true;
             try {
                 plugin.Configure(loggerConfig, route, _options);
-                _loadedSinkStore.Add(new LoadedSinkInfo {
-                    SinkName = route.Sink,
-                    PluginType = plugin.GetType().FullName ?? plugin.GetType().Name,
-                    Levels = route.Levels.ToList().AsReadOnly(),
-                    Configured = true
-                });
             } catch (Exception ex) {
+                configured = false;
                 SelfLog.WriteLine($"Error configuring sink '{route.Sink}': {ex.Message}");
                 _errorStore.Add(new LogErrorEntry {
                     SinkName = route.Sink,
@@ -66,6 +62,13 @@ internal sealed class SinkRoutingEngine {
                     StackTrace = ex.StackTrace
                 });
             }
+
+            _loadedSinkStore.Add(new LoadedSinkInfo {
+                SinkName = route.Sink,
+                PluginType = plugin.GetType().FullName ?? plugin.GetType().Name,
+                Levels = route.Levels.ToList().AsReadOnly(),
+                Configured = configured
+            });
         }
     }
 }

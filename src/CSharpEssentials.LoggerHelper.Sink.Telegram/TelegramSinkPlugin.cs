@@ -44,10 +44,12 @@ public sealed class TelegramSinkPlugin : ISinkPlugin {
         var opts = options.GetSinkConfig<TelegramSinkOptions>("Telegram")
                    ?? options.BindSinkSection<TelegramSinkOptions>("Telegram")
                    ?? options.BindSinkSection<TelegramSinkOptions>("TelegramOption");
-        if (opts is null) {
-            SelfLog.WriteLine("Telegram sink configured in routes but no Sinks.Telegram options provided.");
-            return;
-        }
+        if (opts is null)
+            throw new InvalidOperationException("Telegram sink configured in routes but no Sinks.Telegram options provided (LoggerHelper:Sinks:Telegram).");
+        if (string.IsNullOrWhiteSpace(opts.BotToken))
+            throw new InvalidOperationException("Telegram sink: BotToken is required (LoggerHelper:Sinks:Telegram:BotToken).");
+        if (string.IsNullOrWhiteSpace(opts.ChatId))
+            throw new InvalidOperationException("Telegram sink: ChatId is required (LoggerHelper:Sinks:Telegram:ChatId).");
 
         loggerConfig.WriteTo.Conditional(
             evt => routing.Matches(evt.Level),

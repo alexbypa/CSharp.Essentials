@@ -65,18 +65,18 @@ public class loggerExtension<T> where T : IRequest {
     }
 
     /// <summary>
-    /// Strips CR/LF and control characters from user-supplied values
-    /// to prevent log-forging attacks (CodeQL cs/log-forging).
+    /// Replaces all line terminators (CR, LF, CRLF, NEL U+0085, LS U+2028, PS U+2029, FF)
+    /// with a space to prevent log forging (CodeQL cs/log-forging).
     /// </summary>
     private static string SanitizeLogValue(string value) =>
-        value.Replace("\r", "").Replace("\n", " ");
+        value.ReplaceLineEndings(" ");
 
     /// <summary>
     /// Logs a message asynchronously with a "Dashboard" target sink marker.
     /// </summary>
     [Obsolete("Use ILogger<T> with BeginTrace scope instead.")]
     public static async void TraceDashBoardAsync(IRequest request, LogEventLevel level, Exception? ex, string message, params object[] args) {
-        var newArgs = args.ToList();
+        var newArgs = args?.ToList() ?? [];
         newArgs.Add("Dashboard");
         await Task.Run(() => TraceSync(request, level, ex, message + "{TargetSink}", newArgs.ToArray()));
     }
@@ -86,7 +86,7 @@ public class loggerExtension<T> where T : IRequest {
     /// </summary>
     [Obsolete("Use ILogger<T> with BeginTrace scope instead.")]
     public static void TraceDashBoardSync(IRequest request, LogEventLevel level, Exception? ex, string message, params object[] args) {
-        var newArgs = args.ToList();
+        var newArgs = args?.ToList() ?? [];
         newArgs.Add("Dashboard");
         TraceSync(request, level, ex, message + "{TargetSink}", newArgs.ToArray());
     }

@@ -66,15 +66,17 @@ builder.Services.AddLoggerHelper(b => b
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `From` | `string` | `""` | Sender email address |
-| `To` | `string` | `""` | Recipient email address (comma-separated for multiple) |
-| `Host` | `string` | `""` | SMTP server hostname |
+| `From` | `string` | `""` | **Required.** Sender email address |
+| `To` | `string` | `""` | **Required.** Recipient email address (comma-separated for multiple) |
+| `Host` | `string` | `""` | **Required.** SMTP server hostname |
 | `Port` | `int` | `587` | SMTP server port |
 | `Username` | `string?` | `null` | SMTP authentication username |
 | `Password` | `string?` | `null` | SMTP authentication password |
 | `EnableSsl` | `bool` | `true` | Enable SSL/TLS for SMTP connection |
 | `TemplatePath` | `string?` | `null` | Path to a custom HTML email template |
 | `ThrottleInterval` | `TimeSpan?` | `null` | Minimum interval between emails to prevent flooding |
+
+> **Required:** `Host`, `From` and `To`. If the `Email` section is missing or one of them is empty, the sink fails to configure (`InvalidOperationException`), LoggerHelper records it as not configured (FAILED in the Dashboard/MCP) and the other sinks keep working.
 
 The sink includes a built-in HTML template with color-coded log levels. Provide your own template via `TemplatePath` using placeholders like `{{Timestamp}}`, `{{Level}}`, `{{Message}}`, `{{ApplicationName}}`.
 

@@ -21,6 +21,7 @@ public class DiagnosticsEndpoints : IEndpointDefinition {
                 loadedSinks = loadedSinks.GetAll().Select(s => new {
                     s.SinkName,
                     s.PluginType,
+                    s.Configured,
                     levels = s.Levels
                 }),
                 internalErrors = errorStore.Count,
