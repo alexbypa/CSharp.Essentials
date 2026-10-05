@@ -3,7 +3,7 @@ using CSharpEssentials.LoggerHelper;
 using Serilog.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Net;
 using System.Net.Security;
 using System.Security.Authentication;
@@ -23,20 +23,10 @@ public class HttpMockDelegatingHandler : DelegatingHandler {
 
         _mockHandler ??= _engine.Build();
 
-        var invoker = new HttpMessageInvoker(_mockHandler, disposeHandler: false);
-        try {
-            return await invoker.SendAsync(request, cancellationToken);
-        } catch (MockException mex) {
-            throw new InvalidOperationException(
-                $"❌ Mock configuration error for request: {request.Method} {request.RequestUri}\n" +
-                $"The mock matched the request but the setup is incomplete.\n" +
-                $"Details: {mex.Message}",
-                mex
-            );
-        } catch (Exception ex) {
-            Console.WriteLine($"⚠️ Mock execution failed: {ex.Message}");
-            return await base.SendAsync(request, cancellationToken);
-        }
+        // A matched request never reaches the real network: exceptions thrown by a scenario (e.g. a simulated
+        // HttpRequestException) propagate to the caller like a real transport failure.
+        using var invoker = new HttpMessageInvoker(_mockHandler, disposeHandler: false);
+        return await invoker.SendAsync(request, cancellationToken);
     }
 }
 
@@ -45,8 +35,10 @@ public static class CertificateConfigurator {
     public static void Apply(SocketsHttpHandler handler, httpClientOptions opt) {
         if (string.IsNullOrEmpty(opt?.Certificate?.Path) && string.IsNullOrEmpty(opt?.Certificate?.Password))
             return;
-        if (!File.Exists(opt!.Certificate!.Path))
-            HttpHelperLog.Write(LogEventLevel.Fatal, new Exception("path certified error"), "Certificate file not found at path {path}", opt.Certificate.Path);
+        if (string.IsNullOrEmpty(opt!.Certificate!.Path) || !File.Exists(opt.Certificate.Path)) {
+            HttpHelperLog.Write(LogEventLevel.Fatal, new FileNotFoundException("Certificate file not found", opt.Certificate.Path), "Certificate file not found at path {path}", opt.Certificate.Path);
+            return;
+        }
         try {
             var cert = new X509Certificate2(opt!.Certificate!.Path, opt!.Certificate!.Password);
 
@@ -58,7 +50,7 @@ public static class CertificateConfigurator {
                     sslPolicyErrors == SslPolicyErrors.None ? LogEventLevel.Debug : LogEventLevel.Fatal,
                     null,
                     "[{Time}] TLS handshake → server: {Subject}, errors: {Errors}",
-                    DateTime.Now.ToString("HH:mm:ss"), certificate?.Subject, sslPolicyErrors);
+                    DateTime.UtcNow.ToString("HH:mm:ss"), certificate?.Subject, sslPolicyErrors);
                 return sslPolicyErrors == SslPolicyErrors.None;
             };
         } catch (Exception ex) {
@@ -91,42 +83,30 @@ public static class ProxyConfigurator {
 
 public static class httpExtension {
     public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration) {
-        var builder = new ConfigurationBuilder().AddConfiguration(configuration);
-        Console.WriteLine($"[httpExtension] get builder");
-        var externalConfigPath = Path.Combine(AppContext.BaseDirectory, "appsettings.httphelper.json");
-        if (File.Exists(externalConfigPath)) {
-            Console.WriteLine($"[httpExtension] ✅ TROVATO: {externalConfigPath}");
-            builder.AddJsonFile(externalConfigPath, optional: false, reloadOnChange: true).AddEnvironmentVariables();
-        }
-        IConfiguration finalConfiguration = builder.Build();
-
-        Console.WriteLine($"[httpExtension] configuration builded....");
-
-        services.AddSingleton<IHttpRequestEvents, HttpRequestEvents>();
-        Console.WriteLine($"[httpExtension] singleton IHttpRequestEvents....");
-        services.AddTransient<HttpClientHandlerLogging>();
-        Console.WriteLine($"[httpExtension] added HttpClientHandlerLogging ...");
-        var httpclientoptions = finalConfiguration.GetSection("HttpClientOptions");
+        var httpclientoptions = configuration.GetSection("HttpClientOptions");
         services.Configure<List<httpClientOptions>>(httpclientoptions);
         List<httpClientOptions>? options = getOptions(httpclientoptions);
-        Console.WriteLine($"[httpExtension] Loaded options ...");
 
-        services.AddSingleton<IhttpsClientHelperFactory, httpsClientHelperFactory>();
-        
-        Console.WriteLine($"[httpExtension] Loaded httpsClientHelperFactory ...");
+        // IHttpClientFactory must be registered even when no client is configured (CreateOrGet then throws a clear ArgumentException).
+        services.AddHttpClient();
+        services.TryAddSingleton<IHttpRequestEvents, HttpRequestEvents>();
+        services.TryAddSingleton<HttpRequestEventsRegistry>();
+        services.AddTransient<HttpClientHandlerLogging>();
+        services.TryAddSingleton<IhttpsClientHelperFactory, httpsClientHelperFactory>();
 
         services.InjectMock();
 
-        Console.WriteLine($"[httpExtension] parsing appSettings.json...");
         if (options != null) {
-            Console.WriteLine($"[httpExtension] founded appSettings.json !");
             foreach (var option in options) {
-                Console.WriteLine($"[httpExtension] Trovato option: {option.Name}");
-
+                var name = option.Name;
+                // Named clients only: helpers are created (and cached) by IhttpsClientHelperFactory.
                 services
-                .AddHttpClient<IhttpsClientHelper, httpsClientHelper>(option.Name)
+                .AddHttpClient(name)
                 .SetHandlerLifetime(TimeSpan.FromSeconds(30)) //TODO: sarebbe meglio metterlo su appSettings.json
-                .AddHttpMessageHandler<HttpClientHandlerLogging>()
+                // Per-client events (callbacks of one client never fire for another) + global events.
+                .AddHttpMessageHandler(sp => new HttpClientHandlerLogging(
+                    sp.GetRequiredService<HttpRequestEventsRegistry>().For(name),
+                    sp.GetRequiredService<IHttpRequestEvents>()))
                 .AddHttpMessageHandler<HttpMockDelegatingHandler>()
                 .ConfigurePrimaryHttpMessageHandler(() => {
                     var handler = new SocketsHttpHandler();
@@ -152,7 +132,7 @@ public static class httpExtension {
     }
 }
 public class RequestHttpExtension : IRequest {
-    public string IdTransaction => DateTime.Now.ToString();
+    public string IdTransaction => Guid.NewGuid().ToString("N");
 
     public string Action => "HttpHelper";
 

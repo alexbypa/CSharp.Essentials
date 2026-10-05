@@ -19,6 +19,9 @@
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="CSharpEssentials.LoggerHelper.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
   </ItemGroup>
   <ItemGroup>

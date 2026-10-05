@@ -49,6 +49,8 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 
 ---
 
+> 🎮 **Try it live before you install!** See the exact "Config vs Result" output for every sink directly in your browser on the **[Interactive Playground at loggerhelper.it](https://www.loggerhelper.it/playground.html)**.
+
 <a name="quick-start"></a>
 ## 🚀 Quick Start
 
@@ -98,6 +100,11 @@ Done. Every `ILogger<T>` in your app now routes through LoggerHelper.
 
 > 💡 **PRO TIP: Environment-Specific Configs**  
 > LoggerHelper automatically detects your environment! Create an `appsettings.LoggerHelper.debug.json` file alongside the main config, and LoggerHelper will **automatically** load it when running in **Development** mode. This is perfect for enabling verbose Console logging locally while keeping `appsettings.LoggerHelper.json` strictly for Production settings (like Databases and Email).
+
+> ⚠️ **File in the working directory wins.** If an `appsettings.LoggerHelper*.json` exists in the current directory, `AddLoggerHelper(...)` reads it and it **fully replaces** the `IConfiguration` you passed (no merge). With `AddLoggerHelper(config, fluent)`, routes may come from the fluent API alone: the "no routes" check runs after the fluent merge.
+
+> ⚠️ **Misconfigured sinks are reported, not hidden.** A sink with missing required settings (e.g. empty `ConnectionString`, `Host`, `BotToken`, `ServerUrl`, `NodeUris`) fails to configure; the other sinks keep working and the Dashboard / MCP `loggerhelper_get_sinks` show it as **FAILED**.
+
 ---
 
 ### Option B — Fluent API
@@ -124,6 +131,8 @@ builder.Services.AddLoggerHelper(builder.Configuration, b => b
 );
 ```
 
+Fluent `General` flags and `SensitiveDataMasking` are merged over the JSON: `EnableSelfLogging`, `EnableRequestResponseLogging` and `EnableRenderedMessage` are OR-ed; `EnableOpenTelemetry` is AND-ed (fluent `DisableOpenTelemetry` can only turn it off); masking presets/properties are unioned and rules appended.
+
 [↑ Back to Top](#top)
 
 ---
@@ -140,6 +149,8 @@ dotnet run
 ```
 
 Open the URL shown in your terminal (usually **`http://localhost:<port>/swagger/index.html`**) — the Swagger UI lists all available demo scenarios. Each endpoint produces structured logs visible immediately in the terminal and in the `Logs/` folder.
+
+Try `GET /api/httphelper/retry`, then open `/loggerhelper` to watch HttpHelper retries live.
 
 > 💡 **No database required to run it:** Even if you don't have SQL Server or PostgreSQL running locally, LoggerHelper gracefully ignores the connection errors. Your app won't crash, and logs will still appear perfectly in the Console and File sinks!
 
@@ -178,7 +189,7 @@ Open the URL shown in your terminal (usually **`http://localhost:<port>/swagger/
 | [`...Sink.HangfireConsole`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) | Structured logs in Hangfire Dashboard with color output — [guide →](src/CSharpEssentials.LoggerHelper.Sink.HangfireConsole/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.HangfireConsole.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.HangfireConsole) |
 | [`...Sink.Dashboard`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) | Dashboard LoggerHelper — [guide →](src/CSharpEssentials.LoggerHelper.Dashboard/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Dashboard.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Dashboard) |
 | [`CSharpEssentials.LoggerHelper.MCP`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) | MCP server: AI assistants can query sink health, errors & config — [guide →](src/CSharpEssentials.LoggerHelper.MCP/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.MCP.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.MCP) |
-| [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting, auto logging | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
+| [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting, auto logging — [guide →](src/CSharpEssentials.HttpHelper/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
 
 [↑ Back to Top](#top)
 
@@ -243,7 +254,7 @@ Every log event automatically carries:
 
 ### Internal Diagnostics
 
-If a sink fails (wrong connection string, unreachable SMTP), your app keeps running. Errors are captured silently and inspectable at runtime:
+If a sink fails (wrong connection string, unreachable SMTP), your app keeps running. Errors are captured (not thrown) and inspectable at runtime:
 
 ```csharp
 app.MapGet("/health/logging", (ILogErrorStore errors) =>
@@ -503,6 +514,8 @@ public static class PluginInitializer {
     public static void Init() => SinkPluginRegistry.Register(new MyTargetSinkPlugin());
 }
 ```
+
+If required options are missing or empty, **throw `InvalidOperationException` from `Configure`**: the engine catches it, skips your sink and records it as not configured (FAILED in Dashboard/MCP). Do not silently `return`.
 
 Reference `CSharpEssentials.LoggerHelper` as a NuGet package. The sink auto-registers with no changes to the core.
 

@@ -1,5 +1,4 @@
 using Serilog;
-using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 using System.Runtime.CompilerServices;
@@ -18,6 +17,15 @@ public sealed class ElasticsearchSinkOptions {
 
     /// <summary>Legacy JSON key: indexFormat</summary>
     public string? indexFormat { set => IndexFormat = value ?? IndexFormat; }
+
+    /// <summary>
+    /// Registers the index template on startup (default: true).
+    /// Set to false when the template is managed externally or the cluster user lacks permission to create templates.
+    /// </summary>
+    public bool AutoRegisterTemplate { get; set; } = true;
+
+    /// <summary>Legacy JSON key: autoRegisterTemplate</summary>
+    public bool? autoRegisterTemplate { set => AutoRegisterTemplate = value ?? AutoRegisterTemplate; }
 }
 
 // ── Builder extension ─────────────────────────────────────────────
@@ -39,17 +47,17 @@ public sealed class ElasticsearchSinkPlugin : ISinkPlugin {
         var opts = options.GetSinkConfig<ElasticsearchSinkOptions>("Elasticsearch")
                    ?? options.BindSinkSection<ElasticsearchSinkOptions>("Elasticsearch")
                    ?? options.BindSinkSection<ElasticsearchSinkOptions>("ElasticSearch");
-        if (opts is null) {
-            SelfLog.WriteLine("Elasticsearch sink configured in routes but no Sinks.Elasticsearch options provided.");
-            return;
-        }
+        if (opts is null)
+            throw new InvalidOperationException("Elasticsearch sink configured in routes but no Sinks.Elasticsearch options provided (LoggerHelper:Sinks:Elasticsearch).");
+        if (string.IsNullOrWhiteSpace(opts.NodeUris))
+            throw new InvalidOperationException("Elasticsearch sink: NodeUris is required (LoggerHelper:Sinks:Elasticsearch:NodeUris).");
 
         loggerConfig.WriteTo.Conditional(
             evt => routing.Matches(evt.Level),
             wt => wt.Elasticsearch(
                 nodeUris: opts.NodeUris,
                 indexFormat: opts.IndexFormat,
-                autoRegisterTemplate: true,
+                autoRegisterTemplate: opts.AutoRegisterTemplate,
                 detectElasticsearchVersion: false,
                 autoRegisterTemplateVersion : AutoRegisterTemplateVersion.ESv7
             )

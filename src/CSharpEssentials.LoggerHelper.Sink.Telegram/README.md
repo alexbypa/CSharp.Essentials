@@ -57,9 +57,11 @@ builder.Services.AddLoggerHelper(b => b
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `BotToken` | `string` | `""` | Telegram Bot API token |
-| `ChatId` | `string` | `""` | Target chat/group/channel ID |
+| `BotToken` | `string` | `""` | **Required.** Telegram Bot API token |
+| `ChatId` | `string` | `""` | **Required.** Target chat/group/channel ID |
 | `ThrottleInterval` | `TimeSpan?` | 1 second | Minimum interval between messages |
+
+> **Required:** `BotToken` and `ChatId`. If the `Telegram` section is missing or one of them is empty, the sink fails to configure (`InvalidOperationException`), LoggerHelper records it as not configured (FAILED in the Dashboard/MCP) and the other sinks keep working.
 
 Messages are formatted with **MarkdownV2** and include emoji indicators per level:
 - Information: `INFO`

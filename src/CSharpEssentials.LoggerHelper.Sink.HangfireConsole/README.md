@@ -167,10 +167,12 @@ volumes:
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| ILogger on console but not on Dashboard | `AddHangfireConsoleSink()` called after `AddLoggerHelper()` | Swap the call order |
+| ILogger on console but not on Dashboard; sink shows FAILED in LoggerHelper Dashboard/MCP | `AddHangfireConsoleSink()` called after `AddLoggerHelper()` (or never): the accessor is not registered, so the sink throws `InvalidOperationException` at configure time | Swap the call order |
 | Nothing anywhere | Config file missing or wrong format | Verify `LoggerHelper:Routes` exists (v5 format) |
 | Only `RaiseMessage` on Dashboard | `Set(performContext)` not called | Inject `IPerformContextAccessor`, call `Set`/`Clear` |
 | Works locally, not in Docker | Volume mounts wrong config file | Point to the per-project file, not a root-level copy |
+
+> The accessor is held in a process-wide static holder by design (one per process, it keeps no per-request data): it is not a memory leak.
 
 ---
 

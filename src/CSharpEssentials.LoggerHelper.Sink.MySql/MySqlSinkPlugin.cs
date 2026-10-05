@@ -100,15 +100,10 @@ public sealed class MySqlSinkPlugin : ISinkPlugin {
                    ?? options.BindSinkSection<MySqlSinkOptions>("MySql")
                    ?? options.BindSinkSection<MySqlSinkOptions>("MySQL")
                    ?? options.BindSinkSection<MySqlSinkOptions>("MariaDB");
-        if (opts is null) {
-            SelfLog.WriteLine("MySQL sink configured in routes but no Sinks.MySql options provided.");
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(opts.ConnectionString)) {
-            SelfLog.WriteLine("MySQL sink skipped: ConnectionString is empty.");
-            return;
-        }
+        if (opts is null)
+            throw new InvalidOperationException("MySQL sink configured in routes but no Sinks.MySql options provided (LoggerHelper:Sinks:MySql).");
+        if (string.IsNullOrWhiteSpace(opts.ConnectionString))
+            throw new InvalidOperationException("MySQL sink: ConnectionString is required (LoggerHelper:Sinks:MySql:ConnectionString).");
 
         var columns = opts.Columns is { Count: > 0 }
             ? MySqlColumnMap.FromConfig(opts.Columns)

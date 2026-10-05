@@ -75,6 +75,44 @@ public sealed class LoggerHelperOptions {
     }
 
     /// <summary>
+    /// Copies sink configurations set via the fluent API into this instance.
+    /// Fluent values override any JSON-bound entry for the same sink.
+    /// </summary>
+    internal void MergeSinkConfigsFrom(LoggerHelperOptions other) {
+        foreach (var (sinkName, config) in other._sinkConfigs)
+            _sinkConfigs[sinkName] = config;
+    }
+
+    /// <summary>
+    /// Merges fluent-API options into this (JSON-bound) instance.
+    /// Routes are additive; ApplicationName and sink configs from fluent override JSON;
+    /// General: SelfLogging/RequestResponse/RenderedMessage are OR-ed, OpenTelemetry is AND-ed
+    /// (so fluent can only turn it off); masking is merged only when enabled via fluent.
+    /// </summary>
+    internal void MergeFluentFrom(LoggerHelperOptions fluent) {
+        Routes.AddRange(fluent.Routes);
+        MergeSinkConfigsFrom(fluent);
+        if (!string.IsNullOrEmpty(fluent.ApplicationName))
+            ApplicationName = fluent.ApplicationName;
+
+        General.EnableSelfLogging |= fluent.General.EnableSelfLogging;
+        General.EnableRequestResponseLogging |= fluent.General.EnableRequestResponseLogging;
+        General.EnableRenderedMessage |= fluent.General.EnableRenderedMessage;
+        General.EnableOpenTelemetry &= fluent.General.EnableOpenTelemetry;
+
+        var m = fluent.SensitiveDataMasking;
+        if (!m.Enabled)
+            return;
+        var target = SensitiveDataMasking;
+        target.Enabled = true;
+        target.Presets = target.Presets.Union(m.Presets, StringComparer.OrdinalIgnoreCase).ToList();
+        target.SensitiveProperties = target.SensitiveProperties.Union(m.SensitiveProperties, StringComparer.OrdinalIgnoreCase).ToList();
+        target.Rules.AddRange(m.Rules);
+        if (m.MaskText != new SensitiveDataMaskingOptions().MaskText)
+            target.MaskText = m.MaskText;
+    }
+
+    /// <summary>
     /// Raw IConfigurationSection for "Sinks", stored by the JSON config loader.
     /// Sink plugins use this for JSON binding fallback.
     /// </summary>

@@ -118,7 +118,7 @@ WHERE properties->>'$.OrderId' = '4711';
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `ConnectionString` | `string` | `""` | MySQL/MariaDB connection string. The sink is skipped with a `SelfLog` warning when empty |
+| `ConnectionString` | `string` | `""` | MySQL/MariaDB connection string. **Required:** when empty the sink fails to configure (`InvalidOperationException`) and is recorded as not configured (FAILED in the Dashboard/MCP) |
 | `TableName` | `string` | `"logs"` | Target table name |
 | `AutoCreateTable` | `bool` | `true` | Issue `CREATE TABLE IF NOT EXISTS` on first write |
 | `AddAutoIncrementColumn` | `bool` | `true` | Add an `Id BIGINT AUTO_INCREMENT PRIMARY KEY` column when auto-creating |
@@ -343,7 +343,7 @@ docker exec -it mysql-logs mysql -uroot -psecret logs -e "SELECT level, message,
 | Symptom | Likely Cause | Fix |
 |---|---|---|
 | No output at all | `app.UseLoggerHelper()` missing | Add it after `builder.Build()` |
-| Sink silently does nothing | `ConnectionString` empty — the sink skips itself with a `SelfLog` warning | Set `Sinks.MySql.ConnectionString`, then enable `Serilog.Debugging.SelfLog.Enable(Console.Error)` to see the diagnostics |
+| Sink shows FAILED in Dashboard/MCP, no rows written | `ConnectionString` empty — configure throws `InvalidOperationException` and the sink is recorded as not configured | Set `Sinks.MySql.ConnectionString`; enable `Serilog.Debugging.SelfLog.Enable(Console.Error)` to see write diagnostics |
 | Table not created | `AutoCreateTable: false`, or the user lacks `CREATE` permission | Grant `CREATE` on the schema, or create the table manually and declare matching `Columns` |
 | Rows appear with delay | Events are batched — flushed every `Period` or when `BatchPostingLimit` is reached | Lower `Period` (e.g. `"0.00:00:02"`) or `BatchPostingLimit` |
 | A custom column is always `NULL` | `Writer: "Single"` property name doesn't match the log property | Check casing: `TenantId` in `Columns` ↔ `["TenantId"]` in `BeginScope` |

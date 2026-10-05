@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Serilog;
-using Serilog.Debugging;
 using System.Data;
 using System.Runtime.CompilerServices;
 using SerilogMSSqlOptions = Serilog.Sinks.MSSqlServer.MSSqlServerSinkOptions;
@@ -62,10 +61,10 @@ public sealed class MSSqlServerSinkPlugin : ISinkPlugin {
         var opts = options.GetSinkConfig<MSSqlServerSinkOptions>("MSSqlServer")
                    ?? options.BindSinkSection<MSSqlServerSinkOptions>("MSSqlServer")
                    ?? BindLegacySection(options);
-        if (opts is null) {
-            SelfLog.WriteLine("MSSqlServer sink configured in routes but no Sinks.MSSqlServer options provided.");
-            return;
-        }
+        if (opts is null)
+            throw new InvalidOperationException("MSSqlServer sink configured in routes but no Sinks.MSSqlServer options provided (LoggerHelper:Sinks:MSSqlServer).");
+        if (string.IsNullOrWhiteSpace(opts.ConnectionString))
+            throw new InvalidOperationException("MSSqlServer sink: ConnectionString is required (LoggerHelper:Sinks:MSSqlServer:ConnectionString).");
 
         var colOptions = BuildColumnOptions(opts);
 

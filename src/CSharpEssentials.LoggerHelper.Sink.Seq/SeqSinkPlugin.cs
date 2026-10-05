@@ -1,5 +1,4 @@
 using Serilog;
-using Serilog.Debugging;
 using System.Runtime.CompilerServices;
 
 namespace CSharpEssentials.LoggerHelper.Sink.Seq;
@@ -33,10 +32,10 @@ public sealed class SeqSinkPlugin : ISinkPlugin {
         var opts = options.GetSinkConfig<SeqSinkOptions>("Seq")
                    ?? options.BindSinkSection<SeqSinkOptions>("Seq")
                    ?? options.BindSinkSection<SeqSinkOptions>("SeqOptions");
-        if (opts is null) {
-            SelfLog.WriteLine("Seq sink configured in routes but no Sinks.Seq options provided.");
-            return;
-        }
+        if (opts is null)
+            throw new InvalidOperationException("Seq sink configured in routes but no Sinks.Seq options provided (LoggerHelper:Sinks:Seq).");
+        if (string.IsNullOrWhiteSpace(opts.ServerUrl))
+            throw new InvalidOperationException("Seq sink: ServerUrl is required (LoggerHelper:Sinks:Seq:ServerUrl).");
 
         loggerConfig.WriteTo.Conditional(
             evt => routing.Matches(evt.Level),

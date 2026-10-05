@@ -82,10 +82,8 @@ public sealed class HangfireConsoleSinkPlugin : ISinkPlugin {
         // IPerformContextAccessor viene risolto dal DI in fase di startup.
         // Il sink deve essere creato con l'accessor per poter accedere al PerformContext.
         var accessor = HangfireConsoleSinkAccessorHolder.Accessor;
-        if (accessor is null) {
-            Serilog.Debugging.SelfLog.WriteLine("HangfireConsole sink configured in routes but IPerformContextAccessor not registered. Call services.AddHangfireConsoleSink() at startup.");
-            return;
-        }
+        if (accessor is null)
+            throw new InvalidOperationException("HangfireConsole sink configured in routes but IPerformContextAccessor not registered. Call services.AddHangfireConsoleSink() at startup.");
 
         loggerConfig.WriteTo.Conditional(
             evt => routing.Matches(evt.Level),
@@ -99,6 +97,7 @@ public sealed class HangfireConsoleSinkPlugin : ISinkPlugin {
 /// <summary>
 /// Holds a static reference to the IPerformContextAccessor registered in DI.
 /// This is needed because sink plugins are resolved before the DI container is built.
+/// The last <c>AddHangfireConsoleSink()</c> registration wins; the holder keeps only that single accessor (no state leak).
 /// </summary>
 public static class HangfireConsoleSinkAccessorHolder {
     internal static IPerformContextAccessor? Accessor { get; set; }

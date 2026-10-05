@@ -6,13 +6,163 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **Site:** new comparison page `compare.html` (LoggerHelper vs Serilog vs NLog, incl. benchmark overhead), linked from the home footer and `llms.txt`. Marketing drafts (dev.to x2, YouTube script, Reddit) in `outcomes/content/`, not published.
+- **HttpHelper** now also targets `net10.0` (`net8.0;net9.0;net10.0`), aligned with the core and the sinks.
+  `HttpHelper.Tests` runs on net9.0 and net10.0. No public API change. The existing nullable warnings now repeat for the new target.
+
+- **Tests:** `MySqlColumnMap` and `MySqlBatchedSink` (identifier injection guard, column mapping, generated `INSERT`/`CREATE TABLE`), no DB needed. `Sink.MySql` exposes internals to `CSharpEssentials.LoggerHelper.Tests`. No public API change.
+
+- **Tests:** `RequestResponseLoggingMiddleware` (body capture, truncation limits, status ≥400, error path).
+
+- **Tests:** `AddLoggerHelper(IConfiguration)` (no routes, legacy fallback, fluent merge, contextual buffer registration, JSON file in cwd, Development file) with isolated cwd/env.
+
+- **Tests:** `Configure` of the Email, MSSqlServer, PostgreSQL, MySQL, Telegram, HangfireConsole, Seq and Elasticsearch sink plugins (missing config -> `InvalidOperationException`, minimal config -> logger built, no network). `Sink.HangfireConsole` exposes internals to `CSharpEssentials.LoggerHelper.Tests`.
+
+- **Tests:** legacy `loggerExtension<T>` (enrichment, null request/args, `SpanName`, Dashboard and async variants).
+
+- **Tests:** `ContextualLogBuffer` and `ContextualLogSink` (ordering, wrap-around, flush, memory release, Error/Fatal replay). No production change.
+
+- **Demo**: HttpHelper integration scenario (`GET /api/httphelper/retry`, mocked flaky upstream, retries logged through LoggerHelper and visible in the dashboard).
+
+- **Elasticsearch sink:** new option `AutoRegisterTemplate` (default `true`, JSON key `AutoRegisterTemplate` / legacy `autoRegisterTemplate`). Set `false` to skip the synchronous index-template HTTP call at startup (about 2 s when the node is down). Default behavior unchanged.
+
+- **HttpHelper** mocks: new public constructor `HttpMockScenario(match, List<Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>>)`, so a response factory receives the request and the cancellation token. Existing constructors are unchanged (see the source-level caveat under Fixed).
+
+### Changed
+
+- **Demo:** `/health` now reports `configured` for each loaded sink, so failed sinks no longer look loaded. Internal cleanups in `SinkRoutingEngine` (single `LoadedSinkInfo` construction).
+- **Sinks (behavioral, no signature change):** `ISinkPlugin.Configure` now throws `InvalidOperationException` when the sink section is missing or a required option is empty (Email `Host`/`From`/`To`; MSSqlServer, Postgresql, MySql `ConnectionString`; Telegram `BotToken`/`ChatId`; Seq `ServerUrl`; Elasticsearch `NodeUris`; HangfireConsole requires `AddHangfireConsoleSink()` before `AddLoggerHelper()`). Previously most sinks returned silently (or failed at runtime). `SinkRoutingEngine` catches the exception, keeps the other sinks working and records `LoadedSinkInfo.Configured = false`, so the Dashboard and MCP `loggerhelper_get_sinks` show the sink as FAILED instead of ACTIVE. Custom sink authors should follow the same contract.
+- **HttpHelper** docs: package README rewritten (Quick Start, features table, JSON/Fluent examples, comparison vs Refit/Flurl/HttpClient) and new site page `httphelper.html`. The stale "4.0.5" `AddHttpClients(configuration, handler)` snippet is removed: no such overload exists, use `UseCompression`/`httpProxy`/`Certificate` in `HttpClientOptions`.
+- **HttpHelper** mock engine: `HttpMockEngine.Build()` now uses an internal `HttpMessageHandler` instead of Moq. Public API unchanged. When several scenarios match, the last one wins; responses cycle round-robin (thread-safe). A request with no matching scenario (or a scenario with no `ResponseFactory`) throws `InvalidOperationException` (previously Moq's `MockException`), and `HttpMockDelegatingHandler` no longer falls back to the real network: any exception thrown by a matched scenario (e.g. a simulated `HttpRequestException`) now reaches the caller, where the helper turns it into a 502 as for a real transport failure.
+
+### Removed
+
+- **HttpHelper** no longer depends on `Moq`; it is no longer pulled in transitively by the NuGet package.
+
+### Security
+
+- Log-forging sanitization in `RequestResponseLoggingMiddleware` and legacy `TraceSync` now also
+  neutralizes the Unicode line terminators NEL (U+0085), LS (U+2028) and PS (U+2029), plus form feed,
+  replacing them with a space. A lone CR is now replaced with a space instead of being removed.
+  No public API change.
+
+- **Demo:** `appsettings.LoggerHelper.debug.json` was tracked with real-looking credentials (SMTP, Telegram, Seq, MySQL) and is now untracked; copy `appsettings.LoggerHelper.debug.example.json` and fill in your own values. The old values **remain in git history, so those credentials must be rotated**. `SeqVerifier.js` no longer prints the Seq `apiKey`.
+
+### Fixed
+
+- **`AddLoggerHelper(config, fluent)` (behavior change):** fluent `General` flags and `SensitiveDataMasking` were silently discarded when JSON was also present. They are now merged over the JSON: `EnableSelfLogging`, `EnableRequestResponseLogging`, `EnableRenderedMessage` are OR-ed; `EnableOpenTelemetry` is AND-ed (fluent `DisableOpenTelemetry` can only turn it off); masking is additive (union of presets and properties, rules appended, fluent `MaskText` used when non-default).
+
+- **RequestResponseLoggingMiddleware:** when downstream throws before the response has started, the partial body is no longer copied to the real `Response.Body`, so an upstream `UseExceptionHandler` can still set the 500 (supersedes the note in the earlier entry below). Truncation at `MaxBodySize` no longer splits surrogate pairs.
+
+- **AddLoggerHelper(config, fluent):** the "no routes" validation now runs after the fluent merge, so routes defined only through the fluent API work over a JSON with no routes. Documented: an `appsettings.LoggerHelper*.json` in the working directory fully replaces the passed `IConfiguration`.
+- **AddLoggerHelper(config, fluent):** sink options set through the fluent API (`ConfigureSeq`, `ConfigureEmail`, …) are now merged into the JSON options and override the JSON entry for the same sink. Before, they were dropped and the sink failed to configure.
+
+- **loggerExtension<T>** (legacy v2–v4 API): `TraceDashBoardSync` / `TraceDashBoardAsync` no longer throw when `args` is `null` (the `async void` variant could crash the process); now consistent with `TraceSync`.
+
+- **AddLoggerHelper(IConfiguration):** the `PhysicalFileProvider` used to read `appsettings.LoggerHelper*.json` from the current directory is now disposed and no longer watches the file (`reloadOnChange: false`); it leaked one `FileSystemWatcher` per call. Options are bound once at startup, so the file is not reloaded at runtime (it never reconfigured the already-built sinks).
+
+- **RequestResponseLoggingMiddleware:** restores the original `Response.Body` after the request (it was left on a disposed buffer, breaking upstream exception handlers); when downstream throws after a partial write, the partial response was copied to the client instead of an empty body (reverted when the response has not started, see above); request/response bodies delivered in small chunks are now logged in full and the body limit check no longer does synchronous I/O (Kestrel rejects it); pooled body buffers are cleared on return.
+
+- **HttpHelper** mocks ignored timeout and caller cancellation: a slow mock with `addTimeout` returned a late 200 instead of 408, and cancelling the caller's token did not stop it. The engine now stops waiting (`WaitAsync(ct)`) for every mock factory, legacy ones included: slow mock + timeout gives 408, caller cancellation throws `OperationCanceledException`. Behavior note: legacy factories are now interruptible, and a late response abandoned this way is not disposed.
+- **Source-level caveat:** `new HttpMockScenario(match, [])` and `new HttpMockScenario(match, null)` are now ambiguous (CS0121) between the two list overloads; pass a typed list (e.g. `new List<Func<Task<HttpResponseMessage>>>()`). Binary compatibility is unaffected.
+
+- **HttpHelper**
+  - Retry no longer blocks a thread to clone the request body (`.Result` → `await`).
+  - `SendAsync` no longer swallows internal errors and then throws `NullReferenceException`:
+    an exceeded rate limit now returns a `429` response, an empty URL throws `InvalidOperationException`;
+    the rate-limit lease is disposed.
+  - `addTimeout`: only the helper's own timeout is enforced (`HttpClient.Timeout` is set to infinite),
+    so a timeout deterministically returns `408` instead of racing with `HttpClient` (`500`).
+  - Callbacks (`AddRequestAction`) are now per client: a callback registered on one named client no longer
+    fires for every client. `HttpRequestEvents` is thread-safe.
+  - `httpsClientHelperFactory`: one helper per name even under concurrency (`ConcurrentDictionary` + `Lazy`);
+    `AddActionOnRequest(callback)` no longer throws when called before `CreateOrGet`
+    (it registers a global callback and returns the last created helper, or `null`).
+  - `AddHttpClients` registers `IHttpClientFactory` even with no configured client, and registers
+    named clients only (the typed `IhttpsClientHelper` registration was not resolvable).
+  - Client certificate: missing/empty path or missing file is logged and skipped instead of continuing.
+  - Synthetic `502`/`500` error bodies are now valid JSON (messages are escaped).
+  - `SendAsync`: cancelling the caller's `CancellationToken` now throws `OperationCanceledException`
+    (it was returned as a synthetic `500`); a timeout from the default `HttpClient.Timeout` (no `addTimeout`) now returns `408` instead of `500`.
+    **Behavior change** for code that relied on a `500` response after cancelling (suggested bump: minor).
+  - `addTimeout` after the first `SendAsync` no longer throws `InvalidOperationException`: it no longer touches
+    `HttpClient.Timeout`. The helper never changes an `HttpClient` passed to its constructor (it may be shared):
+    the client's own timeout still applies and the shorter of the two wins, both returned as `408`.
+    Helpers created by `IhttpsClientHelperFactory` own their client, so there `addTimeout` can also be longer
+    than the configured client timeout (which stays the helper's default).
+  - A request callback that cancels itself (not the request) is logged and ignored instead of turning a
+    successful response into a `408`.
+    Calling `addTimeout` again now replaces the previous value (before, every call after the first was silently ignored).
+  - A callback registered with `AddRequestAction` that throws no longer fails the HTTP response nor stops the other
+    callbacks: the error is logged and ignored (cancellation still propagates).
+  - The request (and every retry clone) is disposed when `SendAsync` completes. Do not read `response.RequestMessage.Content`
+    after the call: headers and URI stay readable, the content is disposed.
+  - Timestamps use UTC; `RequestHttpExtension.IdTransaction` is now a unique GUID (`N` format) instead of a local date string.
+
+### Changed
+
+- **HttpHelper (behavior)**
+  - `AddHttpClients` no longer prints to the console and no longer reads `appsettings.httphelper.json`
+    from the application folder (nor adds environment variables on top of it): use the
+    `HttpClientOptions` section of the host configuration.
+  - New `IhttpsClientHelperFactory.AddActionOnRequest(string name, callback)` (default interface method)
+    and `HttpRequestEventsRegistry`; `HttpClientHandlerLogging` and `httpsClientHelperFactory` gain an overloaded constructor.
+  - `HttpHelper.Tests` grew from 22 to 45 tests (rate limiter, cancellation, timeout `408`, error mapping,
+    form data, default headers, factory concurrency, per-client callbacks, certificate guards, `ProxyConfigurator` invalid address).
+
+### Removed
+
+- Orphan `CSharpEssentials.LoggerHelper.SourceGenerator` project (never published) and the internal
+  dead `CompileTimePluginDiscovery` / `CompositePluginDiscovery`. Plugin discovery is now
+  `FileSystemPluginDiscovery` only. No public API change, no runtime behavior change.
+- Dead `net6.0` package group from the `CSharpEssentials.LoggerHelper` project file (the package
+  targets net8.0/net9.0/net10.0 only). Package dependencies are unchanged for every target.
+- Broken root-level `CSharpEssentials.LoggerHelper.slnx` (its project paths did not resolve).
+  The only solution is now `src/CSharpEssentials.LoggerHelper.slnx`.
+
+### Changed
+
+- **CI / tests (internal, no API change)**
+  CI now builds and tests `CSharpEssentials.HttpHelper`: `HttpHelper.Tests` was added to
+  `src/CSharpEssentials.LoggerHelper.slnx` and `build-test.yml` runs it.
+  New smoke test `AllPublishedSinks_Register_AndCanHandle` verifies that all 10 published
+  sinks register in `SinkPluginRegistry` and handle their own name.
+  `HttpHelper.Tests` grew from one trivial test to 22 network-free tests covering
+  `HttpClientOptions` defaults, `ProxyConfigurator`, `AddHttpClients` registration,
+  `HttpsClientHelperFactory` and `HttpsClientHelper` (headers, JSON body, retry, error mapping).
+  Sink auto-registration is now tested without any explicit `PluginInitializer.Init()` call:
+  `AddLoggerHelper` rediscovers all 10 sinks from an empty `SinkPluginRegistry`, and each sink's
+  `[ModuleInitializer]` registers its plugin when the module loads in a fresh `AssemblyLoadContext`.
+  Seven new tests cover the request/response middleware and legacy `TraceSync` log sanitization.
+- **Build (internal, no API change)**
+  The intentional `CA2255` (`[ModuleInitializer]` in a library) is silenced only in the
+  `CSharpEssentials.LoggerHelper.Sink.*` projects, via a conditional `NoWarn` in `src/Directory.Build.props`
+  (build warnings 90 → 60). New sinks inherit it automatically.
+
+---
+
 ## [5.2.6] — 2026-08-31
 
-### new Patch
-  fix(security): sanitize all user-controllable values in log calls (CodeQL cs/log-forging)
+### Security
 
-  - RequestResponseLoggingMiddleware: wrap context.Request.Method with SanitizeLogValue()
-  - LegacyLoggerExtension: sanitize request.IdTransaction and request.Action, add SanitizeLogValue method
+- **Log forging (CodeQL `cs/log-forging`)**
+  `RequestResponseLoggingMiddleware` now sanitizes user-controlled values before logging them:
+  HTTP method, path, unescaped query string, request/response bodies (and method/path in the error log).
+  The legacy `loggerExtension<T>.TraceSync` sanitizes `IdTransaction` and `Action`.
+  Sanitization removes CR and replaces LF with a space, so forged log lines cannot be injected.
+  Behavior change: multi-line request/response bodies are now logged on a single line.
+  No public API change.
+
+### Documentation
+
+- README: MySQL / MariaDB sink listed in the package and sink tables; expanded
+  `CSharpEssentials.LoggerHelper.Sink.MySql` README (shipped as 5.2.4 and 5.2.4.1, docs-only releases).
+  Note: 5.2.5 was not published.
+
 ---
 
 ## [5.2.3] — 2026-08-25
@@ -22,6 +172,77 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **MySQL / MariaDB sink — structured logs in real columns**
   New package `CSharpEssentials.LoggerHelper.Sink.MySql` brings the tenth sink to the
   ecosystem. Routes accept `MySql`, `MySQL` or `MariaDB` (case-insensitive).
+
+  ```json
+  {
+    "LoggerHelper": {
+      "Routes": [ { "Sink": "MySql", "Levels": ["Warning", "Error", "Fatal"] } ],
+      "Sinks": {
+        "MySql": {
+          "ConnectionString": "Server=localhost;Database=logs;Uid=app;Pwd=secret;",
+          "TableName": "app_logs",
+          "AutoCreateTable": true,
+          "StoreTimestampInUtc": true
+        }
+      }
+    }
+  }
+  ```
+
+  **Built in-house rather than wrapping a third-party sink.** The two candidates on NuGet
+  each forced a trade-off worth avoiding:
+  - `Serilog.Sinks.MySQL` ships a **fixed schema**, so `ApplicationName`, `IdTransaction`,
+    `Action` and `MachineName` would have been buried inside a JSON blob instead of
+    being queryable columns — no parity with the PostgreSQL sink.
+  - `Serilog.Sinks.MariaDB` supports custom columns but pins **Serilog 2.10** and
+    `Serilog.Sinks.PeriodicBatching 2.3.0` against the core's Serilog 4.2, and targets
+    `netstandard` only.
+
+  The sink instead sits directly on `MySqlConnector 2.5.0` +
+  `Serilog.Sinks.PeriodicBatching 5.0.0` (Serilog 4.x), keeping the dependency graph
+  aligned with the rest of the ecosystem.
+
+  **Feature parity with the PostgreSQL sink:**
+  - Same ten default columns — `ApplicationName`, `message`, `message_template`, `level`,
+    `raise_date`, `exception`, `properties`, `MachineName`, `Action`, `IdTransaction`
+  - Same eight `Writer` kinds — `Rendered`, `Template`, `Level`, `Timestamp`, `Exception`,
+    `Serialized`, `Properties`, `Single` — so an existing `Columns` block ports over by
+    adjusting only the `Type` values
+  - `AutoCreateTable` issues `CREATE TABLE IF NOT EXISTS` with
+    `utf8mb4 / utf8mb4_unicode_ci`, optional `Id BIGINT AUTO_INCREMENT PRIMARY KEY`
+
+  **MySQL-specific behaviour:**
+  - `StoreTimestampInUtc` (default `false`) — MySQL has no `timestamptz` equivalent, so
+    the sink emits `DATETIME(6)` and lets you pick the clock. `DATETIME(6)` is used over
+    `TIMESTAMP` deliberately: the latter is capped at 2038-01-19
+  - `Type: "Json"` maps to native `JSON` on MySQL 5.7.8+, and to the `LONGTEXT` alias on
+    MariaDB
+  - Batched async writes, one transaction per batch, `BatchPostingLimit` clamped to
+    `1..1000`, bounded 10,000-event queue
+  - Write failures are reported through Serilog `SelfLog` and never thrown into the host
+
+  **Security:** table and column names arriving from configuration are validated against
+  `^[A-Za-z0-9_]{1,64}$` and backtick-quoted; every value is passed as a command
+  parameter, never concatenated into SQL.
+
+  Targets `net8.0`, `net9.0`, `net10.0`. Registered in both `.slnx` files and in
+  `LegacyConfigurationAdapter`, so the legacy `SerilogOption:MySql` section binds too.
+  CI needed no change — `publish.yml` globs `Sink.*` projects.
+
+  > **Verified at compile time only.** The sink has not yet been exercised against a live
+  > MySQL or MariaDB server; DDL generation, inserts and column mapping still need a
+  > runtime pass before this is considered production-ready.
+
+### Documentation
+
+- **`CSharpEssentials.LoggerHelper.Sink.MySql` README**
+  Follows the spoke-README structure established in 5.2.2, plus four MySQL-specific
+  sections: using an existing table, timestamps and time zones, migrating from the
+  PostgreSQL sink (type mapping table), and behaviour/reliability.
+
+  Includes a warning that MySQL runs `STRICT_TRANS_TABLES` by default since 5.7 and
+  **rejects** over-long values with `ERROR 1406` instead of truncating — the sink does not
+  truncate either, so an undersized `VARCHAR` costs the whole batch.
 
 ---
 

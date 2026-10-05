@@ -1,14 +1,11 @@
-﻿using Moq;
-using Moq.Protected;
-
-namespace CSharpEssentials.HttpHelper.HttpMocks;
+﻿namespace CSharpEssentials.HttpHelper.HttpMocks;
 public interface IHttpMockEngine {
     IEnumerable<IHttpMockScenario> scenarios { get; }
     bool Match(HttpRequestMessage request);
     HttpMessageHandler Build();
 }
 /// <summary>
-/// Real Moq
+/// Routes requests to the matching scenario (last match wins) via an internal <see cref="HttpMessageHandler"/>.
 /// </summary>
 public class HttpMockEngine : IHttpMockEngine {
     public IEnumerable<IHttpMockScenario> scenarios { get; }
@@ -26,48 +23,28 @@ public class HttpMockEngine : IHttpMockEngine {
     public HttpMockEngine(IEnumerable<IHttpMockScenario> httpMockScenarios) {
         scenarios = httpMockScenarios;
     }
-    public HttpMessageHandler Build() {
-        if (_cachedHandler != null)
-            return _cachedHandler;
+    public HttpMessageHandler Build() => _cachedHandler ??= new ScenarioHandler(scenarios.ToArray());
 
-        var mock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+    /// <summary>Last matching scenario wins (same order as Moq setups); no match → <see cref="InvalidOperationException"/>.</summary>
+    private sealed class ScenarioHandler(IHttpMockScenario[] scenarios) : HttpMessageHandler {
+        private readonly long[] _counters = new long[scenarios.Length];
 
-        foreach (var scenario in scenarios) {
-            // Inizializziamo l'indice locale per lo scenario
-            int index = 0;
-
-            mock.Protected()
-                .Setup<Task<HttpResponseMessage>>(
-                    "SendAsync",
-                    ItExpr.Is<HttpRequestMessage>(r => scenario.Match(r)),
-                    ItExpr.IsAny<CancellationToken>())
-                .Returns(() => {
-                    // Preleviamo la factory all'indice corrente
-                    var factory = scenario.ResponseFactory[index];
-
-                    // Incrementiamo l'indice e usiamo il modulo per farlo tornare a 0 
-                    // quando raggiunge la fine della lista (scenario.ResponseFactory.Count)
-                    index = (index + 1) % scenario.ResponseFactory.Count;
-
-                    return factory();
-                });
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+            for (var i = scenarios.Length - 1; i >= 0; i--) {
+                if (!scenarios[i].Match(request)) continue;
+                // ponytail: concrete-type check keeps IHttpMockScenario unchanged; custom implementations get WaitAsync but not the token in the factory; upgrade path = default interface member
+                var requestFactories = scenarios[i] is HttpMockScenario { RequestResponseFactory.Count: > 0 } s ? s.RequestResponseFactory : null;
+                var factories = scenarios[i].ResponseFactory;
+                var count = requestFactories?.Count ?? factories.Count;
+                if (count == 0) throw new InvalidOperationException($"Mock scenario for {request.Method} {request.RequestUri} has no ResponseFactory.");
+                // Round-robin over the factories; Interlocked keeps the cursor correct under concurrent requests.
+                var next = (int)((Interlocked.Increment(ref _counters[i]) - 1) % count);
+                return requestFactories is not null
+                    ? requestFactories[next](request, cancellationToken).WaitAsync(cancellationToken)
+                    : factories[next]().WaitAsync(cancellationToken);
+            }
+            throw new InvalidOperationException($"No mock scenario matches {request.Method} {request.RequestUri}.");
         }
-
-        _cachedHandler = mock.Object;
-        return _cachedHandler;
-
-        //foreach (var scenario in scenarios) {
-
-        //    var seq = mock.Protected()
-        //        .SetupSequence<Task<HttpResponseMessage>>(
-        //            "SendAsync",
-        //            ItExpr.Is<HttpRequestMessage>(r => scenario.Match(r)),
-        //            ItExpr.IsAny<CancellationToken>());
-
-        //    foreach (var responseFactory in scenario.ResponseFactory)
-        //        seq.Returns(responseFactory);
-        //}
-        //return mock.Object;
     }
     public HttpMessageHandler Orchestrate() {
         return Build();

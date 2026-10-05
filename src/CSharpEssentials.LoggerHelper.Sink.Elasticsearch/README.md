@@ -29,7 +29,8 @@ Add to `appsettings.json`:
     "Sinks": {
       "Elasticsearch": {
         "NodeUris": "http://localhost:9200",
-        "IndexFormat": "myapp-logs-{0:yyyy.MM.dd}"
+        "IndexFormat": "myapp-logs-{0:yyyy.MM.dd}",
+        "AutoRegisterTemplate": true
       }
     }
   }
@@ -44,7 +45,7 @@ var app = builder.Build();
 app.UseLoggerHelper();   // ← required: activates sinks and registers middleware
 ```
 
-> **Index template registration is automatic.** The sink calls Elasticsearch on startup to register the index template — no manual Kibana/DevTools setup needed.
+> **Index template registration is automatic by default.** The sink calls Elasticsearch on startup to register the index template — no manual Kibana/DevTools setup needed. This is a synchronous HTTP call (about 2 s when the node is down); set `"AutoRegisterTemplate": false` to skip it (see [Configuration Options](#configuration-options)).
 
 ---
 
@@ -119,7 +120,9 @@ OpenSearch exposes the same REST API as Elasticsearch 7.x on port 9200 by defaul
 | `NodeUris` | `string` | `""` | **Required.** Elasticsearch node URL. For HTTPS or authentication include them in the URI: `"https://user:pass@es-host:9243"`. |
 | `IndexFormat` | `string?` | `null` | Index name format with optional date placeholder `{0:...}`. When `null` Serilog uses its own default. |
 
-> **`autoRegisterTemplate` is always `true`** — the sink registers the index template automatically on startup. This is not user-configurable but can be safely repeated (idempotent).
+| `AutoRegisterTemplate` | `bool` | `true` | Registers the index template with a synchronous HTTP call at startup (idempotent). Set `false` to skip it, e.g. when the template is managed elsewhere or the node may be down at startup. Legacy JSON key `autoRegisterTemplate` is also accepted. |
+
+> **Startup validation.** An empty `NodeUris` (or a missing `Elasticsearch` section) makes the sink fail to configure with an `InvalidOperationException`; LoggerHelper records it as not configured (shown as FAILED in the Dashboard/MCP) and the other sinks keep working.
 
 ---
 
@@ -131,7 +134,9 @@ OpenSearch exposes the same REST API as Elasticsearch 7.x on port 9200 by defaul
 | `401 Unauthorized` | Elasticsearch 8.x security is enabled by default | Include credentials in `NodeUris`: `"https://elastic:password@localhost:9200"` |
 | `connection refused` on port 9200 | Elasticsearch is not running or wrong port | Start Elasticsearch and verify the node URL |
 | Index not visible in Kibana | `IndexFormat` date mismatch or wrong data view pattern | Check the index name in Elasticsearch: `GET /_cat/indices?v` |
-| Template registration error at startup | Insufficient Elasticsearch permissions | Grant `manage_index_templates` privilege to the connecting user |
+| Template registration error at startup | Insufficient Elasticsearch permissions | Grant `manage_index_templates` privilege to the connecting user, or set `AutoRegisterTemplate: false` |
+| Startup takes ~2 s longer when Elasticsearch is down | Template registration is a synchronous HTTP call | Set `AutoRegisterTemplate: false` |
+| Sink shows FAILED in Dashboard/MCP, no logs sent | `NodeUris` empty or `Elasticsearch` section missing | Set `Sinks.Elasticsearch.NodeUris` |
 | `No connection could be made` on WSL | `localhost` resolves to IPv6, Docker only listens on IPv4 | Use `http://127.0.0.1:9200` instead of `http://localhost:9200` in `NodeUris` |
 | Index created but no documents | Elasticsearch 8.x version detection fails with the Serilog sink | This sink sets `DetectElasticsearchVersion = false` and `AutoRegisterTemplateVersion = ESv7` internally — no action needed on your side |
 

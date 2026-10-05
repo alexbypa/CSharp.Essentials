@@ -1,6 +1,5 @@
 ﻿using Polly;
 using Polly.Retry;
-using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.RateLimiting;
@@ -16,12 +15,17 @@ public class httpsClientHelper : IhttpsClientHelper {
     public FormUrlEncodedContent formUrlEncodedContent { get; set; }
     private AsyncRetryPolicy<HttpResponseMessage> _retryPolicy = null;
     private readonly IHttpRequestEvents _events;
-    private bool TimeoutSettled = false;
+    private TimeSpan _timeout;
     public record httpClientAuthenticationBasic(string userName, string password);
     public record httpClientAuthenticationBearer(string token);
     public httpsClientHelper(HttpClient httpClient, IHttpRequestEvents events, httpClientRateLimitOptions rateLimitOptions) {
         this.httpClient = httpClient;
         _events = events;
+
+        // L'HttpClient appartiene al chiamante: non lo si modifica (può essere condiviso). Senza addTimeout vale il suo
+        // HttpClient.Timeout; con addTimeout vale il più corto dei due. Entrambi i timeout diventano 408 in _SendAsync.
+        // La factory, proprietaria dei client che crea, azzera HttpClient.Timeout e passa il default via addTimeout.
+        _timeout = Timeout.InfiniteTimeSpan;
 
         if (rateLimitOptions != null && rateLimitOptions.IsEnabled)
             rateLimiter = new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions {
@@ -57,8 +61,6 @@ public class httpsClientHelper : IhttpsClientHelper {
         httpClient.DefaultRequestHeaders.Clear();
         if (_HeaderValues != null)
             foreach (var item in _HeaderValues) {
-                if (item.Key == null)
-                    Debug.Print("semu");
                 httpClient.DefaultRequestHeaders.Add(item.Key, item.Value);
             }
     }
@@ -84,64 +86,57 @@ public class httpsClientHelper : IhttpsClientHelper {
     object body = null,
     IDictionary<string, string>? headers = null,
     CancellationToken cancellationToken = default) {
-        Task<HttpResponseMessage> response = null;
-        try {
-            if (contentBuilder == null) 
-                contentBuilder = new NoBodyContentBuilder();
+        if (contentBuilder == null)
+            contentBuilder = new NoBodyContentBuilder();
 
-            var request = new HttpRequestBuilder()
-                .WithUrl(baseUrl)
-                .WithMethod(httpMethod)
-                .WithBody(body)
-                .WithContentBuilder(contentBuilder)
-                .Build();
+        using var request = new HttpRequestBuilder()
+            .WithUrl(baseUrl)
+            .WithMethod(httpMethod)
+            .WithBody(body)
+            .WithContentBuilder(contentBuilder)
+            .Build();
 
-            // Applica gli header per-request (thread-safe)
-            if (headers != null) {
-                foreach (var kv in headers) {
-                    if (!string.IsNullOrEmpty(kv.Key) && kv.Value != null)
-                        request.Headers.TryAddWithoutValidation(kv.Key, kv.Value);
-                }
+        // Applica gli header per-request (thread-safe)
+        if (headers != null) {
+            foreach (var kv in headers) {
+                if (!string.IsNullOrEmpty(kv.Key) && kv.Value != null)
+                    request.Headers.TryAddWithoutValidation(kv.Key, kv.Value);
             }
-            DateTime dtStartRequest = DateTime.Now;
-            TimeSpan timeSpanRateLimit = TimeSpan.Zero;
-            if (rateLimiter != null) {
-                var lease = await rateLimiter.AcquireAsync(1);
-                if (!lease.IsAcquired) {
-                    throw new InvalidOperationException("Rate limit exceeded");
-                }
-                if (request.Headers.Contains("X-RateLimit-TimeSpanElapsed"))
-                    request.Headers.Remove("X-RateLimit-TimeSpanElapsed");
-                request.Headers.Add("X-RateLimit-TimeSpanElapsed", (DateTime.Now - dtStartRequest).ToString());
-            }
-            var context = new Context();
-
-            if (_retryPolicy == null) {
-                response = _SendAsync(request, cancellationToken);
-            } else {
-                response = _retryPolicy.ExecuteAsync(async ctx => {
-                    var attempt = ctx.ContainsKey("RetryAttempt") ? (int)ctx["RetryAttempt"] : 0;
-                    var backoff = ctx.ContainsKey("BackoffTime") ? (TimeSpan)ctx["BackoffTime"] : TimeSpan.Zero;
-                    if (request.Headers.Contains("X-Retry-Attempt")) request.Headers.Remove("X-Retry-Attempt");
-                    request.Headers.Add("X-Retry-Attempt", attempt.ToString());
-                    
-                    if (request.Headers.Contains("X-RateLimit-TimeSpanElapsed")) request.Headers.Remove("X-RateLimit-TimeSpanElapsed");
-                    request.Headers.Add("X-RateLimit-TimeSpanElapsed", backoff.ToString());
-
-                    return await _SendAsync(CloneHttpRequestMessage(request), cancellationToken);
-
-                }, context);
-            }
-        } catch(Exception ex) {
-            Trace.TraceError(ex.ToString());
         }
-        return await response;
+        DateTime dtStartRequest = DateTime.UtcNow;
+        if (rateLimiter != null) {
+            using var lease = await rateLimiter.AcquireAsync(1);
+            if (!lease.IsAcquired) {
+                return new HttpResponseMessage(System.Net.HttpStatusCode.TooManyRequests) {
+                    ReasonPhrase = "Rate limit exceeded",
+                    Content = new StringContent("{\"error\":\"rate_limit_exceeded\"}", Encoding.UTF8, "application/json"),
+                    RequestMessage = request
+                };
+            }
+            if (request.Headers.Contains("X-RateLimit-TimeSpanElapsed"))
+                request.Headers.Remove("X-RateLimit-TimeSpanElapsed");
+            request.Headers.Add("X-RateLimit-TimeSpanElapsed", (DateTime.UtcNow - dtStartRequest).ToString());
+        }
+
+        if (_retryPolicy == null)
+            return await _SendAsync(request, cancellationToken);
+
+        return await _retryPolicy.ExecuteAsync(async ctx => {
+            var attempt = ctx.ContainsKey("RetryAttempt") ? (int)ctx["RetryAttempt"] : 0;
+            var backoff = ctx.ContainsKey("BackoffTime") ? (TimeSpan)ctx["BackoffTime"] : TimeSpan.Zero;
+            if (request.Headers.Contains("X-Retry-Attempt")) request.Headers.Remove("X-Retry-Attempt");
+            request.Headers.Add("X-Retry-Attempt", attempt.ToString());
+
+            if (request.Headers.Contains("X-RateLimit-TimeSpanElapsed")) request.Headers.Remove("X-RateLimit-TimeSpanElapsed");
+            request.Headers.Add("X-RateLimit-TimeSpanElapsed", backoff.ToString());
+
+            using var clone = await CloneHttpRequestMessageAsync(request); // dispose del clone a fine tentativo
+            return await _SendAsync(clone, cancellationToken);
+        }, new Context());
     }
     private async Task<HttpResponseMessage> _SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
         var startedAt = DateTime.UtcNow;
-        using var timeoutCts = TimeoutSettled
-                ? new CancellationTokenSource(httpClient.Timeout)
-                : new CancellationTokenSource();
+        using var timeoutCts = new CancellationTokenSource(_timeout); // InfiniteTimeSpan = nessun timeout
 
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
             timeoutCts.Token,
@@ -150,7 +145,11 @@ public class httpsClientHelper : IhttpsClientHelper {
         try {
             var response = await httpClient.SendAsync(request, linkedCts.Token);
             return response;
-        } catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested) {
+        } catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) {
+            // Cancellazione del chiamante: si propaga (contratto .NET), non diventa una risposta 500
+            throw;
+        } catch (OperationCanceledException) {
+            // Timer dell'helper (addTimeout) o HttpClient.Timeout di default → 408
             var elapsed = DateTime.UtcNow - startedAt;
             return new HttpResponseMessage(System.Net.HttpStatusCode.RequestTimeout) {
                 ReasonPhrase = "Client timeout",
@@ -164,7 +163,7 @@ public class httpsClientHelper : IhttpsClientHelper {
             return new HttpResponseMessage(System.Net.HttpStatusCode.BadGateway) {
                 ReasonPhrase = "Upstream error",
                 Content = new StringContent(
-                    $"{{\"error\":\"upstream\",\"message\":\"{ex.Message}\"}}",
+                    System.Text.Json.JsonSerializer.Serialize(new { error = "upstream", message = ex.Message }),
                     Encoding.UTF8,
                     "application/json"),
                 RequestMessage = request
@@ -173,14 +172,14 @@ public class httpsClientHelper : IhttpsClientHelper {
             return new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError) {
                 ReasonPhrase = "Internal client error",
                 Content = new StringContent(
-                    $"{{\"error\":\"internal_error\",\"message\":\"{ex.Message}\"}}",
+                    System.Text.Json.JsonSerializer.Serialize(new { error = "internal_error", message = ex.Message }),
                     Encoding.UTF8,
                     "application/json"),
                 RequestMessage = request
             };
         }
     }
-    private static HttpRequestMessage CloneHttpRequestMessage(HttpRequestMessage request) {
+    private static async Task<HttpRequestMessage> CloneHttpRequestMessageAsync(HttpRequestMessage request) {
         var clone = new HttpRequestMessage(request.Method, request.RequestUri);
 
         // Copia gli header
@@ -190,7 +189,8 @@ public class httpsClientHelper : IhttpsClientHelper {
 
         // Clona il contenuto (se presente)
         if (request.Content != null) {
-            var content = request.Content.ReadAsByteArrayAsync().Result; // Blocca solo in questa fase per la clonazione
+            // Nessun CancellationToken: il contenuto è già in memoria (String/ByteArray/FormUrlEncoded); la cancellazione resta gestita da _SendAsync
+            var content = await request.Content.ReadAsByteArrayAsync();
             clone.Content = new ByteArrayContent(content);
 
             // Copia gli header del contenuto
@@ -201,9 +201,8 @@ public class httpsClientHelper : IhttpsClientHelper {
         return clone;
     }
     public IhttpsClientHelper addTimeout(TimeSpan timeSpan) {
-        if (!TimeoutSettled)
-            httpClient.Timeout = timeSpan;
-        TimeoutSettled = true;
+        // Non tocca HttpClient.Timeout (immutabile dopo il primo invio e di proprietà del chiamante). Vale l'ultimo valore.
+        _timeout = timeSpan;
         return this;
     }
     public IhttpsClientHelper addHeaders(string KeyName, string KeyValue) {
@@ -227,6 +226,7 @@ public interface IhttpsClientHelper {
     /// <param name="headers">Headers</param>
     /// <param name="cancellationToken">cancellationToken</param>
     /// <returns></returns>
+    /// <exception cref="OperationCanceledException">Thrown when <paramref name="cancellationToken"/> is cancelled by the caller. Timeouts (<c>addTimeout</c> or <c>HttpClient.Timeout</c>) are returned as a 408 response instead.</exception>
     Task<HttpResponseMessage> SendAsync(
         string baseUrl,
         HttpMethod httpMethod,

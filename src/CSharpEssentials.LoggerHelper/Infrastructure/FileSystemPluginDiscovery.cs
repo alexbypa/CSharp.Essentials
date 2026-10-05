@@ -7,8 +7,8 @@ namespace CSharpEssentials.LoggerHelper;
 /// <summary>
 /// Discovers sink plugin assemblies from the application base directory.
 /// Scans for CSharpEssentials.LoggerHelper.Sink.*.dll and registers their ISinkPlugin
-/// implementations — either via [ModuleInitializer] (for freshly loaded assemblies)
-/// or via reflection fallback (for assemblies already loaded by the runtime via project references).
+/// implementations via reflection. A plugin's [ModuleInitializer] may also register it
+/// (it runs lazily on first access to a type in the module); duplicates are ignored.
 /// </summary>
 internal sealed class FileSystemPluginDiscovery : IPluginDiscovery {
     public void DiscoverAndLoad(ILogErrorStore errorStore) {
@@ -28,9 +28,8 @@ internal sealed class FileSystemPluginDiscovery : IPluginDiscovery {
 
                 var asm = existing ?? AssemblyLoadContext.Default.LoadFromAssemblyPath(dll);
 
-                // [ModuleInitializer] has run if the assembly was freshly loaded above.
-                // For already-loaded assemblies it may not have run (lazy load timing).
-                // Reflection fallback ensures plugins are always registered.
+                // Loading does not run [ModuleInitializer]: it runs lazily on first access to a type in the module.
+                // Reflection fallback registers plugins regardless; duplicates are ignored (registry keyed by Type).
                 RegisterPluginsFromAssembly(asm, errorStore);
             } catch (Exception ex) {
                 errorStore.Add(new LogErrorEntry {

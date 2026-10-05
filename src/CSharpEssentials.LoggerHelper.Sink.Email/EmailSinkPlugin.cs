@@ -52,10 +52,14 @@ public sealed class EmailSinkPlugin : ISinkPlugin {
     public void Configure(LoggerConfiguration loggerConfig, SinkRouting routing, LoggerHelperOptions options) {
         var opts = options.GetSinkConfig<EmailSinkOptions>("Email")
                    ?? options.BindSinkSection<EmailSinkOptions>("Email");
-        if (opts is null) {
-            SelfLog.WriteLine("Email sink configured in routes but no Sinks.Email options provided.");
-            return;
-        }
+        if (opts is null)
+            throw new InvalidOperationException("Email sink configured in routes but no Sinks.Email options provided (LoggerHelper:Sinks:Email).");
+        if (string.IsNullOrWhiteSpace(opts.Host))
+            throw new InvalidOperationException("Email sink: Host is required (LoggerHelper:Sinks:Email:Host).");
+        if (string.IsNullOrWhiteSpace(opts.From))
+            throw new InvalidOperationException("Email sink: From is required (LoggerHelper:Sinks:Email:From).");
+        if (string.IsNullOrWhiteSpace(opts.To))
+            throw new InvalidOperationException("Email sink: To is required (LoggerHelper:Sinks:Email:To).");
 
         loggerConfig.WriteTo.Conditional(
             evt => routing.Matches(evt.Level),

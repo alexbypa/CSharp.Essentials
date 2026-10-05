@@ -1,24 +1,25 @@
 namespace CSharpEssentials.LoggerHelper.Diagnostics;
 
 /// <summary>
-/// Describes a sink route that was configured successfully at startup.
+/// Describes the configuration outcome of a sink route at startup (see <see cref="Configured"/>).
 /// </summary>
 public sealed class LoadedSinkInfo {
     public string SinkName { get; init; } = string.Empty;
     public string PluginType { get; init; } = string.Empty;
     public IReadOnlyList<string> Levels { get; init; } = [];
+    /// <summary>True if the sink was configured successfully; false if its configuration failed.</summary>
     public bool Configured { get; init; }
 }
 
 /// <summary>
-/// Read-only view of successfully loaded sink routes.
+/// Read-only view of the configuration outcome of each sink route (configured or failed).
 /// </summary>
 public interface ILoadedSinkStore {
     IReadOnlyList<LoadedSinkInfo> GetAll();
 }
 
 /// <summary>
-/// Thread-safe store for successfully configured sinks.
+/// Thread-safe store for the configuration outcome of sink routes.
 /// </summary>
 public sealed class LoadedSinkStore : ILoadedSinkStore {
     private readonly List<LoadedSinkInfo> _entries = [];
