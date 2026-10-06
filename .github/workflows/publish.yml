@@ -28,6 +28,7 @@ jobs:
           # 1. Compila i due progetti Core principali
           dotnet build src/CSharpEssentials.HttpHelper/CSharpEssentials.HttpHelper.csproj -c Release
           dotnet build src/CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj -c Release
+          dotnet build src/CSharpEssentials.LoggerHelper.Dashboard/CSharpEssentials.LoggerHelper.Dashboard.csproj -c Release
           
           # 2. Compila dinamicamente tutti i Sink senza doverli scrivere uno per uno (evita errori futuri)
           for proj in src/CSharpEssentials.LoggerHelper.Sink.*/*.csproj; do
@@ -40,6 +41,7 @@ jobs:
           mkdir -p nupkgs
           dotnet pack src/CSharpEssentials.LoggerHelper/CSharpEssentials.LoggerHelper.csproj -c Release --no-build -o ./nupkgs
           dotnet pack src/CSharpEssentials.HttpHelper/CSharpEssentials.HttpHelper.csproj -c Release --no-build -o ./nupkgs
+          dotnet pack src/CSharpEssentials.LoggerHelper.Dashboard/CSharpEssentials.LoggerHelper.Dashboard.csproj -c Release --no-build -o ./nupkgs
           for proj in src/CSharpEssentials.LoggerHelper.Sink.*/*.csproj; do
             dotnet pack "$proj" -c Release --no-build -o ./nupkgs
           done
