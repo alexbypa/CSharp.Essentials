@@ -4,11 +4,13 @@
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>csharpessentials-loggerhelper-demo</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.Jit" Version="2.0.8" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.17.13" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.1" />
   </ItemGroup>
 

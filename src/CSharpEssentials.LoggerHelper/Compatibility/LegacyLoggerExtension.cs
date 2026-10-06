@@ -12,6 +12,27 @@ internal static class LegacyLoggerHolder {
 }
 
 /// <summary>
+/// Never-emitting sink attached to every logger built by AddLoggerHelper(). Serilog disposes it
+/// together with its logger: if that logger is still the legacy one, the legacy API goes back to the
+/// logger that was current before it. A short-lived logger (built and disposed at runtime) therefore
+/// no longer leaves the legacy API pointing at a disposed logger.
+/// </summary>
+internal sealed class LegacyLoggerRelease(Serilog.ILogger? previous) : Serilog.Core.ILogEventSink, IDisposable {
+    private static readonly object Gate = new();
+
+    internal Serilog.ILogger? Owner { get; set; }
+
+    public void Emit(LogEvent logEvent) { }
+
+    public void Dispose() {
+        lock (Gate) {
+            if (ReferenceEquals(LegacyLoggerHolder.Instance, Owner))
+                LegacyLoggerHolder.Instance = previous;
+        }
+    }
+}
+
+/// <summary>
 /// Backward-compatible static logger that mirrors the original loggerExtension&lt;T&gt; API.
 /// Delegates to the Serilog ILogger configured by AddLoggerHelper().
 ///

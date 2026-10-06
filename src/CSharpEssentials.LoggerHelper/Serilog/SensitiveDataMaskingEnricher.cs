@@ -65,6 +65,7 @@ public sealed class SensitiveDataMaskingEnricher : ILogEventEnricher {
         if (_patterns.Length == 0 && _sensitiveProperties.Count == 0)
             return;
 
+        var anyPropertyMasked = false;
         foreach (var name in logEvent.Properties.Keys.ToArray()) {
             // Handled separately below, after the rest of the properties are masked.
             if (name == "RenderedMessage")
@@ -72,21 +73,27 @@ public sealed class SensitiveDataMaskingEnricher : ILogEventEnricher {
 
             if (_sensitiveProperties.Contains(name)) {
                 logEvent.AddOrUpdateProperty(propertyFactory.CreateProperty(name, _options.MaskText));
+                anyPropertyMasked = true;
                 continue;
             }
 
             if (logEvent.Properties[name] is ScalarValue { Value: string original }) {
                 var masked = Mask(original);
-                if (!ReferenceEquals(masked, original))
+                if (!ReferenceEquals(masked, original)) {
                     logEvent.AddOrUpdateProperty(propertyFactory.CreateProperty(name, masked));
+                    anyPropertyMasked = true;
+                }
             }
         }
 
-        // If RenderedMessageEnricher ran first, scrub the rendered text too —
-        // it can contain secrets baked into literal message text.
+        // If RenderedMessageEnricher ran first, its text was rendered from the unmasked properties:
+        // re-render it from the masked ones (otherwise a SensitiveProperties value such as Password,
+        // which no regex matches, would leak through RenderedMessage), then scrub secrets baked
+        // into literal message text.
         if (logEvent.Properties.TryGetValue("RenderedMessage", out var rendered) &&
             rendered is ScalarValue { Value: string renderedText }) {
-            var masked = Mask(renderedText);
+            var source = anyPropertyMasked ? logEvent.RenderMessage() : renderedText;
+            var masked = Mask(source);
             if (!ReferenceEquals(masked, renderedText))
                 logEvent.AddOrUpdateProperty(propertyFactory.CreateProperty("RenderedMessage", masked));
         }

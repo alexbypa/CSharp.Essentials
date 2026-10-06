@@ -10,6 +10,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Demo:** interactive Playground (`/playground.html`, now the Demo root) to try Console, File, Seq, Elasticsearch, MSSqlServer, PostgreSQL and Telegram (bot token from user-secrets) with the fluent API: per-sink minimum level, structured properties, sensitive data masking (presets, properties, regex rules), optional exception. Each request builds a new logger, writes one event, flushes it and shows which sinks received it and the event after masking. **HttpHelper** section: real calls to httpbin.org (success, flaky 5xx with retries, down, timeout → 408, Bearer auth with masked token, POST JSON, rate limit → 429), every attempt logged to the chosen sinks; base URL configurable with `Playground:HttpBaseUrl`. `docker/docker-compose.yml` starts the external sinks (SQL Server, PostgreSQL, Seq, Elasticsearch, optional Kibana). Scalar API reference on `/scalar` next to Swagger. Demo only; the two library fixes it uncovered are listed under Security and Fixed.
+
 - **Site:** new comparison page `compare.html` (LoggerHelper vs Serilog vs NLog, incl. benchmark overhead), linked from the home footer and `llms.txt`. Marketing drafts (dev.to x2, YouTube script, Reddit) in `outcomes/content/`, not published.
 - **HttpHelper** now also targets `net10.0` (`net8.0;net9.0;net10.0`), aligned with the core and the sinks.
   `HttpHelper.Tests` runs on net9.0 and net10.0. No public API change. The existing nullable warnings now repeat for the new target.
@@ -45,6 +47,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Security
 
+- **Sensitive data masking:** with `EnableRenderedMessage` on, a value masked only through `SensitiveProperties` (e.g. `Password`, which no regex preset matches) leaked in clear text in the `RenderedMessage` property, because the message was rendered before masking. When any property is masked, `RenderedMessage` is now re-rendered from the masked properties and then scrubbed by the presets/rules. It reached Seq, Elasticsearch and the properties/JSON columns of DB sinks. Found with the Demo Playground. No public API change.
+
 - Log-forging sanitization in `RequestResponseLoggingMiddleware` and legacy `TraceSync` now also
   neutralizes the Unicode line terminators NEL (U+0085), LS (U+2028) and PS (U+2029), plus form feed,
   replacing them with a space. A lone CR is now replaced with a space instead of being removed.
@@ -53,6 +57,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Demo:** `appsettings.LoggerHelper.debug.json` was tracked with real-looking credentials (SMTP, Telegram, Seq, MySQL) and is now untracked; copy `appsettings.LoggerHelper.debug.example.json` and fill in your own values. The old values **remain in git history, so those credentials must be rotated**. `SeqVerifier.js` no longer prints the Seq `apiKey`.
 
 ### Fixed
+
+- **Legacy `loggerExtension<T>`:** each `AddLoggerHelper` call makes its logger the legacy one, so a short-lived logger built and disposed at runtime (e.g. the Demo Playground) left the legacy API writing to a disposed logger. Disposing a logger now hands the legacy API back to the logger that was current before it (only if it is still the current one). No public API change.
 
 - **`AddLoggerHelper(config, fluent)` (behavior change):** fluent `General` flags and `SensitiveDataMasking` were silently discarded when JSON was also present. They are now merged over the JSON: `EnableSelfLogging`, `EnableRequestResponseLogging`, `EnableRenderedMessage` are OR-ed; `EnableOpenTelemetry` is AND-ed (fluent `DisableOpenTelemetry` can only turn it off); masking is additive (union of presets and properties, rules appended, fluent `MaskText` used when non-default).
 

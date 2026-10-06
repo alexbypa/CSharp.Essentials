@@ -1,0 +1,100 @@
+# LoggerHelper Demo Playground: local infrastructure for every database/server sink.
+# Usage: copy .env.example to .env, then `docker compose up -d` (add `--profile kibana` for Kibana).
+name: loggerhelper-playground
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?set MSSQL_SA_PASSWORD in .env}
+    ports:
+      - "${MSSQL_PORT:-11433}:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -l 5 -Q 'SELECT 1' -b -o /dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      # first start upgrades the system databases and can take a couple of minutes
+      start_period: 180s
+
+  # SQL Server has no "create database" env var: this one-shot container creates it, then exits.
+  # The sink creates the Logs table itself (AutoCreateSqlTable = true).
+  sqlserver-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+      MSSQL_DB: ${MSSQL_DB:-LoggerHelperPlayground}
+    entrypoint: ["/bin/bash", "-c", "/opt/mssql-tools18/bin/sqlcmd -C -S sqlserver -U sa -P \"$$MSSQL_SA_PASSWORD\" -b -Q \"IF DB_ID('$$MSSQL_DB') IS NULL CREATE DATABASE [$$MSSQL_DB]\""]
+    restart: "no"
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-loggerhelper_playground}
+    ports:
+      - "${POSTGRES_PORT:-15432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  seq:
+    image: datalust/seq:latest
+    environment:
+      ACCEPT_EULA: "Y"
+      # Local demo only: UI and ingestion without login.
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    ports:
+      - "${SEQ_PORT:-5341}:80"
+    volumes:
+      - seq-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/80'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-8.14.3}
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+    ports:
+      - "${ELASTIC_PORT:-9200}:9200"
+    volumes:
+      - elastic-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 18
+      start_period: 30s
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION:-8.14.3}
+    profiles: ["kibana"]
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "${KIBANA_PORT:-5601}:5601"
+
+volumes:
+  sqlserver-data:
+  postgres-data:
+  seq-data:
+  elastic-data:
