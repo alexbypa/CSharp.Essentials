@@ -15,7 +15,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Production  → appsettings.LoggerHelper.json       (Console + File + MSSqlServer + PostgreSQL)
 builder.Services.AddLoggerHelper(builder.Configuration);
 builder.Services.AddLoggerHelperMcp();   // MCP server: POST /mcp (JSON-RPC 2.0)
-builder.Services.AddLoggerHelperDashboard();  // Dashboard: /loggerhelper
+// Dashboard credentials come from user-secrets (never from appsettings.json, never committed):
+//   dotnet user-secrets set "Dashboard:Username" "demo"
+//   dotnet user-secrets set "Dashboard:Password" "<a strong password>"
+// Without them the Demo generates a one-time password and prints it to the console only (not to the log sinks).
+var dashboardUser = builder.Configuration["Dashboard:Username"] is { Length: > 0 } user ? user : "demo";
+var dashboardPassword = builder.Configuration["Dashboard:Password"];
+if (string.IsNullOrWhiteSpace(dashboardPassword)) {
+    dashboardPassword = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(12));
+    Console.WriteLine($"[Dashboard] Dashboard:Password not set: one-time credentials {dashboardUser} / {dashboardPassword} (set them with dotnet user-secrets to keep them).");
+}
+builder.Services.AddLoggerHelperDashboard(o => o.UseBasicAuthentication(dashboardUser, dashboardPassword));  // Dashboard: /loggerhelper (Basic auth)
 
 // ── HttpHelper (in-memory mock upstream, no real network) ───────────────────
 builder.Services.AddSingleton<IHttpMockScenario>(HttpHelperEndpoints.FlakyUpstream);
@@ -61,7 +71,7 @@ builder.Services.AddSwaggerGen(c => {
 
 var app = builder.Build();
 
-app.MapLoggerHelperDashboard();  // Dashboard: GET /loggerhelper + GET /loggerhelper/api/status + GET /loggerhelper/sse
+app.MapLoggerHelperDashboard();  // Dashboard: GET /loggerhelper + /loggerhelper/api/status + /loggerhelper/api/logs + /loggerhelper/api/stream (all require Basic auth)
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.UseLoggerHelper();              // request/response logging + correlation ID

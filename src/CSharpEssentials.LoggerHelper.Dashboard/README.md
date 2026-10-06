@@ -11,7 +11,7 @@ Navigate to `/loggerhelper` and see the health of your logging pipeline at a gla
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper.Dashboard
 ```
-
+Requires: `CSharpEssentials.LoggerHelper` ≥ 5.2.0 · **Targets:** net8.0 · net9.0 · net10.0
 Requires: `CSharpEssentials.LoggerHelper` ≥ 5.2.0
 
 ---
@@ -25,7 +25,8 @@ using CSharpEssentials.LoggerHelper.Dashboard;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddLoggerHelper(builder.Configuration);
-builder.Services.AddLoggerHelperDashboard();
+builder.Services.AddLoggerHelperDashboard(o =>
+    o.UseBasicAuthentication("admin", builder.Configuration["Dashboard:Password"]));
 
 var app = builder.Build();
 app.UseLoggerHelper();
@@ -34,7 +35,7 @@ app.MapLoggerHelperDashboard();   // → /loggerhelper
 app.Run();
 ```
 
-Navigate to `https://localhost:5001/loggerhelper`.
+Navigate to `https://localhost:5001/loggerhelper` (the browser asks for the credentials). Authentication is mandatory, see [Protect with authentication](#protect-with-authentication).
 
 ---
 
@@ -86,31 +87,65 @@ Toggle any sink on/off or change log levels without restarting the application. 
 
 ```csharp
 builder.Services.AddLoggerHelperDashboard(options => {
-    options.Path = "/loggerhelper";        // default — change to any route
-    options.RequireAuthorization = true;   // protect with ASP.NET Core auth
-    options.RefreshIntervalSeconds = 15;   // default 30s
+    options.Path = "/loggerhelper";         // default, change to any route
+    options.RefreshIntervalSeconds = 15;    // default 30s
+    options.AuthorizationPolicy = "Admins"; // optional named policy
+    options.UseBasicAuthentication("admin", password); // optional built-in Basic auth
 });
 ```
 
-### Protect with authentication (production)
+| Option | Default | Description |
+|---|---|---|
+| `Path` | `/loggerhelper` | Base route of the dashboard and its API |
+| `RefreshIntervalSeconds` | `30` | Auto-refresh interval |
+| `AuthorizationPolicy` | none | Name of an ASP.NET Core authorization policy required on all routes |
+| `UseBasicAuthentication(username, password)` | none | Built-in HTTP Basic authentication. No default credentials; empty username or password throws `ArgumentException` |
+
+### Protect with authentication
+
+Authentication is **mandatory** on every route (HTML, `/api/status`, `/api/logs`, `/api/stream`). There is no anonymous mode. Pick one of three modes:
+
+**1. Your app's authentication** (default scheme):
 
 ```csharp
-// Program.cs
-builder.Services.AddAuthentication(...);
+builder.Services.AddAuthentication(/* your scheme */).AddJwtBearer(); // needs Microsoft.AspNetCore.Authentication.JwtBearer
 builder.Services.AddAuthorization();
-builder.Services.AddLoggerHelperDashboard(o => o.RequireAuthorization = true);
+builder.Services.AddLoggerHelperDashboard();
 
-// ...
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapLoggerHelperDashboard();
 ```
 
+**2. A named authorization policy:**
+
+```csharp
+builder.Services.AddAuthorization(o => o.AddPolicy("Admins", p => p.RequireRole("Admin")));
+builder.Services.AddLoggerHelperDashboard(o => o.AuthorizationPolicy = "Admins");
+```
+
+**3. Built-in Basic authentication** (apps without their own auth):
+
+```csharp
+builder.Services.AddLoggerHelperDashboard(o =>
+    o.UseBasicAuthentication("admin", builder.Configuration["Dashboard:Password"]));
+```
+
+Basic + `AuthorizationPolicy` together = **AND**: the request must carry valid Basic credentials and satisfy the policy.
+
+Notes on Basic authentication:
+
+- **Use it over HTTPS only.** Credentials travel base64-encoded, not encrypted.
+- **Keep the password out of `appsettings.json`.** Development: `dotnet user-secrets set "Dashboard:Password" "..."`. Production: an environment variable (`Dashboard__Password`) or a secret store (Azure Key Vault, AWS Secrets Manager...).
+- Comparison is constant-time; failures return `401` with `WWW-Authenticate` (the browser prompt also covers the SSE stream).
+- There is **no brute-force protection**: run it behind HTTPS and your app's rate limiter.
+- Side effect: if Basic is the only authentication scheme registered, it becomes the default scheme (.NET 7+ auto default; disable with the `Microsoft.AspNetCore.Authentication.SuppressAutoDefaultScheme` AppContext switch).
+
 ---
 
 ## JSON API endpoints
 
-The Dashboard exposes three endpoints you can call directly (useful for integration tests or external monitoring):
+The Dashboard exposes four routes (all require authentication) you can call directly (useful for integration tests or external monitoring):
 
 | Endpoint | Description |
 |---|---|
@@ -121,12 +156,18 @@ The Dashboard exposes three endpoints you can call directly (useful for integrat
 
 ```bash
 # Check health from CI or monitoring
-curl https://myapp.com/loggerhelper/api/status
+curl -u admin:yourpassword https://myapp.com/loggerhelper/api/status
 ```
 
 ---
 
 ## Troubleshooting
+
+### `InvalidOperationException` at startup from `MapLoggerHelperDashboard`
+No authentication is configured, `AddLoggerHelperDashboard` was not called, or `AuthorizationPolicy` names an unknown policy. Call `AddLoggerHelperDashboard`, then either `UseBasicAuthentication(...)`, register your authentication, or add the policy.
+
+### 401 on every request
+Credentials missing or wrong (Basic), or the app's authentication did not authenticate the user. API calls need `curl -u user:pass`.
 
 ### Dashboard shows "LOADING..." permanently
 The JavaScript derives its base path from `window.location.pathname` at runtime. If you serve the app behind a reverse proxy with a path prefix, make sure the prefix is included in the URL you navigate to — the dashboard detects it automatically.
@@ -146,7 +187,7 @@ Normal behavior — `OperationCanceledException` on disconnect is caught interna
 
 ## Zero dependencies
 
-Pure HTML/CSS/JS served as an embedded string resource. No npm, no bundler, no CDN calls at runtime. The package adds a single `MapGet` route to your ASP.NET Core app.
+Pure HTML/CSS/JS served as an embedded string resource. No npm, no bundler, no CDN calls at runtime. The package maps one route group (4 routes) into your ASP.NET Core app.
 
 ---
 

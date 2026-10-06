@@ -29,6 +29,7 @@ For the exact C# Extension Methods, initialization syntax, and complete appsetti
 - Telegram Bot: CSharpEssentials.LoggerHelper.Sink.Telegram
 - SMTP Email: CSharpEssentials.LoggerHelper.Sink.Email
 - Hangfire Dashboard: CSharpEssentials.LoggerHelper.Sink.HangfireConsole
+- Embedded diagnostics dashboard: CSharpEssentials.LoggerHelper.Dashboard (authentication mandatory on all routes: `options.UseBasicAuthentication(user, pass)`, app auth or `AuthorizationPolicy`; startup throws otherwise)
 - Seq Server: CSharpEssentials.LoggerHelper.Sink.Seq
 - Comparison vs Serilog/NLog: https://www.loggerhelper.it/compare.html
 - HTTP Telemetry: CSharpEssentials.HttpHelper (docs: https://www.loggerhelper.it/httphelper.html)

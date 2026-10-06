@@ -400,10 +400,12 @@ Navigate to `/loggerhelper` to see the health of your logging pipeline at a glan
 
 ```csharp
 // Program.cs
-builder.Services.AddLoggerHelperDashboard();
+builder.Services.AddLoggerHelperDashboard(o => o.UseBasicAuthentication("admin", builder.Configuration["Dashboard:Password"]));
 // ...
 app.MapLoggerHelperDashboard(); // Exposes the UI at /loggerhelper
 ```
+
+> **Authentication is mandatory** on every Dashboard route (page, `/api/status`, `/api/logs`, `/api/stream`). Use the built-in Basic auth shown above (HTTPS only), your app's authentication, or a named `AuthorizationPolicy`. Without any of them `MapLoggerHelperDashboard()` throws `InvalidOperationException` at startup. See the [Dashboard guide](src/CSharpEssentials.LoggerHelper.Dashboard/README.md).
 
 [↑ Back to Top](#top)
 

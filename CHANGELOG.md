@@ -8,6 +8,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+
+- **Dashboard:** every endpoint (`/api/status`, `/api/logs`, `/api/stream` and the HTML page) now requires authentication. Previously only the HTML page could be protected and the API routes (sink errors with stack traces, log text) were public.
+
+### Changed
+
+- **Dashboard (breaking, package not yet published):** `DashboardOptions.RequireAuthorization` is removed; authentication is always required. New optional `DashboardOptions.AuthorizationPolicy` (policy name). `MapLoggerHelperDashboard` throws `InvalidOperationException` at startup when `AddLoggerHelperDashboard` was not called, no authentication is configured, or the policy is unknown.
+
+### Added
+
+- **Dashboard:** `DashboardOptions.UseBasicAuthentication(username, password)`, built-in HTTP Basic authentication for apps without their own auth: constant-time comparison, `401` + `WWW-Authenticate` (browser prompt, also for `EventSource`), empty credentials rejected. Use it over HTTPS only.
+
 ---
 
 ## [5.2.7] — 2026-10-06

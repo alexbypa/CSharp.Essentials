@@ -110,9 +110,19 @@ The same app also gives you:
 | `/playground.html` | the Playground |
 | `/scalar` | Scalar API reference, try every endpoint from the browser |
 | `/swagger` | Swagger UI, same endpoints |
-| `/loggerhelper` | LoggerHelper Dashboard: loaded sinks, errors, live logs |
+| `/loggerhelper` | LoggerHelper Dashboard: loaded sinks, errors, live logs. Basic auth: credentials from user-secrets (see below), otherwise a one-time password printed in the console at startup |
 
 > No Docker? Tick only **Console** and **File**: they need nothing else.
+
+**Dashboard credentials.** The Dashboard always asks for a login. Credentials are a secret, so they live in user-secrets, not in `appsettings.json`:
+
+```bash
+cd src/CSharpEssentials.LoggerHelper.Demo
+dotnet user-secrets set "Dashboard:Username" "demo"
+dotnet user-secrets set "Dashboard:Password" "<a strong password>"
+```
+
+Skip this step and the Demo prints one-time credentials in the console at startup (`[Dashboard] ... one-time credentials demo / ...`), only there and never to the log sinks.
 
 **Optional: Telegram.** A bot token is a secret, so it never goes into the page or into git. Put it in user-secrets and restart the Demo; the **Telegram** checkbox turns on by itself:
 

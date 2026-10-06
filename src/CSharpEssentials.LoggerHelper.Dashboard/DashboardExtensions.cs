@@ -1,4 +1,6 @@
 using CSharpEssentials.LoggerHelper.Diagnostics;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -25,24 +27,37 @@ public static class DashboardExtensions {
         var options = new DashboardOptions();
         configure?.Invoke(options);
         services.AddSingleton(options);
+        services.AddAuthorization();
+        if (options.UsesBasicAuthentication) {
+            services.AddAuthentication()
+                .AddScheme<AuthenticationSchemeOptions, DashboardBasicAuthenticationHandler>(DashboardBasicAuthenticationHandler.SchemeName, null);
+        }
         return services;
     }
 
     /// <summary>
     /// Maps the dashboard endpoints: HTML UI, JSON API, and SSE log stream.
+    /// All endpoints require authentication: HTTP Basic (<see cref="DashboardOptions.UseBasicAuthentication"/>),
+    /// otherwise the app's default authentication scheme, plus the optional <see cref="DashboardOptions.AuthorizationPolicy"/>.
     /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// <c>AddLoggerHelperDashboard</c> was not called, the policy does not exist, or no authentication is configured.
+    /// </exception>
     public static IEndpointRouteBuilder MapLoggerHelperDashboard(this IEndpointRouteBuilder endpoints) {
-        var dashOpts = endpoints.ServiceProvider.GetService<DashboardOptions>() ?? new DashboardOptions();
+        var dashOpts = endpoints.ServiceProvider.GetService<DashboardOptions>()
+            ?? throw new InvalidOperationException("DashboardOptions not registered: call AddLoggerHelperDashboard(...) before MapLoggerHelperDashboard().");
         var basePath = dashOpts.Path.TrimEnd('/');
+        EnsureAuthenticationConfigured(endpoints.ServiceProvider, dashOpts);
+        var group = endpoints.MapGroup(basePath);
 
         // Main dashboard HTML page
-        var dashRoute = endpoints.MapGet(basePath, (HttpContext ctx) => {
+        group.MapGet("", (HttpContext ctx) => {
             ctx.Response.ContentType = "text/html; charset=utf-8";
             return ctx.Response.WriteAsync(DashboardHtml.Render(basePath, dashOpts.RefreshIntervalSeconds));
         });
 
         // JSON API: sink status
-        endpoints.MapGet($"{basePath}/api/status", (
+        group.MapGet("/api/status", (
             LoggerHelperOptions options,
             ILogErrorStore errorStore,
             ILoadedSinkStore sinkStore,
@@ -96,7 +111,7 @@ public static class DashboardExtensions {
             });
 
         // JSON API: recent logs from context buffer
-        endpoints.MapGet($"{basePath}/api/logs", (
+        group.MapGet("/api/logs", (
             HttpContext ctx,
             IServiceProvider sp) => {
                 var buffer = sp.GetService<ContextualLogBuffer>();
@@ -130,7 +145,7 @@ public static class DashboardExtensions {
             });
 
         // SSE: live log stream
-        endpoints.MapGet($"{basePath}/api/stream", async (HttpContext ctx, IServiceProvider sp, CancellationToken ct) => {
+        group.MapGet("/api/stream", async (HttpContext ctx, IServiceProvider sp, CancellationToken ct) => {
             var buffer = sp.GetService<ContextualLogBuffer>();
             if (buffer is null) {
                 ctx.Response.StatusCode = 404;
@@ -169,10 +184,36 @@ public static class DashboardExtensions {
             }
         });
 
-        if (dashOpts.RequireAuthorization) {
-            dashRoute.RequireAuthorization();
+        if (dashOpts.UsesBasicAuthentication) {
+            group.RequireAuthorization(new AuthorizationPolicyBuilder(DashboardBasicAuthenticationHandler.SchemeName)
+                .RequireAuthenticatedUser()
+                .Build());
+            if (!string.IsNullOrWhiteSpace(dashOpts.AuthorizationPolicy))
+                group.RequireAuthorization(dashOpts.AuthorizationPolicy);
+        } else if (!string.IsNullOrWhiteSpace(dashOpts.AuthorizationPolicy)) {
+            group.RequireAuthorization(dashOpts.AuthorizationPolicy);
+        } else {
+            group.RequireAuthorization();
         }
 
         return endpoints;
+    }
+
+    private static void EnsureAuthenticationConfigured(IServiceProvider sp, DashboardOptions options) {
+        // Startup-only: provider tasks are already completed, blocking is safe.
+        var hasPolicy = !string.IsNullOrWhiteSpace(options.AuthorizationPolicy);
+        if (hasPolicy) {
+            var policy = sp.GetRequiredService<IAuthorizationPolicyProvider>()
+                .GetPolicyAsync(options.AuthorizationPolicy!).GetAwaiter().GetResult();
+            if (policy is null)
+                throw new InvalidOperationException($"LoggerHelper Dashboard: authorization policy '{options.AuthorizationPolicy}' not found.");
+        }
+
+        if (options.UsesBasicAuthentication || hasPolicy)
+            return;
+
+        var scheme = sp.GetService<IAuthenticationSchemeProvider>()?.GetDefaultChallengeSchemeAsync().GetAwaiter().GetResult();
+        if (scheme is null)
+            throw new InvalidOperationException("LoggerHelper Dashboard requires authentication: configure AddAuthentication(...) with a default scheme, or call options.UseBasicAuthentication(user, password) in AddLoggerHelperDashboard.");
     }
 }

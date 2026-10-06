@@ -36,5 +36,5 @@ Eseguire con `/microtask-pipeline:microtask`, un task alla volta, commit a fine 
 ## Roadmap (promemoria — NON eseguire)
 
 - [/] **MCP:** nuovi tool `set_log_level`, `search_logs`, `toggle_sink`. *(fatti: SSE transport, prompt `diagnose-logging`)*
-- [/] **Dashboard:** metriche performance (events/sec, latency), sink actions (enable/disable), export JSON/CSV. *(fatti: live stream SSE, `RequireAuthorization`)*
+- [/] **Dashboard:** metriche performance (events/sec, latency), sink actions (enable/disable), export JSON/CSV. *(fatti: live stream SSE, autenticazione obbligatoria Basic / `AuthorizationPolicy`)*
 - [/] **Performance:** test AOT/Trimming (`IsTrimmable=true`), Source Generator per auto-registration sink *(prototipo rotto rimosso in A12)*. *(fatto: benchmark vs Serilog/NLog)*

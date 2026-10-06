@@ -1,4 +1,7 @@
 @host = http://localhost:5123
+# Dashboard: base64 of "<Dashboard:Username>:<Dashboard:Password>" (user-secrets, or the one-time password printed at startup).
+# PowerShell: [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("demo:<password>"))
+@dashboardAuth = <base64 user:password>
 
 ### ═══════════════════════════════════════════════════════════════
 ### Basic Logging
@@ -196,30 +199,35 @@ Accept: application/json
 
 ### Open Dashboard UI (open in browser)
 GET {{host}}/loggerhelper
+Authorization: Basic {{dashboardAuth}}
 Accept: text/html
 
 ###
 
 ### Dashboard API — status
 GET {{host}}/loggerhelper/api/status
+Authorization: Basic {{dashboardAuth}}
 Accept: application/json
 
 ###
 
 ### Dashboard API — recent logs
 GET {{host}}/loggerhelper/api/logs
+Authorization: Basic {{dashboardAuth}}
 Accept: application/json
 
 ###
 
 ### Dashboard API — filtered logs (by level)
 GET {{host}}/loggerhelper/api/logs?level=Warning
+Authorization: Basic {{dashboardAuth}}
 Accept: application/json
 
 ###
 
 ### Dashboard API — filtered logs (by query)
 GET {{host}}/loggerhelper/api/logs?query=Payment
+Authorization: Basic {{dashboardAuth}}
 Accept: application/json
 
 ###
