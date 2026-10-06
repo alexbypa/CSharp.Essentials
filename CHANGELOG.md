@@ -8,11 +8,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [5.2.7] — 2026-10-06
+
 ### Added
 
 - **Demo:** interactive Playground (`/playground.html`, now the Demo root) to try Console, File, Seq, Elasticsearch, MSSqlServer, PostgreSQL and Telegram (bot token from user-secrets) with the fluent API: per-sink minimum level, structured properties, sensitive data masking (presets, properties, regex rules), optional exception. Each request builds a new logger, writes one event, flushes it and shows which sinks received it and the event after masking. **HttpHelper** section: real calls to httpbin.org (success, flaky 5xx with retries, down, timeout → 408, Bearer auth with masked token, POST JSON, rate limit → 429), every attempt logged to the chosen sinks; base URL configurable with `Playground:HttpBaseUrl`. `docker/docker-compose.yml` starts the external sinks (SQL Server, PostgreSQL, Seq, Elasticsearch, optional Kibana). Scalar API reference on `/scalar` next to Swagger. Demo only; the two library fixes it uncovered are listed under Security and Fixed.
 
-- **Site:** new comparison page `compare.html` (LoggerHelper vs Serilog vs NLog, incl. benchmark overhead), linked from the home footer and `llms.txt`. Marketing drafts (dev.to x2, YouTube script, Reddit) in `outcomes/content/`, not published.
+- **Site:** new comparison page `compare.html` (LoggerHelper vs Serilog vs NLog, incl. benchmark overhead), linked from the home footer and `llms.txt`.
 - **HttpHelper** now also targets `net10.0` (`net8.0;net9.0;net10.0`), aligned with the core and the sinks.
   `HttpHelper.Tests` runs on net9.0 and net10.0. No public API change. The existing nullable warnings now repeat for the new target.
 
@@ -41,20 +45,43 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **HttpHelper** docs: package README rewritten (Quick Start, features table, JSON/Fluent examples, comparison vs Refit/Flurl/HttpClient) and new site page `httphelper.html`. The stale "4.0.5" `AddHttpClients(configuration, handler)` snippet is removed: no such overload exists, use `UseCompression`/`httpProxy`/`Certificate` in `HttpClientOptions`.
 - **HttpHelper** mock engine: `HttpMockEngine.Build()` now uses an internal `HttpMessageHandler` instead of Moq. Public API unchanged. When several scenarios match, the last one wins; responses cycle round-robin (thread-safe). A request with no matching scenario (or a scenario with no `ResponseFactory`) throws `InvalidOperationException` (previously Moq's `MockException`), and `HttpMockDelegatingHandler` no longer falls back to the real network: any exception thrown by a matched scenario (e.g. a simulated `HttpRequestException`) now reaches the caller, where the helper turns it into a 502 as for a real transport failure.
 
+- **HttpHelper (behavior)**
+  - `AddHttpClients` no longer prints to the console and no longer reads `appsettings.httphelper.json`
+    from the application folder (nor adds environment variables on top of it): use the
+    `HttpClientOptions` section of the host configuration.
+  - New `IhttpsClientHelperFactory.AddActionOnRequest(string name, callback)` (default interface method)
+    and `HttpRequestEventsRegistry`; `HttpClientHandlerLogging` and `httpsClientHelperFactory` gain an overloaded constructor.
+  - `HttpHelper.Tests` grew from 22 to 45 tests (rate limiter, cancellation, timeout `408`, error mapping,
+    form data, default headers, factory concurrency, per-client callbacks, certificate guards, `ProxyConfigurator` invalid address).
+
+- **CI / tests (internal, no API change)**
+  CI now builds and tests `CSharpEssentials.HttpHelper`: `HttpHelper.Tests` was added to
+  `src/CSharpEssentials.LoggerHelper.slnx` and `build-test.yml` runs it.
+  New smoke test `AllPublishedSinks_Register_AndCanHandle` verifies that all 10 published
+  sinks register in `SinkPluginRegistry` and handle their own name.
+  `HttpHelper.Tests` grew from one trivial test to 22 network-free tests covering
+  `HttpClientOptions` defaults, `ProxyConfigurator`, `AddHttpClients` registration,
+  `HttpsClientHelperFactory` and `HttpsClientHelper` (headers, JSON body, retry, error mapping).
+  Sink auto-registration is now tested without any explicit `PluginInitializer.Init()` call:
+  `AddLoggerHelper` rediscovers all 10 sinks from an empty `SinkPluginRegistry`, and each sink's
+  `[ModuleInitializer]` registers its plugin when the module loads in a fresh `AssemblyLoadContext`.
+  Seven new tests cover the request/response middleware and legacy `TraceSync` log sanitization.
+- **Build (internal, no API change)**
+  The intentional `CA2255` (`[ModuleInitializer]` in a library) is silenced only in the
+  `CSharpEssentials.LoggerHelper.Sink.*` projects, via a conditional `NoWarn` in `src/Directory.Build.props`
+  (build warnings 90 → 60). New sinks inherit it automatically.
+
 ### Removed
 
 - **HttpHelper** no longer depends on `Moq`; it is no longer pulled in transitively by the NuGet package.
 
-### Security
-
-- **Sensitive data masking:** with `EnableRenderedMessage` on, a value masked only through `SensitiveProperties` (e.g. `Password`, which no regex preset matches) leaked in clear text in the `RenderedMessage` property, because the message was rendered before masking. When any property is masked, `RenderedMessage` is now re-rendered from the masked properties and then scrubbed by the presets/rules. It reached Seq, Elasticsearch and the properties/JSON columns of DB sinks. Found with the Demo Playground. No public API change.
-
-- Log-forging sanitization in `RequestResponseLoggingMiddleware` and legacy `TraceSync` now also
-  neutralizes the Unicode line terminators NEL (U+0085), LS (U+2028) and PS (U+2029), plus form feed,
-  replacing them with a space. A lone CR is now replaced with a space instead of being removed.
-  No public API change.
-
-- **Demo:** `appsettings.LoggerHelper.debug.json` was tracked with real-looking credentials (SMTP, Telegram, Seq, MySQL) and is now untracked; copy `appsettings.LoggerHelper.debug.example.json` and fill in your own values. The old values **remain in git history, so those credentials must be rotated**. `SeqVerifier.js` no longer prints the Seq `apiKey`.
+- Orphan `CSharpEssentials.LoggerHelper.SourceGenerator` project (never published) and the internal
+  dead `CompileTimePluginDiscovery` / `CompositePluginDiscovery`. Plugin discovery is now
+  `FileSystemPluginDiscovery` only. No public API change, no runtime behavior change.
+- Dead `net6.0` package group from the `CSharpEssentials.LoggerHelper` project file (the package
+  targets net8.0/net9.0/net10.0 only). Package dependencies are unchanged for every target.
+- Broken root-level `CSharpEssentials.LoggerHelper.slnx` (its project paths did not resolve).
+  The only solution is now `src/CSharpEssentials.LoggerHelper.slnx`.
 
 ### Fixed
 
@@ -109,45 +136,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
     after the call: headers and URI stay readable, the content is disposed.
   - Timestamps use UTC; `RequestHttpExtension.IdTransaction` is now a unique GUID (`N` format) instead of a local date string.
 
-### Changed
+### Security
 
-- **HttpHelper (behavior)**
-  - `AddHttpClients` no longer prints to the console and no longer reads `appsettings.httphelper.json`
-    from the application folder (nor adds environment variables on top of it): use the
-    `HttpClientOptions` section of the host configuration.
-  - New `IhttpsClientHelperFactory.AddActionOnRequest(string name, callback)` (default interface method)
-    and `HttpRequestEventsRegistry`; `HttpClientHandlerLogging` and `httpsClientHelperFactory` gain an overloaded constructor.
-  - `HttpHelper.Tests` grew from 22 to 45 tests (rate limiter, cancellation, timeout `408`, error mapping,
-    form data, default headers, factory concurrency, per-client callbacks, certificate guards, `ProxyConfigurator` invalid address).
+- **Sensitive data masking:** with `EnableRenderedMessage` on, a value masked only through `SensitiveProperties` (e.g. `Password`, which no regex preset matches) leaked in clear text in the `RenderedMessage` property, because the message was rendered before masking. When any property is masked, `RenderedMessage` is now re-rendered from the masked properties and then scrubbed by the presets/rules. It reached Seq, Elasticsearch and the properties/JSON columns of DB sinks. Found with the Demo Playground. No public API change.
 
-### Removed
+- Log-forging sanitization in `RequestResponseLoggingMiddleware` and legacy `TraceSync` now also
+  neutralizes the Unicode line terminators NEL (U+0085), LS (U+2028) and PS (U+2029), plus form feed,
+  replacing them with a space. A lone CR is now replaced with a space instead of being removed.
+  No public API change.
 
-- Orphan `CSharpEssentials.LoggerHelper.SourceGenerator` project (never published) and the internal
-  dead `CompileTimePluginDiscovery` / `CompositePluginDiscovery`. Plugin discovery is now
-  `FileSystemPluginDiscovery` only. No public API change, no runtime behavior change.
-- Dead `net6.0` package group from the `CSharpEssentials.LoggerHelper` project file (the package
-  targets net8.0/net9.0/net10.0 only). Package dependencies are unchanged for every target.
-- Broken root-level `CSharpEssentials.LoggerHelper.slnx` (its project paths did not resolve).
-  The only solution is now `src/CSharpEssentials.LoggerHelper.slnx`.
-
-### Changed
-
-- **CI / tests (internal, no API change)**
-  CI now builds and tests `CSharpEssentials.HttpHelper`: `HttpHelper.Tests` was added to
-  `src/CSharpEssentials.LoggerHelper.slnx` and `build-test.yml` runs it.
-  New smoke test `AllPublishedSinks_Register_AndCanHandle` verifies that all 10 published
-  sinks register in `SinkPluginRegistry` and handle their own name.
-  `HttpHelper.Tests` grew from one trivial test to 22 network-free tests covering
-  `HttpClientOptions` defaults, `ProxyConfigurator`, `AddHttpClients` registration,
-  `HttpsClientHelperFactory` and `HttpsClientHelper` (headers, JSON body, retry, error mapping).
-  Sink auto-registration is now tested without any explicit `PluginInitializer.Init()` call:
-  `AddLoggerHelper` rediscovers all 10 sinks from an empty `SinkPluginRegistry`, and each sink's
-  `[ModuleInitializer]` registers its plugin when the module loads in a fresh `AssemblyLoadContext`.
-  Seven new tests cover the request/response middleware and legacy `TraceSync` log sanitization.
-- **Build (internal, no API change)**
-  The intentional `CA2255` (`[ModuleInitializer]` in a library) is silenced only in the
-  `CSharpEssentials.LoggerHelper.Sink.*` projects, via a conditional `NoWarn` in `src/Directory.Build.props`
-  (build warnings 90 → 60). New sinks inherit it automatically.
+- **Demo:** `appsettings.LoggerHelper.debug.json` was tracked with real-looking credentials (SMTP, Telegram, Seq, MySQL) and is now untracked; copy `appsettings.LoggerHelper.debug.example.json` and fill in your own values. The old values **remain in git history, so those credentials must be rotated**. `SeqVerifier.js` no longer prints the Seq `apiKey`.
 
 ---
 
