@@ -8,17 +8,33 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [5.2.8] — 2026-10-06
+
+Security release for `CSharpEssentials.LoggerHelper.Dashboard` (all packages move to 5.2.8; core and sinks have no code changes). **Upgrade if you use Dashboard 5.2.2 or earlier.**
+
 ### Security
 
 - **Dashboard:** every endpoint (`/api/status`, `/api/logs`, `/api/stream` and the HTML page) now requires authentication. Previously only the HTML page could be protected and the API routes (sink errors with stack traces, log text) were public.
 
 ### Changed
 
-- **Dashboard (breaking, package not yet published):** `DashboardOptions.RequireAuthorization` is removed; authentication is always required. New optional `DashboardOptions.AuthorizationPolicy` (policy name). `MapLoggerHelperDashboard` throws `InvalidOperationException` at startup when `AddLoggerHelperDashboard` was not called, no authentication is configured, or the policy is unknown.
+- **Dashboard (breaking):** `DashboardOptions.RequireAuthorization` is removed; authentication is always required. New optional `DashboardOptions.AuthorizationPolicy` (policy name). `MapLoggerHelperDashboard` throws `InvalidOperationException` at startup when `AddLoggerHelperDashboard` was not called, no authentication is configured, or the policy is unknown.
 
 ### Added
 
 - **Dashboard:** `DashboardOptions.UseBasicAuthentication(username, password)`, built-in HTTP Basic authentication for apps without their own auth: constant-time comparison, `401` + `WWW-Authenticate` (browser prompt, also for `EventSource`), empty credentials rejected. Use it over HTTPS only.
+
+### CI
+
+- `publish.yml` now packs and publishes `CSharpEssentials.LoggerHelper.Dashboard` together with core, HttpHelper and sinks.
+
+### Migration from Dashboard 5.2.2
+
+- **You had `o.RequireAuthorization = true` and your own authentication:** delete that line. Every route is now protected with your default policy; set `o.AuthorizationPolicy = "<name>"` to require a specific policy.
+- **You had no authentication:** the app now fails at startup with `InvalidOperationException`. Add `o.UseBasicAuthentication(user, password)` (password from user-secrets or an environment variable, never `appsettings.json`) or register your authentication.
+- **Scripts calling `/loggerhelper/api/*`:** send credentials, e.g. `curl -u user:password`.
 
 ---
 
