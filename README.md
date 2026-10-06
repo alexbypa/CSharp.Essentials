@@ -63,7 +63,7 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 - 🔁 **HttpHelper, live**: real calls to httpbin.org with Polly retries, timeouts, rate limiting and Bearer auth; every attempt lands in your sinks, token masked.
 - 🔍 **Nothing hidden**: the page shows the event exactly as the sinks receive it and the C# code that produced it.
 
-[![LoggerHelper Playground](https://raw.githubusercontent.com/alexbypa/CSharp.Essentials/main/img/demo-playground.png)](DEMO.md)
+[![LoggerHelper Playground](https://raw.githubusercontent.com/alexbypa/CSharp.Essentials/main/img/Playground.gif)](DEMO.md)
 
 👉 **[Open the step-by-step guide: DEMO.md](DEMO.md)**: Docker setup, a tour of the page, HttpHelper scenarios and seven experiments to try.
 

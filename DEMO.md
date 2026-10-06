@@ -8,7 +8,7 @@ The Playground is an interactive page inside the Demo app. You choose the sinks,
 
 No JSON to edit, no restart, no guessing.
 
-![LoggerHelper Playground](img/demo-playground.png)
+![LoggerHelper Playground](img/Playground.gif)
 
 ---
 
