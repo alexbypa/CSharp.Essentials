@@ -34,6 +34,7 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [See It Live: Demo Playground](#demo-playground) · [full guide](DEMO.md)
 - [Run the Demo in 60 Seconds](#run-the-demo-in-60-seconds)
 - [Why choose LoggerHelper?](#why-choose-loggerhelper)
 - [Packages](#packages)
@@ -50,6 +51,21 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 ---
 
 > 🎮 **Try it live before you install!** See the exact "Config vs Result" output for every sink directly in your browser on the **[Interactive Playground at loggerhelper.it](https://www.loggerhelper.it/playground.html)**.
+
+<a name="demo-playground"></a>
+## 🧪 See It Live: One Event, Every Sink, Zero Secrets Leaked
+
+**`docker compose up -d` + `dotnet run`, then one click.** The Demo Playground sends a single log event to **Console, File, Seq, Elasticsearch, SQL Server, PostgreSQL and Telegram** at the same time, built on the fluent API from the options you pick on the page. And it puts **HttpHelper** to work against a real API.
+
+- 🎯 **Per-sink level routing**: set PostgreSQL to `Error` and watch it filter a `Warning` while the others receive it.
+- 🎭 **Real masking**: `Sup3rSecret!`, emails and card numbers become `***MASKED***` in every sink, rendered message included.
+- 💥 **Resilient by design**: stop a container and send again; your app keeps logging and the failure is reported, not thrown.
+- 🔁 **HttpHelper, live**: real calls to httpbin.org with Polly retries, timeouts, rate limiting and Bearer auth; every attempt lands in your sinks, token masked.
+- 🔍 **Nothing hidden**: the page shows the event exactly as the sinks receive it and the C# code that produced it.
+
+[![LoggerHelper Playground](https://raw.githubusercontent.com/alexbypa/CSharp.Essentials/main/img/demo-playground.png)](DEMO.md)
+
+👉 **[Open the step-by-step guide: DEMO.md](DEMO.md)**: Docker setup, a tour of the page, HttpHelper scenarios and seven experiments to try.
 
 <a name="quick-start"></a>
 ## 🚀 Quick Start
@@ -148,9 +164,11 @@ cd CSharp.Essentials/src/CSharpEssentials.LoggerHelper.Demo
 dotnet run
 ```
 
-Open the URL shown in your terminal (usually **`http://localhost:<port>/swagger/index.html`**) — the Swagger UI lists all available demo scenarios. Each endpoint produces structured logs visible immediately in the terminal and in the `Logs/` folder.
+Open the URL shown in your terminal (usually **`http://localhost:5123`**): the root opens the Playground, and `/swagger` or `/scalar` list all demo scenarios. Each endpoint produces structured logs visible immediately in the terminal and in the `Logs/` folder.
 
 Try `GET /api/httphelper/retry`, then open `/loggerhelper` to watch HttpHelper retries live.
+
+🧪 **Playground with every sink:** start SQL Server, PostgreSQL, Seq and Elasticsearch with `docker compose up -d` in [`src/CSharpEssentials.LoggerHelper.Demo/docker`](src/CSharpEssentials.LoggerHelper.Demo/docker), then open the Demo root (`/playground.html`). Step-by-step guide: **[DEMO.md](DEMO.md)**.
 
 > 💡 **No database required to run it:** Even if you don't have SQL Server or PostgreSQL running locally, LoggerHelper gracefully ignores the connection errors. Your app won't crash, and logs will still appear perfectly in the Console and File sinks!
 
@@ -241,9 +259,12 @@ using (_logger.BeginScope(new Dictionary<string, object?> {
 }
 ```
 
-### Automatic Enrichment
+<a name="enrichment"></a>
+### Enrichment — Extra Properties on Every Log
 
-Every log event automatically carries:
+Enrichment adds properties to a log event besides its message. They become searchable fields in Seq and Elasticsearch, and dedicated columns in database sinks when you map them (see [From property to column](#from-property-to-column)).
+
+**Automatic**, nothing to write:
 
 | Property | Source |
 |----------|--------|
@@ -251,6 +272,40 @@ Every log event automatically carries:
 | `MachineName` | `Environment.MachineName` |
 | `SourceContext` | Class name from `ILogger<T>` |
 | `TraceId` / `SpanId` | `System.Diagnostics.Activity` (OpenTelemetry) |
+
+**Per operation: `BeginTrace`** adds `Action` and `IdTransaction` (plus `SpanName` inside an `Activity`) to every log in the block:
+
+```csharp
+using (logger.BeginTrace("Checkout", idTransaction)) {
+    logger.LogInformation("Payment authorized");     // + Action, IdTransaction
+    logger.LogInformation("Order {OrderId} shipped", orderId);
+}
+
+// One-off log, no scope:
+logger.Trace("Checkout", idTransaction, "Order {OrderId} shipped", orderId);
+```
+
+**Any property you like: `BeginScope`**, as shown above (`OrderId`, `UserId`, `TenantId`...).
+
+**On every event, with your own logic: `WithEnrichers`** plugs standard Serilog enrichers into the pipeline:
+
+```csharp
+builder.Services.AddLoggerHelper(builder.Configuration, b => b
+    .WithEnrichers(c => c
+        .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName)
+        .Enrich.With(new TenantEnricher())));   // your Serilog ILogEventEnricher
+```
+
+> Enrichers added with `WithEnrichers` run **after** sensitive data masking: don't put secrets in them.
+
+<a name="from-property-to-column"></a>
+**From property to column**
+
+| Sink | Where the properties go |
+|------|-------------------------|
+| PostgreSQL | Default columns already include `ApplicationName`, `MachineName`, `Action`, `IdTransaction`; add more with [`Columns`](src/CSharpEssentials.LoggerHelper.Sink.Postgresql/README.md#custom-columns--replicate-or-extend-the-default-schema) |
+| SQL Server | In the `Properties` column; promote any of them to its own column with [`AdditionalColumns`](src/CSharpEssentials.LoggerHelper.Sink.MSSqlServer/README.md#custom-columns--map-log-properties-to-sql-columns) |
+| Seq, Elasticsearch | Every property is a searchable field, nothing to configure |
 
 ### Internal Diagnostics
 

@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LoggerHelper Playground</title>
+<style>
+  :root {
+    --bg: #f6f7fb; --card: #ffffff; --text: #1d2433; --muted: #667085; --border: #e3e6ee;
+    --accent: #4f46e5; --accent-soft: #eef0ff; --ok: #12805c; --ok-soft: #e6f6ef;
+    --warn: #a15c07; --warn-soft: #fff4e0; --err: #c0262d; --err-soft: #fdeaea;
+    --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1218; --card: #171b23; --text: #e6e9f0; --muted: #98a2b3; --border: #2a303c;
+      --accent: #8b85ff; --accent-soft: #24234a; --ok: #4ade9b; --ok-soft: #12291f;
+      --warn: #f5b454; --warn-soft: #2e2413; --err: #ff7b80; --err-soft: #331a1c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { padding: 24px 16px 8px; max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; justify-content: space-between; }
+  h1 { margin: 0; font-size: 1.5rem; }
+  h1 span { color: var(--accent); }
+  nav a { color: var(--muted); text-decoration: none; margin-left: 14px; font-size: .9rem; }
+  nav a:hover { color: var(--accent); }
+  main { max-width: 1200px; margin: 0 auto; padding: 8px 16px 40px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 12px; font-size: 1rem; }
+  .card h2 small { color: var(--muted); font-weight: 400; }
+  label { font-size: .85rem; color: var(--muted); display: block; margin-bottom: 4px; }
+  input[type=text], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; }
+  textarea { font-family: var(--mono); font-size: .9rem; resize: vertical; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .sinks { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .sink { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; }
+  .sink input { accent-color: var(--accent); }
+  .sink span { flex: 1; }
+  .sink select { width: auto; padding: 4px 6px; font-size: .8rem; }
+  .props .prop { display: grid; grid-template-columns: 1fr 1.6fr auto; gap: 6px; margin-bottom: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; font-size: .85rem; cursor: pointer; }
+  .chip input { accent-color: var(--accent); margin: 0; }
+  .check { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: .9rem; }
+  button { font: inherit; border: 0; border-radius: 8px; padding: 9px 16px; cursor: pointer; }
+  .primary { background: var(--accent); color: #fff; font-weight: 600; width: 100%; padding: 12px; }
+  .primary:disabled { opacity: .6; cursor: wait; }
+  .ghost { background: var(--accent-soft); color: var(--accent); }
+  .icon { background: transparent; color: var(--muted); padding: 4px 8px; }
+  .status { display: grid; gap: 6px; }
+  .s { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 8px; font-size: .9rem; }
+  .s.ok { background: var(--ok-soft); color: var(--ok); }
+  .s.skip { background: var(--warn-soft); color: var(--warn); }
+  .s.err { background: var(--err-soft); color: var(--err); }
+  .s small { opacity: .85; }
+  pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: .85rem/1.5 var(--mono); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  td { border-bottom: 1px solid var(--border); padding: 5px 4px; vertical-align: top; }
+  td:first-child { color: var(--muted); width: 38%; font-family: var(--mono); }
+  td:last-child { font-family: var(--mono); word-break: break-all; }
+  .muted { color: var(--muted); font-size: .85rem; }
+  .masked { color: var(--accent); font-weight: 600; }
+  .errors li { color: var(--err); font-size: .85rem; margin-bottom: 4px; }
+  .where a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>LoggerHelper <span>Playground</span></h1>
+  <nav>
+    <a href="/scalar" target="_blank">Scalar</a>
+    <a href="/swagger" target="_blank">Swagger</a>
+    <a href="/loggerhelper" target="_blank">Dashboard</a>
+    <a href="http://localhost:5341" target="_blank">Seq</a>
+    <a href="http://localhost:5601" target="_blank">Kibana</a>
+  </nav>
+</header>
+
+<main>
+  <section>
+    <form id="form" class="card">
+      <h2>1. Event</h2>
+      <label for="message">Message template <small>(placeholders take values from the properties below)</small></label>
+      <textarea id="message" rows="2">Login attempt for {Email} with {Password} from card {CardNumber}</textarea>
+      <div class="row" style="margin-top:12px">
+        <div>
+          <label for="level">Level</label>
+          <select id="level"></select>
+        </div>
+        <div>
+          <label for="fileNameProperty">File sink: split folders by property <small>(optional)</small></label>
+          <input type="text" id="fileNameProperty" placeholder="e.g. TenantId">
+        </div>
+      </div>
+      <div class="check"><input type="checkbox" id="includeException"><label for="includeException" style="margin:0">Attach an exception</label></div>
+      <div class="check"><input type="checkbox" id="renderedMessage" checked><label for="renderedMessage" style="margin:0">EnableRenderedMessage <small>(pre-rendered message for DB sinks)</small></label></div>
+    </form>
+
+    <div class="card">
+      <h2>2. Sinks <small>· minimum level each sink accepts</small></h2>
+      <div class="sinks" id="sinks"></div>
+    </div>
+
+    <div class="card props">
+      <h2>3. Properties</h2>
+      <div id="props"></div>
+      <button type="button" class="ghost" id="addProp">+ Add property</button>
+    </div>
+
+    <div class="card">
+      <h2>4. Sensitive data masking</h2>
+      <div class="check"><input type="checkbox" id="maskEnabled" checked><label for="maskEnabled" style="margin:0">EnableSensitiveDataMasking</label></div>
+      <label style="margin-top:8px">Presets</label>
+      <div class="chips" id="presets"></div>
+      <div class="row" style="margin-top:12px">
+        <div>
+          <label for="sensitiveProps">Sensitive properties <small>(comma separated)</small></label>
+          <input type="text" id="sensitiveProps" value="Password, ApiKey">
+        </div>
+        <div>
+          <label for="maskText">Mask text</label>
+          <input type="text" id="maskText" value="***MASKED***">
+        </div>
+      </div>
+      <label for="rules">Custom regex rules <small>(one per line, named group "secret" masks only that part)</small></label>
+      <textarea id="rules" rows="2">ORD-\d+</textarea>
+    </div>
+
+    <button class="primary" id="send" form="form" type="submit">Send log</button>
+
+    <div class="card" style="margin-top:16px">
+      <h2>5. HttpHelper <small>· real calls to httpbin.org, every attempt logged to the sinks above (with masking)</small></h2>
+      <label for="scenario">Scenario</label>
+      <select id="scenario">
+        <option value="success">Success: GET /get</option>
+        <option value="flaky" selected>Flaky upstream: random 500 / 502 / 503 / 200, retried</option>
+        <option value="down">Upstream down: always 503, retries exhausted</option>
+        <option value="timeout">Timeout: /delay longer than the timeout → 408</option>
+        <option value="bearer">Bearer auth: token sent, then masked in the logs</option>
+        <option value="post">POST JSON: body echoed back</option>
+        <option value="ratelimit">Rate limit: burst of calls → 429 when the window is full</option>
+      </select>
+      <div class="row" style="margin-top:12px">
+        <div><label for="retries">Retries (on 5xx and 408)</label><input type="text" id="retries" value="3" inputmode="numeric"></div>
+        <div><label for="backoff">Backoff factor <small>(wait = factor^attempt s)</small></label><input type="text" id="backoff" value="1" inputmode="decimal"></div>
+      </div>
+      <div class="row">
+        <div><label for="timeout">Timeout (s)</label><input type="text" id="timeout" value="3" inputmode="numeric"></div>
+        <div><label for="bearerToken">Bearer token <small>(bearer scenario)</small></label><input type="text" id="bearerToken" value="eyJhbGciOiJIUzI1NiJ9.demo.token"></div>
+      </div>
+      <div class="row">
+        <div><label for="burst">Burst: calls in parallel <small>(rate limit)</small></label><input type="text" id="burst" value="5" inputmode="numeric"></div>
+        <div><label for="permit">Permits per 10 s window <small>(rate limit)</small></label><input type="text" id="permit" value="2" inputmode="numeric"></div>
+      </div>
+      <button class="primary" id="http" type="button">Call API</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="card">
+      <h2>Result</h2>
+      <div id="result" class="muted">Choose the options and press <b>Send log</b>. A brand-new logger is built with the fluent API, writes one event, is disposed (flush) and reports back here.</div>
+    </div>
+
+    <div class="card">
+      <h2>Fluent configuration used</h2>
+      <pre id="code" class="muted">—</pre>
+    </div>
+
+    <div class="card where">
+      <h2>Where to look</h2>
+      <ul class="muted" style="padding-left:18px;margin:0">
+        <li>Console: the terminal running the Demo</li>
+        <li>File: <code>Logs/playground/</code> in the Demo output folder</li>
+        <li>Seq: <a href="http://localhost:5341" target="_blank">localhost:5341</a></li>
+        <li>Elasticsearch: index <code>loggerhelper-playground-*</code> (<a href="http://localhost:9200/loggerhelper-playground-*/_search?sort=@timestamp:desc&size=5" target="_blank">last 5</a>, or Kibana)</li>
+        <li>SQL Server: <code>SELECT TOP 10 * FROM dbo.PlaygroundLogs ORDER BY Id DESC</code></li>
+        <li>PostgreSQL: <code>SELECT * FROM playground_logs ORDER BY raise_date DESC LIMIT 10</code></li>
+        <li>Telegram: your chat (max 1 message per second, sent in the background)</li>
+      </ul>
+    </div>
+
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const DEFAULT_ON = ['Console', 'File'];
+const DEFAULT_PROPS = [['Email', 'alice@example.com'], ['Password', 'Sup3rSecret!'], ['CardNumber', '4532-1234-5678-9012'], ['OrderId', 'ORD-99821']];
+
+function addProp(k = '', v = '') {
+  const row = document.createElement('div');
+  row.className = 'prop';
+  row.innerHTML = `<input type="text" placeholder="Name" value="${esc(k)}"><input type="text" placeholder="Value" value="${esc(v)}"><button type="button" class="icon" title="Remove">✕</button>`;
+  row.querySelector('button').onclick = () => row.remove();
+  $('props').append(row);
+}
+
+async function init() {
+  const o = await fetch('/api/playground/options').then(r => r.json());
+  $('level').innerHTML = o.levels.map(l => `<option ${l === 'Information' ? 'selected' : ''}>${l}</option>`).join('');
+  const levelOpts = o.levels.map(l => `<option>${l}</option>`).join('');
+  const off = Object.fromEntries((o.unavailable ?? []).map(u => [u.sink, u.hint]));
+  $('sinks').innerHTML = o.sinks.map(s => `
+    <label class="sink" ${off[s] ? `title="Not configured: ${esc(off[s])}" style="opacity:.55"` : ''}>
+      <input type="checkbox" value="${s}" ${DEFAULT_ON.includes(s) ? 'checked' : ''} ${off[s] ? 'disabled' : ''}>
+      <span>${s}${off[s] ? ' <small>(set up)</small>' : ''}</span><select data-sink="${s}" title="Minimum level">${levelOpts}</select></label>`).join('');
+  $('presets').innerHTML = o.presets.map(p => `<label class="chip"><input type="checkbox" value="${p}" checked>${p}</label>`).join('');
+  DEFAULT_PROPS.forEach(([k, v]) => addProp(k, v));
+}
+
+function buildRequest() {
+  const sinks = {};
+  document.querySelectorAll('#sinks input:checked').forEach(c => sinks[c.value] = document.querySelector(`select[data-sink="${c.value}"]`).value);
+  const properties = {};
+  document.querySelectorAll('#props .prop').forEach(r => {
+    const [k, v] = r.querySelectorAll('input');
+    if (k.value.trim()) properties[k.value.trim()] = v.value;
+  });
+  const list = s => s.split(',').map(x => x.trim()).filter(Boolean);
+  return {
+    message: $('message').value,
+    level: $('level').value,
+    sinks,
+    properties,
+    renderedMessage: $('renderedMessage').checked,
+    includeException: $('includeException').checked,
+    fileNameProperty: $('fileNameProperty').value.trim() || null,
+    masking: {
+      enabled: $('maskEnabled').checked,
+      presets: [...document.querySelectorAll('#presets input:checked')].map(c => c.value),
+      sensitiveProperties: list($('sensitiveProps').value),
+      rules: $('rules').value.split('\n').map(x => x.trim()).filter(Boolean),
+      maskText: $('maskText').value
+    }
+  };
+}
+
+// Mirrors what PlaygroundEndpoints does server-side, so the page shows the fluent code it exercises.
+function fluentCode(r) {
+  const lines = ['services.AddLoggerHelper(b => b', '    .WithApplicationName("LoggerHelperPlayground")'];
+  if (r.renderedMessage) lines.push('    .EnableRenderedMessage()');
+  for (const [s, min] of Object.entries(r.sinks)) lines.push(`    .AddRoute("${s}", /* ${min} and above */)`);
+  if (r.sinks.File) lines.push(`    .ConfigureFile(f => { f.Path = "Logs/playground";${r.fileNameProperty ? ` f.FileNameProperty = "${r.fileNameProperty}";` : ''} })`);
+  if (r.sinks.Seq) lines.push('    .ConfigureSeq(s => s.ServerUrl = "http://127.0.0.1:5341")');
+  if (r.sinks.Elasticsearch) lines.push('    .ConfigureElasticsearch(e => { e.NodeUris = "http://127.0.0.1:9200"; e.IndexFormat = "loggerhelper-playground-{0:yyyy.MM.dd}"; })');
+  if (r.sinks.MSSqlServer) lines.push('    .ConfigureMSSqlServer(s => { s.ConnectionString = "…"; s.TableName = "PlaygroundLogs"; })');
+  if (r.sinks.PostgreSql) lines.push('    .ConfigurePostgreSql(p => { p.ConnectionString = "…"; p.TableName = "playground_logs"; })');
+  if (r.sinks.Telegram) lines.push('    .ConfigureTelegram(t => { t.BotToken = "…"; t.ChatId = "…"; })   // from user-secrets');
+  if (r.masking.enabled) {
+    lines.push('    .EnableSensitiveDataMasking(o => {');
+    lines.push(`        o.Presets = [${r.masking.presets.map(p => `"${p}"`).join(', ')}];`);
+    lines.push(`        o.SensitiveProperties = [${r.masking.sensitiveProperties.map(p => `"${p}"`).join(', ')}];`);
+    r.masking.rules.forEach(x => lines.push(`        o.Rules.Add(new() { Pattern = @"${x}" });`));
+    lines.push('    })');
+  }
+  lines[lines.length - 1] += ');';
+  return lines.join('\n');
+}
+
+function render(res, httpHtml = '') {
+  const sinks = res.sinks.map(s => {
+    const cls = !s.configured ? 'err' : s.received ? 'ok' : 'skip';
+    const label = !s.configured ? 'configuration failed'
+      : s.received ? (s.count > 1 ? `received ${s.count} events` : 'received')
+      : `filtered (accepts ${s.levels[0] ?? '—'}+)`;
+    return `<div class="s ${cls}"><b>${esc(s.sink)}</b><small>${label}</small></div>`;
+  }).join('');
+  const errors = res.errors.length
+    ? `<h2 style="margin-top:14px">Errors</h2><ul class="errors">${res.errors.map(e => `<li>${esc(e)}</li>`).join('')}</ul>`
+    : '';
+  const ev = res.logEvent;
+  const mark = v => esc(v).replaceAll(esc($('maskText').value || '***MASKED***'), m => `<span class="masked">${m}</span>`);
+  const props = ev ? Object.entries(ev.properties).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${mark(v)}</td></tr>`).join('') : '';
+  $('result').className = '';
+  $('result').innerHTML = `
+    ${httpHtml}
+    <div class="muted" style="margin-bottom:8px">${httpHtml ? `${res.events.length} events logged` : esc(res.level)} · built, written and flushed in <b>${res.elapsedMs} ms</b></div>
+    <div class="status">${sinks}</div>
+    ${errors}
+    ${ev ? `<h2 style="margin-top:14px">Event as the sinks receive it</h2>
+      <pre>${mark(ev.rendered)}</pre>
+      ${ev.exception ? `<p class="muted">Exception: ${esc(ev.exception)}</p>` : ''}
+      <table style="margin-top:8px">${props}</table>` : ''}`;
+}
+
+$('form').onsubmit = async e => {
+  e.preventDefault();
+  const req = buildRequest();
+  $('code').textContent = fluentCode(req);
+  $('code').className = '';
+  $('send').disabled = true;
+  try {
+    const r = await fetch('/api/playground/log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(req) });
+    const body = await r.json();
+    if (!r.ok) throw new Error(body.error ?? r.statusText);
+    render(body);
+  } catch (err) {
+    $('result').innerHTML = `<div class="s err">${esc(err.message)}</div>`;
+  } finally {
+    $('send').disabled = false;
+  }
+};
+
+$('addProp').onclick = () => addProp();
+const httpPath = h => ({
+  success: '/get', flaky: '/status/500,502,503,200', down: '/status/503', timeout: `/delay/${Math.min(h.timeoutSeconds + 2, 10)}`,
+  bearer: '/bearer', post: '/post', ratelimit: '/get'
+})[h.scenario];
+
+// Mirrors PlaygroundHttpEndpoints: the HttpHelper calls the page triggers.
+function httpCode(h) {
+  const lines = ['var helper = new httpsClientHelper(client, events, rateLimit)',
+                 `    .addTimeout(TimeSpan.FromSeconds(${h.timeoutSeconds}))`];
+  if (h.scenario !== 'ratelimit' && h.retries > 0)
+    lines.push(`    .addRetryCondition(r => (int)r.StatusCode >= 500 || r.StatusCode == HttpStatusCode.RequestTimeout, ${h.retries}, ${h.backoff});`);
+  else lines[lines.length - 1] += ';';
+  if (h.scenario === 'ratelimit')
+    lines.unshift(`var rateLimit = new httpClientRateLimitOptions { IsEnabled = true, PermitLimit = ${h.permitLimit}, Window = TimeSpan.FromSeconds(10), QueueLimit = 0 };`);
+  lines.push('', '// every attempt (retries included) → one log event on the playground logger',
+             'helper.AddRequestAction((req, res, attempt, wait) => {',
+             '    logger.Write(res.IsSuccessStatusCode ? Information : Warning,',
+             '        "HttpHelper {Method} {Url} -> {StatusCode} (attempt {Attempt})", ...);',
+             '    return Task.CompletedTask;', '});', '',
+             `using var res = await helper.SendAsync("https://httpbin.org${httpPath(h)}", HttpMethod.${h.scenario === 'post' ? 'Post, new JsonContentBuilder(), json' : 'Get'});`);
+  if (h.scenario === 'ratelimit') lines.push(`// × ${h.burst} in parallel`);
+  return lines.join('\n');
+}
+
+function renderHttp(body) {
+  const cls = s => s >= 200 && s < 300 ? 'ok' : s === 429 || s === 408 ? 'skip' : 'err';
+  const calls = body.calls.map(c => `<div class="s ${cls(c.status)}"><b>${c.status} ${esc(c.reason)}</b><small>${c.elapsedMs} ms</small></div>`).join('');
+  const attempts = body.attempts.length
+    ? `<table style="margin:8px 0">${body.attempts.map(a => `<tr><td>+${a.atMs} ms · attempt ${a.attempt}</td><td>${a.status} ${esc(a.url)}</td></tr>`).join('')}</table>`
+    : '<p class="muted">No attempt reached the wire (timeout or rate limit is decided by HttpHelper itself).</p>';
+  const bodyPreview = body.calls.find(c => c.body)?.body;
+  const httpHtml = `
+    <h2>HttpHelper · ${esc(body.scenario)}</h2>
+    <div class="status">${calls}</div>
+    <h2 style="margin-top:14px">Attempts on the wire</h2>${attempts}
+    ${bodyPreview ? `<details style="margin-bottom:12px"><summary class="muted">Response body</summary><pre>${esc(bodyPreview)}</pre></details>` : ''}
+    <h2>Logged to the sinks</h2>`;
+  render(body.log, httpHtml);
+  const mark = v => esc(v).replaceAll(esc($('maskText').value || '***MASKED***'), m => `<span class="masked">${m}</span>`);
+  $('result').insertAdjacentHTML('beforeend', `<h2 style="margin-top:14px">All logged events</h2>
+    <pre>${body.log.events.map(e => `[${e.level}] ${mark(e.rendered)}${e.properties.Authorization ? `\n    Authorization: ${mark(e.properties.Authorization)}` : ''}`).join('\n')}</pre>`);
+}
+
+$('http').onclick = async () => {
+  const log = buildRequest();
+  const num = (id, d) => Number($(id).value) || d;
+  const h = {
+    scenario: $('scenario').value, sinks: log.sinks, masking: log.masking,
+    retries: num('retries', 0), backoff: num('backoff', 1), timeoutSeconds: num('timeout', 10),
+    burst: num('burst', 5), permitLimit: num('permit', 2), bearerToken: $('bearerToken').value
+  };
+  $('code').textContent = fluentCode(log) + '\n\n' + httpCode(h);
+  $('code').className = '';
+  $('http').disabled = true;
+  $('result').innerHTML = '<div class="muted">Calling httpbin.org…</div>';
+  try {
+    const r = await fetch('/api/playground/http', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(h) });
+    const body = await r.json();
+    if (!r.ok) throw new Error(body.error ?? r.statusText);
+    renderHttp(body);
+  } catch (err) {
+    $('result').innerHTML = `<div class="s err">${esc(err.message)}</div>`;
+  } finally {
+    $('http').disabled = false;
+  }
+};
+
+init();
+</script>
+</body>
+</html>

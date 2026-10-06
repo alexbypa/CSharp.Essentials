@@ -236,9 +236,12 @@ using (_logger.BeginScope(new Dictionary<string, object?> {
 }
 ```
 
-### Automatic Enrichment
+<a name="enrichment"></a>
+### Enrichment — Extra Properties on Every Log
 
-Every log event automatically carries:
+Enrichment adds properties to a log event besides its message. They become searchable fields in Seq and Elasticsearch, and dedicated columns in database sinks when you map them (see [From property to column](#from-property-to-column)).
+
+**Automatic**, nothing to write:
 
 | Property | Source |
 |----------|--------|
@@ -246,6 +249,40 @@ Every log event automatically carries:
 | `MachineName` | `Environment.MachineName` |
 | `SourceContext` | Class name from `ILogger<T>` |
 | `TraceId` / `SpanId` | `System.Diagnostics.Activity` (OpenTelemetry) |
+
+**Per operation: `BeginTrace`** adds `Action` and `IdTransaction` (plus `SpanName` inside an `Activity`) to every log in the block:
+
+```csharp
+using (logger.BeginTrace("Checkout", idTransaction)) {
+    logger.LogInformation("Payment authorized");     // + Action, IdTransaction
+    logger.LogInformation("Order {OrderId} shipped", orderId);
+}
+
+// One-off log, no scope:
+logger.Trace("Checkout", idTransaction, "Order {OrderId} shipped", orderId);
+```
+
+**Any property you like: `BeginScope`**, as shown above (`OrderId`, `UserId`, `TenantId`...).
+
+**On every event, with your own logic: `WithEnrichers`** plugs standard Serilog enrichers into the pipeline:
+
+```csharp
+builder.Services.AddLoggerHelper(builder.Configuration, b => b
+    .WithEnrichers(c => c
+        .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName)
+        .Enrich.With(new TenantEnricher())));   // your Serilog ILogEventEnricher
+```
+
+> Enrichers added with `WithEnrichers` run **after** sensitive data masking: don't put secrets in them.
+
+<a name="from-property-to-column"></a>
+**From property to column**
+
+| Sink | Where the properties go |
+|------|-------------------------|
+| PostgreSQL | Default columns already include `ApplicationName`, `MachineName`, `Action`, `IdTransaction`; add more with [`Columns`](https://github.com/alexbypa/CSharp.Essentials/blob/main/src/CSharpEssentials.LoggerHelper.Sink.Postgresql/README.md#custom-columns--replicate-or-extend-the-default-schema) |
+| SQL Server | In the `Properties` column; promote any of them to its own column with [`AdditionalColumns`](https://github.com/alexbypa/CSharp.Essentials/blob/main/src/CSharpEssentials.LoggerHelper.Sink.MSSqlServer/README.md#custom-columns--map-log-properties-to-sql-columns) |
+| Seq, Elasticsearch | Every property is a searchable field, nothing to configure |
 
 ### Internal Diagnostics
 

@@ -5,6 +5,7 @@ using CSharpEssentials.LoggerHelper.Dashboard;
 using CSharpEssentials.LoggerHelper.Demo.Endpoints;
 using CSharpEssentials.LoggerHelper.MCP;
 using Microsoft.OpenApi;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,8 @@ builder.Services.AddSingleton<IEndpointDefinition, SensitiveDataMaskingEndpoints
 builder.Services.AddSingleton<IEndpointDefinition, McpDemoEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, ContextualLoggingEndpoints>();
 builder.Services.AddSingleton<IEndpointDefinition, HttpHelperEndpoints>();
+builder.Services.AddSingleton<IEndpointDefinition, PlaygroundEndpoints>();
+builder.Services.AddSingleton<IEndpointDefinition, PlaygroundHttpEndpoints>();
 
 // ── Swagger ─────────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
@@ -72,8 +75,16 @@ app.UseSwaggerUI(c => {
     c.DisplayRequestDuration();
 });
 
-// Root → Swagger UI
-app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
+// Scalar UI on /scalar, reading the same Swashbuckle document as Swagger UI
+app.MapScalarApiReference(o => o
+    .WithTitle("LoggerHelper Demo")
+    .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json"));
+
+// Playground page: wwwroot/playground.html (docker/docker-compose.yml for the external sinks)
+app.UseStaticFiles();
+
+// Root → Playground
+app.MapGet("/", () => Results.Redirect("/playground.html")).ExcludeFromDescription();
 
 app.UseEndpointDefinitions();
 

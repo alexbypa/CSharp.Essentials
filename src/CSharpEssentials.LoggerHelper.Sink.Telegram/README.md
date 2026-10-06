@@ -15,6 +15,25 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.Telegram
 
 ---
 
+## Get a bot token and your chat id (3 minutes)
+
+1. **Create the bot**: in Telegram, open [@BotFather](https://t.me/BotFather), send `/newbot`, pick a name and a username ending in `bot`. BotFather replies with the **bot token** (`123456789:AAH...`). Keep it secret: whoever has it controls the bot.
+2. **Write to the bot first**: open the chat with your bot and press **Start** (or send `/start`). A bot cannot message someone who never wrote to it.
+3. **Read your chat id**: open `https://api.telegram.org/bot<TOKEN>/getUpdates` in the browser and look for `"chat":{"id":123456789,...}`. That number is the **ChatId**.
+   - Empty `"result":[]`? Send another message to the bot and reload.
+   - For a group: add the bot to the group, write a message there, reload. Group ids are negative (`-100...`).
+
+Keep the token out of source control, e.g. with user-secrets in development:
+
+```bash
+dotnet user-secrets set "LoggerHelper:Sinks:Telegram:BotToken" "123456789:AAH..."
+dotnet user-secrets set "LoggerHelper:Sinks:Telegram:ChatId" "123456789"
+```
+
+User-secrets apply when you call `AddLoggerHelper(builder.Configuration)` and no `appsettings.LoggerHelper.json` (or `appsettings.LoggerHelper.debug.json` in Development) sits in the working directory. If one of those files exists, it replaces `builder.Configuration`: set the environment variables `LoggerHelper__Sinks__Telegram__BotToken` and `LoggerHelper__Sinks__Telegram__ChatId` instead.
+
+---
+
 ## Quick Setup — JSON
 
 ```json

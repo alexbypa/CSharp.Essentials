@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Serilog.Events;
 
 namespace CSharpEssentials.LoggerHelper;
 
@@ -99,12 +100,20 @@ public static class ServiceCollectionExtensions {
 
         var loadedSinkStore = new LoadedSinkStore();
 
+        // Disposed with the logger: hands the legacy static API back to the previous logger.
+        var legacyRelease = new LegacyLoggerRelease(LegacyLoggerHolder.Instance);
+
         // Build eagerly to avoid circular resolution (ILoggerProvider ↔ Serilog.ILogger) during DI startup.
         var serilogLogger = LoggerPipelineFactory.Build(
-            options, errorStore, loadedSinkStore, registry, discovery, customEnrichers,
+            options, errorStore, loadedSinkStore, registry, discovery,
+            c => {
+                customEnrichers?.Invoke(c);
+                c.WriteTo.Sink(legacyRelease, LevelAlias.Off);   // never receives events
+            },
             out var contextBuffer, contextEnricher: null);
 
         // Wire legacy static API for backward compatibility
+        legacyRelease.Owner = serilogLogger;
         LegacyLoggerHolder.Instance = serilogLogger;
 
         // Register services — consumers should depend on interfaces (DIP)
