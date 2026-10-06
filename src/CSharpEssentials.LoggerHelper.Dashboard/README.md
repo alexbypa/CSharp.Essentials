@@ -73,7 +73,9 @@ Enable in `appsettings.json`:
 }
 ```
 
-> **How it works:** a lock-free ring buffer (`Interlocked`, zero heap allocations after startup) retains the last N log entries. On Error/Fatal the buffer flushes context to your configured sinks with `IsContextualHistory = true`, and the Dashboard reads the flushed entries via `/api/status`. The triggering Error/Fatal is stored separately and shown with a red "▼ Triggering event" separator — it never enters the ring buffer, preventing feedback loops.
+> `ContextualBufferCapacity` must be greater than 0; a value <= 0 throws `ArgumentOutOfRangeException` at startup.
+
+> **How it works:** a thread-safe ring buffer (short lock, zero heap allocations after startup) retains the last N log entries. On Error/Fatal the buffer flushes context to your configured sinks with `IsContextualHistory = true`, and the Dashboard reads the flushed entries via `/api/status`. The triggering Error/Fatal is stored separately and shown with a red "▼ Triggering event" separator — it never enters the ring buffer, preventing feedback loops.
 
 ### Routing Configuration
 Visual table of which log levels go to which sinks — useful when diagnosing why a specific message did or did not appear in a given sink.

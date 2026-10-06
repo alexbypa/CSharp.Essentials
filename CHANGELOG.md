@@ -6,7 +6,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased]
+## [5.2.9] — 2026-10-06
+
+### Fixed
+
+- **MySQL sink:** `MySqlColumnMap` identifier validation now anchors with `\z`, so an identifier with a trailing newline (`"abc\n"`) is rejected instead of accepted by `$`.
+- **Contextual log buffer:** `ContextualLogBuffer` could lose, duplicate or tear entries under concurrent `Push`/`FlushAndClear`. `Push`, `FlushAndClear` and `Snapshot` now run under a single short lock instead of the previous lock-free `Interlocked` scheme (`Push` is now a short lock, not lock-free). Behaviour change: the constructor throws `ArgumentOutOfRangeException` for `capacity <= 0` (previously `DivideByZeroException` on first `Push`, or `OverflowException`).
+
+### Changed
+
+- **Benchmarks:** added `ContextualLogBufferContentionBenchmark` (1/4/16/64 threads, `Push` and `Push` + `FlushAndClear`) comparing the locked `ContextualLogBuffer` with the pre-fix lock-free version; results in `docs/benchmarks.md`. Decision: keep the lock. No runtime impact.
+- **MySQL sink (tests):** `MySqlBatchedSink.ExtractValue` is now `internal` and covered by unit tests (rendered/template message, level, timestamp UTC/local, exception, serialized, properties); no public API change.
 
 ---
 

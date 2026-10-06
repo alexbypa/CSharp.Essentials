@@ -112,7 +112,7 @@ internal sealed class MySqlBatchedSink : IBatchedLogEventSink {
         }
     }
 
-    private object? ExtractValue(MySqlColumn column, LogEvent logEvent) => column.Writer switch {
+    internal object? ExtractValue(MySqlColumn column, LogEvent logEvent) => column.Writer switch {
         MySqlWriterKind.Rendered => logEvent.RenderMessage(),
         MySqlWriterKind.Template => logEvent.MessageTemplate.Text,
         MySqlWriterKind.Level => logEvent.Level.ToString(),

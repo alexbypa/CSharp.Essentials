@@ -258,7 +258,7 @@ Any unrecognized value falls back to `TEXT`.
 
 Set `AutoCreateTable: false` and declare `Columns` matching your schema. The sink never alters an existing table.
 
-Table and column names are validated against `^[A-Za-z0-9_]{1,64}$` and quoted with backticks; values are always passed as command parameters, never concatenated into SQL.
+Table and column names are validated against `^[A-Za-z0-9_]{1,64}\z` and quoted with backticks; values are always passed as command parameters, never concatenated into SQL.
 
 ---
 

@@ -153,7 +153,7 @@ public sealed class GeneralOptions {
     public bool EnableContextualLogging { get; set; }
 
     /// <summary>
-    /// Number of log entries to retain in the contextual ring buffer. Default: 100.
+    /// Number of log entries to retain in the contextual ring buffer. Default: 100. Must be greater than 0 (a value &lt;= 0 makes <c>ContextualLogBuffer</c> throw <see cref="ArgumentOutOfRangeException"/> at startup).
     /// </summary>
     public int ContextualBufferCapacity { get; set; } = 100;
 }

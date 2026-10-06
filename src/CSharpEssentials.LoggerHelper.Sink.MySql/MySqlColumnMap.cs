@@ -23,7 +23,7 @@ internal sealed record MySqlColumn(string Name, MySqlWriterKind Writer, string S
 /// </summary>
 internal static class MySqlColumnMap {
     /// <summary>MySQL identifiers are max 64 chars; restricting the charset keeps them safe to quote.</summary>
-    private static readonly Regex IdentifierPattern = new(@"^[A-Za-z0-9_]{1,64}$", RegexOptions.Compiled);
+    private static readonly Regex IdentifierPattern = new(@"^[A-Za-z0-9_]{1,64}\z", RegexOptions.Compiled);
 
     internal static IReadOnlyList<MySqlColumn> Default() => new List<MySqlColumn> {
         new("ApplicationName", MySqlWriterKind.Single, "VARCHAR(255)", "ApplicationName"),
