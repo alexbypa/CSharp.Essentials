@@ -17,8 +17,9 @@ namespace CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks;
 /// minimum level Information (Debug is dropped). OpenTelemetry is disabled for LoggerHelper.
 /// Difference kept on purpose: LoggerHelper adds its default enrichers (ApplicationName,
 /// MachineName, LogContext) and per-level routing; Serilog and NLog run with no enrichers.
-/// Small and quick on its own: run it with --filter *LoggerComparison*.
+/// Small and quick on its own: run it with --anyCategories Quick (or --filter *LoggerComparison*).
 /// </summary>
+[BenchmarkCategory("Quick")]
 [MemoryDiagnoser]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
 [RankColumn]

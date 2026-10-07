@@ -32,6 +32,7 @@ append_section() {
   echo ""
   echo "---"
   append_section "LoggerHelper vs Serilog vs NLog (via ILogger)" "LoggerComparisonBenchmark"
+  append_section "Masking cost vs number of sinks" "MaskingSinkScalingBenchmark"
   append_section "Throughput" "ThroughputBenchmark"
   append_section "Routing Overhead" "RoutingBenchmark"
   append_section "Startup Time" "StartupBenchmark"

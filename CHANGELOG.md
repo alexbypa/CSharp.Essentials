@@ -10,6 +10,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **Benchmarks:** classes can be grouped with `[BenchmarkCategory("Quick")]`; `benchmarks.yml` has a `category` input (default `Quick`, `*` = all) next to `filter` (default `*`), so adding a class to the quick run needs no workflow change. Every run now opens the PR that updates `docs/benchmarks.md` with the classes it ran.
+- **Benchmarks:** new `MaskingSinkScalingBenchmark` measures sensitive data masking on/off with 1, 3 and 5 sinks (masking is an enricher, applied once per event before routing).
 - **Benchmarks:** new `LoggerComparisonBenchmark` compares LoggerHelper, Serilog (`Serilog.Extensions.Logging`) and NLog (`NLog.Extensions.Logging`) through the same `ILogger` API, with the same messages, one no-op sink and minimum level Information. The benchmark-only `NullSinkPlugin` now uses `WriteTo.Conditional` + `SinkRouting.Matches` like the published sinks (it used a sub-logger, which overstated LoggerHelper's cost).
 - **CI (`benchmarks.yml`):** runs on .NET 10 (BenchmarkDotNet 0.15.8). Manual runs take a `filter` input (default: the quick comparison) and a `job` input (default `short`, 3 iterations); tag pushes still run the full suite with the full job. Result tables go to the run summary and the full output is uploaded as an artifact. A full run opens a PR with the updated `docs/benchmarks.md` instead of pushing to protected `main` (which failed with GH013).
 
