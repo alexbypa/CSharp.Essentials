@@ -25,7 +25,7 @@ append_section() {
 {
   echo "# LoggerHelper v5 — Benchmark Results"
   echo ""
-  echo "> Generated: $(date -u '+%Y-%m-%d') | Runtime: .NET 9 | OS: ubuntu-latest"
+  echo "> Generated: $(date -u '+%Y-%m-%d') | Runtime: .NET 10 | OS: ubuntu-latest"
   echo ""
   echo "Comparison: **LoggerHelper v5** vs **Serilog** (baseline) vs **NLog**."
   echo "All frameworks use a no-op sink/target — measures framework overhead, not I/O."
