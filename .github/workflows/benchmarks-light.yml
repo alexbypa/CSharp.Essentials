@@ -1,4 +1,4 @@
-name: Benchmarks-Light
+name: Benchmarks
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Restore
         run: dotnet restore src/CSharpEssentials.LoggerHelper.Benchmarks/CSharpEssentials.LoggerHelper.Benchmarks.csproj
@@ -36,7 +36,7 @@ jobs:
         run: |
           dotnet run -c Release \
             --project src/CSharpEssentials.LoggerHelper.Benchmarks/CSharpEssentials.LoggerHelper.Benchmarks.csproj \
-            --framework net9.0 \
+            --framework net10.0 \
             -- --filter '*ThroughputBenchmark*' --job short --artifacts ./benchmark-results
 
       # Results visible on the run page (Summary tab).
@@ -46,7 +46,7 @@ jobs:
           {
             echo "# Benchmark results"
             echo ""
-            echo "Commit: \`${GITHUB_SHA::7}\` · Runtime: .NET 9 · ubuntu-latest · job short"
+            echo "Commit: \`${GITHUB_SHA::7}\` · Runtime: .NET 10 · ubuntu-latest · job short"
             echo ""
             found=0
             for f in benchmark-results/results/*-report-github.md; do
