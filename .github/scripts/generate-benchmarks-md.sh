@@ -12,14 +12,12 @@ find benchmark-results -name "*.md" -type f 2>/dev/null || echo "No .md files fo
 append_section() {
   local title="$1"
   local pattern="$2"
+  # Skip classes that were not run (e.g. a run filtered to a single class).
+  ls "$ARTIFACTS_DIR"/*${pattern}*-report-github.md 1>/dev/null 2>&1 || return 0
   echo ""
   echo "## $title"
   echo ""
-  if ls "$ARTIFACTS_DIR"/*${pattern}*-report-github.md 1>/dev/null 2>&1; then
-    cat "$ARTIFACTS_DIR"/*${pattern}*-report-github.md
-  else
-    echo "_Results not available._"
-  fi
+  cat "$ARTIFACTS_DIR"/*${pattern}*-report-github.md
   echo ""
   echo "---"
 }
@@ -27,12 +25,13 @@ append_section() {
 {
   echo "# LoggerHelper v5 — Benchmark Results"
   echo ""
-  echo "> Generated: $(date -u '+%Y-%m-%d') | Runtime: .NET 9 | OS: ubuntu-latest"
+  echo "> Generated: $(date -u '+%Y-%m-%d') | Runtime: .NET 10 | OS: ubuntu-latest"
   echo ""
   echo "Comparison: **LoggerHelper v5** vs **Serilog** (baseline) vs **NLog**."
   echo "All frameworks use a no-op sink/target — measures framework overhead, not I/O."
   echo ""
   echo "---"
+  append_section "LoggerHelper vs Serilog vs NLog (via ILogger)" "LoggerComparisonBenchmark"
   append_section "Throughput" "ThroughputBenchmark"
   append_section "Routing Overhead" "RoutingBenchmark"
   append_section "Startup Time" "StartupBenchmark"
@@ -41,6 +40,7 @@ append_section() {
   append_section "Sensitive Data Masking" "SensitiveDataMaskingBenchmark"
   append_section "MCP Tools" "McpToolsBenchmark"
   append_section "Sampling" "SamplingSinkBenchmark"
+  append_section "Contextual Buffer Contention" "ContextualLogBufferContentionBenchmark"
   echo ""
   echo "_Benchmarks run automatically on each release via [GitHub Actions](../.github/workflows/benchmarks.yml)._"
 } > "$OUTPUT"

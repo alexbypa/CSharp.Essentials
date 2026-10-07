@@ -21,6 +21,9 @@ internal sealed class NLogCompetitor : IDisposable
 
     public Logger Logger => _factory.GetLogger("Benchmark");
 
+    /// <summary>Factory isolata, usata da NLogLoggerProvider per il confronto via ILogger.</summary>
+    public LogFactory Factory => _factory;
+
     public void Dispose() => _factory.Shutdown();
 
     // --- Factory methods per i casi d'uso comuni ---
