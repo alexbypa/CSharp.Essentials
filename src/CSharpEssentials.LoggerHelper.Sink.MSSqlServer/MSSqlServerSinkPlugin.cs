@@ -17,7 +17,8 @@ public sealed class MSSqlServerSinkOptions {
     public string Period { get; set; } = "0.00:00:10";
 
     /// <summary>
-    /// Standard columns to include (e.g. "LogEvent", "Message", "MessageTemplate", "Level", "Exception").
+    /// When set, REPLACES the default column set (Id, Message, MessageTemplate, Level, TimeStamp, Exception, Properties)
+    /// with exactly these columns (e.g. "LogEvent", "Message", "Level"); list "Id" and "TimeStamp" explicitly if you need them.
     /// </summary>
     public List<string>? AddStandardColumns { get; set; }
 
@@ -31,6 +32,11 @@ public sealed class MSSqlServerSinkOptions {
     /// Each column maps to a Serilog property with the same name.
     /// </summary>
     public List<AdditionalColumnConfig>? AdditionalColumns { get; set; }
+
+    /// <summary>
+    /// When true the TimeStamp column is stored in UTC; when false (default) it is stored as local time.
+    /// </summary>
+    public bool StoreTimestampInUtc { get; set; }
 }
 
 /// <summary>
@@ -84,8 +90,9 @@ public sealed class MSSqlServerSinkPlugin : ISinkPlugin {
         );
     }
 
-    private static Serilog.Sinks.MSSqlServer.ColumnOptions BuildColumnOptions(MSSqlServerSinkOptions opts) {
+    internal static Serilog.Sinks.MSSqlServer.ColumnOptions BuildColumnOptions(MSSqlServerSinkOptions opts) {
         var colOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+        colOptions.TimeStamp.ConvertToUtc = opts.StoreTimestampInUtc;
 
         // Standard columns: add
         if (opts.AddStandardColumns is { Count: > 0 }) {

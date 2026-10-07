@@ -15,17 +15,14 @@ Eseguire con `/microtask-pipeline:microtask`, un task alla volta, commit a fine 
 | Stato | ID | Gruppo | Tipo | Task |
 |---|---|---|---|---|
 | [ ] | D7 | G8 | docs | GIF dashboard + MCP nel README NuGet. **Bloccato:** serve registrare le GIF (Demo app + dashboard + chat MCP) e committarle in `img/`; i link raw GitHub darebbero 404 su NuGet finché il file non è su `main`. Script di scena in `outcomes/content/D4.md` |
-| [ ] | A65 | G11 | user | **Azione utente (A61/A49):** ruotare password SMTP, BotToken Telegram, ApiKey Seq, password MySQL (e Postgres/MSSQL se non default locali); confermare che la password postgres in `appsettings.LoggerHelper.json` sia un default di sviluppo; valutare la pulizia della history (`git filter-repo`) + force push. I segreti restano nella history finché non ruotati/purgati. Non scrivere i valori in nessun file |
-| [ ] | A35 | G12 | code | `.mcp.json` (radice, oggi solo `perplexity-docs`): aggiungere `demo-logger` e `myapp-logger` (MCP di Demo/TestApp) con URL + trasporto corretti (oggi ECONNREFUSED); poi togliere i permessi `mcp__demo-logger__*` / `mcp__myapp-logger__*` da `.claude/settings.local.json` se ridondanti |
-| [ ] | A69 | G12 | code | `ConsoleSinkOptions.OutputTemplate` è bindato ma mai applicato (`ColoredConsoleSink` salva `_template` e non lo legge): implementarlo o rimuovere l'opzione; aggiornare README Console (oggi dice "reserved") e sito |
-| [ ] | A70 | G12 | code | Sink File: la stringa `RollingInterval` usa `Enum.Parse` case-sensitive senza errore chiaro: usare `Enum.TryParse(ignoreCase)` + `InvalidOperationException` esplicita + test |
-| [ ] | A71 | G12 | code | MSSqlServer: `AddStandardColumns` sostituisce il set di colonne di default (nome fuorviante) e `TimeStamp` non è convertito in UTC: decidere rinomina/doc vs opzione `ConvertToUtc` |
 | [ ] | A39 | G0b | code | Parità repo pubblico `alexbypa/CSharp.Essentials`: portare fix A38 (`ReplaceLineEndings(" ")` nei due `SanitizeLogValue` + test) per mantenere identiche le due copie |
 | [ ] | A40 | G0b | analysis | `Directory.Packages.props` non applicato (nessun `ManagePackageVersionsCentrally`, versioni inline nei csproj e divergenti, es. M.E.Configuration 9.0.5 vs 10.0.9): attivare CPM o rimuovere il file e correggere CLAUDE.md |
 | [ ] | A41 | G0b | code | Core csproj: allineare major delle dipendenze M.E.* (Configuration/Binder 10.0.9 vs Json/Logging 9.0.1) |
 | [ ] | A48 | G6b | code | `HttpHelperLog` (`src/CSharpEssentials.HttpHelper/HttpHelperLog.cs:10`) scrive sul `Serilog.Log` statico, ma `AddLoggerHelper` non assegna mai `Log.Logger`: i log interni di HttpHelper non raggiungono la pipeline LoggerHelper, contrariamente al README HttpHelper (~riga 82). Collegarlo alla pipeline oppure correggere il README (da C1) |
 | [ ] | A50 | G6b | docs | Bassa priorità. Demo: il cursore round-robin del mock è condiviso, quindi la sequenza 502/503/200 vale solo per richieste seriali: annotarlo nel README della Demo oppure rendere il match per-request (da C1) |
 | [ ] | A51 | G4c | code | Bassa priorità. `IHttpMockScenario`: aggiungere un default interface member che esponga le factory request-aware (`Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>`), così anche le implementazioni custom ricevono request e token nella factory (oggi solo `HttpMockScenario`; nota di design nel commento ponytail di `HttpMockEngine`). Additivo, nessun breaking change |
+| [ ] | A72 | G13 | code | Demo `Endpoints/McpDemoEndpoints.cs` (`curlExamples`, ~righe 44-49): gli esempi curl usano `localhost:5000` ma Demo ascolta su `localhost:5123` (`launchSettings.json`): allineare la porta |
+| [ ] | A73 | G13 | code | `CSharpEssentials.LoggerHelper.Sink.Console.csproj:30`: il `PackageReference Serilog.Sinks.Console` sembra inutilizzato (il sink è scritto a mano, nessun `using` nei `.cs`): verificare (build + test, anche transitive) e rimuoverlo |
 
 ## Roadmap (promemoria — NON eseguire)
 

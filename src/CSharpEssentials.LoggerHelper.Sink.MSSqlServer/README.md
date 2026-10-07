@@ -85,7 +85,7 @@ Log events are batched and inserted as rows into the configured table. Default c
 | `Message` | `NVARCHAR(MAX)` | Rendered log message |
 | `MessageTemplate` | `NVARCHAR(MAX)` | Raw template with `{placeholders}` |
 | `Level` | `NVARCHAR(128)` | e.g. `Warning`, `Error` |
-| `TimeStamp` | `DATETIME` | Event timestamp (as written by the Serilog sink, not converted to UTC) |
+| `TimeStamp` | `DATETIME` | Event timestamp: local time unless `StoreTimestampInUtc` is `true` |
 | `Exception` | `NVARCHAR(MAX)` | Full exception string (nullable) |
 | `Properties` | `NVARCHAR(MAX)` | All structured properties as XML |
 
@@ -144,9 +144,10 @@ using (Serilog.Context.LogContext.PushProperty("UserId", userId))
 | `AutoCreateSqlTable` | `bool` | `true` | Create the table on startup if it does not exist. |
 | `BatchPostingLimit` | `int` | `100` | Maximum events per batch INSERT. |
 | `Period` | `string` | `"0.00:00:10"` | Flush interval in `d.hh:mm:ss` (`TimeSpan`) format. `"0.00:00:10"` = 10 seconds; an unparsable value falls back to 10 seconds. |
-| `AddStandardColumns` | `List<string>?` | `null` | When set, **replaces** the default column set with exactly these columns. Valid values: `Id`, `Message`, `MessageTemplate`, `Level`, `TimeStamp`, `Exception`, `Properties`, `LogEvent`. |
+| `AddStandardColumns` | `List<string>?` | `null` | When set, **replaces** the default column set with exactly these columns. Valid values: `Id`, `Message`, `MessageTemplate`, `Level`, `TimeStamp`, `Exception`, `Properties`, `LogEvent`. E.g. `["LogEvent"]` yields only the `LogEvent` column; list `Id`, `TimeStamp`, etc. as well to keep them. |
 | `RemoveStandardColumns` | `List<string>?` | `null` | Standard columns to exclude (e.g. `["Properties"]` to drop the XML blob). Applied after `AddStandardColumns`; unknown names are ignored. |
 | `AdditionalColumns` | `List<AdditionalColumnConfig>?` | `null` | Custom columns mapped from log properties (see above). |
+| `StoreTimestampInUtc` | `bool` | `false` | Store the `TimeStamp` column in UTC. When `false`, it is stored as local time. |
 
 ### AdditionalColumnConfig
 

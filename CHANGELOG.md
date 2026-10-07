@@ -8,13 +8,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [5.2.10] — 2026-10-07
+
+### Added
+
+- **MSSqlServer sink:** `MSSqlServerSinkOptions.StoreTimestampInUtc` (default `false`); when `true`, the `TimeStamp` column is written in UTC (`TimeStamp.ConvertToUtc`).
+
 ### Fixed
 
+- **Console sink:** `ConsoleSinkOptions.OutputTemplate` is now applied (Serilog template syntax; the default format is unchanged when null/empty; include `{Exception}` explicitly if you want exceptions rendered). Behaviour change for anyone who had already set it. `Console.ResetColor` now runs in a `finally`.
+- **File sink:** `RollingInterval` is parsed case-insensitively; an invalid value throws `InvalidOperationException` listing the valid values (previously `ArgumentException` from `Enum.Parse`).
 - **Masking (fluent + JSON):** `LoggerHelperOptions.MergeFluentFrom` no longer duplicates a fluent `MaskingRule` that has the same `Pattern` as one already in the JSON configuration; the JSON rule wins (ordinal comparison). Added tests for the `EnableSelfLogging` OR, fluent masking `Enabled=false` keeping JSON rules, and rule de-duplication.
 
 ### Documentation
 
-- Sink READMEs (Console, MSSqlServer, File, Elasticsearch, Seq) aligned to the real API: usings, Console output format, MSSqlServer `Id` type and `AddStandardColumns` semantics, File JSON format and `RollingInterval` case-sensitivity, Elasticsearch default index and legacy keys, Seq troubleshooting.
+- Sink READMEs (Console, MSSqlServer, File, Elasticsearch, Seq) aligned to the real API: usings, Console output format, MSSqlServer `Id` type and `AddStandardColumns` semantics, File JSON format and `RollingInterval` values, Elasticsearch default index and legacy keys, Seq troubleshooting.
+- MSSqlServer README documents that `AddStandardColumns` replaces the default column set (no behaviour change).
 - HangfireConsole README declares the supported target frameworks (net8.0, net9.0, net10.0).
 - Site: `playground.html` now loads `js/main.js`; `index.html` shows concrete fluent and `appsettings.json` examples with sample output for the 9 older sinks, and the Email snippet uses `Host`/`Port`.
 

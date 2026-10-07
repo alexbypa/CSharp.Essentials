@@ -146,7 +146,7 @@ builder.Services.AddLoggerHelper(b => b
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `Path` | `string` | `"Logs"` | Base directory for log files. Relative paths are resolved from the app working directory. |
-| `RollingInterval` | `string` | `"Day"` | When to start a new file: `Minute`, `Hour`, `Day`, `Month`, `Year`, `Infinite` (single file, never rolls). Exact Serilog enum name (case-sensitive); an invalid value makes the sink fail to configure. |
+| `RollingInterval` | `string` | `"Day"` | When to start a new file: `Minute`, `Hour`, `Day`, `Month`, `Year`, `Infinite` (single file, never rolls). Serilog enum name, case-insensitive (`day` = `Day`); an invalid value throws `InvalidOperationException` listing the valid ones and the sink shows FAILED. |
 | `RetainedFileCountLimit` | `int` | `7` | How many rolled files to keep before the oldest is deleted. |
 | `Shared` | `bool` | `true` | Allow multiple processes (e.g. multiple app instances) to write to the same file. |
 | `FileNameProperty` | `string?` | `null` | Log event property used to create per-value subdirectories (e.g. `"TenantId"`). Values are sanitized for folder names (`\ / : * ? " < > |` become `_`, max 100 chars). See section above. |

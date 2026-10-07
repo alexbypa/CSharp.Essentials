@@ -45,6 +45,13 @@ public sealed class FileSinkPlugin : ISinkPlugin {
     public bool CanHandle(string sinkName) =>
         string.Equals(sinkName, "File", StringComparison.OrdinalIgnoreCase);
 
+    internal static RollingInterval ParseRollingInterval(string? value) {
+        if (Enum.TryParse<RollingInterval>(value, ignoreCase: true, out var interval) && Enum.IsDefined(interval))
+            return interval;
+        throw new InvalidOperationException(
+            $"File sink: invalid RollingInterval '{value}' (LoggerHelper:Sinks:File:RollingInterval). Valid values: {string.Join(", ", Enum.GetNames<RollingInterval>())}.");
+    }
+
     public void Configure(LoggerConfiguration loggerConfig, SinkRouting routing, LoggerHelperOptions options) {
         var opts = options.GetSinkConfig<FileSinkOptions>("File")
                    ?? options.BindSinkSection<FileSinkOptions>("File")
@@ -60,7 +67,7 @@ public sealed class FileSinkPlugin : ISinkPlugin {
                 wt => wt.File(
                     new JsonFormatter(),
                     logFilePath,
-                    rollingInterval: Enum.Parse<RollingInterval>(opts.RollingInterval),
+                    rollingInterval: FileSinkPlugin.ParseRollingInterval(opts.RollingInterval),
                     retainedFileCountLimit: opts.RetainedFileCountLimit,
                     shared: opts.Shared
                 )
@@ -89,7 +96,7 @@ internal sealed class DynamicPropertyFileSink : ILogEventSink, IDisposable {
 
     internal DynamicPropertyFileSink(FileSinkOptions opts) {
         _opts = opts;
-        _rollingInterval = Enum.Parse<RollingInterval>(opts.RollingInterval);
+        _rollingInterval = FileSinkPlugin.ParseRollingInterval(opts.RollingInterval);
         _defaultSink = new Lazy<ILogEventSink>(() => CreateSink(opts.Path));
     }
 

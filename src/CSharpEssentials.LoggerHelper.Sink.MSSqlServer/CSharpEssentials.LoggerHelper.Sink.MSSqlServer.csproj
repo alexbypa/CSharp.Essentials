@@ -22,6 +22,9 @@
     <ProjectReference Include="..\CSharpEssentials.LoggerHelper\CSharpEssentials.LoggerHelper.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="CSharpEssentials.LoggerHelper.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="8.2.0" />
   </ItemGroup>
 </Project>

@@ -51,8 +51,6 @@ app.UseLoggerHelper();   // ← required: activates sinks and registers middlewa
 ```
 
 > **`Sinks.Console` is optional.** The sink works with just the route declaration.
->
-> **Known limitation:** `OutputTemplate` is bound but not applied yet — the sink always prints `[HH:mm:ss Level] Message` (see [What You'll See](#what-youll-see)).
 
 ---
 
@@ -85,7 +83,7 @@ Each line is printed in color according to the log level (local time, full level
 [14:23:03 Error] Unhandled exception: Connection refused
 ```
 
-When an exception is attached, its `ToString()` is appended to the same line.
+This is the default format (no `OutputTemplate`); when an exception is attached, its `ToString()` is appended to the same line. With a custom `OutputTemplate` (Serilog template syntax), include `{Exception}` explicitly to print exceptions.
 
 ---
 
@@ -93,7 +91,7 @@ When an exception is attached, its `ToString()` is appended to the same line.
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `OutputTemplate` | `string?` | `null` | Reserved. Accepted and bound from JSON / fluent API, but not applied by the current sink: output is always `[HH:mm:ss Level] Message`. |
+| `OutputTemplate` | `string?` | `null` | Serilog output template (e.g. `[{Timestamp:HH:mm:ss} {Level:u3}] {Message}{NewLine}{Exception}`). When null or empty, the default `[HH:mm:ss Level] Message` is used. Exceptions are printed only if `{Exception}` is in the template. |
 
 ---
 
@@ -117,7 +115,6 @@ Colors are applied per-line and reset automatically after each message.
 | Symptom | Likely Cause | Fix |
 |---|---|---|
 | No output at all | `app.UseLoggerHelper()` missing | Add it after `builder.Build()` |
-| Custom `OutputTemplate` has no effect | The option is not applied by the current sink (fixed `[HH:mm:ss Level] Message` format) | Expected for now |
 | No colors in CI/Docker | Terminal does not support ANSI | Expected behavior in non-interactive terminals; output is still written |
 | `Debug` lines missing | `Debug` not included in `Levels` | Add `"Debug"` to the `Routes` array for this sink |
 

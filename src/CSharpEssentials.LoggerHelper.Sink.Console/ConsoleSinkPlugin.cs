@@ -1,6 +1,7 @@
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Formatting.Display;
 using System.Runtime.CompilerServices;
 
 namespace CSharpEssentials.LoggerHelper.Sink.Console;
@@ -42,24 +43,33 @@ public sealed class ConsoleSinkPlugin : ISinkPlugin {
 // ── Sink implementation ───────────────────────────────────────────
 
 internal sealed class ColoredConsoleSink : ILogEventSink {
-    private readonly string? _template;
+    private readonly MessageTemplateTextFormatter? _formatter;
 
     internal ColoredConsoleSink(string? outputTemplate) {
-        _template = outputTemplate;
+        _formatter = string.IsNullOrWhiteSpace(outputTemplate) ? null : new MessageTemplateTextFormatter(outputTemplate);
     }
 
     public void Emit(LogEvent logEvent) {
+        string formatted;
+        if (_formatter is null) {
+            var message = logEvent.RenderMessage();
+            var exception = logEvent.Exception?.ToString();
+            formatted = $"[{logEvent.Timestamp.ToLocalTime():HH:mm:ss} {logEvent.Level}] {message}";
+
+            if (!string.IsNullOrEmpty(exception))
+                formatted += $" {exception}";
+        } else {
+            var sw = new StringWriter();
+            _formatter.Format(logEvent, sw);
+            formatted = sw.ToString().TrimEnd('\r', '\n');
+        }
+
         System.Console.ForegroundColor = GetColor(logEvent.Level);
-
-        var message = logEvent.RenderMessage();
-        var exception = logEvent.Exception?.ToString();
-        var formatted = $"[{logEvent.Timestamp.ToLocalTime():HH:mm:ss} {logEvent.Level}] {message}";
-
-        if (!string.IsNullOrEmpty(exception))
-            formatted += $" {exception}";
-
-        System.Console.WriteLine(formatted);
-        System.Console.ResetColor();
+        try {
+            System.Console.WriteLine(formatted);
+        } finally {
+            System.Console.ResetColor();
+        }
     }
 
     private static ConsoleColor GetColor(LogEventLevel level) => level switch {
