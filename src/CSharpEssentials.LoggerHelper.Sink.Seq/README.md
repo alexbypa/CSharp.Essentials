@@ -51,6 +51,10 @@ app.UseLoggerHelper();   // ← required: activates sinks and registers middlewa
 ## Quick Setup — Fluent API
 
 ```csharp
+using CSharpEssentials.LoggerHelper;
+using CSharpEssentials.LoggerHelper.Sink.Seq;
+using Serilog.Events;
+
 builder.Services.AddLoggerHelper(b => b
     .WithApplicationName("MyApp")
     .AddRoute("Seq", LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
@@ -92,8 +96,10 @@ TenantId = 'acme' and OrderId > 100
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `ServerUrl` | `string` | `""` | **Required.** Seq ingestion URL (default port is `5341`). |
+| `ServerUrl` | `string` | `""` | **Required.** Seq ingestion URL (default port is `5341`). Legacy JSON key `serverUrl` is also accepted. |
 | `ApiKey` | `string?` | `null` | API key for authentication. Optional for local single-user Seq instances. Required for production Seq Server or Seq Cloud. |
+
+> An empty `ServerUrl` (or a missing `Seq` section) makes the sink fail to configure with an `InvalidOperationException`; LoggerHelper records it as not configured and the other sinks keep working. The v4 section name `SeqOptions` is read as a fallback.
 
 ---
 
@@ -122,7 +128,7 @@ For **Seq Cloud** or a production server, generate an API key in *Settings → A
 | Sink shows FAILED in Dashboard/MCP | `ServerUrl` empty or `Seq` section missing: the sink throws `InvalidOperationException` at configure time and is recorded as not configured | Set `Sinks.Seq.ServerUrl` |
 | No events appear in Seq UI | `ServerUrl` not reachable | Check the URL and ensure Seq is running; `curl http://localhost:5341/api` should return JSON |
 | `401 Unauthorized` in logs | Wrong or missing `ApiKey` | Verify the key in Seq *Settings → API Keys* |
-| Properties not visible in Seq | `EnableRenderedMessage` masking them | Set `General.EnableSelfLogging: true` to see internal sink diagnostics |
+| Nothing arrives and no error is shown | Sink errors are silent by default | Enable `General.EnableSelfLogging` (JSON `"General": { "EnableSelfLogging": true }` or `.EnableSelfLogging()` on the builder) to see Serilog `SelfLog` diagnostics |
 | Events delayed | Network latency or Seq ingestion backpressure | Check Seq server health; reduce the number of events per second if needed |
 
 ---

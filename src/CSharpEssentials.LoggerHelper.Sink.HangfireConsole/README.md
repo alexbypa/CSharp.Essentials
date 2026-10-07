@@ -16,6 +16,8 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.HangfireConsole
 dotnet add package Hangfire.Console
 ```
 
+**Supported frameworks:** `net8.0`, `net9.0`, `net10.0`.
+
 ---
 
 ## Quick Start (3 steps)

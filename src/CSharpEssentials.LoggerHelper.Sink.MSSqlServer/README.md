@@ -54,6 +54,10 @@ app.UseLoggerHelper();   // ← required: activates sinks and registers middlewa
 ## Quick Setup — Fluent API
 
 ```csharp
+using CSharpEssentials.LoggerHelper;
+using CSharpEssentials.LoggerHelper.Sink.MSSqlServer;
+using Serilog.Events;
+
 builder.Services.AddLoggerHelper(b => b
     .WithApplicationName("MyApp")
     .AddRoute("MSSqlServer", LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
@@ -61,6 +65,7 @@ builder.Services.AddLoggerHelper(b => b
         s.ConnectionString  = "Server=.;Database=Logs;Trusted_Connection=true;TrustServerCertificate=true";
         s.TableName         = "AppLogs";
         s.AutoCreateSqlTable = true;
+        s.Period            = "0.00:00:10";   // d.hh:mm:ss
     })
 );
 
@@ -76,13 +81,15 @@ Log events are batched and inserted as rows into the configured table. Default c
 
 | Column | SQL Type | Notes |
 |---|---|---|
-| `Id` | `BIGINT IDENTITY` | Primary key |
+| `Id` | `INT IDENTITY` | Primary key |
 | `Message` | `NVARCHAR(MAX)` | Rendered log message |
 | `MessageTemplate` | `NVARCHAR(MAX)` | Raw template with `{placeholders}` |
 | `Level` | `NVARCHAR(128)` | e.g. `Warning`, `Error` |
-| `TimeStamp` | `DATETIME` | UTC timestamp |
+| `TimeStamp` | `DATETIME` | Event timestamp (as written by the Serilog sink, not converted to UTC) |
 | `Exception` | `NVARCHAR(MAX)` | Full exception string (nullable) |
 | `Properties` | `NVARCHAR(MAX)` | All structured properties as XML |
+
+> Need a pre-rendered message property on each event for your own columns? Call `.EnableRenderedMessage()` on the builder (or set `General.EnableRenderedMessage`).
 
 ---
 
@@ -136,9 +143,9 @@ using (Serilog.Context.LogContext.PushProperty("UserId", userId))
 | `SchemaName` | `string` | `"dbo"` | Table schema. |
 | `AutoCreateSqlTable` | `bool` | `true` | Create the table on startup if it does not exist. |
 | `BatchPostingLimit` | `int` | `100` | Maximum events per batch INSERT. |
-| `Period` | `string` | `"0.00:00:10"` | Flush interval in `d.hh:mm:ss` format. `"0.00:00:10"` = 10 seconds. |
-| `AddStandardColumns` | `List<string>?` | `null` | Standard columns to include. Valid values: `Id`, `Message`, `MessageTemplate`, `Level`, `TimeStamp`, `Exception`, `Properties`, `LogEvent`. |
-| `RemoveStandardColumns` | `List<string>?` | `null` | Standard columns to exclude (e.g. `["Properties"]` to drop the XML blob). |
+| `Period` | `string` | `"0.00:00:10"` | Flush interval in `d.hh:mm:ss` (`TimeSpan`) format. `"0.00:00:10"` = 10 seconds; an unparsable value falls back to 10 seconds. |
+| `AddStandardColumns` | `List<string>?` | `null` | When set, **replaces** the default column set with exactly these columns. Valid values: `Id`, `Message`, `MessageTemplate`, `Level`, `TimeStamp`, `Exception`, `Properties`, `LogEvent`. |
+| `RemoveStandardColumns` | `List<string>?` | `null` | Standard columns to exclude (e.g. `["Properties"]` to drop the XML blob). Applied after `AddStandardColumns`; unknown names are ignored. |
 | `AdditionalColumns` | `List<AdditionalColumnConfig>?` | `null` | Custom columns mapped from log properties (see above). |
 
 ### AdditionalColumnConfig
@@ -146,7 +153,7 @@ using (Serilog.Context.LogContext.PushProperty("UserId", userId))
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `ColumnName` | `string` | `""` | SQL column name — must match the log property name. |
-| `DataType` | `string` | `"NVarChar"` | SQL type. Any `SqlDbType` name: `NVarChar`, `Int`, `BigInt`, `DateTime`, `Bit`, etc. |
+| `DataType` | `string` | `"NVarChar"` | SQL type. Any `SqlDbType` name (case-insensitive): `NVarChar`, `Int`, `BigInt`, `DateTime`, `Bit`, etc. An unknown name falls back to `NVarChar`. |
 | `AllowNull` | `bool` | `true` | Whether the column accepts `NULL`. |
 | `DataLength` | `int` | `-1` | Column length. `-1` = `MAX`. Use a fixed length (e.g. `100`) for indexed columns. |
 

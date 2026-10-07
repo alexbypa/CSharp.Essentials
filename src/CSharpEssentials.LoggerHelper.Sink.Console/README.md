@@ -11,14 +11,13 @@
 ```bash
 dotnet add package CSharpEssentials.LoggerHelper
 dotnet add package CSharpEssentials.LoggerHelper.Sink.Console
-
 ```
 
 ---
 
 ## Quick Setup — JSON
 
-Add to `appsettings.json`:
+Add to `appsettings.json` (the `Routes` entry is all you need):
 
 ```json
 {
@@ -34,16 +33,13 @@ Add to `appsettings.json`:
     }
   }
 }
-
 ```
 
-### 2. Initialization in C#
-
-Keep your `Program.cs` exceptionally clean. Register the helper and activate the pipeline in just two lines of code:
+Then register the helper and activate the pipeline:
 
 ```csharp
 // Program.cs
-using CSharpEssentials.LoggerHelper.Extensions;
+using CSharpEssentials.LoggerHelper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,13 +50,19 @@ var app = builder.Build();
 app.UseLoggerHelper();   // ← required: activates sinks and registers middleware
 ```
 
-> **`Sinks.Console` is optional.** If omitted, the default template `[HH:mm:ss Level] Message` is used.
+> **`Sinks.Console` is optional.** The sink works with just the route declaration.
+>
+> **Known limitation:** `OutputTemplate` is bound but not applied yet — the sink always prints `[HH:mm:ss Level] Message` (see [What You'll See](#what-youll-see)).
 
 ---
 
 ## Quick Setup — Fluent API
 
 ```csharp
+using CSharpEssentials.LoggerHelper;
+using CSharpEssentials.LoggerHelper.Sink.Console;
+using Serilog.Events;
+
 builder.Services.AddLoggerHelper(b => b
     .WithApplicationName("MyApp")
     .AddRoute("Console", LogEventLevel.Debug, LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
@@ -75,19 +77,15 @@ app.UseLoggerHelper();   // ← required
 
 ## What You'll See
 
-Each line is printed in color according to the log level:
-
-```
-[14:23:01 INF] Application started
-[14:23:02 WRN] Retry attempt 1 for endpoint /api/orders
-[14:23:03 ERR] Unhandled exception: Connection refused
-```
-
-Default template (no `OutputTemplate` configured):
+Each line is printed in color according to the log level (local time, full level name):
 
 ```
 [14:23:01 Information] Application started
+[14:23:02 Warning] Retry attempt 1 for endpoint /api/orders
+[14:23:03 Error] Unhandled exception: Connection refused
 ```
+
+When an exception is attached, its `ToString()` is appended to the same line.
 
 ---
 
@@ -95,7 +93,7 @@ Default template (no `OutputTemplate` configured):
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `OutputTemplate` | `string?` | `null` | Serilog output template. Supports all Serilog tokens (`{Level}`, `{Message}`, `{Exception}`, `{Properties}`, etc.). When `null`, uses `[HH:mm:ss Level] Message`. |
+| `OutputTemplate` | `string?` | `null` | Reserved. Accepted and bound from JSON / fluent API, but not applied by the current sink: output is always `[HH:mm:ss Level] Message`. |
 
 ---
 
@@ -119,7 +117,7 @@ Colors are applied per-line and reset automatically after each message.
 | Symptom | Likely Cause | Fix |
 |---|---|---|
 | No output at all | `app.UseLoggerHelper()` missing | Add it after `builder.Build()` |
-| Custom template not applied | App not restarted after config change | Restart the process — configuration is read at startup |
+| Custom `OutputTemplate` has no effect | The option is not applied by the current sink (fixed `[HH:mm:ss Level] Message` format) | Expected for now |
 | No colors in CI/Docker | Terminal does not support ANSI | Expected behavior in non-interactive terminals; output is still written |
 | `Debug` lines missing | `Debug` not included in `Levels` | Add `"Debug"` to the `Routes` array for this sink |
 

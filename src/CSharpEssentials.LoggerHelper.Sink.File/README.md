@@ -54,6 +54,10 @@ app.UseLoggerHelper();   // ← required: activates sinks and registers middlewa
 ## Quick Setup — Fluent API
 
 ```csharp
+using CSharpEssentials.LoggerHelper;
+using CSharpEssentials.LoggerHelper.Sink.File;
+using Serilog.Events;
+
 builder.Services.AddLoggerHelper(b => b
     .WithApplicationName("MyApp")
     .AddRoute("File", LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
@@ -75,20 +79,20 @@ app.UseLoggerHelper();   // ← required
 Each log event is written as a **single JSON line**:
 
 ```json
-{"@t":"2026-06-01T14:23:01.1230000Z","@mt":"Order {OrderId} placed by {UserId}","@l":"Information","OrderId":42,"UserId":"usr_99","ApplicationName":"MyApp","SourceContext":"OrdersController"}
+{"Timestamp":"2026-06-01T14:23:01.1230000+00:00","Level":"Information","MessageTemplate":"Order {OrderId} placed by {UserId}","Properties":{"OrderId":42,"UserId":"usr_99","ApplicationName":"MyApp","SourceContext":"OrdersController"}}
 ```
 
-Fields at a glance:
+Fields at a glance (Serilog `JsonFormatter`):
 
 | Field | Description |
 |---|---|
-| `@t` | UTC timestamp (ISO 8601) |
-| `@mt` | Raw message template |
-| `@l` | Log level (omitted when `Information`) |
-| `@x` | Exception string (present on errors) |
-| Any extra key | Structured property pushed via scope or call-site |
+| `Timestamp` | Event timestamp (ISO 8601 with offset) |
+| `Level` | Log level |
+| `MessageTemplate` | Raw message template |
+| `Exception` | Exception string (present only when an exception is logged) |
+| `Properties` | Structured properties pushed via scope or call-site |
 
-Files are named `log-YYYYMMDD.txt` by default and roll at midnight.
+Files are named `log-YYYYMMDD.txt` by default (`log.txt` with `Infinite`) and roll according to `RollingInterval`.
 
 ---
 
@@ -142,10 +146,10 @@ builder.Services.AddLoggerHelper(b => b
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `Path` | `string` | `"Logs"` | Base directory for log files. Relative paths are resolved from the app working directory. |
-| `RollingInterval` | `string` | `"Day"` | When to start a new file: `Minute`, `Hour`, `Day`, `Month`, `Year`, `Infinite` (single file, never rolls). |
+| `RollingInterval` | `string` | `"Day"` | When to start a new file: `Minute`, `Hour`, `Day`, `Month`, `Year`, `Infinite` (single file, never rolls). Exact Serilog enum name (case-sensitive); an invalid value makes the sink fail to configure. |
 | `RetainedFileCountLimit` | `int` | `7` | How many rolled files to keep before the oldest is deleted. |
 | `Shared` | `bool` | `true` | Allow multiple processes (e.g. multiple app instances) to write to the same file. |
-| `FileNameProperty` | `string?` | `null` | Log event property used to create per-value subdirectories (e.g. `"TenantId"`). See section above. |
+| `FileNameProperty` | `string?` | `null` | Log event property used to create per-value subdirectories (e.g. `"TenantId"`). Values are sanitized for folder names (`\ / : * ? " < > |` become `_`, max 100 chars). See section above. |
 | `MaxOpenFiles` | `int` | `64` | Maximum number of simultaneously open file handles when using `FileNameProperty`. Oldest handles are closed on LRU eviction. |
 
 > All logs are written in **structured JSON format** using Serilog's `JsonFormatter`. There is no plain-text mode for this sink — use the Console sink for human-readable output.
@@ -160,7 +164,8 @@ builder.Services.AddLoggerHelper(b => b
 | All logs in base folder (no subdirectory) | `FileNameProperty` not set in scope before logging | Wrap log calls with `BeginScope` containing the property |
 | `Too many open files` OS error | `MaxOpenFiles` too high for the OS limit | Reduce `MaxOpenFiles` or raise the OS `ulimit -n` |
 | Old files not deleted | `RetainedFileCountLimit` reached but files are locked | Check for other processes holding file handles |
-| Logs from different log levels mixed | All levels route to the same file | Use separate `File` sink instances with different `Path` values and different `Routes` |
+| Sink shows FAILED in Dashboard/MCP | Invalid `RollingInterval` (e.g. `"Daily"`) or unwritable `Path` | Use `Minute`, `Hour`, `Day`, `Month`, `Year` or `Infinite` and check folder permissions |
+| Different levels end up in the same file | One `File` sink writes everything routed to it into a single file set | Limit what is written with the route `Levels`; per-level files are not supported |
 
 ---
 

@@ -16,7 +16,7 @@ For the exact C# Extension Methods, initialization syntax, and complete appsetti
 - `Configure` must throw `InvalidOperationException` when the sink's section is missing or a required option is empty (Email Host/From/To; MSSqlServer/Postgresql/MySql ConnectionString; Telegram BotToken/ChatId; Seq ServerUrl; Elasticsearch NodeUris; HangfireConsole needs `AddHangfireConsoleSink()` before `AddLoggerHelper()`). The engine catches it, keeps the other sinks working and records the sink as not configured (FAILED in Dashboard/MCP).
 - Elasticsearch: `AutoRegisterTemplate` (default true) controls the synchronous index-template call at startup.
 - An `appsettings.LoggerHelper*.json` in the working directory fully replaces the `IConfiguration` passed to `AddLoggerHelper`.
-- `AddLoggerHelper(config, fluent)` merges fluent `General` flags over JSON: SelfLogging/RequestResponseLogging/RenderedMessage OR, OpenTelemetry AND (fluent can only disable); `SensitiveDataMasking` is additive (union of presets/properties, rules appended).
+- `AddLoggerHelper(config, fluent)` merges fluent `General` flags over JSON: SelfLogging/RequestResponseLogging/RenderedMessage OR, OpenTelemetry AND (fluent can only disable); `SensitiveDataMasking` is additive (union of presets/properties, rules appended, de-duplicated by Pattern: JSON wins).
 
 ## Atomic NuGet Mapping Matrix
 - Core Engine: CSharpEssentials.LoggerHelper

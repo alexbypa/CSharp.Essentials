@@ -6,6 +6,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [Unreleased]
+
+### Fixed
+
+- **Masking (fluent + JSON):** `LoggerHelperOptions.MergeFluentFrom` no longer duplicates a fluent `MaskingRule` that has the same `Pattern` as one already in the JSON configuration; the JSON rule wins (ordinal comparison). Added tests for the `EnableSelfLogging` OR, fluent masking `Enabled=false` keeping JSON rules, and rule de-duplication.
+
+### Documentation
+
+- Sink READMEs (Console, MSSqlServer, File, Elasticsearch, Seq) aligned to the real API: usings, Console output format, MSSqlServer `Id` type and `AddStandardColumns` semantics, File JSON format and `RollingInterval` case-sensitivity, Elasticsearch default index and legacy keys, Seq troubleshooting.
+- HangfireConsole README declares the supported target frameworks (net8.0, net9.0, net10.0).
+- Site: `playground.html` now loads `js/main.js`; `index.html` shows concrete fluent and `appsettings.json` examples with sample output for the 9 older sinks, and the Email snippet uses `Host`/`Port`.
+
+---
+
 ## [5.2.9] — 2026-10-06
 
 ### Fixed

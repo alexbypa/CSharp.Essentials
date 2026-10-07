@@ -87,7 +87,8 @@ public sealed class LoggerHelperOptions {
     /// Merges fluent-API options into this (JSON-bound) instance.
     /// Routes are additive; ApplicationName and sink configs from fluent override JSON;
     /// General: SelfLogging/RequestResponse/RenderedMessage are OR-ed, OpenTelemetry is AND-ed
-    /// (so fluent can only turn it off); masking is merged only when enabled via fluent.
+    /// (so fluent can only turn it off); masking is merged only when enabled via fluent,
+    /// and masking rules are de-duplicated by Pattern (the first one wins, so JSON over fluent).
     /// </summary>
     internal void MergeFluentFrom(LoggerHelperOptions fluent) {
         Routes.AddRange(fluent.Routes);
@@ -107,7 +108,9 @@ public sealed class LoggerHelperOptions {
         target.Enabled = true;
         target.Presets = target.Presets.Union(m.Presets, StringComparer.OrdinalIgnoreCase).ToList();
         target.SensitiveProperties = target.SensitiveProperties.Union(m.SensitiveProperties, StringComparer.OrdinalIgnoreCase).ToList();
-        target.Rules.AddRange(m.Rules);
+        foreach (var rule in m.Rules)
+            if (!target.Rules.Exists(r => string.Equals(r.Pattern, rule.Pattern, StringComparison.Ordinal)))
+                target.Rules.Add(rule);
         if (m.MaskText != new SensitiveDataMaskingOptions().MaskText)
             target.MaskText = m.MaskText;
     }

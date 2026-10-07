@@ -52,12 +52,17 @@ app.UseLoggerHelper();   // ← required: activates sinks and registers middlewa
 ## Quick Setup — Fluent API
 
 ```csharp
+using CSharpEssentials.LoggerHelper;
+using CSharpEssentials.LoggerHelper.Sink.Elasticsearch;
+using Serilog.Events;
+
 builder.Services.AddLoggerHelper(b => b
     .WithApplicationName("MyApp")
     .AddRoute("Elasticsearch", LogEventLevel.Information, LogEventLevel.Warning, LogEventLevel.Error, LogEventLevel.Fatal)
     .ConfigureElasticsearch(e => {
         e.NodeUris    = "http://localhost:9200";
         e.IndexFormat = "myapp-logs-{0:yyyy.MM.dd}";
+        e.AutoRegisterTemplate = true;   // default; false skips the startup HTTP call
     })
 );
 
@@ -91,7 +96,7 @@ Documents land in the index matching your `IndexFormat` (e.g. `myapp-logs-2026.0
 
 ## Index Format
 
-The `IndexFormat` string uses standard .NET date format tokens applied to the current UTC date:
+The `IndexFormat` string uses standard .NET date format tokens (`{0:...}`) applied to the event date. When omitted, the Serilog Elasticsearch default (`logstash-{0:yyyy.MM.dd}`) is used.
 
 | Example | Resulting index name |
 |---|---|
@@ -103,7 +108,7 @@ The `IndexFormat` string uses standard .NET date format tokens applied to the cu
 
 ## OpenSearch Compatibility
 
-This sink is fully compatible with **OpenSearch** — use the same configuration, pointing `NodeUris` at your OpenSearch node:
+This sink targets the Elasticsearch 7.x REST API, which OpenSearch also exposes — use the same configuration, pointing `NodeUris` at your OpenSearch node:
 
 ```json
 "NodeUris": "http://localhost:9200"
@@ -118,9 +123,10 @@ OpenSearch exposes the same REST API as Elasticsearch 7.x on port 9200 by defaul
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `NodeUris` | `string` | `""` | **Required.** Elasticsearch node URL. For HTTPS or authentication include them in the URI: `"https://user:pass@es-host:9243"`. |
-| `IndexFormat` | `string?` | `null` | Index name format with optional date placeholder `{0:...}`. When `null` Serilog uses its own default. |
+| `IndexFormat` | `string?` | `null` | Index name format with optional date placeholder `{0:...}`. When `null` Serilog uses its own default (`logstash-{0:yyyy.MM.dd}`). |
+| `AutoRegisterTemplate` | `bool` | `true` | Registers the index template with a synchronous HTTP call at startup (idempotent). Set `false` to skip it, e.g. when the template is managed elsewhere or the node may be down at startup. Legacy JSON keys `nodeUris`, `indexFormat` and `autoRegisterTemplate` are also accepted. |
 
-| `AutoRegisterTemplate` | `bool` | `true` | Registers the index template with a synchronous HTTP call at startup (idempotent). Set `false` to skip it, e.g. when the template is managed elsewhere or the node may be down at startup. Legacy JSON key `autoRegisterTemplate` is also accepted. |
+> The sink name is matched case-insensitively; the v4 spelling `ElasticSearch` is accepted as an alias for the route and the `Sinks` section.
 
 > **Startup validation.** An empty `NodeUris` (or a missing `Elasticsearch` section) makes the sink fail to configure with an `InvalidOperationException`; LoggerHelper records it as not configured (shown as FAILED in the Dashboard/MCP) and the other sinks keep working.
 

@@ -15,13 +15,11 @@ Eseguire con `/microtask-pipeline:microtask`, un task alla volta, commit a fine 
 | Stato | ID | Gruppo | Tipo | Task |
 |---|---|---|---|---|
 | [ ] | D7 | G8 | docs | GIF dashboard + MCP nel README NuGet. **Bloccato:** serve registrare le GIF (Demo app + dashboard + chat MCP) e committarle in `img/`; i link raw GitHub darebbero 404 su NuGet finché il file non è su `main`. Script di scena in `outcomes/content/D4.md` |
-| [ ] | A64 | G11 | code | `LoggerHelperOptions.MergeFluentFrom` (A63): le `MaskingRule` fluent sono accodate a quelle JSON, quindi regole identiche si duplicano. Deduplicare (confronto per valore) + test: `EnableSelfLogging` OR, fluent masking `Enabled=false`, regole duplicate |
 | [ ] | A65 | G11 | user | **Azione utente (A61/A49):** ruotare password SMTP, BotToken Telegram, ApiKey Seq, password MySQL (e Postgres/MSSQL se non default locali); confermare che la password postgres in `appsettings.LoggerHelper.json` sia un default di sviluppo; valutare la pulizia della history (`git filter-repo`) + force push. I segreti restano nella history finché non ruotati/purgati. Non scrivere i valori in nessun file |
-| [ ] | A31 | G11 | docs | Allineare i README dei sink Console, MSSqlServer, File, Elasticsearch, Seq (chiari, completi, esempi = API reale) |
-| [ ] | A32 | G11 | docs | Sito: `playground.html:155` carica `assets/app.js` inesistente (c'è `js/main.js`); verificare menu in `index.html` |
-| [ ] | A33 | G11 | docs | Sito: applicare "Show, Don't Tell" ai sink vecchi (esempi concreti al posto delle descrizioni) |
-| [ ] | A34 | G11 | docs | README HangfireConsole: dichiarare TFM supportati (net8.0/net9.0/net10.0). Vedi `outcomes/audits/hangfireconsole-docs-review.md` |
 | [ ] | A35 | G12 | code | `.mcp.json` (radice, oggi solo `perplexity-docs`): aggiungere `demo-logger` e `myapp-logger` (MCP di Demo/TestApp) con URL + trasporto corretti (oggi ECONNREFUSED); poi togliere i permessi `mcp__demo-logger__*` / `mcp__myapp-logger__*` da `.claude/settings.local.json` se ridondanti |
+| [ ] | A69 | G12 | code | `ConsoleSinkOptions.OutputTemplate` è bindato ma mai applicato (`ColoredConsoleSink` salva `_template` e non lo legge): implementarlo o rimuovere l'opzione; aggiornare README Console (oggi dice "reserved") e sito |
+| [ ] | A70 | G12 | code | Sink File: la stringa `RollingInterval` usa `Enum.Parse` case-sensitive senza errore chiaro: usare `Enum.TryParse(ignoreCase)` + `InvalidOperationException` esplicita + test |
+| [ ] | A71 | G12 | code | MSSqlServer: `AddStandardColumns` sostituisce il set di colonne di default (nome fuorviante) e `TimeStamp` non è convertito in UTC: decidere rinomina/doc vs opzione `ConvertToUtc` |
 | [ ] | A39 | G0b | code | Parità repo pubblico `alexbypa/CSharp.Essentials`: portare fix A38 (`ReplaceLineEndings(" ")` nei due `SanitizeLogValue` + test) per mantenere identiche le due copie |
 | [ ] | A40 | G0b | analysis | `Directory.Packages.props` non applicato (nessun `ManagePackageVersionsCentrally`, versioni inline nei csproj e divergenti, es. M.E.Configuration 9.0.5 vs 10.0.9): attivare CPM o rimuovere il file e correggere CLAUDE.md |
 | [ ] | A41 | G0b | code | Core csproj: allineare major delle dipendenze M.E.* (Configuration/Binder 10.0.9 vs Json/Logging 9.0.1) |

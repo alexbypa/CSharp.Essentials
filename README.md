@@ -147,7 +147,7 @@ builder.Services.AddLoggerHelper(builder.Configuration, b => b
 );
 ```
 
-Fluent `General` flags and `SensitiveDataMasking` are merged over the JSON: `EnableSelfLogging`, `EnableRequestResponseLogging` and `EnableRenderedMessage` are OR-ed; `EnableOpenTelemetry` is AND-ed (fluent `DisableOpenTelemetry` can only turn it off); masking presets/properties are unioned and rules appended.
+Fluent `General` flags and `SensitiveDataMasking` are merged over the JSON: `EnableSelfLogging`, `EnableRequestResponseLogging` and `EnableRenderedMessage` are OR-ed; `EnableOpenTelemetry` is AND-ed (fluent `DisableOpenTelemetry` can only turn it off); masking presets/properties are unioned and rules appended, de-duplicated by `Pattern` (JSON wins).
 
 [↑ Back to Top](#top)
 
