@@ -8,8 +8,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Demo:** the curl examples returned by `GET /api/mcp-demo/tools` and `test-all-endpoints.http` pointed to `localhost:5000`; the Demo listens on `localhost:5123`, so copied commands failed with "connection refused".
+
 ### Changed
 
+- **Console sink:** removed the unused `Serilog.Sinks.Console` package reference (the sink writes through `System.Console`); the package no longer pulls it in transitively. Anyone relying on that transitive dependency for their own `WriteTo.Console()` must reference `Serilog.Sinks.Console` directly.
 - **Benchmarks:** classes can be grouped with `[BenchmarkCategory("Quick")]`; `benchmarks.yml` has a `category` input (default `Quick`, `*` = all) next to `filter` (default `*`), so adding a class to the quick run needs no workflow change. Every run now opens the PR that updates `docs/benchmarks.md` with the classes it ran.
 - **Benchmarks:** new `MaskingSinkScalingBenchmark` measures sensitive data masking on/off with 1, 3 and 5 sinks (masking is an enricher, applied once per event before routing).
 - **Benchmarks:** new `LoggerComparisonBenchmark` compares LoggerHelper, Serilog (`Serilog.Extensions.Logging`) and NLog (`NLog.Extensions.Logging`) through the same `ILogger` API, with the same messages, one no-op sink and minimum level Information. The benchmark-only `NullSinkPlugin` now uses `WriteTo.Conditional` + `SinkRouting.Matches` like the published sinks (it used a sub-logger, which overstated LoggerHelper's cost).

@@ -4,7 +4,7 @@
 ### Then fire each request to exercise every endpoint.
 ### ═══════════════════════════════════════════════════════════════
 
-@baseUrl = http://localhost:5000
+@baseUrl = http://localhost:5123
 
 ### ── Basic Logging ─────────────────────────────────────────────
 

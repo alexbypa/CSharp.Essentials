@@ -21,8 +21,6 @@ Eseguire con `/microtask-pipeline:microtask`, un task alla volta, commit a fine 
 | [ ] | A48 | G6b | code | `HttpHelperLog` (`src/CSharpEssentials.HttpHelper/HttpHelperLog.cs:10`) scrive sul `Serilog.Log` statico, ma `AddLoggerHelper` non assegna mai `Log.Logger`: i log interni di HttpHelper non raggiungono la pipeline LoggerHelper, contrariamente al README HttpHelper (~riga 82). Collegarlo alla pipeline oppure correggere il README (da C1) |
 | [ ] | A50 | G6b | docs | Bassa priorità. Demo: il cursore round-robin del mock è condiviso, quindi la sequenza 502/503/200 vale solo per richieste seriali: annotarlo nel README della Demo oppure rendere il match per-request (da C1) |
 | [ ] | A51 | G4c | code | Bassa priorità. `IHttpMockScenario`: aggiungere un default interface member che esponga le factory request-aware (`Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>`), così anche le implementazioni custom ricevono request e token nella factory (oggi solo `HttpMockScenario`; nota di design nel commento ponytail di `HttpMockEngine`). Additivo, nessun breaking change |
-| [ ] | A72 | G13 | code | Demo `Endpoints/McpDemoEndpoints.cs` (`curlExamples`, ~righe 44-49): gli esempi curl usano `localhost:5000` ma Demo ascolta su `localhost:5123` (`launchSettings.json`): allineare la porta |
-| [ ] | A73 | G13 | code | `CSharpEssentials.LoggerHelper.Sink.Console.csproj:30`: il `PackageReference Serilog.Sinks.Console` sembra inutilizzato (il sink è scritto a mano, nessun `using` nei `.cs`): verificare (build + test, anche transitive) e rimuoverlo |
 
 ## Roadmap (promemoria — NON eseguire)
 

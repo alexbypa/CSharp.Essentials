@@ -41,12 +41,12 @@ public class McpDemoEndpoints : IEndpointDefinition {
                 }
             },
             curlExamples = new {
-                listTools       = "curl -X POST http://localhost:5000/mcp -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\",\"params\":{}}'",
-                getHealth       = "curl -X POST http://localhost:5000/mcp -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"loggerhelper_get_health\",\"arguments\":{}}}'",
-                getErrors       = "curl -X POST http://localhost:5000/mcp -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"loggerhelper_get_errors\",\"arguments\":{\"count\":5}}}'",
-                listPrompts     = "curl -X POST http://localhost:5000/mcp -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"prompts/list\",\"params\":{}}'",
-                diagnoseAll     = "curl -X POST http://localhost:5000/mcp -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":5,\"method\":\"prompts/get\",\"params\":{\"name\":\"diagnose-logging\",\"arguments\":{\"focus\":\"all\"}}}'",
-                sseConnect      = "curl -N http://localhost:5000/mcp/sse"
+                listTools       = "curl -X POST http://localhost:5123/mcp -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\",\"params\":{}}'",
+                getHealth       = "curl -X POST http://localhost:5123/mcp -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"loggerhelper_get_health\",\"arguments\":{}}}'",
+                getErrors       = "curl -X POST http://localhost:5123/mcp -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"loggerhelper_get_errors\",\"arguments\":{\"count\":5}}}'",
+                listPrompts     = "curl -X POST http://localhost:5123/mcp -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"prompts/list\",\"params\":{}}'",
+                diagnoseAll     = "curl -X POST http://localhost:5123/mcp -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":5,\"method\":\"prompts/get\",\"params\":{\"name\":\"diagnose-logging\",\"arguments\":{\"focus\":\"all\"}}}'",
+                sseConnect      = "curl -N http://localhost:5123/mcp/sse"
             }
         }))
         .WithSummary("MCP Server — transports, tools, prompts, and curl examples")
