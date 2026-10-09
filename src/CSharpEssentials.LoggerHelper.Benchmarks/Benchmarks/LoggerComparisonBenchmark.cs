@@ -19,7 +19,7 @@ namespace CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks;
 /// MachineName, LogContext) and per-level routing; Serilog and NLog run with no enrichers.
 /// Small and quick on its own: run it with --anyCategories Quick (or --filter *LoggerComparison*).
 /// </summary>
-[BenchmarkCategory("Quick")]
+[BenchmarkCategory("Quick", "Release")]
 [MemoryDiagnoser]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
 [RankColumn]

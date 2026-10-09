@@ -17,6 +17,7 @@ namespace CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks;
 ///
 /// Tutti usano sink no-op — misura overhead del framework, non I/O.
 /// </summary>
+[BenchmarkCategory("Quick", "Release")]
 [MemoryDiagnoser]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
 [RankColumn]

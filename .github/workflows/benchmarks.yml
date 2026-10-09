@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       category:
-        description: "Classes marked [BenchmarkCategory(\"<name>\")]. Default 'Quick' = quick set; '*' = no category filter."
+        description: "Classes marked [BenchmarkCategory(\"<name>\")]. Quick = comparison set; Release = what a tag runs; '*' = no category filter."
         required: false
         default: 'Quick'
       filter:
@@ -32,8 +32,8 @@ jobs:
   benchmark:
     runs-on: ubuntu-latest
     env:
-      # Tag push → full suite; manual run → category + filter typed in the form (both must match).
-      BENCH_CATEGORY: ${{ github.event_name == 'workflow_dispatch' && inputs.category || '*' }}
+      # Tag push → 'Release' classes; manual run → category + filter typed in the form (both must match).
+      BENCH_CATEGORY: ${{ github.event_name == 'workflow_dispatch' && inputs.category || 'Release' }}
       BENCH_FILTER: ${{ github.event_name == 'workflow_dispatch' && inputs.filter || '*' }}
       # Tag push → full job (accurate); manual run → short job unless 'default' is chosen.
       BENCH_JOB: ${{ github.event_name == 'workflow_dispatch' && inputs.job || 'default' }}

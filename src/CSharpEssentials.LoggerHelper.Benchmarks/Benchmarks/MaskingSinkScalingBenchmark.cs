@@ -13,7 +13,7 @@ namespace CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks;
 /// should stay flat at 1, 3 and 5 sinks, while both rows grow with the sink fan-out.
 /// Payload contains an email, a card number and a password; all no-op sinks, OpenTelemetry off.
 /// </summary>
-[BenchmarkCategory("Quick")]
+[BenchmarkCategory("Quick", "Release")]
 [MemoryDiagnoser]
 [RankColumn]
 public class MaskingSinkScalingBenchmark {

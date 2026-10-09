@@ -8,14 +8,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [5.2.11] — 2026-10-09
+
 ### Fixed
 
 - **Demo:** the curl examples returned by `GET /api/mcp-demo/tools` and `test-all-endpoints.http` pointed to `localhost:5000`; the Demo listens on `localhost:5123`, so copied commands failed with "connection refused".
 
 ### Changed
 
+- **HttpHelper:** dropped the redundant `Microsoft.AspNetCore.Http.Abstractions` 2.3.0, `Microsoft.Extensions.Configuration.Json`, `Microsoft.Extensions.Http` and `System.Threading.RateLimiting` package references (provided by the `Microsoft.AspNetCore.App` framework reference that flows from `CSharpEssentials.LoggerHelper`); net8/net9 consumers no longer get 9.x assemblies forced on them.
+- **Repo:** removed the unused `Directory.Packages.props` (central package management was never enabled; versions live in each csproj).
+- **Dependencies:** `CSharpEssentials.LoggerHelper`, `.Sink.Console` and `.Sink.File` no longer declare `Microsoft.Extensions.Configuration`, `.Json`, `.Binder` and `.Logging` package references (they were redundant with the `Microsoft.AspNetCore.App` framework reference and forced 10.x on net8/net9 consumers). On net8.0 these assemblies now come from the installed ASP.NET Core runtime; `Serilog.Settings.Configuration` still requires `Binder` >= 9.0.0.
 - **Console sink:** removed the unused `Serilog.Sinks.Console` package reference (the sink writes through `System.Console`); the package no longer pulls it in transitively. Anyone relying on that transitive dependency for their own `WriteTo.Console()` must reference `Serilog.Sinks.Console` directly.
 - **Benchmarks:** classes can be grouped with `[BenchmarkCategory("Quick")]`; `benchmarks.yml` has a `category` input (default `Quick`, `*` = all) next to `filter` (default `*`), so adding a class to the quick run needs no workflow change. Every run now opens the PR that updates `docs/benchmarks.md` with the classes it ran.
+- **Benchmarks:** tag pushes run only the `Release` category (LoggerComparison, MaskingSinkScaling, Routing, Startup, TraceApi, SensitiveDataMasking, McpTools: 7 of 13 classes); the five comparison classes are also `Quick`. The before/after classes of past fixes and `Throughput` have no category and run only on request (`category` = `*`).
 - **Benchmarks:** new `MaskingSinkScalingBenchmark` measures sensitive data masking on/off with 1, 3 and 5 sinks (masking is an enricher, applied once per event before routing).
 - **Benchmarks:** new `LoggerComparisonBenchmark` compares LoggerHelper, Serilog (`Serilog.Extensions.Logging`) and NLog (`NLog.Extensions.Logging`) through the same `ILogger` API, with the same messages, one no-op sink and minimum level Information. The benchmark-only `NullSinkPlugin` now uses `WriteTo.Conditional` + `SinkRouting.Matches` like the published sinks (it used a sub-logger, which overstated LoggerHelper's cost).
 - **CI (`benchmarks.yml`):** runs on .NET 10 (BenchmarkDotNet 0.15.8). Manual runs take a `filter` input (default: the quick comparison) and a `job` input (default `short`, 3 iterations); tag pushes still run the full suite with the full job. Result tables go to the run summary and the full output is uploaded as an artifact. A full run opens a PR with the updated `docs/benchmarks.md` instead of pushing to protected `main` (which failed with GH013).

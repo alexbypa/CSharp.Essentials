@@ -19,6 +19,7 @@ namespace CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks;
 ///   dotnet run -c Release --framework net9.0 \
 ///     -- --filter *SensitiveDataMasking* --job short
 /// </summary>
+[BenchmarkCategory("Release")]
 [MemoryDiagnoser]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
 [RankColumn]

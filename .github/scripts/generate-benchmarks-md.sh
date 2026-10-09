@@ -36,6 +36,7 @@ append_section() {
   append_section "Throughput" "ThroughputBenchmark"
   append_section "Routing Overhead" "RoutingBenchmark"
   append_section "Startup Time" "StartupBenchmark"
+  append_section "Trace API" "TraceApiBenchmark"
   append_section "Emit Overhead" "EmitOverheadBenchmark"
   append_section "Sink Routing Match" "SinkRoutingMatchBenchmark"
   append_section "Sensitive Data Masking" "SensitiveDataMaskingBenchmark"

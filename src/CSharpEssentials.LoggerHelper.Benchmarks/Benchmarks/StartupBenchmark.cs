@@ -15,6 +15,7 @@ namespace CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks;
 /// Ogni invocazione crea e distrugge un'istanza del logger.
 /// LoggerHelper disabilita OpenTelemetry per un confronto equo del solo costo DI/Serilog.
 /// </summary>
+[BenchmarkCategory("Quick", "Release")]
 [MemoryDiagnoser]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
 [RankColumn]

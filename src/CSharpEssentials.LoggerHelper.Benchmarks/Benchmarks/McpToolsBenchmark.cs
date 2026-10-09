@@ -18,6 +18,7 @@ namespace CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks;
 /// HOW TO RUN:
 ///   dotnet run -c Release --framework net9.0 -- --filter *McpTools* --job short
 /// </summary>
+[BenchmarkCategory("Release")]
 [MemoryDiagnoser]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
 [RankColumn]

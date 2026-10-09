@@ -15,6 +15,7 @@ namespace CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks;
 /// Differenziatore chiave di LoggerHelper: routing dichiarativo per livello.
 /// OpenTelemetry è disabilitato per un confronto equo.
 /// </summary>
+[BenchmarkCategory("Quick", "Release")]
 [MemoryDiagnoser]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
 [RankColumn]
