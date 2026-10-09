@@ -141,6 +141,72 @@ public class HttpMockEngineTests {
         _output.WriteLine($"[Restituito] {ex.GetType().Name}: {ex.Message}");
     }
 
+    [Fact]
+    public async Task Build_CustomScenarioWithRequestFactory_ReceivesRequestAndToken() {
+        _output.WriteLine("[Scenario] Implementazione custom di IHttpMockScenario che override RequestResponseFactory, con anche ResponseFactory non vuota");
+        _output.WriteLine("[Atteso] La factory riceve la stessa request e lo stesso token passati all'handler, e vince su ResponseFactory");
+
+        HttpRequestMessage? seenRequest = null;
+        CancellationToken seenToken = default;
+        var scenario = new CustomScenario(
+            [Respond("legacy")],
+            [(r, t) => { seenRequest = r; seenToken = t; return Task.FromResult(new HttpResponseMessage { Content = new StringContent("request-aware") }); }]);
+        var handler = new HttpMockEngine([scenario]).Build();
+        using var cts = new CancellationTokenSource();
+        using var request = new HttpRequestMessage(HttpMethod.Get, "http://x/a");
+        using var invoker = new HttpMessageInvoker(handler, disposeHandler: false);
+        using var response = await invoker.SendAsync(request, cts.Token);
+        var body = await response.Content.ReadAsStringAsync();
+        _output.WriteLine($"[Restituito] Body=\"{body}\", StessaRequest={ReferenceEquals(request, seenRequest)}, StessoToken={seenToken == cts.Token}");
+
+        Assert.Equal("request-aware", body);
+        Assert.Same(request, seenRequest);
+        Assert.Equal(cts.Token, seenToken);
+    }
+
+    [Fact]
+    public async Task Build_CustomScenarioWithoutRequestFactory_UsesResponseFactory() {
+        _output.WriteLine("[Scenario] Implementazione custom che NON override RequestResponseFactory (default [])");
+        _output.WriteLine("[Atteso] Il motore ripiega su ResponseFactory: body \"legacy\"");
+
+        var handler = new HttpMockEngine([new LegacyScenario([Respond("legacy")])]).Build();
+        var body = await Send(handler);
+        _output.WriteLine($"[Restituito] Body=\"{body}\"");
+
+        Assert.Equal("legacy", body);
+    }
+
+    [Fact]
+    public async Task Build_CustomScenarioRequestFactoryNull_FallsBackToResponseFactory() {
+        _output.WriteLine("[Scenario] Implementazione custom la cui RequestResponseFactory restituisce null");
+        _output.WriteLine("[Atteso] Nessuna NullReferenceException: il motore ripiega su ResponseFactory (\"legacy\")");
+
+        var handler = new HttpMockEngine([new NullRequestFactoryScenario([Respond("legacy")])]).Build();
+        var body = await Send(handler);
+        _output.WriteLine($"[Restituito] Body=\"{body}\"");
+
+        Assert.Equal("legacy", body);
+    }
+
+    private sealed class CustomScenario(
+        IReadOnlyList<Func<Task<HttpResponseMessage>>> responseFactory,
+        IReadOnlyList<Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>> requestFactory) : IHttpMockScenario {
+        public Func<HttpRequestMessage, bool> Match => _ => true;
+        public IReadOnlyList<Func<Task<HttpResponseMessage>>> ResponseFactory => responseFactory;
+        public IReadOnlyList<Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>> RequestResponseFactory => requestFactory;
+    }
+
+    private sealed class LegacyScenario(IReadOnlyList<Func<Task<HttpResponseMessage>>> responseFactory) : IHttpMockScenario {
+        public Func<HttpRequestMessage, bool> Match => _ => true;
+        public IReadOnlyList<Func<Task<HttpResponseMessage>>> ResponseFactory => responseFactory;
+    }
+
+    private sealed class NullRequestFactoryScenario(IReadOnlyList<Func<Task<HttpResponseMessage>>> responseFactory) : IHttpMockScenario {
+        public Func<HttpRequestMessage, bool> Match => _ => true;
+        public IReadOnlyList<Func<Task<HttpResponseMessage>>> ResponseFactory => responseFactory;
+        IReadOnlyList<Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>> IHttpMockScenario.RequestResponseFactory => null!;
+    }
+
     private sealed class ThrowingHandler : HttpMessageHandler {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
             throw new Xunit.Sdk.XunitException("real network reached");

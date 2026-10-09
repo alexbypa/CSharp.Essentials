@@ -32,8 +32,7 @@ public class HttpMockEngine : IHttpMockEngine {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
             for (var i = scenarios.Length - 1; i >= 0; i--) {
                 if (!scenarios[i].Match(request)) continue;
-                // ponytail: concrete-type check keeps IHttpMockScenario unchanged; custom implementations get WaitAsync but not the token in the factory; upgrade path = default interface member
-                var requestFactories = scenarios[i] is HttpMockScenario { RequestResponseFactory.Count: > 0 } s ? s.RequestResponseFactory : null;
+                var requestFactories = scenarios[i].RequestResponseFactory is { Count: > 0 } rf ? rf : null;
                 var factories = scenarios[i].ResponseFactory;
                 var count = requestFactories?.Count ?? factories.Count;
                 if (count == 0) throw new InvalidOperationException($"Mock scenario for {request.Method} {request.RequestUri} has no ResponseFactory.");

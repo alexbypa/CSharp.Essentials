@@ -208,7 +208,17 @@ services.AddSingleton<IHttpMockScenario>(new HttpMockScenario(
     }));
 ```
 
-With `addTimeout(TimeSpan.FromSeconds(1))` the call returns 408; cancelling the caller's token throws `OperationCanceledException`. The token inside the factory is only available via `HttpMockScenario`; custom `IHttpMockScenario` implementations still get timeout/cancellation (the engine stops waiting) but not the token in their factory.
+With `addTimeout(TimeSpan.FromSeconds(1))` the call returns 408; cancelling the caller's token throws `OperationCanceledException`. Custom `IHttpMockScenario` implementations get the same request/token factories by exposing `RequestResponseFactory` (default interface member, empty by default; non-empty entries take precedence over `ResponseFactory`). Declare it public or explicit:
+
+```csharp
+class SlowScenario : IHttpMockScenario
+{
+    public Func<HttpRequestMessage, bool> Match { get; } = r => r.RequestUri?.Host == "slow.local";
+    public IReadOnlyList<Func<Task<HttpResponseMessage>>> ResponseFactory => [];
+    public IReadOnlyList<Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>> RequestResponseFactory { get; } =
+        [async (request, ct) => { await Task.Delay(TimeSpan.FromSeconds(30), ct); return new HttpResponseMessage(HttpStatusCode.OK); }];
+}
+```
 
 ---
 

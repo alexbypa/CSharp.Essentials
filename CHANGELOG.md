@@ -8,6 +8,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **HttpHelper** mocks: `IHttpMockScenario.RequestResponseFactory` (default interface member, default empty) — custom scenarios receive request and `CancellationToken` in their factory; `HttpMockScenario.RequestResponseFactory` is now public.
+
 ---
 
 ## [5.2.11] — 2026-10-09
