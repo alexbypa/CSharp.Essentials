@@ -79,7 +79,7 @@ public class GitHubService(IhttpsClientHelperFactory factory)
 | Body builders | `JsonContentBuilder`, `XmlContentBuilder`, `StringContentBuilder(mediaType)` (any text media type), `FormUrlEncodedContentBuilder`, `NoBodyContentBuilder` | Implement `IContentBuilder` for anything else |
 | Headers & auth | `addHeaders`, `setHeadersAndBearerAuthenticationSync`, `setHeadersAndBasicAuthenticationSync`, per-call `headers` | |
 | Compression, proxy, client certificate | `UseCompression`, `httpProxy`, `Certificate` in config | Configured on the pooled `SocketsHttpHandler` |
-| Logging | Failures are logged through [LoggerHelper](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | Companion package, same Serilog pipeline |
+| Logging | Failures are logged through [LoggerHelper](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | Companion package, same Serilog pipeline; without `AddLoggerHelper` it falls back to Serilog's static `Log.Logger` |
 | Mocking | Register `IHttpMockScenario` instances in DI | Matching requests never reach the network; see [Testing](#-testing-with-mock-scenarios) |
 
 **No exceptions for transport failures.** `SendAsync` returns:
@@ -176,6 +176,41 @@ factory.AddActionOnRequest((req, res, attempt, elapsed) => Task.CompletedTask);
 ```
 
 A throwing callback is logged and ignored — it never fails the HTTP call.
+
+### Logging and correlation
+
+Opt-in, off by default, independent of `AddRequestAction`. One structured event per attempt (retries included) goes through the LoggerHelper pipeline, so your routes, sinks and masking apply.
+
+```json
+{
+  "HttpHelperLogging": {
+    "LogRequests": [ "*" ],
+    "CorrelationIdHeader": "X-Correlation-ID"
+  }
+}
+```
+
+- `LogRequests`: `"*"` = every named client, or a list of client names (`["Order", "Login"]`). Empty or missing = off.
+- `CorrelationIdHeader`: header added to outgoing requests. Null or missing = off.
+- Both are read through `IOptionsMonitor`: editing `appsettings.json` turns them on/off without a restart.
+
+Event: `HTTP {Method} {RequestPath} responded {StatusCode} in {ElapsedMs} ms (attempt {RetryAttempt})`, with properties `HttpClientName`, `Method`, `RequestPath` (query string removed), `StatusCode`, `ElapsedMs`, `RetryAttempt` and `CorrelationId`. Levels: Information for 2xx/3xx, Warning for 4xx, Error for 5xx, 408 and transport exceptions (caller cancellation is Warning; a timeout from `addTimeout` is Error; with a plain `HttpClient` or a hand-built pipeline the two cannot be told apart and log Warning). Headers and bodies are never logged.
+
+Correlation id: the current `Activity` TraceId if present, otherwise a new GUID ("N" format). It is the same on every retry of one call, and a header you set yourself is never overwritten. .NET already sends the W3C `traceparent` header when an Activity exists; this header is for services that don't use OpenTelemetry. The id is forwarded to the upstream host, so it is opt-in. The generated id covers one call and its retries: to share one id across several calls (e.g. login, order, payment), set the header yourself on each call, as the Playground `order` scenario does.
+
+`IHttpClientFactory` already logs `System.Net.Http.HttpClient.<name>.*` at Information (no retry attempt, no correlation id). To avoid duplicates, raise that category to `Warning`:
+
+```json
+{ "Logging": { "LogLevel": { "System.Net.Http.HttpClient": "Warning" } } }
+```
+
+Hand-built handler (no `IHttpClientFactory`): the same events come from the public constructor, with an optional `Serilog.ILogger` target.
+
+```csharp
+var handler = new HttpClientHandlerLogging(events, null, "playground", loggingOptionsMonitor, logger) { InnerHandler = new SocketsHttpHandler() };
+```
+
+`clientName` is matched ordinal against `LogRequests`. With `logger` omitted (null) events go through the LoggerHelper pipeline / `Log.Logger`; with an injected logger they do not carry `ApplicationName` / `Action = "HttpHelper"`.
 
 ### 🧪 Testing with mock scenarios
 

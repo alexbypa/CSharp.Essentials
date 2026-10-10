@@ -7,13 +7,13 @@ using static CSharpEssentials.HttpHelper.httpsClientHelper;
 
 namespace CSharpEssentials.HttpHelper;
 public class httpsClientHelper : IhttpsClientHelper {
-    protected readonly IHttpClientFactory clientFactory;
+    protected readonly IHttpClientFactory? clientFactory;
     protected HttpClient httpClient;
-    protected HttpClientHandlerLogging httpLoggingHandler;
-    protected RateLimiter rateLimiter;
-    public object JsonData { get; set; }
-    public FormUrlEncodedContent formUrlEncodedContent { get; set; }
-    private AsyncRetryPolicy<HttpResponseMessage> _retryPolicy = null;
+    protected HttpClientHandlerLogging? httpLoggingHandler;
+    protected RateLimiter? rateLimiter;
+    public object? JsonData { get; set; }
+    public FormUrlEncodedContent? formUrlEncodedContent { get; set; }
+    private AsyncRetryPolicy<HttpResponseMessage>? _retryPolicy = null;
     private readonly IHttpRequestEvents _events;
     private TimeSpan _timeout;
     public record httpClientAuthenticationBasic(string userName, string password);
@@ -82,8 +82,8 @@ public class httpsClientHelper : IhttpsClientHelper {
     public async Task<HttpResponseMessage> SendAsync(
     string baseUrl,
     HttpMethod httpMethod,
-    IContentBuilder contentBuilder = null,
-    object body = null,
+    IContentBuilder? contentBuilder = null,
+    object? body = null,
     IDictionary<string, string>? headers = null,
     CancellationToken cancellationToken = default) {
         if (contentBuilder == null)
@@ -131,7 +131,11 @@ public class httpsClientHelper : IhttpsClientHelper {
             request.Headers.Add("X-RateLimit-TimeSpanElapsed", backoff.ToString());
 
             using var clone = await CloneHttpRequestMessageAsync(request); // dispose del clone a fine tentativo
-            return await _SendAsync(clone, cancellationToken);
+            var response = await _SendAsync(clone, cancellationToken); // _SendAsync maps failures to 408/502/500; only caller cancellation throws (not retried)
+            // The clone does not copy Options: carry a generated correlation id back so the next attempt reuses it.
+            if (clone.Options.TryGetValue(HttpClientHandlerLogging.GeneratedCorrelationKey, out var g))
+                request.Headers.TryAddWithoutValidation(g.Key, g.Value);
+            return response;
         }, new Context());
     }
     private async Task<HttpResponseMessage> _SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
@@ -142,6 +146,7 @@ public class httpsClientHelper : IhttpsClientHelper {
             timeoutCts.Token,
             cancellationToken
         );
+        request.Options.Set(HttpClientHandlerLogging.CallerTokenKey, cancellationToken); // permette all'handler di distinguere timeout da cancel del chiamante
         try {
             var response = await httpClient.SendAsync(request, linkedCts.Token);
             return response;
@@ -230,8 +235,8 @@ public interface IhttpsClientHelper {
     Task<HttpResponseMessage> SendAsync(
         string baseUrl,
         HttpMethod httpMethod,
-        IContentBuilder contentBuilder = null, 
-        object body = null,
+        IContentBuilder? contentBuilder = null, 
+        object? body = null,
         IDictionary<string, string>? headers = null,
         CancellationToken cancellationToken = default);
     IhttpsClientHelper AddRequestAction(Func<HttpRequestMessage, HttpResponseMessage, int, TimeSpan, Task> action);

@@ -8,10 +8,30 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [5.3.0] — 2026-10-10
+
 ### Added
 
 - **HttpHelper** mocks: `IHttpMockScenario.RequestResponseFactory` (default interface member, default empty) — custom scenarios receive request and `CancellationToken` in their factory; `HttpMockScenario.RequestResponseFactory` is now public.
 - **HttpHelper:** public `StringContentBuilder(string mediaType)` builds a UTF-8 `StringContent` from `body.ToString()` for any media type (null body returns null; blank media type throws `ArgumentException`). `JsonContentBuilder` and `XmlContentBuilder` now derive from it, behavior unchanged.
+- **HttpHelper:** opt-in built-in request log. New `HttpHelperLogging` configuration section (public `HttpHelperLoggingOptions`): `LogRequests` (`["*"]` or named clients, hot-reloaded via `IOptionsMonitor`) writes one structured event per attempt to the LoggerHelper pipeline (`HTTP {Method} {RequestPath} responded {StatusCode} in {ElapsedMs} ms (attempt {RetryAttempt})`, with `HttpClientName`, `Method`, `RequestPath` without query string, `StatusCode`, `ElapsedMs`, `RetryAttempt`). Information for 2xx/3xx, Warning for 4xx, Error for 5xx/408/transport exceptions, Warning on cancellation. Headers and bodies are never logged.
+- **HttpHelper:** `HttpHelperLogging:CorrelationIdHeader` propagates a correlation id on outgoing requests: the `Activity` TraceId when present, otherwise a GUID ("N"), identical across retries. A header already set by the caller is never overwritten, invalid header names are ignored, and the value is added as `CorrelationId` to the log event.
+- **Demo / docs:** the `demo-flaky` client enables the built-in log; new "Logging and correlation" section in the HttpHelper README (linked from the root README package table), `docs/site/httphelper.html` and `llms.txt`.
+- **HttpHelper:** `HttpClientHandlerLogging` 4-parameter constructor (events, globalEvents, clientName, `IOptionsMonitor<HttpHelperLoggingOptions>`, optional Serilog `ILogger`) is now public, so hand-built pipelines can enable the built-in per-attempt log and send it to a chosen logger.
+- **Demo:** Playground `order` scenario (login, order, payment: timeout, 503, 200, one CorrelationId for the whole flow) and an "HTTP log" on/off switch (`GET/POST /api/playground/http/logging`) demonstrating hot reload; Playground request events now reach the sinks the user selected.
+
+### Changed
+
+- **HttpHelper:** the request-logging handler no longer builds unused log strings or reads the request body, so large uploads are no longer buffered on every call.
+- **HttpHelper:** the timeout of a request sent through the helper is now logged as Error instead of Warning; caller cancellation stays Warning, and a plain `HttpClient` or hand-built pipeline stays Warning because the two cannot be told apart.
+- **Docs:** HttpHelper README and `docs/site/httphelper.html` explain that the generated correlation id covers one call and its retries; to share one id across several calls, set the header yourself.
+
+### Fixed
+
+- **HttpHelper:** internal logs (certificate, proxy, request-event callback failures) now reach the LoggerHelper pipeline when `AddLoggerHelper` is configured, instead of the unset Serilog `Log.Logger` where they were silently dropped. Without `AddLoggerHelper` they still go to `Log.Logger`. Consumers who combine `AddLoggerHelper` with their own `Log.Logger` will no longer see these HttpHelper events there. Upgrade `CSharpEssentials.HttpHelper` and `CSharpEssentials.LoggerHelper` together; with a mismatched LoggerHelper it silently falls back to `Log.Logger`.
+- **Demo:** README notes that the mock's 502/503/200 sequence on `GET /api/httphelper/retry` only holds for serial requests (the cursor is shared).
 
 ### Removed
 

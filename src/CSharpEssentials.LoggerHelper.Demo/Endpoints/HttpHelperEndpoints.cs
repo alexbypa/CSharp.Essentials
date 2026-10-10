@@ -27,16 +27,10 @@ public class HttpHelperEndpoints : IEndpointDefinition {
 
     public void DefineEndpoints(WebApplication app) {
         var factory = app.Services.GetRequiredService<IhttpsClientHelperFactory>();
-        var logger = app.Services.GetRequiredService<ILogger<HttpHelperEndpoints>>();
 
         // registered once: per-request registration would leak callbacks.
         factory.CreateOrGet(ClientName).addRetryCondition(r => (int)r.StatusCode >= 500, retryCount: 3, backoffFactor: 1);
-        factory.AddActionOnRequest(ClientName, (req, res, attempt, elapsed) => {
-            var level = res.IsSuccessStatusCode ? LogLevel.Information : LogLevel.Warning;
-            logger.Log(level, "HttpHelper {Method} {Url} -> {StatusCode} (attempt {Attempt})",
-                req.Method, req.RequestUri, (int)res.StatusCode, attempt);
-            return Task.CompletedTask;
-        });
+        // per-attempt log: built-in, enabled by "HttpHelperLogging" in appsettings.json (no callback needed).
 
         var group = app.MapGroup("/api/httphelper").WithTags("HttpHelper");
 
@@ -49,6 +43,6 @@ public class HttpHelperEndpoints : IEndpointDefinition {
         .WithSummary("HttpHelper retry — flaky upstream (502, 503, 200)")
         .WithDescription(
             "Calls an in-memory flaky upstream through HttpHelper with retry on 5xx. " +
-            "Hit it, then open /loggerhelper: two Warning attempts + one Information.");
+            "Hit it, then open /loggerhelper: two Error attempts (502, 503) + one Information.");
     }
 }

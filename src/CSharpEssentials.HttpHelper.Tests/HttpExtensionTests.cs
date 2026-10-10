@@ -46,6 +46,26 @@ public class HttpExtensionTests {
     }
 
     [Fact]
+    public void AddHttpClients_Always_BindsHttpHelperLoggingOptions() {
+        _output.WriteLine("[Scenario] Configurazione con HttpHelperLogging:LogRequests = [A, *]");
+        _output.WriteLine("[Atteso] IOptionsMonitor<HttpHelperLoggingOptions> espone LogRequests = [A, *]");
+
+        var config = BuildConfiguration(new Dictionary<string, string?> {
+            ["HttpClientOptions:0:Name"] = "A",
+            ["HttpHelperLogging:LogRequests:0"] = "A",
+            ["HttpHelperLogging:LogRequests:1"] = "*"
+        });
+        var services = new ServiceCollection();
+        services.AddHttpClients(config);
+        using var provider = services.BuildServiceProvider();
+
+        var logRequests = provider.GetRequiredService<IOptionsMonitor<HttpHelperLoggingOptions>>().CurrentValue.LogRequests;
+
+        _output.WriteLine($"[Restituito] {string.Join(",", logRequests)}");
+        Assert.Equal(["A", "*"], logRequests);
+    }
+
+    [Fact]
     public void AddHttpClients_AnyConfiguration_ReturnsSameServiceCollection() {
         _output.WriteLine("🚀 [Scenario] Test AddHttpClients restituisce la stessa istanza di ServiceCollection (fluent API)");
         

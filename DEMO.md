@@ -169,7 +169,7 @@ User-secrets are read at startup: after setting them, stop the Demo with **Ctrl+
 <a name="httphelper"></a>
 ## 4. HttpHelper: real calls to a free API
 
-`CSharpEssentials.HttpHelper` is the most downloaded package of the family, and here it talks to the real internet. Every scenario calls [httpbin.org](https://httpbin.org), a free API built for testing HTTP clients, through an `httpsClientHelper` configured on the fly. Each attempt on the wire becomes a log event on the Playground logger, so it reaches the sinks you ticked, masked.
+`CSharpEssentials.HttpHelper` is the most downloaded package of the family, and here it talks to the real internet. Every scenario calls [httpbin.org](https://httpbin.org), a free API built for testing HTTP clients, through an `httpsClientHelper` configured on the fly. Each attempt is logged by HttpHelper's own built-in events (status, elapsed, attempt, `CorrelationId`) on the Playground logger, so it reaches the sinks you ticked, masked.
 
 ```
 Browser  ──POST /api/playground/http──▶  Demo (C#, HttpHelper)  ──HTTPS──▶  httpbin.org
@@ -183,12 +183,13 @@ The page never calls httpbin.org itself: it sends your choices to the Demo, and 
 | Scenario | httpbin call | What you see |
 |---|---|---|
 | **Success** | `GET /get` | One attempt, `200`, the echoed request (with HttpHelper's `X-Retry-Attempt` header when retries > 0) |
-| **Flaky upstream** | `GET /status/500,502,503,200` (random) | Polly retries on 5xx until a `200` or until retries run out; one `Warning` per failed attempt |
+| **Flaky upstream** | `GET /status/500,502,503,200` (random) | Polly retries on 5xx until a `200` or until retries run out; each failed 5xx attempt is logged as `Error` |
 | **Upstream down** | `GET /status/503` | Every retry fails, the final `Error` says how long it took |
 | **Timeout** | `GET /delay/<timeout + 2>` (httpbin max 10 s, so keep the timeout under 8 s) | HttpHelper turns the timeout into a `408` (retried too), no exception thrown at you |
 | **Bearer auth** | `GET /bearer` | httpbin confirms the token; the logs show `Bearer ***MASKED***` (BearerToken preset) |
 | **POST JSON** | `POST /post` | The JSON body echoed back, sent with `JsonContentBuilder` |
 | **Rate limit** | `GET /get` × burst | A sliding-window limiter lets N calls through per 10 s; the rest get `429` locally |
+| **E-commerce order** | in-memory shop (`shop.playground.demo`, no network): `POST /login`, `/orders`, `/payments` | Payment times out (`408`), then `503`, then `200`; the three steps share one `CorrelationId`, shown on every logged event |
 
 Retries apply to 5xx and 408. The wait between attempts is `backoff ^ attempt` seconds, as in `addRetryCondition`.
 
@@ -222,10 +223,12 @@ Add a property `TenantId = acme` and write `TenantId` in **File sink: split fold
 Tick **Attach an exception**, choose `Error`, send. The stack trace reaches every sink: the `Exception` column in SQL Server, `exception` in PostgreSQL, the exception panel in Seq.
 
 ### 🔁 6. A flaky API, tamed
-Tick Seq and Elasticsearch, choose **Flaky upstream**, keep 3 retries and press **Call API**. The timeline shows each attempt on the wire (`500`, `502`... `200`), and Seq shows the same attempts as `Warning`s followed by the final outcome. Set retries to `0` and run it again to compare. Then try **Bearer auth**: the API gets the real token, the logs never do.
+Tick Seq and Elasticsearch, choose **Flaky upstream**, keep 3 retries and press **Call API**. The timeline shows each attempt on the wire (`500`, `502`... `200`), and Seq shows the same attempts (failed 5xx ones as `Error`s) followed by the final outcome. Set retries to `0` and run it again to compare. Then try **Bearer auth**: the API gets the real token, the logs never do.
+
+**Order flow and the HTTP log switch.** Choose **E-commerce order** and press **Call API**: the payment step times out, gets a `503`, then succeeds, and all three steps carry one `CorrelationId` (the `X-Correlation-ID` header). Now untick **HTTP log** (or remove `"playground"` from `HttpHelperLogging:LogRequests` in `appsettings.json` while the app runs; it reloads on change) and run it again: the per-attempt events disappear, the header is still sent.
 
 ### 📲 7. An alert on your phone
-With Telegram configured (see [Run the Demo](#run-demo)), route only `Error` and above to Telegram, choose **Upstream down** and press **Call API**. The final `Error` reaches your chat; the `Warning`s for each retry do not. The same routing works for **Send log** with level `Error` or `Fatal`.
+With Telegram configured (see [Run the Demo](#run-demo)), route only `Error` and above to Telegram, choose **Upstream down** and press **Call API**. Each failed attempt and the final outcome are `Error`s, so they reach your chat. The same routing works for **Send log** with level `Error` or `Fatal`.
 
 [↑ Back to Top](#top)
 
@@ -323,18 +326,15 @@ logger.Write(level, exception, message, args);
 Each **Call API** adds HttpHelper on top of the same logger ([`PlaygroundHttpEndpoints.cs`](src/CSharpEssentials.LoggerHelper.Demo/Endpoints/PlaygroundHttpEndpoints.cs)):
 
 ```csharp
+// every attempt (retries included) is logged by HttpHelper itself: status, elapsed, attempt, CorrelationId
+// (appsettings: "HttpHelperLogging": { "LogRequests": [ "playground" ], "CorrelationIdHeader": "X-Correlation-ID" })
+var handler = new HttpClientHandlerLogging(events, null, "playground", httpLogging, logger) { InnerHandler = sockets };
+using var client = new HttpClient(handler, disposeHandler: false);
+
 var helper = new httpsClientHelper(client, events, rateLimit)
     .addTimeout(TimeSpan.FromSeconds(3))
     .addRetryCondition(r => (int)r.StatusCode >= 500 || r.StatusCode == HttpStatusCode.RequestTimeout,
                        retryCount: 3, backoffFactor: 1);
-
-// every attempt on the wire, retries included, becomes a log event
-helper.AddRequestAction((req, res, attempt, rateLimitWait) => {
-    logger.Write(res.IsSuccessStatusCode ? LogEventLevel.Information : LogEventLevel.Warning,
-                 "HttpHelper {Method} {Url} -> {StatusCode} (attempt {Attempt})",
-                 req.Method.Method, req.RequestUri, (int)res.StatusCode, attempt + 1);
-    return Task.CompletedTask;
-});
 
 using var res = await helper.SendAsync("https://httpbin.org/status/500,502,503,200", HttpMethod.Get);
 ```

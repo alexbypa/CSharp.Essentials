@@ -6,6 +6,7 @@ namespace CSharpEssentials.LoggerHelper;
 /// <summary>
 /// Non-generic holder for the shared Serilog logger instance.
 /// Set once during AddLoggerHelper() startup, read by all loggerExtension&lt;T&gt; instantiations.
+/// Also read by CSharpEssentials.HttpHelper (InternalsVisibleTo): do not rename or remove <c>Instance</c>.
 /// </summary>
 internal static class LegacyLoggerHolder {
     internal static volatile Serilog.ILogger? Instance;

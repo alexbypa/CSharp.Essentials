@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="CSharpEssentials.LoggerHelper.Tests" />
+    <InternalsVisibleTo Include="CSharpEssentials.HttpHelper" />
   </ItemGroup>
 
   <ItemGroup>

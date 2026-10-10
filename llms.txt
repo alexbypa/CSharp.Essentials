@@ -32,4 +32,4 @@ For the exact C# Extension Methods, initialization syntax, and complete appsetti
 - Embedded diagnostics dashboard: CSharpEssentials.LoggerHelper.Dashboard (authentication mandatory on all routes: `options.UseBasicAuthentication(user, pass)`, app auth or `AuthorizationPolicy`; startup throws otherwise)
 - Seq Server: CSharpEssentials.LoggerHelper.Sink.Seq
 - Comparison vs Serilog/NLog: https://www.loggerhelper.it/compare.html
-- HTTP Telemetry: CSharpEssentials.HttpHelper (docs: https://www.loggerhelper.it/httphelper.html)
+- HTTP Telemetry: CSharpEssentials.HttpHelper (docs: https://www.loggerhelper.it/httphelper.html). Opt-in per-attempt structured log + correlation ID via config section `HttpHelperLogging` (`LogRequests`: ["*"] or client names, `CorrelationIdHeader`: "X-Correlation-ID"); hot reload, independent of AddRequestAction; hand-built pipelines: public ctor HttpClientHandlerLogging(events, globalEvents, clientName, IOptionsMonitor<HttpHelperLoggingOptions>, Serilog.ILogger? logger = null)

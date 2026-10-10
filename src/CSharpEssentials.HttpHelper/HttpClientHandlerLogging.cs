@@ -1,26 +1,49 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.Options;
+using Serilog;
+using Serilog.Events;
 
 namespace CSharpEssentials.HttpHelper;
 public class HttpClientHandlerLogging : DelegatingHandler {
     private readonly IHttpRequestEvents _events;
     private readonly IHttpRequestEvents? _globalEvents;
+    private readonly string _clientName = "";
+    private readonly IOptionsMonitor<HttpHelperLoggingOptions>? _logging;
+    private readonly Serilog.ILogger? _logger;
     public HttpClientHandlerLogging(IHttpRequestEvents events) => _events = events;
     public HttpClientHandlerLogging(IHttpRequestEvents events, IHttpRequestEvents? globalEvents) : this(events) => _globalEvents = globalEvents;
+    /// <summary>Handler with built-in request logging (status, elapsed, attempt, CorrelationId), for hand-built pipelines.</summary>
+    /// <param name="events">Callbacks invoked after each response.</param>
+    /// <param name="globalEvents">Optional second callback list (e.g. registered globally).</param>
+    /// <param name="clientName">Matched ordinal against <c>LogRequests</c> ("*" or client names).</param>
+    /// <param name="logging">Logging options (<c>LogRequests</c>, <c>CorrelationIdHeader</c>).</param>
+    /// <param name="logger">Target for request events; null = LoggerHelper pipeline / <c>Log.Logger</c>.
+    /// With an injected logger the events do not carry ApplicationName / Action="HttpHelper".</param>
+    public HttpClientHandlerLogging(IHttpRequestEvents events, IHttpRequestEvents? globalEvents, string clientName, IOptionsMonitor<HttpHelperLoggingOptions> logging, Serilog.ILogger? logger = null) : this(events, globalEvents) {
+        ArgumentNullException.ThrowIfNull(clientName);
+        ArgumentNullException.ThrowIfNull(logging);
+        _clientName = clientName;
+        _logging = logging;
+        _logger = logger;
+    }
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
-        string pageCalled = GetPageName(request);
+        int totRetry = request.Headers.TryGetValues("X-Retry-Attempt", out var retryValues) && int.TryParse(retryValues.FirstOrDefault(), out var retry) ? retry : 0;
+        TimeSpan RateLimitTimeSpanElapsed = request.Headers.TryGetValues("X-RateLimit-TimeSpanElapsed", out var waitValues) && TimeSpan.TryParse(waitValues.FirstOrDefault(), out var waited) ? waited : TimeSpan.Zero;
 
-        HttpResponseMessage response = null;
-        StringBuilder requestLog = new StringBuilder();
-        StringBuilder responseLog = new StringBuilder();
-        requestLog.Append(request.ToString());
-        if (request.Content != null) {
-            requestLog.Append(await request.Content.ReadAsStringAsync());
+        var opts = _logging?.CurrentValue;
+        bool log = opts is not null && ShouldLog(opts.LogRequests, _clientName);
+        string? cid = opts?.CorrelationIdHeader is { Length: > 0 } h ? EnsureCorrelationId(request, h) : null;
+        long start = log ? Stopwatch.GetTimestamp() : 0;
+
+        HttpResponseMessage response;
+        try {
+            response = await base.SendAsync(request, cancellationToken);
+        } catch (Exception ex) when (log) {
+            LogFailure(request, ex, start, totRetry, cid);
+            throw;
         }
-
-        int totRetry = request.Headers.Contains("X-Retry-Attempt") ? int.Parse(request.Headers.GetValues("X-Retry-Attempt").FirstOrDefault()) : 0;
-        TimeSpan RateLimitTimeSpanElapsed = request.Headers.Contains("X-RateLimit-TimeSpanElapsed") ? TimeSpan.Parse(request.Headers.GetValues("X-RateLimit-TimeSpanElapsed").FirstOrDefault()) : TimeSpan.Zero;
-
-        response = await base.SendAsync(request, cancellationToken);
+        if (log)
+            LogResponse(request, response, start, totRetry, cid);
         try {
             await _events.InvokeAll(request, response, totRetry, RateLimitTimeSpanElapsed);
             if (_globalEvents != null && !ReferenceEquals(_globalEvents, _events))
@@ -31,6 +54,65 @@ public class HttpClientHandlerLogging : DelegatingHandler {
         }
         return response;
     }
+    private static bool ShouldLog(List<string> logRequests, string clientName) =>
+        logRequests.Count > 0 && (logRequests.Contains("*") || logRequests.Contains(clientName, StringComparer.Ordinal));
+
+    /// <summary>Set by <see cref="httpsClientHelper"/> before sending: lets the handler tell a caller cancel from a timeout (the token it receives is a merged one).</summary>
+    internal static readonly HttpRequestOptionsKey<CancellationToken> CallerTokenKey = new("CSharpEssentials.HttpHelper.CallerToken");
+    internal static readonly HttpRequestOptionsKey<KeyValuePair<string, string>> GeneratedCorrelationKey = new("CSharpEssentials.HttpHelper.GeneratedCorrelation");
+
+    // Caller value wins; otherwise generate and remember it in Options so the retry loop can carry it to the next attempt.
+    private static string? EnsureCorrelationId(HttpRequestMessage request, string headerName) {
+        if (request.Headers.NonValidated.TryGetValues(headerName, out var existing))
+            return existing.ToString();
+        var id = Activity.Current is { IdFormat: ActivityIdFormat.W3C } a ? a.TraceId.ToHexString() : Guid.NewGuid().ToString("N");
+        if (!request.Headers.TryAddWithoutValidation(headerName, id))
+            return null; // invalid or content header name: nothing sent, so nothing to log or carry over retries
+        request.Options.Set(GeneratedCorrelationKey, new KeyValuePair<string, string>(headerName, id));
+        return id;
+    }
+
+    private void LogResponse(HttpRequestMessage request, HttpResponseMessage response, long start, int attempt, string? cid) {
+        int status = (int)response.StatusCode;
+        var level = status >= 500 || status == 408 ? LogEventLevel.Error
+            : status >= 400 ? LogEventLevel.Warning
+            : LogEventLevel.Information;
+        WriteEvent(level, null, cid, "HTTP {Method} {RequestPath} responded {StatusCode} in {ElapsedMs} ms (attempt {RetryAttempt})",
+            request.Method.Method, GetRequestPath(request), status, ElapsedMs(start), attempt);
+    }
+
+    private void LogFailure(HttpRequestMessage request, Exception ex, long start, int attempt, string? cid) {
+        // Key present: a cancel not requested by the caller is a timeout → Error. Without the key (plain HttpClient / hand-built pipeline) the two are indistinguishable: Warning.
+        var timedOut = request.Options.TryGetValue(CallerTokenKey, out var caller) && !caller.IsCancellationRequested;
+        var level = ex is OperationCanceledException && !timedOut ? LogEventLevel.Warning : LogEventLevel.Error;
+        WriteEvent(level, ex, cid, "HTTP {Method} {RequestPath} failed in {ElapsedMs} ms (attempt {RetryAttempt})",
+            request.Method.Method, GetRequestPath(request), ElapsedMs(start), attempt);
+    }
+
+    private void WriteEvent(LogEventLevel level, Exception? ex, string? cid, string template, params object?[] args) {
+        var l = _logger ?? HttpHelperLog.Logger;
+        if (!l.IsEnabled(level))
+            return;
+        l = l.ForContext("HttpClientName", _clientName);
+        if (cid is not null)
+            l = l.ForContext("CorrelationId", cid);
+        l.Write(level, ex, template, args);
+    }
+
+    private static double ElapsedMs(long start) => Math.Round(Stopwatch.GetElapsedTime(start).TotalMilliseconds, 1);
+
+    // Path only: query string may carry secrets.
+    private static string GetRequestPath(HttpRequestMessage request) {
+        var uri = request.RequestUri;
+        if (uri is null)
+            return "";
+        if (uri.IsAbsoluteUri)
+            return uri.AbsolutePath;
+        var s = uri.OriginalString;
+        int q = s.IndexOf('?');
+        return q < 0 ? s : s[..q];
+    }
+
     public static string GetPageName(HttpRequestMessage request) {
         if (request == null || request.RequestUri == null)
             return null;

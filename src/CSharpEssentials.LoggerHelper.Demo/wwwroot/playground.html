@@ -141,7 +141,10 @@
         <option value="bearer">Bearer auth: token sent, then masked in the logs</option>
         <option value="post">POST JSON: body echoed back</option>
         <option value="ratelimit">Rate limit: burst of calls → 429 when the window is full</option>
+        <option value="order">E-commerce order: login → order → payment (timeout, 503, 200), one CorrelationId</option>
       </select>
+      <label style="margin-top:12px"><input type="checkbox" id="httpLog"> HTTP log (HttpHelperLogging:LogRequests)</label>
+      <div id="httpOpts">
       <div class="row" style="margin-top:12px">
         <div><label for="retries">Retries (on 5xx and 408)</label><input type="text" id="retries" value="3" inputmode="numeric"></div>
         <div><label for="backoff">Backoff factor <small>(wait = factor^attempt s)</small></label><input type="text" id="backoff" value="1" inputmode="decimal"></div>
@@ -153,6 +156,7 @@
       <div class="row">
         <div><label for="burst">Burst: calls in parallel <small>(rate limit)</small></label><input type="text" id="burst" value="5" inputmode="numeric"></div>
         <div><label for="permit">Permits per 10 s window <small>(rate limit)</small></label><input type="text" id="permit" value="2" inputmode="numeric"></div>
+      </div>
       </div>
       <button class="primary" id="http" type="button">Call API</button>
     </div>
@@ -313,18 +317,27 @@ const httpPath = h => ({
 
 // Mirrors PlaygroundHttpEndpoints: the HttpHelper calls the page triggers.
 function httpCode(h) {
-  const lines = ['var helper = new httpsClientHelper(client, events, rateLimit)',
+  if (h.scenario === 'order') return [
+    '// in-memory shop (HttpMockEngine): no network. One CorrelationId for the whole flow, fixed 500 ms timeout + 3 retries.',
+    'var handler = new HttpClientHandlerLogging(events, null, "playground", httpLogging, logger) { InnerHandler = shop.Build() };',
+    'using var client = new HttpClient(handler);',
+    'var helper = new httpsClientHelper(client, events, null)',
+    '    .addTimeout(TimeSpan.FromMilliseconds(500))',
+    '    .addRetryCondition(r => (int)r.StatusCode >= 500 || r.StatusCode == HttpStatusCode.RequestTimeout, 3, 0.5);',
+    '', 'var cid = "order-" + Guid.NewGuid().ToString("N")[..8];',
+    'foreach (var path in new[] { "/login", "/orders", "/payments" })   // payment: timeout → 503 → 200',
+    '    using var res = await helper.SendAsync("https://shop.playground.demo" + path, HttpMethod.Post, new JsonContentBuilder(), "{}", new Dictionary<string, string> { ["X-Correlation-ID"] = cid });'].join('\n');
+  const lines = ['// every attempt (retries included) is logged by HttpHelper itself: status, elapsed, attempt, CorrelationId',
+                 'var handler = new HttpClientHandlerLogging(events, null, "playground", httpLogging, logger) { InnerHandler = sockets };',
+                 'using var client = new HttpClient(handler, disposeHandler: false);', '',
+                 'var helper = new httpsClientHelper(client, events, rateLimit)',
                  `    .addTimeout(TimeSpan.FromSeconds(${h.timeoutSeconds}))`];
   if (h.scenario !== 'ratelimit' && h.retries > 0)
     lines.push(`    .addRetryCondition(r => (int)r.StatusCode >= 500 || r.StatusCode == HttpStatusCode.RequestTimeout, ${h.retries}, ${h.backoff});`);
   else lines[lines.length - 1] += ';';
   if (h.scenario === 'ratelimit')
     lines.unshift(`var rateLimit = new httpClientRateLimitOptions { IsEnabled = true, PermitLimit = ${h.permitLimit}, Window = TimeSpan.FromSeconds(10), QueueLimit = 0 };`);
-  lines.push('', '// every attempt (retries included) → one log event on the playground logger',
-             'helper.AddRequestAction((req, res, attempt, wait) => {',
-             '    logger.Write(res.IsSuccessStatusCode ? Information : Warning,',
-             '        "HttpHelper {Method} {Url} -> {StatusCode} (attempt {Attempt})", ...);',
-             '    return Task.CompletedTask;', '});', '',
+  lines.push('',
              `using var res = await helper.SendAsync("https://httpbin.org${httpPath(h)}", HttpMethod.${h.scenario === 'post' ? 'Post, new JsonContentBuilder(), json' : 'Get'});`);
   if (h.scenario === 'ratelimit') lines.push(`// × ${h.burst} in parallel`);
   return lines.join('\n');
@@ -332,21 +345,23 @@ function httpCode(h) {
 
 function renderHttp(body) {
   const cls = s => s >= 200 && s < 300 ? 'ok' : s === 429 || s === 408 ? 'skip' : 'err';
-  const calls = body.calls.map(c => `<div class="s ${cls(c.status)}"><b>${c.status} ${esc(c.reason)}</b><small>${c.elapsedMs} ms</small></div>`).join('');
+  const calls = body.calls.map(c => `<div class="s ${cls(c.status)}"><b>${c.step ? esc(c.step) + ': ' : ''}${c.status} ${esc(c.reason)}</b><small>${c.elapsedMs} ms</small></div>`).join('');
   const attempts = body.attempts.length
     ? `<table style="margin:8px 0">${body.attempts.map(a => `<tr><td>+${a.atMs} ms · attempt ${a.attempt}</td><td>${a.status} ${esc(a.url)}</td></tr>`).join('')}</table>`
     : '<p class="muted">No attempt reached the wire (timeout or rate limit is decided by HttpHelper itself).</p>';
   const bodyPreview = body.calls.find(c => c.body)?.body;
+  const cidHtml = body.correlationId ? `<p class="muted">CorrelationId: <b>${esc(body.correlationId)}</b></p>` : '';
+  const offHtml = body.httpLog ? '' : '<p class="muted">HTTP log off: no per-attempt events (header still sent)</p>';
   const httpHtml = `
     <h2>HttpHelper · ${esc(body.scenario)}</h2>
-    <div class="status">${calls}</div>
+    <div class="status">${calls}</div>${cidHtml}${offHtml}
     <h2 style="margin-top:14px">Attempts on the wire</h2>${attempts}
     ${bodyPreview ? `<details style="margin-bottom:12px"><summary class="muted">Response body</summary><pre>${esc(bodyPreview)}</pre></details>` : ''}
     <h2>Logged to the sinks</h2>`;
   render(body.log, httpHtml);
   const mark = v => esc(v).replaceAll(esc($('maskText').value || '***MASKED***'), m => `<span class="masked">${m}</span>`);
   $('result').insertAdjacentHTML('beforeend', `<h2 style="margin-top:14px">All logged events</h2>
-    <pre>${body.log.events.map(e => `[${e.level}] ${mark(e.rendered)}${e.properties.Authorization ? `\n    Authorization: ${mark(e.properties.Authorization)}` : ''}`).join('\n')}</pre>`);
+    <pre>${body.log.events.map(e => `[${e.level}] ${mark(e.rendered)}${e.properties.CorrelationId ? ` · cid=${esc(e.properties.CorrelationId)}` : ''}${e.properties.Authorization ? `\n    Authorization: ${mark(e.properties.Authorization)}` : ''}`).join('\n')}</pre>`);
 }
 
 $('http').onclick = async () => {
@@ -360,7 +375,7 @@ $('http').onclick = async () => {
   $('code').textContent = fluentCode(log) + '\n\n' + httpCode(h);
   $('code').className = '';
   $('http').disabled = true;
-  $('result').innerHTML = '<div class="muted">Calling httpbin.org…</div>';
+  $('result').innerHTML = `<div class="muted">${h.scenario === 'order' ? 'Calling the in-memory shop…' : 'Calling httpbin.org…'}</div>`;
   try {
     const r = await fetch('/api/playground/http', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(h) });
     const body = await r.json();
@@ -372,6 +387,12 @@ $('http').onclick = async () => {
     $('http').disabled = false;
   }
 };
+
+$('scenario').onchange = () => { $('httpOpts').hidden = $('scenario').value === 'order'; };
+$('scenario').onchange();
+$('httpLog').onchange = () => fetch('/api/playground/http/logging', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: $('httpLog').checked }) })
+  .then(r => { if (!r.ok) throw new Error(); }).catch(() => { $('httpLog').checked = !$('httpLog').checked; });
+fetch('/api/playground/http/logging').then(r => r.json()).then(b => { $('httpLog').checked = b.enabled; }).catch(() => {});
 
 init();
 </script>

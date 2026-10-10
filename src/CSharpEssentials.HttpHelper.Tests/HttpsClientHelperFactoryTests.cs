@@ -195,6 +195,32 @@ public class HttpsClientHelperFactoryTests {
         Assert.Equal(1, calls);
     }
 
+    [Fact]
+    public async Task HttpClientHandlerLogging_WithRequestContent_DoesNotReadBody() {
+        _output.WriteLine("[Scenario] POST con contenuto che passa da HttpClientHandlerLogging verso un handler interno che non legge il body");
+        _output.WriteLine("[Atteso] Il body non viene mai serializzato dall'handler di logging (nessun buffering inutile)");
+
+        var content = new CountingContent();
+        using var invoker = new HttpMessageInvoker(new HttpClientHandlerLogging(new HttpRequestEvents()) { InnerHandler = new OkHandler() });
+
+        using var response = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Post, "http://x.local/") { Content = content }, default);
+
+        _output.WriteLine($"[Restituito] Serializzazioni={content.Serializations}");
+        Assert.Equal(0, content.Serializations);
+    }
+
+    private sealed class CountingContent : HttpContent {
+        public int Serializations { get; private set; }
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context) {
+            Serializations++;
+            return Task.CompletedTask;
+        }
+        protected override bool TryComputeLength(out long length) {
+            length = 0;
+            return true;
+        }
+    }
+
     private sealed class OkHandler : HttpMessageHandler {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
             Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));

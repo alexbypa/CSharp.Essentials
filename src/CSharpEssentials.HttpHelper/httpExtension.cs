@@ -4,6 +4,7 @@ using Serilog.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Security;
 using System.Security.Authentication;
@@ -85,6 +86,7 @@ public static class httpExtension {
     public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration) {
         var httpclientoptions = configuration.GetSection("HttpClientOptions");
         services.Configure<List<httpClientOptions>>(httpclientoptions);
+        services.Configure<HttpHelperLoggingOptions>(configuration.GetSection("HttpHelperLogging"));
         List<httpClientOptions>? options = getOptions(httpclientoptions);
 
         // IHttpClientFactory must be registered even when no client is configured (CreateOrGet then throws a clear ArgumentException).
@@ -106,7 +108,9 @@ public static class httpExtension {
                 // Per-client events (callbacks of one client never fire for another) + global events.
                 .AddHttpMessageHandler(sp => new HttpClientHandlerLogging(
                     sp.GetRequiredService<HttpRequestEventsRegistry>().For(name),
-                    sp.GetRequiredService<IHttpRequestEvents>()))
+                    sp.GetRequiredService<IHttpRequestEvents>(),
+                    name,
+                    sp.GetRequiredService<IOptionsMonitor<HttpHelperLoggingOptions>>()))
                 .AddHttpMessageHandler<HttpMockDelegatingHandler>()
                 .ConfigurePrimaryHttpMessageHandler(() => {
                     var handler = new SocketsHttpHandler();
