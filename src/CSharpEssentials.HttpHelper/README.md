@@ -76,7 +76,7 @@ public class GitHubService(IhttpsClientHelperFactory factory)
 | Timeout | `addTimeout(TimeSpan)` | Expiry returns **408** `{"error":"timeout",...}`; defaults to the client's `HttpClient.Timeout` |
 | Rate limiting | `RateLimitOptions` in config (sliding window) | Over the limit returns **429** `{"error":"rate_limit_exceeded"}` |
 | Request callbacks | `AddRequestAction(...)` / `factory.AddActionOnRequest(...)` | Per client or global; receives request, response, retry attempt, elapsed |
-| Body builders | `JsonContentBuilder`, `XmlContentBuilder`, `FormUrlEncodedContentBuilder`, `NoBodyContentBuilder` | Implement `IContentBuilder` for anything else |
+| Body builders | `JsonContentBuilder`, `XmlContentBuilder`, `StringContentBuilder(mediaType)` (any text media type), `FormUrlEncodedContentBuilder`, `NoBodyContentBuilder` | Implement `IContentBuilder` for anything else |
 | Headers & auth | `addHeaders`, `setHeadersAndBearerAuthenticationSync`, `setHeadersAndBasicAuthenticationSync`, per-call `headers` | |
 | Compression, proxy, client certificate | `UseCompression`, `httpProxy`, `Certificate` in config | Configured on the pooled `SocketsHttpHandler` |
 | Logging | Failures are logged through [LoggerHelper](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | Companion package, same Serilog pipeline |

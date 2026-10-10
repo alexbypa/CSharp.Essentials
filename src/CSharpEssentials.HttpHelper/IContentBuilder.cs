@@ -5,22 +5,27 @@ public interface IContentBuilder {
     HttpContent BuildContent(object body);
 }
 
-public class JsonContentBuilder : IContentBuilder {
+/// <summary>
+/// Builds a <see cref="StringContent"/> (UTF-8) from <c>body.ToString()</c> with the given media type.
+/// </summary>
+/// <param name="mediaType">Media type of the content, e.g. "application/json".</param>
+public class StringContentBuilder(string mediaType) : IContentBuilder {
+    private readonly string _mediaType = !string.IsNullOrWhiteSpace(mediaType)
+        ? mediaType
+        : throw new ArgumentException("Media type is required.", nameof(mediaType));
+
     public HttpContent BuildContent(object body) {
         if (body == null)
             return null;
 
-        return new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+        return new StringContent(body.ToString(), Encoding.UTF8, _mediaType);
     }
 }
 
-public class XmlContentBuilder : IContentBuilder {
-    public HttpContent BuildContent(object body) {
-        if (body == null)
-            return null;
+public class JsonContentBuilder() : StringContentBuilder("application/json") {
+}
 
-        return new StringContent(body.ToString(), Encoding.UTF8, "application/xml");
-    }
+public class XmlContentBuilder() : StringContentBuilder("application/xml") {
 }
 
 public class FormUrlEncodedContentBuilder : IContentBuilder {

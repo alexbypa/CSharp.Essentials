@@ -11,6 +11,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ### Added
 
 - **HttpHelper** mocks: `IHttpMockScenario.RequestResponseFactory` (default interface member, default empty) — custom scenarios receive request and `CancellationToken` in their factory; `HttpMockScenario.RequestResponseFactory` is now public.
+- **HttpHelper:** public `StringContentBuilder(string mediaType)` builds a UTF-8 `StringContent` from `body.ToString()` for any media type (null body returns null; blank media type throws `ArgumentException`). `JsonContentBuilder` and `XmlContentBuilder` now derive from it, behavior unchanged.
+
+### Removed
+
+- **Repo:** `src/UpdateTestsLogs.cs`, a one-off script with hardcoded paths that was not part of any project.
+- **Repo:** `src/UpdateTests.cs`, the twin of `UpdateTestsLogs.cs`: same hardcoded `d:\Work\...` paths, not part of any project.
 
 ---
 
