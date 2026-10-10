@@ -10,7 +10,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [5.3.0] — 2026-10-10
+## [5.3.1] — 2026-10-10
 
 ### Added
 
