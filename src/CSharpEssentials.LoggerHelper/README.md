@@ -34,6 +34,7 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [See It Live: Demo Playground](#demo-playground) · [full guide](DEMO.md)
 - [Run the Demo in 60 Seconds](#run-the-demo-in-60-seconds)
 - [Why choose LoggerHelper?](#why-choose-loggerhelper)
 - [Packages](#packages)
@@ -43,10 +44,28 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 - [Sink Overview](#sink-overview)
 - [Comparison](#comparison)
 - [Architecture](#architecture)
+															
 - [View Source & Contribute](#view-source-contribute)
 - [Documentation & Links](#documentation-links)
 
 ---
+
+> 🎮 **Try it live before you install!** See the exact "Config vs Result" output for every sink directly in your browser on the **[Interactive Playground at loggerhelper.it](https://www.loggerhelper.it/playground.html)**.
+
+<a name="demo-playground"></a>
+## 🧪 See It Live: One Event, Every Sink, Zero Secrets Leaked
+
+**`docker compose up -d` + `dotnet run`, then one click.** The Demo Playground sends a single log event to **Console, File, Seq, Elasticsearch, SQL Server, PostgreSQL and Telegram** at the same time, built on the fluent API from the options you pick on the page. And it puts **HttpHelper** to work against a real API.
+
+- 🎯 **Per-sink level routing**: set PostgreSQL to `Error` and watch it filter a `Warning` while the others receive it.
+- 🎭 **Real masking**: `Sup3rSecret!`, emails and card numbers become `***MASKED***` in every sink, rendered message included.
+- 💥 **Resilient by design**: stop a container and send again; your app keeps logging and the failure is reported, not thrown.
+- 🔁 **HttpHelper, live**: real calls to httpbin.org with Polly retries, timeouts, rate limiting and Bearer auth; every attempt lands in your sinks, token masked.
+- 🔍 **Nothing hidden**: the page shows the event exactly as the sinks receive it and the C# code that produced it.
+
+[![LoggerHelper Playground](https://raw.githubusercontent.com/alexbypa/CSharp.Essentials/main/img/Playground.gif)](DEMO.md)
+
+👉 **[Open the step-by-step guide: DEMO.md](DEMO.md)**: Docker setup, a tour of the page, HttpHelper scenarios and seven experiments to try.
 
 <a name="quick-start"></a>
 ## 🚀 Quick Start
@@ -145,7 +164,11 @@ cd CSharp.Essentials/src/CSharpEssentials.LoggerHelper.Demo
 dotnet run
 ```
 
-Open the URL shown in your terminal (usually **`http://localhost:<port>/swagger/index.html`**) — the Swagger UI lists all available demo scenarios. Each endpoint produces structured logs visible immediately in the terminal and in the `Logs/` folder.
+Open the URL shown in your terminal (usually **`http://localhost:5123`**): the root opens the Playground, and `/swagger` or `/scalar` list all demo scenarios. Each endpoint produces structured logs visible immediately in the terminal and in the `Logs/` folder.
+
+Try `GET /api/httphelper/retry`, then open `/loggerhelper` to watch HttpHelper retries live.
+
+🧪 **Playground with every sink:** start SQL Server, PostgreSQL, Seq and Elasticsearch with `docker compose up -d` in [`src/CSharpEssentials.LoggerHelper.Demo/docker`](src/CSharpEssentials.LoggerHelper.Demo/docker), then open the Demo root (`/playground.html`). Step-by-step guide: **[DEMO.md](DEMO.md)**.
 
 > 💡 **No database required to run it:** Even if you don't have SQL Server or PostgreSQL running locally, LoggerHelper gracefully ignores the connection errors. Your app won't crash, and logs will still appear perfectly in the Console and File sinks!
 
@@ -172,7 +195,7 @@ Open the URL shown in your terminal (usually **`http://localhost:<port>/swagger/
 | Package | Description | Version | Downloads |
 |---------|-------------|---------|-----------|
 | [`CSharpEssentials.LoggerHelper`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | Core routing engine, `ILogger<T>` bridge, JSON/fluent config | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper) |
-| [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting, auto logging | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
+| [`CSharpEssentials.HttpHelper`](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | HttpClient + Polly resilience, rate limiting, opt-in per-attempt structured logging and correlation ID (`HttpHelperLogging`) — [guide →](src/CSharpEssentials.HttpHelper/README.md#logging-and-correlation) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.HttpHelper.svg)](https://www.nuget.org/packages/CSharpEssentials.HttpHelper) |
 | [`...Sink.Console`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console) | Colored console output, per-level themes — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Console/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Console.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.Console.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Console) |
 | [`...Sink.MSSqlServer`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) | SQL Server structured logs, auto table creation — [guide →](src/CSharpEssentials.LoggerHelper.Sink.MSSqlServer/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.MSSqlServer.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.MSSqlServer) |
 | [`...Sink.Postgresql`](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) | PostgreSQL, JSONB columns, custom schema — [guide →](src/CSharpEssentials.LoggerHelper.Sink.Postgresql/README.md) | [![NuGet](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.Sink.Postgresql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) | [![NuGet](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.Sink.Postgresql.svg)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper.Sink.Postgresql) |
@@ -280,8 +303,8 @@ builder.Services.AddLoggerHelper(builder.Configuration, b => b
 
 | Sink | Where the properties go |
 |------|-------------------------|
-| PostgreSQL | Default columns already include `ApplicationName`, `MachineName`, `Action`, `IdTransaction`; add more with [`Columns`](https://github.com/alexbypa/CSharp.Essentials/blob/main/src/CSharpEssentials.LoggerHelper.Sink.Postgresql/README.md#custom-columns--replicate-or-extend-the-default-schema) |
-| SQL Server | In the `Properties` column; promote any of them to its own column with [`AdditionalColumns`](https://github.com/alexbypa/CSharp.Essentials/blob/main/src/CSharpEssentials.LoggerHelper.Sink.MSSqlServer/README.md#custom-columns--map-log-properties-to-sql-columns) |
+| PostgreSQL | Default columns already include `ApplicationName`, `MachineName`, `Action`, `IdTransaction`; add more with [`Columns`](src/CSharpEssentials.LoggerHelper.Sink.Postgresql/README.md#custom-columns--replicate-or-extend-the-default-schema) |
+| SQL Server | In the `Properties` column; promote any of them to its own column with [`AdditionalColumns`](src/CSharpEssentials.LoggerHelper.Sink.MSSqlServer/README.md#custom-columns--map-log-properties-to-sql-columns) |
 | Seq, Elasticsearch | Every property is a searchable field, nothing to configure |
 
 ### Internal Diagnostics
@@ -382,7 +405,7 @@ builder.Services.AddLoggerHelperDashboard(o => o.UseBasicAuthentication("admin",
 app.MapLoggerHelperDashboard(); // Exposes the UI at /loggerhelper
 ```
 
-> **Authentication is mandatory** on every Dashboard route (page, `/api/status`, `/api/logs`, `/api/stream`). Use the built-in Basic auth shown above (HTTPS only), your app's authentication, or a named `AuthorizationPolicy`. Without any of them `MapLoggerHelperDashboard()` throws `InvalidOperationException` at startup. See the [Dashboard guide](https://github.com/alexbypa/CSharp.Essentials/blob/main/src/CSharpEssentials.LoggerHelper.Dashboard/README.md).
+> **Authentication is mandatory** on every Dashboard route (page, `/api/status`, `/api/logs`, `/api/stream`). Use the built-in Basic auth shown above (HTTPS only), your app's authentication, or a named `AuthorizationPolicy`. Without any of them `MapLoggerHelperDashboard()` throws `InvalidOperationException` at startup. See the [Dashboard guide](src/CSharpEssentials.LoggerHelper.Dashboard/README.md).
 
 [↑ Back to Top](#top)
 
