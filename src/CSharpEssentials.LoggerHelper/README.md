@@ -1,11 +1,13 @@
 <a name="top"></a>
 # CSharpEssentials — LoggerHelper
 
-**Stop writing Serilog boilerplate. Route any log level to any sink — in one JSON file.**
+**A thin, opinionated layer over Serilog: exact level sets per sink, masking on every sink and queryable sink health — from one JSON file.**
+
+> Already happy with `restrictedToMinimumLevel` in `Serilog.Settings.Configuration`? Then plain Serilog is enough. See [when LoggerHelper helps](#comparison).
 
 [![NuGet Version](https://img.shields.io/nuget/v/CSharpEssentials.LoggerHelper.svg?label=NuGet&color=blue)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/CSharpEssentials.LoggerHelper.svg?label=downloads&color=brightgreen)](https://www.nuget.org/packages/CSharpEssentials.LoggerHelper)
-![.NET Versions](https://img.shields.io/badge/.NET-6%20%7C%208%20%7C%209%20%7C%2010-512BD4?logo=dotnet)
+![.NET Versions](https://img.shields.io/badge/.NET-8%20%7C%209%20%7C%2010-512BD4?logo=dotnet)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/alexbypa/CSharp.Essentials/blob/main/LICENSE)
 
 [![Build and Test (src v5)](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/build-test.yml/badge.svg)](https://github.com/alexbypa/CSharp.Essentials/actions/workflows/build-test.yml)
@@ -181,7 +183,7 @@ Try `GET /api/httphelper/retry`, then open `/loggerhelper` to watch HttpHelper r
 
 - 🔌 **Native `ILogger<T>`**: Zero vendor lock-in. Uses standard Microsoft abstractions.
 - 🧩 **Zero Unnecessary Dependencies**: Highly modular. Install the core package and *only* the specific sinks you need.
-- 🛠️ **JSON-First Configuration**: Route any log level to any sink without writing a single line of C# conditional logic.
+- 🛠️ **JSON-First Configuration**: Send an exact set of levels to each sink (e.g. Information + Warning but not Error) without sub-loggers or filter expressions.
 - 🛡️ **PII Data Masking**: Automatically redact passwords, JWTs, and sensitive fields across *all* sinks globally.
 - 🤖 **AI-Ready**: Includes a native MCP Server to let AI assistants query log health and configuration out-of-the-box.
 
@@ -497,22 +499,25 @@ For per-sink configuration options (connection strings, paths, retention, custom
 <a name="comparison"></a>
 ## 📊 Comparison
 
-| Feature | Serilog alone | NLog | **LoggerHelper v5** |
+LoggerHelper sits **on top of** Serilog: everything below that plain Serilog or NLog already do is marked as such. Pick plain Serilog when you need maximum throughput or full programmatic control of the pipeline; LoggerHelper adds per-message overhead (see [benchmarks](https://github.com/alexbypa/CSharp.Essentials/blob/main/docs/benchmarks.md)).
+
+| Feature | Serilog (plain) | NLog | **LoggerHelper v5** |
 |---------|:---:|:---:|:---:|
-| Per-level sink routing (declarative) | Manual per sink | Via targets | **JSON / fluent — built-in** |
-| `ILogger<T>` compatible | Via bridge pkg | Native | **Native — zero code change** |
-| Install only needed sinks | ❌ | ❌ | **✅ modular NuGet** |
-| Named params preserved (structured) | ✅ | ✅ | **✅** |
-| `BeginScope` structured | ✅ | ✅ | **✅ propagates to Serilog** |
-| OpenTelemetry trace correlation | Manual | Manual | **✅ built-in, auto** |
-| Internal error diagnostics | ❌ | ❌ | **✅ injectable `ILogErrorStore`** |
-| Fluent OR JSON OR merged | ❌ | ❌ | **✅ all three** |
-| Request/Response middleware | Serilog.AspNetCore | Manual | **✅ 1 line** |
-| Email/Telegram alerts | 3rd-party | NLog.MailKit | **✅ built-in + throttling** |
-| Dynamic file routing by property | ❌ | ❌ | **✅ multi-tenant ready** |
-| Sink plugin system (custom sinks) | Manual wiring | Manual | **✅ `[ModuleInitializer]` auto-reg** |
-| Initial setup complexity | 15–30 lines | XML + code | **✅ 5 lines** |
-| Sensitive data masking (PII/secrets) | Manual `IDestructuringPolicy` | 3rd-party | **✅ JSON-driven, all sinks at once** |
+| Per-sink minimum level from JSON | ✅ `restrictedToMinimumLevel` | ✅ `minlevel` in rules | ✅ |
+| Exact level set per sink (e.g. Information + Warning, not Error) | Sub-logger + `Serilog.Expressions` filter per sink | ✅ `levels="Info,Warn"` in rules | ✅ `Routes[].Levels` |
+| `ILogger<T>` support | Via `Serilog.Extensions.Logging` / `Serilog.AspNetCore` | Via `NLog.Extensions.Logging` | Built in (registers an `ILoggerProvider`) |
+| Sinks as separate NuGet packages | ✅ | ✅ | ✅ auto-discovered via `[ModuleInitializer]` |
+| Structured named params, `BeginScope` | ✅ | ✅ | ✅ (propagated to Serilog) |
+| JSON and code config combined | ✅ `ReadFrom.Configuration` + `WriteTo` | ✅ | ✅ JSON, fluent or merged |
+| Trace correlation | ✅ TraceId/SpanId captured (Serilog 3+) | Via `NLog.DiagnosticSource` | ✅ plus log events added to the current `Activity` |
+| Sink startup failures | `SelfLog` (text output) | `InternalLogger` (text output) | Queryable `ILogErrorStore`, sink listed as `Configured=false` |
+| Request/response logging | `UseSerilogRequestLogging` (summary, no bodies) | Manual | Middleware with bodies (64 KB cap), 1 line |
+| Email / Telegram alerts | `Serilog.Sinks.Email`; Telegram via 3rd-party sinks | `NLog.MailKit`; Telegram via 3rd-party | Sink packages with built-in throttling |
+| File path by log property (multi-tenant) | `Serilog.Sinks.Map` | `${event-properties}` in `fileName` | `FileNameProperty` in the File sink |
+| Sensitive data masking | 3rd-party (`Destructurama`, masking enrichers) | 3rd-party / custom | JSON-driven, applied to every sink |
+| Minimal setup | 2–3 lines + JSON (`ReadFrom.Configuration`) | 1–2 lines + XML/JSON | 2 lines + JSON |
+| Overhead per message (no-op sink) | baseline | lower than Serilog | ~3× plain Serilog |
+| Maturity and ecosystem | **Standard, huge** | **Established** | Young, small |
 
 [↑ Back to Top](#top)
 

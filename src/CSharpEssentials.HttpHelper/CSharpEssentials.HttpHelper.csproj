@@ -14,7 +14,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.loggerhelper.it</PackageProjectUrl>
     <RepositoryUrl>https://github.com/alexbypa/CSharp.Essentials</RepositoryUrl>
-    <PackageTags>httpclient;polly;resilience;retry;rate-limiting;aspnetcore;http;structured-logging</PackageTags>
+    <PackageTags>httpclient;polly;resilience;retry;rate-limiting;aspnetcore;http;structured-logging;resilient-httpclient;correlation-id;mock-http;net8;net9;net10;dotnet8;dotnet9;dotnet10</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

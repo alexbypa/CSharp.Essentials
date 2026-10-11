@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [5.3.2] — 2026-10-11
+
+### Changed
+
+- **Docs:** README comparison table rewritten to be accurate about plain Serilog and NLog (modular sinks, JSON + code config, `Serilog.Sinks.Map`, `SelfLog`, trace correlation and setup size were understated) and now states overhead and maturity. Tagline no longer claims per-level routing as unique: it names exact level sets, masking and sink health. .NET badge fixed to 8 | 9 | 10.
+
+---
+
 ## [5.3.1] — 2026-10-10
 
 ### Added
