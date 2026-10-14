@@ -6,14 +6,14 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/build-test.yml'
-      - 'tools/trx-summary.ps1'
+      - '.github/scripts/trx-summary.ps1'
 
   pull_request:
     branches: [main]
     paths:
       - 'src/**'
       - '.github/workflows/build-test.yml'
-      - 'tools/trx-summary.ps1'
+      - '.github/scripts/trx-summary.ps1'
 
 permissions:
   contents: read
@@ -83,7 +83,7 @@ jobs:
         shell: pwsh
         run: |
           $trx = 'src/CSharpEssentials.LoggerHelper.Tests/TestResults/test-results.trx'
-          if (Test-Path $trx) { ./tools/trx-summary.ps1 -Path $trx >> $env:GITHUB_STEP_SUMMARY }
+          if (Test-Path $trx) { ./.github/scripts/trx-summary.ps1 -Path $trx >> $env:GITHUB_STEP_SUMMARY }
 
       - name: Upload Test Results Artifact
         uses: actions/upload-artifact@v4

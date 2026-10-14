@@ -13,6 +13,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **LoggerHelper:** sensitive data masking regexes (presets and custom `Rules`) now run with a 250 ms match timeout, so a custom pattern prone to catastrophic backtracking can no longer stall logging on hostile input (ReDoS). On timeout the whole value is replaced with `MaskText` and the event is written to Serilog `SelfLog`.
 - **Repo:** added `SECURITY.md` with supported versions and private vulnerability reporting.
 - **CI:** GitHub Actions workflows are read-only at the top level; write permissions moved to the single job that needs them. `publish.yml` no longer asks for `packages: write` (NuGet push uses the API key).
+- **CI:** removed the `Deploy GitHub Pages` workflow: it never deployed (Pages is off on this repo, and `docs/site` is not in the public one). The site at loggerhelper.it is uploaded by hand.
+- **CI:** `trx-summary.ps1` moved from `tools/` to `.github/scripts/`, next to the other CI script: `tools/` is not synced to the public repo, where the test summary step failed.
 
 ---
 
