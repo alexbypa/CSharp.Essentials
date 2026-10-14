@@ -1,10 +1,20 @@
+using Xunit.Abstractions;
 using Microsoft.Extensions.Configuration;
 
 namespace CSharpEssentials.LoggerHelper.Tests;
 
 public class LegacyConfigurationAdapterTests {
+    private readonly ITestOutputHelper _output;
+
+    public LegacyConfigurationAdapterTests(ITestOutputHelper output) {
+        _output = output;
+    }
+
     [Fact]
     public void TryApply_MapsSerilogConfiguration_ToRoutes() {
+        _output.WriteLine("[Scenario] JSON legacy v2-v4 (Serilog:SerilogConfiguration con ApplicationName, 2 SerilogCondition Console/Email e SerilogOption Email/Telegram) passato a LegacyConfigurationAdapter.TryApply");
+        _output.WriteLine("[Atteso] TryApply == true; ApplicationName=\"LegacyApp\"; 2 Routes (incluso Console); RawSinksSection valorizzata");
+
         var config = new ConfigurationBuilder()
             .AddJsonStream(new MemoryStream("""
             {
@@ -37,6 +47,7 @@ public class LegacyConfigurationAdapterTests {
         var options = new LoggerHelperOptions();
         var applied = LegacyConfigurationAdapter.TryApply(config, options);
 
+        _output.WriteLine($"[Restituito] applied={applied}, ApplicationName={options.ApplicationName}, Routes=[{string.Join(", ", options.Routes.Select(r => r.Sink))}], RawSinksSection={(options.RawSinksSection is null ? "null" : "presente")}");
         Assert.True(applied);
         Assert.Equal("LegacyApp", options.ApplicationName);
         Assert.Equal(2, options.Routes.Count);
