@@ -1,4 +1,5 @@
 using Serilog.Core;
+using Serilog.Debugging;
 using Serilog.Events;
 using System.Text.RegularExpressions;
 
@@ -18,9 +19,19 @@ namespace CSharpEssentials.LoggerHelper;
 ///
 /// One JSON block protects every sink at once — no per-sink configuration, no code changes
 /// at call sites.
+///
+/// Every pattern runs with <see cref="MatchTimeout"/>: log text often comes from end users, so a
+/// custom rule prone to catastrophic backtracking must not stall the logging thread (ReDoS).
+/// On timeout the whole value is replaced with the mask text (fail closed, nothing leaks) and
+/// the event is reported through Serilog's <see cref="SelfLog"/>.
 /// </summary>
 public sealed class SensitiveDataMaskingEnricher : ILogEventEnricher {
     private const string SecretGroupName = "secret";
+
+    /// <summary>
+    /// Upper bound for a single regex match against one property value.
+    /// </summary>
+    internal static readonly TimeSpan MatchTimeout = TimeSpan.FromMilliseconds(250);
 
     private readonly SensitiveDataMaskingOptions _options;
     private readonly Regex[] _patterns;
@@ -50,12 +61,12 @@ public sealed class SensitiveDataMaskingEnricher : ILogEventEnricher {
 
         foreach (var preset in options.Presets) {
             if (BuiltInPresetPatterns.TryGetValue(preset, out var pattern))
-                patterns.Add(new Regex(pattern, RegexOptions.Compiled));
+                patterns.Add(new Regex(pattern, RegexOptions.Compiled, MatchTimeout));
         }
 
         foreach (var rule in options.Rules) {
             if (!string.IsNullOrWhiteSpace(rule.Pattern))
-                patterns.Add(new Regex(rule.Pattern, RegexOptions.Compiled));
+                patterns.Add(new Regex(rule.Pattern, RegexOptions.Compiled, MatchTimeout));
         }
 
         return patterns.ToArray();
@@ -101,8 +112,14 @@ public sealed class SensitiveDataMaskingEnricher : ILogEventEnricher {
 
     private string Mask(string input) {
         foreach (var pattern in _patterns) {
-            if (pattern.IsMatch(input))
-                input = pattern.Replace(input, m => ReplaceMatch(m, _options.MaskText));
+            try {
+                if (pattern.IsMatch(input))
+                    input = pattern.Replace(input, m => ReplaceMatch(m, _options.MaskText));
+            } catch (RegexMatchTimeoutException) {
+                SelfLog.WriteLine("LoggerHelper masking: pattern {0} timed out after {1} ms; value fully masked.",
+                    pattern, MatchTimeout.TotalMilliseconds);
+                return _options.MaskText;
+            }
         }
         return input;
     }

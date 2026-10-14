@@ -8,6 +8,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+
+- **LoggerHelper:** sensitive data masking regexes (presets and custom `Rules`) now run with a 250 ms match timeout, so a custom pattern prone to catastrophic backtracking can no longer stall logging on hostile input (ReDoS). On timeout the whole value is replaced with `MaskText` and the event is written to Serilog `SelfLog`.
+- **Repo:** added `SECURITY.md` with supported versions and private vulnerability reporting.
+- **CI:** GitHub Actions workflows are read-only at the top level; write permissions moved to the single job that needs them. `publish.yml` no longer asks for `packages: write` (NuGet push uses the API key).
+
 ---
 
 ## [5.3.2] — 2026-10-11

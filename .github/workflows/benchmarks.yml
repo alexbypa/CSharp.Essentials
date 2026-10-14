@@ -25,12 +25,15 @@ on:
           - default
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   benchmark:
     runs-on: ubuntu-latest
+    # Write access only for this job: it commits the results to a branch and opens a PR.
+    permissions:
+      contents: write
+      pull-requests: write
     env:
       # Tag push → 'Release' classes; manual run → category + filter typed in the form (both must match).
       BENCH_CATEGORY: ${{ github.event_name == 'workflow_dispatch' && inputs.category || 'Release' }}

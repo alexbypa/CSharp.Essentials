@@ -3,9 +3,9 @@ name: Publish NuGet Packages
 on:
   workflow_dispatch: # Permette l'attivazione esclusivamente manuale da interfaccia GitHub
 
+# Publishing goes to nuget.org with NUGET_API_KEY: the GitHub token only needs to read the code.
 permissions:
   contents: read
-  packages: write
 
 jobs:
   publish:

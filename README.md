@@ -374,6 +374,9 @@ logger.LogInformation("Login for {Email} with {Password}", "alice@example.com", 
   regardless of content.
 - **Custom regex rules** with an optional `secret` capture group mask only part of a match —
   `Bearer ***MASKED***` keeps the scheme visible while hiding the token.
+- **ReDoS-safe:** every pattern runs with a 250 ms match timeout. A custom rule that backtracks
+  badly on hostile input masks the whole value (nothing leaks) and reports to Serilog `SelfLog`
+  instead of stalling the logging thread.
 - **Zero overhead when disabled** (the default) — the enricher isn't added to the pipeline at all.
 
 Serilog has no first-class equivalent: redaction usually means a hand-rolled `IDestructuringPolicy`

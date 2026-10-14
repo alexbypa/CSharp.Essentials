@@ -17,6 +17,7 @@ For the exact C# Extension Methods, initialization syntax, and complete appsetti
 - Elasticsearch: `AutoRegisterTemplate` (default true) controls the synchronous index-template call at startup.
 - An `appsettings.LoggerHelper*.json` in the working directory fully replaces the `IConfiguration` passed to `AddLoggerHelper`.
 - `AddLoggerHelper(config, fluent)` merges fluent `General` flags over JSON: SelfLogging/RequestResponseLogging/RenderedMessage OR, OpenTelemetry AND (fluent can only disable); `SensitiveDataMasking` is additive (union of presets/properties, rules appended, de-duplicated by Pattern: JSON wins).
+- `SensitiveDataMasking` regexes (presets and `Rules`) run with a 250 ms match timeout (ReDoS guard): on timeout the whole value is masked and the event goes to Serilog `SelfLog`.
 
 ## Atomic NuGet Mapping Matrix
 - Core Engine: CSharpEssentials.LoggerHelper
