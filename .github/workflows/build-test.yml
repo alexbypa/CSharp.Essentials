@@ -10,10 +10,6 @@ on:
 
   pull_request:
     branches: [main]
-    paths:
-      - 'src/**'
-      - '.github/workflows/build-test.yml'
-      - '.github/scripts/trx-summary.ps1'
 
 permissions:
   contents: read
