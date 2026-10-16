@@ -92,6 +92,7 @@ This is the default format (no `OutputTemplate`); when an exception is attached,
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `OutputTemplate` | `string?` | `null` | Serilog output template (e.g. `[{Timestamp:HH:mm:ss} {Level:u3}] {Message}{NewLine}{Exception}`). When null or empty, the default `[HH:mm:ss Level] Message` is used. Exceptions are printed only if `{Exception}` is in the template. |
+| `ThrottleInterval` | `TimeSpan?` | `null` | Minimum interval between events sent through this route (JSON `"00:00:05"`). Events inside the window are dropped before the send. `null` or `00:00:00` = no throttling. The window is per route, so two routes using this sink throttle independently. |
 
 ---
 

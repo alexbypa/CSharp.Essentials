@@ -113,7 +113,7 @@ public class SinkPluginConfigureTests {
         _output.WriteLine("[Atteso] Emit ignora l'evento senza lanciare eccezioni");
 
         var accessor = new PerformContextAccessor();
-        var sink = new HangfireConsoleSerilogSink(accessor);
+        var sink = new HangfireConsoleSerilogSink(accessor, new CSharpEssentials.LoggerHelper.Diagnostics.ThrottleGate("HangfireConsole", null));
         var evt = new Serilog.Events.LogEvent(DateTimeOffset.UtcNow, Serilog.Events.LogEventLevel.Information, null,
             new Serilog.Parsing.MessageTemplateParser().Parse("hello"), []);
 

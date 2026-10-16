@@ -78,7 +78,7 @@ builder.Services.AddLoggerHelper(b => b
 |----------|------|---------|-------------|
 | `BotToken` | `string` | `""` | **Required.** Telegram Bot API token |
 | `ChatId` | `string` | `""` | **Required.** Target chat/group/channel ID |
-| `ThrottleInterval` | `TimeSpan?` | 1 second | Minimum interval between messages |
+| `ThrottleInterval` | `TimeSpan?` | 1 second | Minimum interval between messages. Applied per route (two routes throttle independently). Default 1 second when unset; `00:00:00` disables it. Throttled events are dropped before formatting |
 
 > **Required:** `BotToken` and `ChatId`. If the `Telegram` section is missing or one of them is empty, the sink fails to configure (`InvalidOperationException`), LoggerHelper records it as not configured (FAILED in the Dashboard/MCP) and the other sinks keep working.
 
