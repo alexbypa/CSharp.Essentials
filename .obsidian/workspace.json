@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "DEMO.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "DEMO"
+              "title": "README"
             }
           }
         ]
@@ -99,7 +99,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "DEMO.md",
+                "file": "README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -118,7 +118,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "DEMO.md",
+                "file": "README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -161,7 +161,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "DEMO.md",
+                "file": "README.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -190,13 +190,16 @@
   },
   "active": "c9ed80fc611c4a9e",
   "lastOpenFiles": [
+    "CONTRIBUTING.md",
+    "src/CSharpEssentials.LoggerHelper/README.md",
+    "src/CSharpEssentials.LoggerHelper.Sink.MSSqlServer/README.md",
+    "DEMO.md",
     "Nuovo Documento di testo.txt",
     "src/CSharpEssentials.LoggerHelper.Tests/obj/7b8217aa-3bf5-42b3-9fd1-1c8442e7b385.tmp",
     "src/CSharpEssentials.LoggerHelper.Tests/obj/8009228c-0e6b-4a56-b11f-63012ebf826e.tmp",
     "src/CSharpEssentials.LoggerHelper.Tests/obj/cc6a4a06-492f-4bbc-905f-7f9209b51c4e.tmp",
     "CLAUDE.md",
     "src/CSharpEssentials.HttpHelper.Tests/bin/Debug/net10.0/5nrotbmy.otz~",
-    "DEMO.md",
     "docs/benchmarks.md"
   ]
 }
