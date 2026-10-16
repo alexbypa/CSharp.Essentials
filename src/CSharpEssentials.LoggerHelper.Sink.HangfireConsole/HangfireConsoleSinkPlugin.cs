@@ -1,3 +1,4 @@
+using CSharpEssentials.LoggerHelper.Diagnostics;
 using Hangfire.Console;
 using Hangfire.Server;
 using Serilog;
@@ -18,6 +19,12 @@ public sealed class HangfireConsoleSinkOptions {
     /// Optional format provider for rendering log messages.
     /// </summary>
     public IFormatProvider? FormatProvider { get; set; }
+
+    /// <summary>
+    /// Minimum interval between two events passed to this sink route. Null (default) or zero disables throttling.
+    /// JSON example: "00:00:20"
+    /// </summary>
+    public TimeSpan? ThrottleInterval { get; set; }
 }
 
 // ── PerformContext accessor (same pattern as IHttpContextAccessor) ──
@@ -87,7 +94,7 @@ public sealed class HangfireConsoleSinkPlugin : ISinkPlugin {
 
         loggerConfig.WriteTo.Conditional(
             evt => routing.Matches(evt.Level),
-            wt => wt.Sink(new HangfireConsoleSerilogSink(accessor, opts?.FormatProvider))
+            wt => wt.Sink(new HangfireConsoleSerilogSink(accessor, new ThrottleGate("HangfireConsole", opts?.ThrottleInterval), opts?.FormatProvider))
         );
     }
 }
@@ -113,16 +120,21 @@ public static class HangfireConsoleSinkAccessorHolder {
 /// </summary>
 internal sealed class HangfireConsoleSerilogSink : ILogEventSink {
     private readonly IPerformContextAccessor _accessor;
+    private readonly IThrottleGate _throttle;
     private readonly IFormatProvider? _formatProvider;
 
-    internal HangfireConsoleSerilogSink(IPerformContextAccessor accessor, IFormatProvider? formatProvider = null) {
+    internal HangfireConsoleSerilogSink(IPerformContextAccessor accessor, IThrottleGate throttle, IFormatProvider? formatProvider = null) {
         _accessor = accessor;
+        _throttle = throttle;
         _formatProvider = formatProvider;
     }
 
     public void Emit(LogEvent logEvent) {
         var context = _accessor.Current;
         if (context is null)
+            return;
+
+        if (!_throttle.TryPass(logEvent))
             return;
 
         var message = logEvent.RenderMessage(_formatProvider);

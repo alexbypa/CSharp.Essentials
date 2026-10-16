@@ -53,7 +53,7 @@ public sealed class TelegramSinkPlugin : ISinkPlugin {
 
         loggerConfig.WriteTo.Conditional(
             evt => routing.Matches(evt.Level),
-            wt => wt.Sink(new TelegramLogEventSink(opts))
+            wt => wt.Sink(new TelegramLogEventSink(opts, new ThrottleGate("Telegram", opts.ThrottleInterval ?? TimeSpan.FromSeconds(1))))
         );
     }
 }
@@ -62,20 +62,19 @@ public sealed class TelegramSinkPlugin : ISinkPlugin {
 
 internal sealed class TelegramLogEventSink : ILogEventSink {
     private readonly TelegramSinkOptions _opts;
+    private readonly IThrottleGate _throttle;
     private static readonly HttpClient _client = new() { Timeout = TimeSpan.FromSeconds(10) };
 
-    internal TelegramLogEventSink(TelegramSinkOptions opts) {
+    internal TelegramLogEventSink(TelegramSinkOptions opts, IThrottleGate throttle) {
         _opts = opts;
+        _throttle = throttle;
     }
 
     public void Emit(LogEvent logEvent) {
-        var message = FormatMessage(logEvent);
-
-        var throttle = _opts.ThrottleInterval ?? TimeSpan.FromSeconds(1);
-        if (!SinkThrottlingManager.CanSend("Telegram", throttle)) {
-            SelfLog.WriteLine($"Telegram throttled: {logEvent.RenderMessage()}");
+        if (!_throttle.TryPass(logEvent))
             return;
-        }
+
+        var message = FormatMessage(logEvent);
 
         // Fire-and-forget: Serilog's sink Emit() is synchronous by contract; dispatching to
         // a thread-pool thread avoids blocking Serilog's background queue for a network round-trip.

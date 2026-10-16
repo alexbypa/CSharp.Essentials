@@ -74,7 +74,7 @@ builder.Services.AddLoggerHelper(b => b
 | `Password` | `string?` | `null` | SMTP authentication password |
 | `EnableSsl` | `bool` | `true` | Enable SSL/TLS for SMTP connection |
 | `TemplatePath` | `string?` | `null` | Path to a custom HTML email template |
-| `ThrottleInterval` | `TimeSpan?` | `null` | Minimum interval between emails to prevent flooding |
+| `ThrottleInterval` | `TimeSpan?` | `null` | Minimum interval between emails to prevent flooding. Applied per route: two routes using this sink throttle independently |
 
 > **Required:** `Host`, `From` and `To`. If the `Email` section is missing or one of them is empty, the sink fails to configure (`InvalidOperationException`), LoggerHelper records it as not configured (FAILED in the Dashboard/MCP) and the other sinks keep working.
 

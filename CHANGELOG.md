@@ -8,6 +8,28 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [5.4.0] — 2026-10-16
+
+### Added
+
+- **LoggerHelper:** public `IThrottleGate` and `ThrottleGate(string sinkName, TimeSpan? interval, TimeProvider? timeProvider = null)` in `CSharpEssentials.LoggerHelper.Diagnostics`: a lock-free per-route throttle gate. A `null` or non-positive interval never drops; the first call passes; a drop writes `<Sink> throttled: <message>` to Serilog `SelfLog`.
+- **All sinks:** optional `TimeSpan? ThrottleInterval` on the options of every sink (JSON `Sinks:<Sink>:ThrottleInterval`, e.g. `"00:00:05"`, and fluent). New on Console, File, HangfireConsole, MySql, Seq, Elasticsearch, MSSqlServer and Postgresql; Email and Telegram already had it. Default `null` = no throttling (Telegram keeps its 1 second default; `"00:00:00"` disables it).
+
+### Changed
+
+- **Sinks:** the throttle window is now per route per sink instead of global per sink name: two Email routes (e.g. Error and Fatal) throttle independently, and the window resets when the logger is rebuilt. Throttled events are dropped before the send. File with `FileNameProperty` throttles route-wide, not per file name; HangfireConsole events outside a job do not consume the window.
+- **Sink.Telegram:** throttled events are no longer formatted.
+
+### Deprecated
+
+- **LoggerHelper:** `SinkThrottlingManager` is marked `[Obsolete]`, use `ThrottleGate`. It will be removed in the next major.
+
+---
+
+## [5.3.3] — 2026-10-16
+
 ### Security
 
 - **Demo:** the Playground (`POST /api/playground/log`) replaces line terminators (CR, LF, NEL, LS, PS, FF) with a space in the message and in property values before logging them, so a request can no longer forge extra log lines in text sinks (CodeQL `cs/log-forging`, code scanning alert #58).

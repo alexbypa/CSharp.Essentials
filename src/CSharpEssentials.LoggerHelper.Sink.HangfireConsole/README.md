@@ -125,6 +125,7 @@ services.AddLoggerHelper(b => b
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `FormatProvider` | `IFormatProvider?` | `null` | Custom format provider for rendering log messages |
+| `ThrottleInterval` | `TimeSpan?` | `null` | Minimum interval between events sent through this route (JSON `"00:00:05"`). Events outside a job never consume the window. Events inside the window are dropped before the send. `null` or `00:00:00` = no throttling. The window is per route, so two routes using this sink throttle independently. |
 
 ## Color Mapping
 

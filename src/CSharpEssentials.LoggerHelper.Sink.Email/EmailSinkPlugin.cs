@@ -63,7 +63,7 @@ public sealed class EmailSinkPlugin : ISinkPlugin {
 
         loggerConfig.WriteTo.Conditional(
             evt => routing.Matches(evt.Level),
-            wt => wt.Sink(new EmailLogEventSink(opts))
+            wt => wt.Sink(new EmailLogEventSink(opts, new ThrottleGate("Email", opts.ThrottleInterval)))
         );
     }
 }
@@ -72,13 +72,15 @@ public sealed class EmailSinkPlugin : ISinkPlugin {
 
 internal sealed class EmailLogEventSink : ILogEventSink, IDisposable {
     private readonly EmailSinkOptions _opts;
+    private readonly IThrottleGate _throttle;
     private readonly string _template;
     private readonly SmtpClient _smtpClient;
     // SmtpClient.Send is not thread-safe; protect concurrent Emit calls.
     private readonly object _sendLock = new();
 
-    internal EmailLogEventSink(EmailSinkOptions opts) {
+    internal EmailLogEventSink(EmailSinkOptions opts, IThrottleGate throttle) {
         _opts = opts;
+        _throttle = throttle;
         // Cache the template at construction time: File.ReadAllText on every Emit() is I/O on the hot path.
         _template = !string.IsNullOrWhiteSpace(opts.TemplatePath) && File.Exists(opts.TemplatePath)
             ? File.ReadAllText(opts.TemplatePath)
@@ -90,13 +92,10 @@ internal sealed class EmailLogEventSink : ILogEventSink, IDisposable {
     }
 
     public void Emit(LogEvent logEvent) {
-        try {
-            if (_opts.ThrottleInterval.HasValue &&
-                !SinkThrottlingManager.CanSend("Email", _opts.ThrottleInterval.Value)) {
-                SelfLog.WriteLine($"Email throttled: {logEvent.RenderMessage()}");
-                return;
-            }
+        if (!_throttle.TryPass(logEvent))
+            return;
 
+        try {
             var htmlBody = GenerateHtmlBody(logEvent);
             var subject = $"[LoggerHelper] [{logEvent.Level}]";
 

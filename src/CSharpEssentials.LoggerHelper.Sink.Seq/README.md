@@ -98,6 +98,7 @@ TenantId = 'acme' and OrderId > 100
 |---|---|---|---|
 | `ServerUrl` | `string` | `""` | **Required.** Seq ingestion URL (default port is `5341`). Legacy JSON key `serverUrl` is also accepted. |
 | `ApiKey` | `string?` | `null` | API key for authentication. Optional for local single-user Seq instances. Required for production Seq Server or Seq Cloud. |
+| `ThrottleInterval` | `TimeSpan?` | `null` | Minimum interval between events sent through this route (JSON `"00:00:05"`). Events inside the window are dropped before the send. `null` or `00:00:00` = no throttling. The window is per route, so two routes using this sink throttle independently. |
 
 > An empty `ServerUrl` (or a missing `Seq` section) makes the sink fail to configure with an `InvalidOperationException`; LoggerHelper records it as not configured and the other sinks keep working. The v4 section name `SeqOptions` is read as a fallback.
 

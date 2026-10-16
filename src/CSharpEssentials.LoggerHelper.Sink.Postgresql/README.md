@@ -68,6 +68,7 @@ builder.Services.AddLoggerHelper(b => b
 | `NeedAutoCreateTable` | `bool` | `true` | Automatically create the log table |
 | `AddAutoIncrementColumn` | `bool` | `false` | Add an auto-increment primary key column |
 | `Columns` | `List<PostgreSqlColumnConfig>?` | `null` | Custom column definitions (overrides defaults) |
+| `ThrottleInterval` | `TimeSpan?` | `null` | Minimum interval between events sent through this route (JSON `"00:00:05"`). Events inside the window are dropped before the send. `null` or `00:00:00` = no throttling. The window is per route, so two routes using this sink throttle independently. |
 
 > **Required:** `ConnectionString`. If the `Postgresql` section is missing or it is empty, the sink fails to configure (`InvalidOperationException`), LoggerHelper records it as not configured (FAILED in the Dashboard/MCP) and the other sinks keep working.
 

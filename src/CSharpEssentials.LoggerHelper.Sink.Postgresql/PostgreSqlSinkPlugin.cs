@@ -1,3 +1,4 @@
+using CSharpEssentials.LoggerHelper.Diagnostics;
 using NpgsqlTypes;
 using Serilog;
 using Serilog.Debugging;
@@ -44,6 +45,12 @@ public sealed class PostgreSqlSinkOptions {
 
     /// <summary>Legacy JSON key: ColumnsPostGreSQL</summary>
     public List<PostgreSqlColumnConfig>? ColumnsPostGreSQL { set => Columns = value ?? Columns; }
+
+    /// <summary>
+    /// Minimum interval between two events passed to this sink route. Null (default) or zero disables throttling.
+    /// JSON example: "00:00:20"
+    /// </summary>
+    public TimeSpan? ThrottleInterval { get; set; }
 }
 
 /// <summary>
@@ -101,8 +108,10 @@ public sealed class PostgreSqlSinkPlugin : ISinkPlugin {
         if (opts.AddAutoIncrementColumn)
             SelfLog.WriteLine("PostgreSQL: addAutoIncrementColumn is recognized; ensure your table defines id SERIAL PRIMARY KEY when using custom columns.");
 
+        var gate = new ThrottleGate("PostgreSql", opts.ThrottleInterval);
+
         loggerConfig.WriteTo.Conditional(
-            evt => routing.Matches(evt.Level),
+            evt => routing.Matches(evt.Level) && gate.TryPass(evt),
             wt => wt.PostgreSQL(
                 connectionString: opts.ConnectionString,
                 tableName: opts.TableName,

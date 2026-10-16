@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // SinkThrottlingManager is obsolete; kept under test/benchmark until removal
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
 using CSharpEssentials.LoggerHelper.Diagnostics;
