@@ -109,6 +109,7 @@ public static class HangfireConsoleSinkAccessorHolder {
 /// Serilog Sink che scrive i log sulla dashboard Hangfire tramite PerformContext.
 /// Se non siamo dentro un job Hangfire (PerformContext è null), il log viene ignorato.
 /// Supporta colori diversi in base al LogEventLevel.
+/// Se il log ha un'eccezione allegata, la scrive su una riga successiva (vedi <see cref="FormatException"/>).
 /// </summary>
 internal sealed class HangfireConsoleSerilogSink : ILogEventSink {
     private readonly IPerformContextAccessor _accessor;
@@ -138,7 +139,24 @@ internal sealed class HangfireConsoleSerilogSink : ILogEventSink {
 
         context.SetTextColor(color);
         context.WriteLine($"[{logEvent.Timestamp.ToLocalTime():HH:mm:ss} {logEvent.Level}] {message}");
+        var exception = FormatException(logEvent);
+        if (exception is not null)
+            context.WriteLine(exception);
         context.ResetTextColor();
+    }
+
+    /// <summary>
+    /// Testo dell'eccezione allegata al log, o null se non c'è.
+    /// Sotto Error: compatto "Tipo: Messaggio". Da Error in su: ex.ToString() con stack trace e inner exception.
+    /// </summary>
+    internal static string? FormatException(LogEvent logEvent) {
+        var ex = logEvent.Exception;
+        if (ex is null)
+            return null;
+
+        return logEvent.Level >= LogEventLevel.Error
+            ? ex.ToString()
+            : $"{ex.GetType().Name}: {ex.Message}";
     }
 }
 

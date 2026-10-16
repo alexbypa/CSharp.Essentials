@@ -137,6 +137,21 @@ services.AddLoggerHelper(b => b
 | Error | Red |
 | Fatal | DarkRed |
 
+## Exceptions
+
+When the log event carries an exception, the sink writes it on the line after the message, in the same color:
+
+| Level | Exception line |
+|-------|----------------|
+| Verbose → Warning | `Type: Message`, e.g. `HttpRequestException: boom` |
+| Error, Fatal | full `ex.ToString()` (type, message, inner exceptions, stack trace) |
+
+```csharp
+logger.LogWarning(new HttpRequestException("boom"), "Tool failed, continuing");
+// [10:42:07 Warning] Tool failed, continuing
+// HttpRequestException: boom
+```
+
 ## Thread Safety
 
 `IPerformContextAccessor` uses `AsyncLocal<T>` internally, so parallel jobs running on the same server never interfere with each other. Each async flow sees only its own `PerformContext`.
