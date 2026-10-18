@@ -62,7 +62,7 @@ jobs:
             --logger "console;verbosity=detailed"
 
       - name: Publish xUnit Test Results Dashboard
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: always()
         with:
           name: xUnit Test Results Dashboard
