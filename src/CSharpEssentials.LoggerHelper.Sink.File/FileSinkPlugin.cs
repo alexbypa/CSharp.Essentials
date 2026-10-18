@@ -1,3 +1,4 @@
+using CSharpEssentials.LoggerHelper.Diagnostics;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -29,6 +30,12 @@ public sealed class FileSinkOptions {
     /// When exceeded, the least recently used sink is disposed. Default: 64.
     /// </summary>
     public int MaxOpenFiles { get; set; } = 64;
+
+    /// <summary>
+    /// Minimum interval between two events passed to this sink route. Null (default) or zero disables throttling.
+    /// JSON example: "00:00:20"
+    /// </summary>
+    public TimeSpan? ThrottleInterval { get; set; }
 }
 
 // ── Builder extension ─────────────────────────────────────────────
@@ -56,6 +63,7 @@ public sealed class FileSinkPlugin : ISinkPlugin {
         var opts = options.GetSinkConfig<FileSinkOptions>("File")
                    ?? options.BindSinkSection<FileSinkOptions>("File")
                    ?? new FileSinkOptions();
+        var gate = new ThrottleGate("File", opts.ThrottleInterval);
 
         if (string.IsNullOrWhiteSpace(opts.FileNameProperty)) {
             var logDirectory = opts.Path;
@@ -63,7 +71,7 @@ public sealed class FileSinkPlugin : ISinkPlugin {
             Directory.CreateDirectory(logDirectory);
 
             loggerConfig.WriteTo.Conditional(
-                evt => routing.Matches(evt.Level),
+                evt => routing.Matches(evt.Level) && gate.TryPass(evt),
                 wt => wt.File(
                     new JsonFormatter(),
                     logFilePath,
@@ -75,7 +83,7 @@ public sealed class FileSinkPlugin : ISinkPlugin {
         } else {
             var dynamicSink = new DynamicPropertyFileSink(opts);
             loggerConfig.WriteTo.Conditional(
-                evt => routing.Matches(evt.Level),
+                evt => routing.Matches(evt.Level) && gate.TryPass(evt),
                 wt => wt.Sink(dynamicSink)
             );
         }

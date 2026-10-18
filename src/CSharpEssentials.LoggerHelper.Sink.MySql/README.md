@@ -126,6 +126,7 @@ WHERE properties->>'$.OrderId' = '4711';
 | `BatchPostingLimit` | `int` | `100` | Events written per batch. Clamped to `1..1000` |
 | `Period` | `string` | `"0.00:00:05"` | Flush interval as a `TimeSpan` string. Falls back to 5s if unparsable |
 | `Columns` | `List<MySqlColumnConfig>?` | `null` | Custom column definitions (overrides defaults) |
+| `ThrottleInterval` | `TimeSpan?` | `null` | Minimum interval between events sent through this route (JSON `"00:00:05"`). Events inside the window are dropped before the send. `null` or `00:00:00` = no throttling. The window is per route, so two routes using this sink throttle independently. |
 
 Legacy lowercase JSON keys (`connectionstring`, `tableName`, `autoCreateTable`, `needAutoCreateTable`, `addAutoIncrementColumn`, `ColumnsMySql`) are accepted for compatibility with older configuration files.
 

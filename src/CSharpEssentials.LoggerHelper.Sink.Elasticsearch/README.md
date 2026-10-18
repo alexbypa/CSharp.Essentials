@@ -125,6 +125,7 @@ OpenSearch exposes the same REST API as Elasticsearch 7.x on port 9200 by defaul
 | `NodeUris` | `string` | `""` | **Required.** Elasticsearch node URL. For HTTPS or authentication include them in the URI: `"https://user:pass@es-host:9243"`. |
 | `IndexFormat` | `string?` | `null` | Index name format with optional date placeholder `{0:...}`. When `null` Serilog uses its own default (`logstash-{0:yyyy.MM.dd}`). |
 | `AutoRegisterTemplate` | `bool` | `true` | Registers the index template with a synchronous HTTP call at startup (idempotent). Set `false` to skip it, e.g. when the template is managed elsewhere or the node may be down at startup. Legacy JSON keys `nodeUris`, `indexFormat` and `autoRegisterTemplate` are also accepted. |
+| `ThrottleInterval` | `TimeSpan?` | `null` | Minimum interval between events sent through this route (JSON `"00:00:05"`). Events inside the window are dropped before the send. `null` or `00:00:00` = no throttling. The window is per route, so two routes using this sink throttle independently. |
 
 > The sink name is matched case-insensitively; the v4 spelling `ElasticSearch` is accepted as an alias for the route and the `Sinks` section.
 

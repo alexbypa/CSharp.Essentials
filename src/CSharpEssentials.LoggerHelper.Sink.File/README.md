@@ -151,6 +151,7 @@ builder.Services.AddLoggerHelper(b => b
 | `Shared` | `bool` | `true` | Allow multiple processes (e.g. multiple app instances) to write to the same file. |
 | `FileNameProperty` | `string?` | `null` | Log event property used to create per-value subdirectories (e.g. `"TenantId"`). Values are sanitized for folder names (`\ / : * ? " < > |` become `_`, max 100 chars). See section above. |
 | `MaxOpenFiles` | `int` | `64` | Maximum number of simultaneously open file handles when using `FileNameProperty`. Oldest handles are closed on LRU eviction. |
+| `ThrottleInterval` | `TimeSpan?` | `null` | Minimum interval between events sent through this route (JSON `"00:00:05"`). Events inside the window are dropped before the send. `null` or `00:00:00` = no throttling. The window is per route, so with `FileNameProperty` it is route-wide (not per file name), and two routes using this sink throttle independently. |
 
 > All logs are written in **structured JSON format** using Serilog's `JsonFormatter`. There is no plain-text mode for this sink — use the Console sink for human-readable output.
 

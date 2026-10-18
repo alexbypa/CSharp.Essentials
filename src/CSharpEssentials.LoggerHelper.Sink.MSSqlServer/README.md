@@ -148,6 +148,7 @@ using (Serilog.Context.LogContext.PushProperty("UserId", userId))
 | `RemoveStandardColumns` | `List<string>?` | `null` | Standard columns to exclude (e.g. `["Properties"]` to drop the XML blob). Applied after `AddStandardColumns`; unknown names are ignored. |
 | `AdditionalColumns` | `List<AdditionalColumnConfig>?` | `null` | Custom columns mapped from log properties (see above). |
 | `StoreTimestampInUtc` | `bool` | `false` | Store the `TimeStamp` column in UTC. When `false`, it is stored as local time. |
+| `ThrottleInterval` | `TimeSpan?` | `null` | Minimum interval between events sent through this route (JSON `"00:00:05"`). Events inside the window are dropped before the send. `null` or `00:00:00` = no throttling. The window is per route, so two routes using this sink throttle independently. |
 
 ### AdditionalColumnConfig
 

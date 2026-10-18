@@ -234,11 +234,14 @@ public class PlaygroundEndpoints : IEndpointDefinition {
     }
 
     private static void Write(Serilog.ILogger logger, PlaygroundRequest req, LogEventLevel level) {
-        var props = req.Properties ?? [];
+        // Message and property values come from the request body: neutralize line terminators so they
+        // cannot forge extra lines in text sinks (CodeQL cs/log-forging).
+        var message = req.Message.ReplaceLineEndings(" ");
+        var props = (req.Properties ?? []).ToDictionary(p => p.Key, p => p.Value?.ReplaceLineEndings(" "));
 
         // Placeholders in the message ({Email}, {Password}...) are bound positionally by Serilog:
         // pass the property values in placeholder order. The other properties go on the context.
-        var placeholders = new MessageTemplateParser().Parse(req.Message).Tokens
+        var placeholders = new MessageTemplateParser().Parse(message).Tokens
             .OfType<PropertyToken>().Select(t => t.PropertyName).ToList();
         var args = placeholders.Select(n => (object?)props.GetValueOrDefault(n)).ToArray();
 
@@ -246,7 +249,7 @@ public class PlaygroundEndpoints : IEndpointDefinition {
             logger = logger.ForContext(key, value);
 
         var ex = req.IncludeException ? CreateException() : null;
-        logger.Write(level, ex, req.Message, args);
+        logger.Write(level, ex, message, args);
     }
 
     private static Exception CreateException() {

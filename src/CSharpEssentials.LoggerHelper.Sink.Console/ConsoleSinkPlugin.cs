@@ -1,3 +1,4 @@
+using CSharpEssentials.LoggerHelper.Diagnostics;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -13,6 +14,12 @@ namespace CSharpEssentials.LoggerHelper.Sink.Console;
 /// </summary>
 public sealed class ConsoleSinkOptions {
     public string? OutputTemplate { get; set; }
+
+    /// <summary>
+    /// Minimum interval between two events passed to this sink route. Null (default) or zero disables throttling.
+    /// JSON example: "00:00:20"
+    /// </summary>
+    public TimeSpan? ThrottleInterval { get; set; }
 }
 
 // ── Builder extension (OCP: core doesn't know about this sink) ───
@@ -35,7 +42,7 @@ public sealed class ConsoleSinkPlugin : ISinkPlugin {
 
         loggerConfig.WriteTo.Conditional(
             evt => routing.Matches(evt.Level),
-            wt => wt.Sink(new ColoredConsoleSink(opts?.OutputTemplate))
+            wt => wt.Sink(new ColoredConsoleSink(opts?.OutputTemplate, new ThrottleGate("Console", opts?.ThrottleInterval)))
         );
     }
 }
@@ -44,12 +51,17 @@ public sealed class ConsoleSinkPlugin : ISinkPlugin {
 
 internal sealed class ColoredConsoleSink : ILogEventSink {
     private readonly MessageTemplateTextFormatter? _formatter;
+    private readonly IThrottleGate _throttle;
 
-    internal ColoredConsoleSink(string? outputTemplate) {
+    internal ColoredConsoleSink(string? outputTemplate, IThrottleGate throttle) {
+        _throttle = throttle;
         _formatter = string.IsNullOrWhiteSpace(outputTemplate) ? null : new MessageTemplateTextFormatter(outputTemplate);
     }
 
     public void Emit(LogEvent logEvent) {
+        if (!_throttle.TryPass(logEvent))
+            return;
+
         string formatted;
         if (_formatter is null) {
             var message = logEvent.RenderMessage();

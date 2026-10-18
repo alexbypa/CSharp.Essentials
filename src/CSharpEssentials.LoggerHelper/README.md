@@ -345,6 +345,20 @@ Route logs to subdirectories based on any log property:
 Logs with `TenantId = "acme"` → `Logs/acme/log-20250101.txt`.  
 Logs without the property → `Logs/log-20250101.txt`.
 
+### Throttling — Any Sink, Per Route
+
+Cap how often a sink sends with one optional key. Events inside the window are dropped before the send and written to Serilog `SelfLog`:
+
+```jsonc
+"Sinks": {
+  "Email":    { "Host": "smtp.example.com", "ThrottleInterval": "00:05:00" },
+  "Telegram": { "BotToken": "...", "ChatId": "...", "ThrottleInterval": "00:00:05" },
+  "Seq":      { "ServerUrl": "http://localhost:5341", "ThrottleInterval": "00:00:01" }
+}
+```
+
+`ThrottleInterval` works on every sink (default `null` = no throttling; Telegram keeps its 1 second default, `"00:00:00"` disables it). The window is per route: an Email route for `Error` and one for `Fatal` throttle independently.
+
 ### Sensitive Data Masking — One JSON Block Protects Every Sink
 
 Stop writing `Regex.Replace` calls before every `logger.LogInformation`. Declare what's sensitive
@@ -515,7 +529,7 @@ LoggerHelper sits **on top of** Serilog: everything below that plain Serilog or 
 | Trace correlation | ✅ TraceId/SpanId captured (Serilog 3+) | Via `NLog.DiagnosticSource` | ✅ plus log events added to the current `Activity` |
 | Sink startup failures | `SelfLog` (text output) | `InternalLogger` (text output) | Queryable `ILogErrorStore`, sink listed as `Configured=false` |
 | Request/response logging | `UseSerilogRequestLogging` (summary, no bodies) | Manual | Middleware with bodies (64 KB cap), 1 line |
-| Email / Telegram alerts | `Serilog.Sinks.Email`; Telegram via 3rd-party sinks | `NLog.MailKit`; Telegram via 3rd-party | Sink packages with built-in throttling |
+| Email / Telegram alerts | `Serilog.Sinks.Email`; Telegram via 3rd-party sinks | `NLog.MailKit`; Telegram via 3rd-party | Sink packages; `ThrottleInterval` throttling on every sink |
 | File path by log property (multi-tenant) | `Serilog.Sinks.Map` | `${event-properties}` in `fileName` | `FileNameProperty` in the File sink |
 | Sensitive data masking | 3rd-party (`Destructurama`, masking enrichers) | 3rd-party / custom | JSON-driven, applied to every sink |
 | Minimal setup | 2–3 lines + JSON (`ReadFrom.Configuration`) | 1–2 lines + XML/JSON | 2 lines + JSON |

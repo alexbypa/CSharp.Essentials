@@ -1,3 +1,4 @@
+using CSharpEssentials.LoggerHelper.Diagnostics;
 using Serilog;
 using Serilog.Debugging;
 using Serilog.Sinks.PeriodicBatching;
@@ -50,6 +51,12 @@ public sealed class MySqlSinkOptions {
 
     /// <summary>Legacy JSON key: ColumnsMySql</summary>
     public List<MySqlColumnConfig>? ColumnsMySql { set => Columns = value ?? Columns; }
+
+    /// <summary>
+    /// Minimum interval between two events passed to this sink route. Null (default) or zero disables throttling.
+    /// JSON example: "00:00:20"
+    /// </summary>
+    public TimeSpan? ThrottleInterval { get; set; }
 }
 
 /// <summary>
@@ -131,7 +138,8 @@ public sealed class MySqlSinkPlugin : ISinkPlugin {
             QueueLimit = 10_000
         });
 
-        loggerConfig.WriteTo.Conditional(evt => routing.Matches(evt.Level), wt => wt.Sink(sink));
+        var gate = new ThrottleGate("MySql", opts.ThrottleInterval);
+        loggerConfig.WriteTo.Conditional(evt => routing.Matches(evt.Level) && gate.TryPass(evt), wt => wt.Sink(sink));
     }
 }
 

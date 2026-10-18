@@ -1,3 +1,4 @@
+using CSharpEssentials.LoggerHelper.Diagnostics;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
@@ -26,6 +27,12 @@ public sealed class ElasticsearchSinkOptions {
 
     /// <summary>Legacy JSON key: autoRegisterTemplate</summary>
     public bool? autoRegisterTemplate { set => AutoRegisterTemplate = value ?? AutoRegisterTemplate; }
+
+    /// <summary>
+    /// Minimum interval between two events passed to this sink route. Null (default) or zero disables throttling.
+    /// JSON example: "00:00:20"
+    /// </summary>
+    public TimeSpan? ThrottleInterval { get; set; }
 }
 
 // ── Builder extension ─────────────────────────────────────────────
@@ -52,8 +59,10 @@ public sealed class ElasticsearchSinkPlugin : ISinkPlugin {
         if (string.IsNullOrWhiteSpace(opts.NodeUris))
             throw new InvalidOperationException("Elasticsearch sink: NodeUris is required (LoggerHelper:Sinks:Elasticsearch:NodeUris).");
 
+        var gate = new ThrottleGate("Elasticsearch", opts.ThrottleInterval);
+
         loggerConfig.WriteTo.Conditional(
-            evt => routing.Matches(evt.Level),
+            evt => routing.Matches(evt.Level) && gate.TryPass(evt),
             wt => wt.Elasticsearch(
                 nodeUris: opts.NodeUris,
                 indexFormat: opts.IndexFormat,

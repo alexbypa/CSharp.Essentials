@@ -1,3 +1,4 @@
+using CSharpEssentials.LoggerHelper.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System.Data;
@@ -37,6 +38,12 @@ public sealed class MSSqlServerSinkOptions {
     /// When true the TimeStamp column is stored in UTC; when false (default) it is stored as local time.
     /// </summary>
     public bool StoreTimestampInUtc { get; set; }
+
+    /// <summary>
+    /// Minimum interval between two events passed to this sink route. Null (default) or zero disables throttling.
+    /// JSON example: "00:00:20"
+    /// </summary>
+    public TimeSpan? ThrottleInterval { get; set; }
 }
 
 /// <summary>
@@ -74,8 +81,10 @@ public sealed class MSSqlServerSinkPlugin : ISinkPlugin {
 
         var colOptions = BuildColumnOptions(opts);
 
+        var gate = new ThrottleGate("MSSqlServer", opts.ThrottleInterval);
+
         loggerConfig.WriteTo.Conditional(
-            evt => routing.Matches(evt.Level),
+            evt => routing.Matches(evt.Level) && gate.TryPass(evt),
             wt => wt.MSSqlServer(
                 connectionString: opts.ConnectionString,
                 sinkOptions: new SerilogMSSqlOptions {

@@ -125,6 +125,7 @@ services.AddLoggerHelper(b => b
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `FormatProvider` | `IFormatProvider?` | `null` | Custom format provider for rendering log messages |
+| `ThrottleInterval` | `TimeSpan?` | `null` | Minimum interval between events sent through this route (JSON `"00:00:05"`). Events outside a job never consume the window. Events inside the window are dropped before the send. `null` or `00:00:00` = no throttling. The window is per route, so two routes using this sink throttle independently. |
 
 ## Color Mapping
 
@@ -136,6 +137,21 @@ services.AddLoggerHelper(b => b
 | Warning | Yellow |
 | Error | Red |
 | Fatal | DarkRed |
+
+## Exceptions
+
+When the log event carries an exception, the sink writes it on the line after the message, in the same color:
+
+| Level | Exception line |
+|-------|----------------|
+| Verbose → Warning | `Type: Message`, e.g. `HttpRequestException: boom` |
+| Error, Fatal | full `ex.ToString()` (type, message, inner exceptions, stack trace) |
+
+```csharp
+logger.LogWarning(new HttpRequestException("boom"), "Tool failed, continuing");
+// [10:42:07 Warning] Tool failed, continuing
+// HttpRequestException: boom
+```
 
 ## Thread Safety
 

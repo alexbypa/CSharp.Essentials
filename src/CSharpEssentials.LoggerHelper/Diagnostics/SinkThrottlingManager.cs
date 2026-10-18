@@ -3,8 +3,10 @@ using System.Collections.Concurrent;
 namespace CSharpEssentials.LoggerHelper.Diagnostics;
 
 /// <summary>
-/// Manages per-sink throttling to prevent flooding destinations like Email or Telegram.
+/// Manages per-sink-name throttling to prevent flooding destinations like Email or Telegram.
+/// Superseded by <see cref="ThrottleGate"/> (per-route, injected).
 /// </summary>
+[Obsolete("Use ThrottleGate (per-route). Removed in next major.")]
 public static class SinkThrottlingManager {
     private static readonly ConcurrentDictionary<string, DateTime> _lastSent = new();
 
