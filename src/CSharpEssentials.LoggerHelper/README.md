@@ -393,6 +393,24 @@ logger.LogInformation("Login for {Email} with {Password}", "alice@example.com", 
   instead of stalling the logging thread.
 - **Zero overhead when disabled** (the default) — the enricher isn't added to the pipeline at all.
 
+> **Performance: regex presets are the expensive part.** `SensitiveProperties` replaces the value of a
+> named field directly, with no regex. `Presets` and `Rules` run every pattern on every string
+> property of every event. In our benchmark (`MaskingSinkScalingBenchmark`, .NET 10, short job) one log
+> with 5 presets and a payload containing an email, a card number and a password went from about
+> 345 ns (masking off) to about 2,370 ns, and the cost is the same with 1, 3 or 5 sinks because masking
+> runs once per event, before routing. For high-volume logging, if you control your property names,
+> list them in `SensitiveProperties` and leave `Presets` empty. Keep the presets as a safety net only
+> where secrets can reach free text or exceptions: `SensitiveProperties` can't see them, and a field
+> with a name you didn't list is not masked.
+
+```jsonc
+// Fast: no regex runs
+"SensitiveDataMasking": {
+  "Enabled": true,
+  "SensitiveProperties": [ "Email", "Password", "CardNumber", "ApiKey", "Token" ]
+}
+```
+
 Serilog has no first-class equivalent: redaction usually means a hand-rolled `IDestructuringPolicy`
 or a third-party enricher wired up per project. Here it's one JSON block, applied globally.
 

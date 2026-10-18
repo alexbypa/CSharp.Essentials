@@ -8,6 +8,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Documentation
+
+- **Masking:** README (root and core package) now states that regex `Presets`/`Rules` are the costly part of sensitive data masking (about 345 ns → 2,370 ns per event with 5 presets in `MaskingSinkScalingBenchmark`, independent of the number of sinks) and recommends `SensitiveProperties` alone for high-volume logging, with its limits (exact property names, no free text or exceptions).
+
 ---
 
 ## [5.4.0] — 2026-10-16
