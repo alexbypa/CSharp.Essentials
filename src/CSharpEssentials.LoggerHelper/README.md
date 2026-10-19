@@ -16,6 +16,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/alexbypa/CSharp.Essentials?style=social)](https://github.com/alexbypa/CSharp.Essentials/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/alexbypa/CSharp.Essentials)](https://github.com/alexbypa/CSharp.Essentials/issues)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15669/badge)](https://www.bestpractices.dev/projects/15669)
 
 > ⭐ **If you find this project useful, please consider giving it a star on [GitHub](https://github.com/alexbypa/CSharp.Essentials)!**  
 > 💡 *Explore the source code, check open issues, or contribute.*
