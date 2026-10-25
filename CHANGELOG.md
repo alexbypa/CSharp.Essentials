@@ -8,8 +8,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [5.5.0] — 2026-10-25
+
+### Added
+
+- **HttpHelper:** `HttpResponseMessage.IsSynthetic()` / `IsTransportFailure()` / `GetSyntheticReason()` extension methods and `SyntheticResponseReason` enum (`Timeout`, `TransportFailure`, `InternalError`, `RateLimited`) mark the synthetic 408/502/500/429 responses HttpHelper already returns on transport failure, so callers can tell them apart from a real response without reading `ReasonPhrase`/body — additive, no change to existing status/reason/body. Covered by a payment-retry scenario showing a stable `Idempotency-Key` collapses a retried synthetic failure into a single provider-side effect, versus two without one.
+- **Demo:** the HttpHelper Playground shows `IsSynthetic()` / `IsTransportFailure()` / `GetSyntheticReason()` for every call and has a new **Unreachable host** scenario (connection refused → synthetic `502`), so the marker is visible with real calls. The React site gets a simulated "Real response or invented by HttpHelper?" section.
+
 ### Documentation
 
+- **HttpHelper:** README, the dev.to playground article and the site page now call out that a synthetic `408`/`502` means no response was received, not a failed request — retrying a non-idempotent `POST`/`PATCH` on that basis can duplicate the effect (e.g. a double charge) unless the caller sends a stable idempotency key; `CorrelationId` is for tracing across retries, not an idempotency contract.
+- **Demo / README:** the Demo quick start now spells out where each command runs (`docker compose up -d` in `src/CSharpEssentials.LoggerHelper.Demo/docker` after `cp .env.example .env`, `dotnet run` one level up), notes `--framework` for the multi-target Demo, and says how to log in to the Dashboard (user `demo`, one-time password printed at startup). The Unreachable host scenario runs without retries (about 2 s instead of 11 s on Windows).
+- **Demo / README:** the quick start now starts with `git clone` (the Demo is run from a clone of the repo, not installed from NuGet).
+- **Links:** playground, HttpHelper and comparison links in the READMEs and `llms.txt` now point to the sections of the React site (`#playground`, `#httphelper`, `#comparison`).
 - **Masking:** README (root and core package) now states that regex `Presets`/`Rules` are the costly part of sensitive data masking (about 235 ns → 2,000 ns per event with 5 presets, versus about 400 ns with `SensitiveProperties` alone, in `MaskingSinkScalingBenchmark`; independent of the number of sinks) and recommends `SensitiveProperties` alone for high-volume logging, with its limits (exact property names, no free text or exceptions).
 
 ---

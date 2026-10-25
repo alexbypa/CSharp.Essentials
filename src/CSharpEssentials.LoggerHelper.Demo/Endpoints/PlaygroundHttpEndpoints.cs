@@ -17,7 +17,7 @@ namespace CSharpEssentials.LoggerHelper.Demo.Endpoints;
 /// tentativo con il logger fluente del Playground: stessi sink, stesso masking scelti nella pagina.
 /// </summary>
 public class PlaygroundHttpEndpoints : IEndpointDefinition {
-    public static readonly string[] Scenarios = ["success", "flaky", "down", "timeout", "bearer", "post", "ratelimit", "order"];
+    public static readonly string[] Scenarios = ["success", "flaky", "down", "timeout", "bearer", "post", "ratelimit", "order", "unreachable"];
 
     // ponytail: one shared connection pool; each request wraps it in its own logging handler + events,
     // so per-request callbacks never accumulate on a shared client.
@@ -95,7 +95,7 @@ public class PlaygroundHttpEndpoints : IEndpointDefinition {
         .WithSummary("Call a free public API through HttpHelper and show its built-in request events (with CorrelationId) on the chosen sinks")
         .WithDescription(
             "order runs against an in-memory shop (login → order → payment: timeout, 503, 200) with one CorrelationId, no network. The others hit httpbin.org: success (GET /get), flaky (random 500/502/503/200), down (always 503), " +
-            "timeout (/delay longer than the timeout → 408), bearer (/bearer with an Authorization header, masked by the " +
+            "timeout (/delay longer than the timeout → 408), unreachable (connection refused → synthetic 502), bearer (/bearer with an Authorization header, masked by the " +
             "BearerToken preset), post (JSON body echoed back), ratelimit (a burst of calls against a sliding-window limiter → 429). " +
             "Every attempt is logged by HttpHelper's built-in request events (status, elapsed, attempt, CorrelationId) through a playground logger built with the fluent API.");
     }
@@ -139,7 +139,8 @@ public class PlaygroundHttpEndpoints : IEndpointDefinition {
             var elapsed = sw.ElapsedMilliseconds - started;
             logger.ForContext("CorrelationId", cid).Write(res.IsSuccessStatusCode ? LogEventLevel.Information : LogEventLevel.Error,
                 "Order step {Step} finished with {StatusCode} in {ElapsedMs} ms", step, (int)res.StatusCode, elapsed);
-            calls.Add(new { step, status = (int)res.StatusCode, reason = res.ReasonPhrase, elapsedMs = elapsed, body = text });
+            calls.Add(new { step, status = (int)res.StatusCode, reason = res.ReasonPhrase, elapsedMs = elapsed, body = text,
+                isSynthetic = res.IsSynthetic(), isTransportFailure = res.IsTransportFailure(), syntheticReason = res.GetSyntheticReason()?.ToString() });
         }
         return calls;
     }
@@ -171,7 +172,7 @@ public class PlaygroundHttpEndpoints : IEndpointDefinition {
 
         IhttpsClientHelper helper = new httpsClientHelper(client, events, rateLimit!)
             .addTimeout(TimeSpan.FromSeconds(Math.Clamp(req.TimeoutSeconds, 1, 60)));
-        if (req.Retries > 0 && req.Scenario != "ratelimit")
+        if (req.Retries > 0 && req.Scenario is not ("ratelimit" or "unreachable"))   // unreachable shows the marker, not retries: Windows takes ~2 s per refused connection
             helper.addRetryCondition(r => (int)r.StatusCode >= 500 || r.StatusCode == System.Net.HttpStatusCode.RequestTimeout,
                                      Math.Clamp(req.Retries, 1, 5), Math.Clamp(req.Backoff, 0.1, 2));
 
@@ -188,10 +189,12 @@ public class PlaygroundHttpEndpoints : IEndpointDefinition {
             _         => new Call(HttpMethod.Get, "/get")   // ratelimit
         };
 
+        // unreachable: nothing listens on port 1, so the connection is refused → HttpRequestException → synthetic 502 (TransportFailure)
+        var url = req.Scenario == "unreachable" ? "http://127.0.0.1:1/get" : baseUrl + path;
         var count = req.Scenario == "ratelimit" ? Math.Clamp(req.Burst, 1, 20) : 1;
         var tasks = Enumerable.Range(0, count).Select(async _ => {
             var started = sw.ElapsedMilliseconds;
-            using var res = await helper.SendAsync(baseUrl + path, method,
+            using var res = await helper.SendAsync(url, method,
                 body is null ? new NoBodyContentBuilder() : new JsonContentBuilder(), body!, headers, ct);
             var text = await res.Content.ReadAsStringAsync(ct);
             var status = (int)res.StatusCode;
@@ -200,11 +203,12 @@ public class PlaygroundHttpEndpoints : IEndpointDefinition {
             // so the per-attempt callback does not see them: log the final outcome of every call.
             logger.Write(res.IsSuccessStatusCode ? LogEventLevel.Information : LogEventLevel.Error,
                          "HttpHelper call {Url} finished with {StatusCode} {Reason} in {ElapsedMs} ms",
-                         baseUrl + path, status, res.ReasonPhrase, sw.ElapsedMilliseconds - started);
+                         url, status, res.ReasonPhrase, sw.ElapsedMilliseconds - started);
 
             return (object)new {
                 status, reason = res.ReasonPhrase, elapsedMs = sw.ElapsedMilliseconds - started,
-                body = text.Length > 600 ? text[..600] + "…" : text
+                body = text.Length > 600 ? text[..600] + "…" : text,
+                isSynthetic = res.IsSynthetic(), isTransportFailure = res.IsTransportFailure(), syntheticReason = res.GetSyntheticReason()?.ToString()
             };
         });
         return [.. await Task.WhenAll(tasks)];

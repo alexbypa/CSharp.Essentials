@@ -50,6 +50,13 @@ No JSON to edit, no restart, no guessing.
 
 **Prerequisites:** [.NET SDK](https://dotnet.microsoft.com/download) 8, 9 or 10 and [Docker Desktop](https://www.docker.com/products/docker-desktop/) with **at least 4 GB of memory free for these containers, 6 GB with Kibana** (SQL Server and Elasticsearch take about 1.5 GB each). On Windows the limit is `memory=` in `%USERPROFILE%\.wslconfig`: see [Troubleshooting](#troubleshooting).
 
+**Step 0: get the code.** The Demo is not a NuGet package: clone the repo and work from the clone.
+
+```bash
+git clone https://github.com/alexbypa/CSharp.Essentials.git
+cd CSharp.Essentials
+```
+
 **Step 1: create your `.env` before the first start.** It holds the database passwords. **Copy** the template, don't rename it: `.env.example` stays in git as the template, your `.env` is git-ignored and never leaves your PC.
 
 ```bash
@@ -96,10 +103,14 @@ More details: [`docker/README.md`](src/CSharpEssentials.LoggerHelper.Demo/docker
 <a name="run-demo"></a>
 ## 2. Run the Demo
 
+The Docker steps leave you in the `docker` folder: go up one level (or start from the clone root).
+
 ```bash
-cd src/CSharpEssentials.LoggerHelper.Demo
+cd ..                         # from the clone root instead: cd src/CSharpEssentials.LoggerHelper.Demo
 dotnet run
 ```
+
+The Demo targets `net8.0`, `net9.0` and `net10.0`. If `dotnet run` asks which framework to use, add `--framework net8.0`, `net9.0` or `net10.0`, matching the SDK you installed.
 
 Open **http://localhost:5123**: the root opens the Playground.
 
@@ -117,7 +128,7 @@ The same app also gives you:
 **Dashboard credentials.** The Dashboard always asks for a login. Credentials are a secret, so they live in user-secrets, not in `appsettings.json`:
 
 ```bash
-cd src/CSharpEssentials.LoggerHelper.Demo
+cd src/CSharpEssentials.LoggerHelper.Demo   # from the clone root
 dotnet user-secrets set "Dashboard:Username" "demo"
 dotnet user-secrets set "Dashboard:Password" "<a strong password>"
 ```
@@ -127,7 +138,7 @@ Skip this step and the Demo prints one-time credentials in the console at startu
 **Optional: Telegram.** A bot token is a secret, so it never goes into the page or into git. Put it in user-secrets and restart the Demo; the **Telegram** checkbox turns on by itself:
 
 ```bash
-cd src/CSharpEssentials.LoggerHelper.Demo
+cd src/CSharpEssentials.LoggerHelper.Demo   # from the clone root
 dotnet user-secrets set "Playground:Telegram:BotToken" "<your-bot-token>"
 dotnet user-secrets set "Playground:Telegram:ChatId" "<your-chat-id>"
 ```
@@ -189,6 +200,7 @@ The page never calls httpbin.org itself: it sends your choices to the Demo, and 
 | **Bearer auth** | `GET /bearer` | httpbin confirms the token; the logs show `Bearer ***MASKED***` (BearerToken preset) |
 | **POST JSON** | `POST /post` | The JSON body echoed back, sent with `JsonContentBuilder` |
 | **Rate limit** | `GET /get` × burst | A sliding-window limiter lets N calls through per 10 s; the rest get `429` locally |
+| **Unreachable host** | `GET http://127.0.0.1:1/get` (nothing listens there, no internet needed) | The connection is refused, HttpHelper returns a synthetic `502`. No retries in this scenario: Windows takes about 2 s to report a refused connection, so each retry would add that wait. The result line shows `synthetic: TransportFailure · outcome unknown`, from `IsSynthetic()` / `IsTransportFailure()` / `GetSyntheticReason()` |
 | **E-commerce order** | in-memory shop (`shop.playground.demo`, no network): `POST /login`, `/orders`, `/payments` | Payment times out (`408`), then `503`, then `200`; the three steps share one `CorrelationId`, shown on every logged event |
 
 Retries apply to 5xx and 408. The wait between attempts is `backoff ^ attempt` seconds, as in `addRetryCondition`.
@@ -224,6 +236,8 @@ Tick **Attach an exception**, choose `Error`, send. The stack trace reaches ever
 
 ### 🔁 6. A flaky API, tamed
 Tick Seq and Elasticsearch, choose **Flaky upstream**, keep 3 retries and press **Call API**. The timeline shows each attempt on the wire (`500`, `502`... `200`), and Seq shows the same attempts (failed 5xx ones as `Error`s) followed by the final outcome. Set retries to `0` and run it again to compare. Then try **Bearer auth**: the API gets the real token, the logs never do.
+
+**Synthetic or real?** Every call in the result shows `synthetic: <reason>` when HttpHelper built the response itself (`Timeout` → `408`, `TransportFailure` → `502`, `RateLimited` → `429`) and `real server response` otherwise, using `response.IsSynthetic()`. Try **Upstream down** (a real `503`, not synthetic) next to **Unreachable host** (a synthetic `502`, outcome unknown): the status family is the same, only the marker tells them apart.
 
 **Order flow and the HTTP log switch.** Choose **E-commerce order** and press **Call API**: the payment step times out, gets a `503`, then succeeds, and all three steps carry one `CorrelationId` (the `X-Correlation-ID` header). Now untick **HTTP log** (or remove `"playground"` from `HttpHelperLogging:LogRequests` in `appsettings.json` while the app runs; it reloads on change) and run it again: the per-attempt events disappear, the header is still sent.
 

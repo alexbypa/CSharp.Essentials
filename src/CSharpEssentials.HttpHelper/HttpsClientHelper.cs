@@ -107,6 +107,7 @@ public class httpsClientHelper : IhttpsClientHelper {
         if (rateLimiter != null) {
             using var lease = await rateLimiter.AcquireAsync(1);
             if (!lease.IsAcquired) {
+                request.Options.Set(HttpResponseMessageExtensions.SyntheticMarkerKey, SyntheticResponseReason.RateLimited);
                 return new HttpResponseMessage(System.Net.HttpStatusCode.TooManyRequests) {
                     ReasonPhrase = "Rate limit exceeded",
                     Content = new StringContent("{\"error\":\"rate_limit_exceeded\"}", Encoding.UTF8, "application/json"),
@@ -156,6 +157,7 @@ public class httpsClientHelper : IhttpsClientHelper {
         } catch (OperationCanceledException) {
             // Timer dell'helper (addTimeout) o HttpClient.Timeout di default → 408
             var elapsed = DateTime.UtcNow - startedAt;
+            request.Options.Set(HttpResponseMessageExtensions.SyntheticMarkerKey, SyntheticResponseReason.Timeout);
             return new HttpResponseMessage(System.Net.HttpStatusCode.RequestTimeout) {
                 ReasonPhrase = "Client timeout",
                 Content = new StringContent(
@@ -165,6 +167,7 @@ public class httpsClientHelper : IhttpsClientHelper {
                 RequestMessage = request
             };
         } catch (HttpRequestException ex) {
+            request.Options.Set(HttpResponseMessageExtensions.SyntheticMarkerKey, SyntheticResponseReason.TransportFailure);
             return new HttpResponseMessage(System.Net.HttpStatusCode.BadGateway) {
                 ReasonPhrase = "Upstream error",
                 Content = new StringContent(
@@ -174,6 +177,7 @@ public class httpsClientHelper : IhttpsClientHelper {
                 RequestMessage = request
             };
         } catch (Exception ex) {
+            request.Options.Set(HttpResponseMessageExtensions.SyntheticMarkerKey, SyntheticResponseReason.InternalError);
             return new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError) {
                 ReasonPhrase = "Internal client error",
                 Content = new StringContent(
