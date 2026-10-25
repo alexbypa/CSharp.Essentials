@@ -12,6 +12,8 @@ namespace CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks;
 /// before the event is routed to the sinks. So the masking cost (Masking_On minus Masking_Off)
 /// should stay flat at 1, 3 and 5 sinks, while both rows grow with the sink fan-out.
 /// Payload contains an email, a card number and a password; all no-op sinks, OpenTelemetry off.
+/// Three setups: masking off, 5 regex presets (+ Password as sensitive property), and only
+/// SensitiveProperties (Email, CardNumber, Password) with no regex at all.
 /// </summary>
 [BenchmarkCategory("Quick", "Release")]
 [MemoryDiagnoser]
@@ -19,28 +21,36 @@ namespace CSharpEssentials.LoggerHelper.Benchmarks.Benchmarks;
 public class MaskingSinkScalingBenchmark {
     private ServiceProvider _spOff = null!;
     private ServiceProvider _spOn = null!;
+    private ServiceProvider _spProps = null!;
     private ILogger _off = null!;
     private ILogger _on = null!;
+    private ILogger _props = null!;
+
+    private enum Masking { Off, Presets, SensitivePropertiesOnly }
 
     [Params(1, 3, 5)]
     public int Sinks { get; set; }
 
     [GlobalSetup]
     public void Setup() {
-        _spOff = BuildProvider(Sinks, masking: false);
+        _spOff = BuildProvider(Sinks, Masking.Off);
         _off = _spOff.GetRequiredService<ILoggerProvider>().CreateLogger("Benchmark");
 
-        _spOn = BuildProvider(Sinks, masking: true);
+        _spOn = BuildProvider(Sinks, Masking.Presets);
         _on = _spOn.GetRequiredService<ILoggerProvider>().CreateLogger("Benchmark");
+
+        _spProps = BuildProvider(Sinks, Masking.SensitivePropertiesOnly);
+        _props = _spProps.GetRequiredService<ILoggerProvider>().CreateLogger("Benchmark");
     }
 
     [GlobalCleanup]
     public void Cleanup() {
         _spOff.Dispose();
         _spOn.Dispose();
+        _spProps.Dispose();
     }
 
-    private static ServiceProvider BuildProvider(int sinks, bool masking) {
+    private static ServiceProvider BuildProvider(int sinks, Masking masking) {
         var services = new ServiceCollection();
         services.AddLoggerHelper(b => {
             b.WithApplicationName("Benchmark").DisableOpenTelemetry();
@@ -51,11 +61,13 @@ public class MaskingSinkScalingBenchmark {
                     LogEventLevel.Warning,
                     LogEventLevel.Error,
                     LogEventLevel.Fatal);
-            if (masking)
+            if (masking == Masking.Presets)
                 b.EnableSensitiveDataMasking(o => {
                     o.Presets.AddRange(["Email", "CreditCard", "JwtToken", "BearerToken", "ConnectionStringSecret"]);
                     o.SensitiveProperties.Add("Password");
                 });
+            else if (masking == Masking.SensitivePropertiesOnly)
+                b.EnableSensitiveDataMasking(o => o.SensitiveProperties.AddRange(["Email", "CardNumber", "Password"]));
         });
         return services.BuildServiceProvider();
     }
@@ -68,5 +80,10 @@ public class MaskingSinkScalingBenchmark {
     [Benchmark]
     public void Masking_On()
         => _on.LogInformation("Checkout for {Email}, card {CardNumber}, auth {Password}",
+            "alice@example.com", "4532-1234-5678-9012", "Sup3rSecret!");
+
+    [Benchmark]
+    public void Masking_SensitivePropertiesOnly()
+        => _props.LogInformation("Checkout for {Email}, card {CardNumber}, auth {Password}",
             "alice@example.com", "4532-1234-5678-9012", "Sup3rSecret!");
 }

@@ -16,6 +16,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/alexbypa/CSharp.Essentials?style=social)](https://github.com/alexbypa/CSharp.Essentials/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/alexbypa/CSharp.Essentials)](https://github.com/alexbypa/CSharp.Essentials/issues)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15669/badge)](https://www.bestpractices.dev/projects/15669)
 
 > ⭐ **If you find this project useful, please consider giving it a star on [GitHub](https://github.com/alexbypa/CSharp.Essentials)!**  
 > 💡 *Explore the source code, check open issues, or contribute.*
@@ -392,6 +393,25 @@ logger.LogInformation("Login for {Email} with {Password}", "alice@example.com", 
   badly on hostile input masks the whole value (nothing leaks) and reports to Serilog `SelfLog`
   instead of stalling the logging thread.
 - **Zero overhead when disabled** (the default) — the enricher isn't added to the pipeline at all.
+
+> **Performance: regex presets are the expensive part.** `SensitiveProperties` replaces the value of a
+> named field directly, with no regex. `Presets` and `Rules` run every pattern on every string
+> property of every event. In our benchmark (`MaskingSinkScalingBenchmark`, .NET 10, short job) one log
+> with 5 presets and a payload containing an email, a card number and a password went from about
+> 235 ns (masking off) to about 2,000 ns, while `SensitiveProperties` alone (same three fields, no
+> regex) took about 400 ns. The cost is the same with 1, 3 or 5 sinks because masking runs once per
+> event, before routing. For high-volume logging, if you control your property names,
+> list them in `SensitiveProperties` and leave `Presets` empty. Keep the presets as a safety net only
+> where secrets can reach free text or exceptions: `SensitiveProperties` can't see them, and a field
+> with a name you didn't list is not masked.
+
+```jsonc
+// Fast: no regex runs
+"SensitiveDataMasking": {
+  "Enabled": true,
+  "SensitiveProperties": [ "Email", "Password", "CardNumber", "ApiKey", "Token" ]
+}
+```
 
 Serilog has no first-class equivalent: redaction usually means a hand-rolled `IDestructuringPolicy`
 or a third-party enricher wired up per project. Here it's one JSON block, applied globally.
