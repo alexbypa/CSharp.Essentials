@@ -92,6 +92,16 @@ public class GitHubService(IhttpsClientHelperFactory factory)
 | Any other exception | `500 InternalServerError` |
 | **Caller cancels** the `CancellationToken` | `OperationCanceledException` is thrown (standard .NET contract) |
 
+**Retries and non-idempotent requests.** A synthetic `408`/`502` means *no response was received* — the outcome is unknown, not failed: the upstream call may have already succeeded. Retrying a `POST`/`PATCH` on that basis can duplicate the effect (e.g. a double charge) unless the API dedupes on an idempotency key the client sends. `CorrelationId` (`HttpHelperLogging:CorrelationIdHeader`) is for tracing across retries, not an idempotency contract. Headers passed to `SendAsync` are copied to every retry attempt, so a caller-supplied idempotency key (e.g. `Idempotency-Key`) already stays stable across attempts with no extra code:
+
+```csharp
+var idempotencyKey = Guid.NewGuid().ToString("N");
+await client.SendAsync("https://api.gateway.com/charge", HttpMethod.Post, new JsonContentBuilder(), payload,
+    headers: new Dictionary<string, string> { ["Idempotency-Key"] = idempotencyKey });
+```
+
+Use `response.IsSynthetic()` / `response.IsTransportFailure()` to tell a synthetic response apart from a real one, instead of reading `ReasonPhrase`/body.
+
 ---
 
 ## 📚 Examples
@@ -281,7 +291,7 @@ They solve different problems; this table is about **what you get out of the box
 
 ## 📖 Documentation & Demo
 
-- [HttpHelper page](https://www.loggerhelper.it/httphelper.html) — Quick Start, examples, comparison
+- [HttpHelper section](https://www.loggerhelper.it/#httphelper) — features and the synthetic-response demo
 - [Full site](https://www.loggerhelper.it)
 
 ## 🤝 Contributing

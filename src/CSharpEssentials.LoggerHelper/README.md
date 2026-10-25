@@ -16,6 +16,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/alexbypa/CSharp.Essentials?style=social)](https://github.com/alexbypa/CSharp.Essentials/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/alexbypa/CSharp.Essentials)](https://github.com/alexbypa/CSharp.Essentials/issues)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15669/badge)](https://www.bestpractices.dev/projects/15669)
 
 > ⭐ **If you find this project useful, please consider giving it a star on [GitHub](https://github.com/alexbypa/CSharp.Essentials)!**  
 > 💡 *Explore the source code, check open issues, or contribute.*
@@ -52,12 +53,27 @@ dotnet add package CSharpEssentials.LoggerHelper.Sink.File
 
 ---
 
-> 🎮 **Try it live before you install!** See the exact "Config vs Result" output for every sink directly in your browser on the **[Interactive Playground at loggerhelper.it](https://www.loggerhelper.it/playground.html)**.
+> 🎮 **Try it live before you install!** See the exact "Config vs Result" output for every sink directly in your browser on the **[Interactive Playground at loggerhelper.it](https://www.loggerhelper.it/#playground)**.
 
 <a name="demo-playground"></a>
 ## 🧪 See It Live: One Event, Every Sink, Zero Secrets Leaked
 
 **`docker compose up -d` + `dotnet run`, then one click.** The Demo Playground sends a single log event to **Console, File, Seq, Elasticsearch, SQL Server, PostgreSQL and Telegram** at the same time, built on the fluent API from the options you pick on the page. And it puts **HttpHelper** to work against a real API.
+
+The Demo is not part of the NuGet packages: clone the repo, then run it from the clone (two folders: the containers live in `docker`, the app one level up):
+
+```bash
+git clone https://github.com/alexbypa/CSharp.Essentials.git
+cd CSharp.Essentials
+cd src/CSharpEssentials.LoggerHelper.Demo/docker
+cp .env.example .env          # first time only: database passwords (PowerShell: Copy-Item .env.example .env)
+docker compose up -d
+
+cd ..                         # back to src/CSharpEssentials.LoggerHelper.Demo
+dotnet run                    # if asked for a framework: --framework net8.0, net9.0 or net10.0, matching your SDK
+```
+
+Open **http://localhost:5123**.
 
 - 🎯 **Per-sink level routing**: set PostgreSQL to `Error` and watch it filter a `Warning` while the others receive it.
 - 🎭 **Real masking**: `Sup3rSecret!`, emails and card numbers become `***MASKED***` in every sink, rendered message included.
@@ -163,14 +179,14 @@ Clone the repo and start the interactive demo app. The demo comes pre-configured
 ```bash
 git clone https://github.com/alexbypa/CSharp.Essentials.git
 cd CSharp.Essentials/src/CSharpEssentials.LoggerHelper.Demo
-dotnet run
+dotnet run          # if asked for a framework: --framework net8.0, net9.0 or net10.0, matching your SDK
 ```
 
 Open the URL shown in your terminal (usually **`http://localhost:5123`**): the root opens the Playground, and `/swagger` or `/scalar` list all demo scenarios. Each endpoint produces structured logs visible immediately in the terminal and in the `Logs/` folder.
 
-Try `GET /api/httphelper/retry`, then open `/loggerhelper` to watch HttpHelper retries live.
+Try `GET /api/httphelper/retry`, then open `/loggerhelper` to watch HttpHelper retries live. The Dashboard asks for a login: user `demo`, and a one-time password printed in the terminal at startup (`[Dashboard] ... one-time credentials demo / <password>`); see [DEMO.md](DEMO.md) to set your own.
 
-🧪 **Playground with every sink:** start SQL Server, PostgreSQL, Seq and Elasticsearch with `docker compose up -d` in [`src/CSharpEssentials.LoggerHelper.Demo/docker`](src/CSharpEssentials.LoggerHelper.Demo/docker), then open the Demo root (`/playground.html`). Step-by-step guide: **[DEMO.md](DEMO.md)**.
+🧪 **Playground with every sink:** start SQL Server, PostgreSQL, Seq and Elasticsearch with `docker compose up -d` in [`src/CSharpEssentials.LoggerHelper.Demo/docker`](src/CSharpEssentials.LoggerHelper.Demo/docker) (copy `.env.example` to `.env` there first), then open the Demo root (`/playground.html`). Step-by-step guide: **[DEMO.md](DEMO.md)**.
 
 > 💡 **No database required to run it:** Even if you don't have SQL Server or PostgreSQL running locally, LoggerHelper gracefully ignores the connection errors. Your app won't crash, and logs will still appear perfectly in the Console and File sinks!
 
@@ -640,7 +656,7 @@ By visiting the repository you can:
 ## 📚 Documentation & Links
 
 - [**Documentation Site**](https://www.loggerhelper.it) — full reference, guides, and playground
-- [**Interactive Playground**](https://www.loggerhelper.it/playground.html)
+- [**Interactive Playground**](https://www.loggerhelper.it/#playground)
 - [**Changelog**](CHANGELOG.md)
 - [**Benchmark Results**](docs/benchmarks.md)
 - [**Migration Guide v2/v4 → v5**](docs/legacy-parity-v5.md)

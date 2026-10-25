@@ -141,6 +141,7 @@
         <option value="bearer">Bearer auth: token sent, then masked in the logs</option>
         <option value="post">POST JSON: body echoed back</option>
         <option value="ratelimit">Rate limit: burst of calls → 429 when the window is full</option>
+        <option value="unreachable">Unreachable host: connection refused → synthetic 502 (TransportFailure), no retries</option>
         <option value="order">E-commerce order: login → order → payment (timeout, 503, 200), one CorrelationId</option>
       </select>
       <label style="margin-top:12px"><input type="checkbox" id="httpLog"> HTTP log (HttpHelperLogging:LogRequests)</label>
@@ -165,7 +166,7 @@
   <section>
     <div class="card">
       <h2>Result</h2>
-      <div id="result" class="muted">Choose the options and press <b>Send log</b>. A brand-new logger is built with the fluent API, writes one event, is disposed (flush) and reports back here.</div>
+      <div id="result" class="muted">Choose the options and press <b>Send log</b> (sections 1-4), or <b>Call API</b> in section 5 to try HttpHelper. A brand-new logger is built with the fluent API, writes one event, is disposed (flush) and reports back here.</div>
     </div>
 
     <div class="card">
@@ -312,7 +313,7 @@ $('form').onsubmit = async e => {
 $('addProp').onclick = () => addProp();
 const httpPath = h => ({
   success: '/get', flaky: '/status/500,502,503,200', down: '/status/503', timeout: `/delay/${Math.min(h.timeoutSeconds + 2, 10)}`,
-  bearer: '/bearer', post: '/post', ratelimit: '/get'
+  bearer: '/bearer', post: '/post', ratelimit: '/get', unreachable: '/get'
 })[h.scenario];
 
 // Mirrors PlaygroundHttpEndpoints: the HttpHelper calls the page triggers.
@@ -332,23 +333,30 @@ function httpCode(h) {
                  'using var client = new HttpClient(handler, disposeHandler: false);', '',
                  'var helper = new httpsClientHelper(client, events, rateLimit)',
                  `    .addTimeout(TimeSpan.FromSeconds(${h.timeoutSeconds}))`];
-  if (h.scenario !== 'ratelimit' && h.retries > 0)
+  if (h.scenario !== 'ratelimit' && h.scenario !== 'unreachable' && h.retries > 0)
     lines.push(`    .addRetryCondition(r => (int)r.StatusCode >= 500 || r.StatusCode == HttpStatusCode.RequestTimeout, ${h.retries}, ${h.backoff});`);
   else lines[lines.length - 1] += ';';
   if (h.scenario === 'ratelimit')
     lines.unshift(`var rateLimit = new httpClientRateLimitOptions { IsEnabled = true, PermitLimit = ${h.permitLimit}, Window = TimeSpan.FromSeconds(10), QueueLimit = 0 };`);
   lines.push('',
-             `using var res = await helper.SendAsync("https://httpbin.org${httpPath(h)}", HttpMethod.${h.scenario === 'post' ? 'Post, new JsonContentBuilder(), json' : 'Get'});`);
+             `using var res = await helper.SendAsync("${h.scenario === 'unreachable' ? 'http://127.0.0.1:1' : 'https://httpbin.org'}${httpPath(h)}", HttpMethod.${h.scenario === 'post' ? 'Post, new JsonContentBuilder(), json' : 'Get'});`,
+             '', 'res.IsSynthetic();        // true when HttpHelper built the response (408, 502, 500, 429), false for a real server answer',
+             'res.IsTransportFailure(); // true for 408/502: nothing received, outcome unknown',
+             'res.GetSyntheticReason(); // Timeout | TransportFailure | InternalError | RateLimited | null');
   if (h.scenario === 'ratelimit') lines.push(`// × ${h.burst} in parallel`);
   return lines.join('\n');
 }
 
+const synth = c => c.isSynthetic
+  ? `synthetic: ${esc(c.syntheticReason)}${c.isTransportFailure ? ' · outcome unknown' : ''}`
+  : 'real server response';
+
 function renderHttp(body) {
   const cls = s => s >= 200 && s < 300 ? 'ok' : s === 429 || s === 408 ? 'skip' : 'err';
-  const calls = body.calls.map(c => `<div class="s ${cls(c.status)}"><b>${c.step ? esc(c.step) + ': ' : ''}${c.status} ${esc(c.reason)}</b><small>${c.elapsedMs} ms</small></div>`).join('');
+  const calls = body.calls.map(c => `<div class="s ${cls(c.status)}"><b>${c.step ? esc(c.step) + ': ' : ''}${c.status} ${esc(c.reason)}</b><small>${c.elapsedMs} ms · ${synth(c)}</small></div>`).join('');
   const attempts = body.attempts.length
     ? `<table style="margin:8px 0">${body.attempts.map(a => `<tr><td>+${a.atMs} ms · attempt ${a.attempt}</td><td>${a.status} ${esc(a.url)}</td></tr>`).join('')}</table>`
-    : '<p class="muted">No attempt reached the wire (timeout or rate limit is decided by HttpHelper itself).</p>';
+    : '<p class="muted">No attempt got a response (a timeout, a rate limit or a connection failure is decided by HttpHelper itself).</p>';
   const bodyPreview = body.calls.find(c => c.body)?.body;
   const cidHtml = body.correlationId ? `<p class="muted">CorrelationId: <b>${esc(body.correlationId)}</b></p>` : '';
   const offHtml = body.httpLog ? '' : '<p class="muted">HTTP log off: no per-attempt events (header still sent)</p>';
